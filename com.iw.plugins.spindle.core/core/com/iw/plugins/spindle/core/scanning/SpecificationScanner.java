@@ -40,7 +40,8 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
+import com.iw.plugins.spindle.core.parser.dom.IDOMModel;
+import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.spec.IPluginDescribable;
 import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
@@ -56,7 +57,7 @@ import com.iw.plugins.spindle.messages.ParseMessages;
  * 
  * @author glongman@gmail.com
  */
-public abstract class SpecificationScanner extends AbstractScanner
+public abstract class SpecificationScanner extends AbstractDOMScanner
 {
 
     protected Resource fResourceLocation;
@@ -78,12 +79,16 @@ public abstract class SpecificationScanner extends AbstractScanner
      * 
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
      */
-    protected Object beforeScan(Object source) throws ScannerException
+    protected Object beforeScan() throws ScannerException
     {
-        if (!isDocument(source))
+        IDOMModel model = getDOMModel();
+        if (!isDocumentModel(model))
             return null;
 
-        Document document = (Document) source;
+        Document document = (Document) model.getDocument();
+        if (document == null)
+            return null;
+
         setPublicId(W3CAccess.getPublicId(document));
         if (fPublicId == null)
             throw new ScannerException(CoreMessages.format(XMLPublicIDUtil.SPEC_DTD_ERROR_KEY),
@@ -127,17 +132,20 @@ public abstract class SpecificationScanner extends AbstractScanner
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(java.lang.Object,
      *      java.lang.Object)
      */
-    protected void doScan(Object source, Object resultObject) throws ScannerException
+    protected void doScan() throws ScannerException
     {
-        validate(source);
+        validate(fSource);
     }
 
     protected void validate(Object source)
     {
         if (!isValidating())
             return;
+        IDOMModel model = getDOMModel();
+        if (model.getDocument() == null || model.hasFatalProblems())
+            return;
         DOMValidator validator = new DOMValidator();
-        validator.validate((Document) source);
+        validator.validate(model);
         addProblems(validator.getProblems());
     }
 
@@ -146,10 +154,10 @@ public abstract class SpecificationScanner extends AbstractScanner
      * 
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#afterScan(java.lang.Object)
      */
-    protected Object afterScan(Object scanResults) throws ScannerException
+    protected Object afterScan() throws ScannerException
     {
         fResourceLocation = null;
-        return super.afterScan(scanResults);
+        return super.afterScan();
     }
 
     public void setResourceLocation(Resource location)
@@ -484,9 +492,9 @@ public abstract class SpecificationScanner extends AbstractScanner
      * 
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
      */
-    protected boolean isDocument(Object source) throws ScannerException
+    protected boolean isDocumentModel(Object source) throws ScannerException
     {
-        Assert.isLegal(source instanceof Document);
+        Assert.isLegal(fSource instanceof IDOMModel);
         return true;
     }
 

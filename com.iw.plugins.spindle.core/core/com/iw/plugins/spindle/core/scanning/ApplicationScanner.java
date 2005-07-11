@@ -47,9 +47,9 @@ public class ApplicationScanner extends LibraryScanner
      * 
      * @see com.iw.plugins.spindle.core.scanner.AbstractScanner#beforeScan()
      */
-    protected Object beforeScan(Object source) throws ScannerException
+    protected Object beforeScan() throws ScannerException
     {
-        return super.beforeScan(source);
+        return super.beforeScan();
     }
 
     protected Object createResult()
@@ -62,10 +62,10 @@ public class ApplicationScanner extends LibraryScanner
      * 
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(org.w3c.dom.Node)
      */
-    protected void doScan(Object source, Object resultObject) throws ScannerException
+    protected void doScan() throws ScannerException
     {
-        validate(source);
-        IApplicationSpecification specification = (IApplicationSpecification) resultObject;
+        validate(fSource);
+        IApplicationSpecification specification = (IApplicationSpecification) fResultObject;
         specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
         specification.setLocation(getSourceLocationInfo(fRootNode));

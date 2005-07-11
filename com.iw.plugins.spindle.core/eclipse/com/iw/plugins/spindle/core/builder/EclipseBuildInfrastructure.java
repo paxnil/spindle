@@ -61,6 +61,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryCoreException;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
+import com.iw.plugins.spindle.core.parser.dom.IDOMModelSource;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
@@ -133,11 +134,12 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
      * Constructor for TapestryBuilder.
      */
     public EclipseBuildInfrastructure(IProject project, IProgressMonitor monitor,
-            IResourceDelta delta)
+            IResourceDelta delta, IDOMModelSource domModelSource)
     {
         super();
         fCurrentProject = project;
         fNotifier = new BuildNotifier(monitor, fCurrentProject);
+        fDOMModelSource = domModelSource;
     }
 
     public void executeBuild(boolean requestIncremental, Map args)
@@ -477,8 +479,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         if (fClasspathRoot == null || !fClasspathRoot.exists())
             throw new BuilderException("could not obtain the Classpath Root!");
 
-        fValidateWebXML = fTapestryProject.isValidatingWebXML();
-
+        fValidateWebXML = fTapestryProject.isValidatingWebXML();        
     }
 
     boolean conflictsWithJavaOutputDirectory(IResource resource)

@@ -72,9 +72,9 @@ public class ComponentScanner extends SpecificationScanner
      * 
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(
      */
-    protected Object beforeScan(Object source) throws ScannerException
+    protected Object beforeScan() throws ScannerException
     {
-        if (super.beforeScan(source) == null)
+        if (super.beforeScan() == null)
             return null;
 
         String name = fResourceLocation.getName();
@@ -98,10 +98,10 @@ public class ComponentScanner extends SpecificationScanner
      * 
      * @see com.iw.plugins.spindle.core.processing.AbstractScanner#doScan(org.w3c.dom.Node)
      */
-    protected void doScan(Object source, Object resultObject) throws ScannerException
+    protected void doScan() throws ScannerException
     {
-        super.doScan(source, resultObject);
-        PluginComponentSpecification specification = (PluginComponentSpecification) resultObject;
+        super.doScan();
+        PluginComponentSpecification specification = (PluginComponentSpecification) fResultObject;
 
         specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
@@ -403,7 +403,6 @@ public class ComponentScanner extends SpecificationScanner
 
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
-            boolean consumed = false;
             if (!fIsTapestry_4_0)
             {
                 if (isElement(node, "binding") && scanBinding_3_0(contained, child))
@@ -442,13 +441,10 @@ public class ComponentScanner extends SpecificationScanner
     {
         String name = getBindingName(component, node);
         String value = null;
-        boolean fromAttribute = true;
         try
         {
             ExtendedAttributeResult result = getExtendedAttribute(node, "value", true);
             value = result.value;
-            fromAttribute = result.fromAttribute;
-
         }
         catch (ScannerException e)
         {
@@ -514,8 +510,8 @@ public class ComponentScanner extends SpecificationScanner
         location.setResource(component.getLocation().getResource());
         spec.setLocation(location);
 
-        ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, "value")
-                : getBestGuessSourceLocation(node, true);
+//        ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, "value")
+//                : getBestGuessSourceLocation(node, true);
 
         component.setBinding(name, spec);
         return true;
@@ -569,7 +565,7 @@ public class ComponentScanner extends SpecificationScanner
 
         ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, "expression")
                 : getBestGuessSourceLocation(node, true);
-        //TODO validate bindings of all different types!
+        // TODO validate bindings of all different types!
         fValidator.validateExpression(expression, IProblem.ERROR, src);
 
         component.setBinding(name, spec);
@@ -591,7 +587,7 @@ public class ComponentScanner extends SpecificationScanner
 
             else
 
-                //TODO it appears that there is no default for components!
+                // TODO it appears that there is no default for components!
                 specification.setComponentClassName("org.apache.tapestry.BaseComponent");
 
         }
@@ -879,7 +875,7 @@ public class ComponentScanner extends SpecificationScanner
 
         ps.setPersistence(persistence);
 
-        //   must be done now - not revalidatable
+        // must be done now - not revalidatable
         ExtendedAttributeResult result = null;
         String initialValue = null;
         try
@@ -931,7 +927,7 @@ public class ComponentScanner extends SpecificationScanner
 
         String name = getAttribute(node, "name", false);
 
-        //   not revalidatable - error state would only change if the file changed!
+        // not revalidatable - error state would only change if the file changed!
         if (name != null && spec.isReservedParameterName(name))
 
             addProblem(
@@ -1044,14 +1040,14 @@ public class ComponentScanner extends SpecificationScanner
         }
     }
 
-//    public IType validateTypeSpecial(ICoreResource dependant, String typeName,
-//            int severity, ISourceLocation location) throws ScannerException
-//    {
-//        String useName = typeName;
-//        if (useName.indexOf(".") < 0)
-//            useName = "java.lang." + useName;
-//
-//        return fValidator.validateTypeName(dependant, useName, severity, location);
-//
-//    }
+    // public IType validateTypeSpecial(ICoreResource dependant, String typeName,
+    // int severity, ISourceLocation location) throws ScannerException
+    // {
+    // String useName = typeName;
+    // if (useName.indexOf(".") < 0)
+    // useName = "java.lang." + useName;
+    //
+    // return fValidator.validateTypeName(dependant, useName, severity, location);
+    //
+    // }
 }

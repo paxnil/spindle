@@ -37,8 +37,6 @@ import java.util.Map;
 import org.apache.hivemind.ApplicationRuntimeException;
 import org.apache.hivemind.Location;
 import org.apache.hivemind.Resource;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.binding.BindingConstants;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
@@ -80,19 +78,19 @@ import com.iw.plugins.spindle.messages.PageloadMessages;
 public class TemplateScanner extends AbstractScanner
 {
 
-    private static final int IMPLICIT_ID_PATTERN_ID_GROUP = 1;
-
-    private static final int IMPLICIT_ID_PATTERN_TYPE_GROUP = 2;
-
-    private static final int IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP = 4;
-
-    private static final int IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP = 5;
-
-    private Pattern _simpleIdPattern;
-
-    private Pattern _implicitIdPattern;
-
-    private PatternMatcher _patternMatcher;
+//    private static final int IMPLICIT_ID_PATTERN_ID_GROUP = 1;
+//
+//    private static final int IMPLICIT_ID_PATTERN_TYPE_GROUP = 2;
+//
+//    private static final int IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP = 4;
+//
+//    private static final int IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP = 5;
+//
+//    private Pattern _simpleIdPattern;
+//
+//    private Pattern _implicitIdPattern;
+//
+//    private PatternMatcher _patternMatcher;
 
     private PluginComponentSpecification fComponentSpec;
 
@@ -166,7 +164,7 @@ public class TemplateScanner extends AbstractScanner
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(java.lang.Object,
      *      java.lang.Object)
      */
-    protected void doScan(Object source, Object resultObject) throws ScannerException
+    protected void doScan() throws ScannerException
     {
 
         char[] data = null;
@@ -195,7 +193,7 @@ public class TemplateScanner extends AbstractScanner
         if (data == null)
             throw new ScannerException("null data!", false, IProblem.NOT_QUICK_FIXABLE);
 
-        List result = (List) resultObject;
+        List result = (List) fResultObject;
 
         TemplateToken[] parseResults = null;
 
@@ -818,7 +816,7 @@ public class TemplateScanner extends AbstractScanner
      * 
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
      */
-    protected Object beforeScan(Object source) throws ScannerException
+    protected Object beforeScan() throws ScannerException
     {
         return new ArrayList();
     }

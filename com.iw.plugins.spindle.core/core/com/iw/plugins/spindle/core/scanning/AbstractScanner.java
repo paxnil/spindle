@@ -29,15 +29,12 @@ package com.iw.plugins.spindle.core.scanning;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Node;
-
 import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.source.SourceLocation;
 import com.iw.plugins.spindle.core.util.Assert;
 
@@ -66,23 +63,27 @@ public abstract class AbstractScanner implements IProblemCollector
 
     protected boolean isCachingJavaTypes = false;
 
+    protected Object fSource;
+
+    protected Object fResultObject;
+
     public Object scan(Object source, IScannerValidator validator) throws ScannerException
     {
         Assert.isNotNull(source);
         Assert.isNotNull(validator);
-        Object resultObject = null;
+        fSource = source;
         beginCollecting();
         try
         {
 
             fValidator = validator;
             fValidator.setProblemCollector(this);
-            resultObject = beforeScan(source);
-            if (resultObject == null)
+            fResultObject = beforeScan();
+            if (fResultObject == null)
                 return null;
 
-            doScan(source, resultObject);
-            return afterScan(resultObject);
+            doScan();
+            return afterScan();
         }
         catch (ScannerException scex)
         {
@@ -94,8 +95,8 @@ public abstract class AbstractScanner implements IProblemCollector
             }
             else
             {
-                addProblem(new DefaultProblem(IProblem.ERROR,
-                        scex.getMessage(), SourceLocation.FILE_LOCATION, false, scex.getCode()));
+                addProblem(new DefaultProblem(IProblem.ERROR, scex.getMessage(),
+                        SourceLocation.FILE_LOCATION, false, scex.getCode()));
             }
             return null;
         }
@@ -113,15 +114,15 @@ public abstract class AbstractScanner implements IProblemCollector
 
     }
 
-    protected abstract void doScan(Object source, Object resultObject) throws ScannerException;
+    protected abstract void doScan() throws ScannerException;
 
-    protected abstract Object beforeScan(Object source) throws ScannerException;
+    protected abstract Object beforeScan() throws ScannerException;
 
     protected abstract void cleanup();
 
-    protected Object afterScan(Object scanResults) throws ScannerException
+    protected Object afterScan() throws ScannerException
     {
-        return scanResults;
+        return fResultObject;
     }
 
     public void beginCollecting()
@@ -172,147 +173,12 @@ public abstract class AbstractScanner implements IProblemCollector
         return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
     }
 
-    public boolean isElement(Node node, String elementName)
-    {
-        return W3CAccess.isElement(node, elementName);
-    }
-
-    public String getValue(Node node)
-    {
-        return W3CAccess.getValue(node);
-    }
-
     protected boolean isDummyString(String value)
     {
         if (value != null)
             return value.startsWith(fValidator.getDummyStringPrefix());
 
         return false;
-    }
-
-    protected String getAttribute(Node node, String attributeName)
-    {
-        return getAttribute(node, attributeName, false);
-    }
-
-    protected boolean getBooleanAttribute(Node node, String attributeName, boolean defaultValue)
-    {
-        return W3CAccess.getBooleanAttribute(node, attributeName, defaultValue);
-    }
-
-    protected boolean getBooleanAttribute(Node node, String attributeName)
-    {
-        return W3CAccess.getBooleanAttribute(node, attributeName);
-    }
-
-    protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull)
-    {
-        String result = W3CAccess.getAttribute(node, attributeName);
-        if (TapestryCore.isNull(result) && returnDummyIfNull)
-            result = getNextDummyString();
-
-        return result;
-    }
-
-    protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull,
-            boolean warnIfNull)
-    {
-        String result = W3CAccess.getAttribute(node, attributeName);
-        if (TapestryCore.isNull(result) && returnDummyIfNull)
-        {
-            result = getNextDummyString();
-            if (warnIfNull)
-                addProblem(
-                        IProblem.WARNING,
-                        getAttributeSourceLocation(node, attributeName),
-                        "warning, attribute value is null!",
-                        false,
-                        -1);
-        }
-
-        return result;
-    }
-
-    protected ISourceLocationInfo getSourceLocationInfo(Node node)
-    {
-        return W3CAccess.getSourceLocationInfo(node);
-    }
-
-    protected ISourceLocation getBestGuessSourceLocation(Node node, boolean forNodeContent)
-    {
-        ISourceLocationInfo info = getSourceLocationInfo(node);
-
-        if (info != null)
-        {
-            if (forNodeContent)
-            {
-                if (!info.isEmptyTag())
-                {
-                    return info.getContentSourceLocation();
-                }
-                else
-                {
-                    return info.getTagNameLocation();
-                }
-            }
-            else
-            {
-                return info.getTagNameLocation();
-            }
-        }
-        return null;
-    }
-
-    protected ISourceLocation getNodeStartSourceLocation(Node node)
-    {
-        ISourceLocationInfo info = getSourceLocationInfo(node);
-        ISourceLocation result = null;
-        if (info != null)
-            result = info.getTagNameLocation();
-
-        return result;
-    }
-
-    protected ISourceLocation getNodeEndSourceLocation(Node node)
-    {
-        ISourceLocationInfo info = getSourceLocationInfo(node);
-        ISourceLocation result = null;
-        if (info != null)
-        {
-            result = info.getEndTagSourceLocation();
-            if (result == null)
-            {
-                result = info.getTagNameLocation();
-            }
-        }
-        return result;
-    }
-
-    protected ISourceLocation getNodeBodySourceLocation(Node node)
-    {
-        ISourceLocationInfo info = getSourceLocationInfo(node);
-        ISourceLocation result = null;
-
-        if (info != null)
-        {
-            result = info.getContentSourceLocation();
-        }
-        return result;
-    }
-
-    protected ISourceLocation getAttributeSourceLocation(Node node, String rawname)
-    {
-        ISourceLocationInfo info = getSourceLocationInfo(node);
-        ISourceLocation result = null;
-        if (info != null)
-        {
-            result = info.getAttributeSourceLocation(rawname);
-            if (result == null)
-            {
-                result = info.getTagNameLocation();
-            }
-        }
-        return result;
     }
 
     /*

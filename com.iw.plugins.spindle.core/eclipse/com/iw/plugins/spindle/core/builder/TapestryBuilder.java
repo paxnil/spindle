@@ -13,6 +13,7 @@ import org.eclipse.ui.IWorkbench;
 import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+import com.iw.plugins.spindle.xerces.parser.XercesDOMModelSource;
 
 /**
  * @author gwl
@@ -45,7 +46,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             System.out.println("\nStarting build of " + project.getName() + " @ "
                     + new Date(System.currentTimeMillis()));
 
-        fInfrastructure = new EclipseBuildInfrastructure(project, monitor, getDelta(project));
+        fInfrastructure = new EclipseBuildInfrastructure(project, monitor, getDelta(project),
+                new XercesDOMModelSource());
 
         fInfrastructure.build(kind != FULL_BUILD, args);
 

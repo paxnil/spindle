@@ -26,14 +26,12 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
-import org.apache.xerces.dom.DocumentImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  * Static Helper methods for accessing data in DOM nodes Includes transparent support for some PULL
@@ -121,31 +119,31 @@ public class W3CAccess
 
     }
 
-    public static ISourceLocationInfo getSourceLocationInfo(Node node)
-    {
-        ISourceLocationInfo result = null;
-//        if (node instanceof PullParserNode)
-//        {
-//            PullParserNode ppnode = (PullParserNode) node;
-//            result = ppnode.getSourceLocationInfo();
-//
-//        }
-//        else
-//        {
-       
-            try
-            {
-                DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
-                result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.IDENTIFIER);
-            }
-            catch (RuntimeException e)
-            {
-               
-                e.printStackTrace();
-            }
-//        }
-        return result;
-    }
+//    public static ISourceLocationInfo getSourceLocationInfo(Node node)
+//    {
+//        ISourceLocationInfo result = null;
+////        if (node instanceof PullParserNode)
+////        {
+////            PullParserNode ppnode = (PullParserNode) node;
+////            result = ppnode.getSourceLocationInfo();
+////
+////        }
+////        else
+////        {
+//       
+//            try
+//            {
+//                DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
+//                result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.IDENTIFIER);
+//            }
+//            catch (RuntimeException e)
+//            {
+//               
+//                e.printStackTrace();
+//            }
+////        }
+//        return result;
+//    }
 
     public static boolean isTextNode(Node child)
     {

@@ -59,9 +59,9 @@ public class LibraryScanner extends SpecificationScanner
      * 
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(
      */
-    protected Object beforeScan(Object source) throws ScannerException
+    protected Object beforeScan() throws ScannerException
     {
-        if (super.beforeScan(source) == null)
+        if (super.beforeScan() == null)
             return null;
 
         return createResult();
@@ -81,10 +81,10 @@ public class LibraryScanner extends SpecificationScanner
      * 
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(org.w3c.dom.Node)
      */
-    protected void doScan(Object source, Object resultObject) throws ScannerException
+    protected void doScan() throws ScannerException
     {
-        validate(source);
-        ILibrarySpecification specification = (ILibrarySpecification) resultObject;
+        validate(fSource);
+        ILibrarySpecification specification = (ILibrarySpecification) fResultObject;
         specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
         specification.setLocation(getSourceLocationInfo(fRootNode));

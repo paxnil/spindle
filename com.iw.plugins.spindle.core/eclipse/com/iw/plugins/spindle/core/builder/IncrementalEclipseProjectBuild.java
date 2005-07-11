@@ -42,7 +42,6 @@ import org.eclipse.core.resources.IStorage;
 
 import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
@@ -79,8 +78,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
      * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveApplication(com.iw.plugins.spindle.core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
-    protected IApplicationSpecification resolveApplication(Parser parser, Resource location,
-            String encoding)
+    protected IApplicationSpecification resolveApplication(Resource location, String encoding)
     {
         IEclipseResource useLocation = (IEclipseResource) location;
         PluginApplicationSpecification result = null;
@@ -100,14 +98,14 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             if (result == null || result.isPlaceholder() || fileChanged(file))
             {
                 Markers.removeProblemsFor(file);
-                return super.resolveApplication(parser, location, encoding);
+                return super.resolveApplication(location, encoding);
             }
         }
         else
         {
             // this can only happen if somebody added a library tag to the
             // .application file
-            return super.resolveApplication(parser, location, encoding);
+            return super.resolveApplication(location, encoding);
         }
 
         try
@@ -158,8 +156,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
      * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveLibrarySpecification(com.iw.plugins.spindle.core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
-    protected ILibrarySpecification resolveLibrarySpecification(Parser parser, Resource location,
-            String encoding)
+    protected ILibrarySpecification resolveLibrarySpecification(Resource location, String encoding)
     {
 
         IEclipseResource useLocation = (IEclipseResource) location;
@@ -186,14 +183,14 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             if (result == null || result.isPlaceholder() || fileChanged(file))
             {
                 Markers.removeProblemsFor(file);
-                return super.resolveLibrarySpecification(parser, location, encoding);
+                return super.resolveLibrarySpecification(location, encoding);
             }
         }
         else
         {
             // this can only happen if somebody added a library tag to the
             // .application file
-            return super.resolveLibrarySpecification(parser, location, encoding);
+            return super.resolveLibrarySpecification(location, encoding);
         }
 
         try
@@ -238,9 +235,9 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
      *      org.eclipse.core.resources.IStorage,
      *      com.iw.plugins.spindle.core.resources.ICoreResource, java.lang.String)
      */
-    protected IComponentSpecification resolveIComponentSpecification(Parser parser,
-            ICoreNamespace namespace, ICoreResource location,
-            String templateExtension, String encoding)
+    protected IComponentSpecification resolveIComponentSpecification(ICoreNamespace namespace,
+            ICoreResource location, String templateExtension,
+            String encoding)
     {
         PluginComponentSpecification result = null;
 
@@ -262,7 +259,6 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             {
                 Markers.removeProblemsFor(file);
                 return super.resolveIComponentSpecification(
-                        parser,
                         namespace,
                         location,
                         templateExtension,
@@ -275,7 +271,6 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             // .application file
             // so the resolve is the same as the full build and we stop here.
             return super.resolveIComponentSpecification(
-                    parser,
                     namespace,
                     location,
                     templateExtension,
