@@ -101,7 +101,7 @@ public class TapestryCorePlugin extends AbstractUIPlugin implements IPreferenceC
     {
         super();
         plugin = this;
-        ILogger logger = new EclipsePluginLogger(Platform.getLog((Bundle) this), PLUGIN_ID);
+        ILogger logger = new EclipsePluginLogger(Platform.getLog(getBundle()), PLUGIN_ID);
         ICoreListeners coreListeners = new EclipseCoreListeners();
         new TapestryCore(logger, coreListeners, new PropertySource());
 
