@@ -192,6 +192,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
             SHOW_ADVANCED_OPTIONS);
 
     protected DialogDefaultLocation fDefaultLocation;
+    
+    protected IStatus overallStatus = new SpindleStatus();
 
     public static void initializeDefaultPreferences(IPreferenceStore pstore)
     {

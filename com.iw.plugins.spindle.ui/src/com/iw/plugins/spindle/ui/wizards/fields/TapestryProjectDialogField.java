@@ -133,6 +133,7 @@ public class TapestryProjectDialogField extends StringButtonField
     setButtonLabel(UIPlugin.getString(fName + ".button"));
     ITapestryProject tproject = null;
     IProject project = null;
+    String name = null;
     if (jelem != null)
       project = jelem.getJavaProject().getProject();
 
@@ -141,13 +142,16 @@ public class TapestryProjectDialogField extends StringButtonField
       try
       {
         tproject = (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
+        name = project.getName();
       } catch (CoreException e)
       {
         UIPlugin.log(e);
       }
     }
-
+    
     setTapestryProject(tproject, true);
+    if (tproject == null)
+    	setTextValue(name, false);   
   }
 
   private ITapestryProject getTapestryNature(IProject project)
