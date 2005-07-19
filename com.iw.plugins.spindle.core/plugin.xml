@@ -172,21 +172,21 @@
          point="org.eclipse.core.runtime.adapters">
       <factory
             adaptableType="org.eclipse.core.resources.IResource"
-            class="com.iw.plugins.spindle.core.adapters.SpindleProjectAdapterFactory">
+            class="com.iw.plugins.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
          <adapter type="com.iw.plugins.spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
       </factory>
       <factory
             adaptableType="org.eclipse.core.resources.IStorage"
-            class="com.iw.plugins.spindle.core.adapters.SpindleProjectAdapterFactory">
+            class="com.iw.plugins.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
          <adapter type="com.iw.plugins.spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
       </factory>      
        <factory
             adaptableType="org.eclipse.ui.IFileEditorInput"
-            class="com.iw.plugins.spindle.core.adapters.SpindleProjectAdapterFactory">
+            class="com.iw.plugins.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
          <adapter type="com.iw.plugins.spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
