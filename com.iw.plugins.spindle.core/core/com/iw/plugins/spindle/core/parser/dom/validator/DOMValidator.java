@@ -176,7 +176,7 @@ public class DOMValidator implements IProblemCollector
     }
 
     // standalone version
-    public void validate(Document xmlDocument)
+    private void validate(Document xmlDocument)
     {
         fSeenIds.clear();
         beginCollecting();
@@ -371,9 +371,8 @@ public class DOMValidator implements IProblemCollector
         DTDElement element = DTDAccess.getDTDElement(fDTD, elementName);
         if (element == null)
             throw new Error("expected dtd info here!");
-
-        ISourceLocationInfo sourceInfo = getNodeSourceInfo(node);
-        Set sourceAttributeNames = sourceInfo.getAttributeNames();
+        
+        Set sourceAttributeNames =  W3CAccess.getAttributeNames(node);
 
         for (Iterator iter = element.attributes.keySet().iterator(); iter.hasNext();)
         {

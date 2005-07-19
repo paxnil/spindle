@@ -47,7 +47,7 @@ public abstract class AbstractDOMScanner extends AbstractScanner
 
     public Object scan(IDOMModel source, IScannerValidator validator) throws ScannerException
     {
-        return scan(source, validator);
+        return scan((Object)source, validator);
     }
 
     public Object scan(Object source, IScannerValidator validator) throws ScannerException
