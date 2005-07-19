@@ -26,12 +26,17 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  * Static Helper methods for accessing data in DOM nodes Includes transparent support for some PULL
@@ -42,29 +47,43 @@ import com.iw.plugins.spindle.core.TapestryCore;
 public class W3CAccess
 {
 
+    public static Set getAttributeNames(Node node)
+    {
+        Assert.isNotNull(node);
+        if (!node.hasAttributes())
+            return Collections.EMPTY_SET;
+
+        HashSet result = new HashSet();
+        NamedNodeMap attrMap = node.getAttributes();
+        for (int i = 0; i < attrMap.getLength(); i++)
+            result.add(attrMap.item(i).getNodeName());
+
+        return result;
+    }
+
     public static String getAttribute(Node node, String attributeName)
     {
         String result = null;
-//        if (node instanceof PullParserNode)
-//        {
-//            PullParserNode ppnode = (PullParserNode) node;
-//            Map attrs = ppnode.getKludgeAttributes();
-//            if (attrs != null)
-//                result = (String) attrs.get(attributeName);
-//
-//        }
-//        else
-//        {
-            NamedNodeMap map = node.getAttributes();
+        // if (node instanceof PullParserNode)
+        // {
+        // PullParserNode ppnode = (PullParserNode) node;
+        // Map attrs = ppnode.getKludgeAttributes();
+        // if (attrs != null)
+        // result = (String) attrs.get(attributeName);
+        //
+        // }
+        // else
+        // {
+        NamedNodeMap map = node.getAttributes();
 
-            if (map != null)
-            {
-                Node attributeNode = map.getNamedItem(attributeName);
+        if (map != null)
+        {
+            Node attributeNode = map.getNamedItem(attributeName);
 
-                if (attributeNode != null)
-                    result = attributeNode.getNodeValue();
-            }
-//        }
+            if (attributeNode != null)
+                result = attributeNode.getNodeValue();
+        }
+        // }
         return result;
     }
 
@@ -119,31 +138,31 @@ public class W3CAccess
 
     }
 
-//    public static ISourceLocationInfo getSourceLocationInfo(Node node)
-//    {
-//        ISourceLocationInfo result = null;
-////        if (node instanceof PullParserNode)
-////        {
-////            PullParserNode ppnode = (PullParserNode) node;
-////            result = ppnode.getSourceLocationInfo();
-////
-////        }
-////        else
-////        {
-//       
-//            try
-//            {
-//                DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
-//                result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.IDENTIFIER);
-//            }
-//            catch (RuntimeException e)
-//            {
-//               
-//                e.printStackTrace();
-//            }
-////        }
-//        return result;
-//    }
+    // public static ISourceLocationInfo getSourceLocationInfo(Node node)
+    // {
+    // ISourceLocationInfo result = null;
+    // // if (node instanceof PullParserNode)
+    // // {
+    // // PullParserNode ppnode = (PullParserNode) node;
+    // // result = ppnode.getSourceLocationInfo();
+    // //
+    // // }
+    // // else
+    // // {
+    //       
+    // try
+    // {
+    // DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
+    // result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.IDENTIFIER);
+    // }
+    // catch (RuntimeException e)
+    // {
+    //               
+    // e.printStackTrace();
+    // }
+    // // }
+    // return result;
+    // }
 
     public static boolean isTextNode(Node child)
     {

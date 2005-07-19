@@ -44,9 +44,6 @@
       <library name="lib/tapestry/tapestry-4.0-alpha-3.jar">
          <export name="*"/>
       </library>
-      <library name="tests.jar">
-         <export name="*"/>
-      </library>
    </runtime>
    <requires>
       <import plugin="org.eclipse.core.resources" export="true"/>
@@ -58,7 +55,6 @@
       <import plugin="org.eclipse.core.runtime" export="true"/>
        <import plugin="org.apache.xerces" export="true"/>
        <import plugin="org.eclipse.ui" export="true"/>
-       <import plugin="org.junit" optional="true"/>
    </requires>
    <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
    <extension-point id="incrementalBuildVeto" name="Option to veto an incremental build" schema="schema/incrementalBuildVeto.exsd"/>
@@ -100,7 +96,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="com.iw.plugins.spindle.core.TapestryProject">
+               class="com.iw.plugins.spindle.core.eclipse.TapestryProject">
          </run>
       </runtime>
       <requires-nature
