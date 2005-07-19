@@ -15,8 +15,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.adapters.SpindleProjectAdapterFactory;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
+import com.iw.plugins.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory;
 
 import core.test.SuiteOfTestCases;
 

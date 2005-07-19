@@ -23,7 +23,7 @@
  *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.core;
+package com.iw.plugins.spindle.core.eclipse;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
