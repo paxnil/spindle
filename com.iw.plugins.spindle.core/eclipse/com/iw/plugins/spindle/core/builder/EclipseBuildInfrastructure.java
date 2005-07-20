@@ -187,6 +187,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
                     IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
                     SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+            if (AbstractBuildInfrastructure.DEBUG) 
+                System.err.println("Tapestry build aborted: "+e.getMessage());
         }
         catch (BuilderException e)
         {
@@ -194,6 +196,9 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
                     IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(), SourceLocation.FOLDER_LOCATION,
                     false, IProblem.NOT_QUICK_FIXABLE));
+            if (AbstractBuildInfrastructure.DEBUG) 
+                System.err.println("Tapestry build aborted: "+e.getMessage());
+           
         }
         catch (NullPointerException e)
         {

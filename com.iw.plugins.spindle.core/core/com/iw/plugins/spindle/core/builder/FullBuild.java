@@ -175,7 +175,7 @@ public class FullBuild extends AbstractBuild
                     TapestryCore.log(e);
                 }
 
-                if (model == null || model.getDocument() == null)
+                if (model == null)
                 {
                     // fInfrastructure.fProblemPersister.recordProblems(webXML,
                     // model.getProblems());

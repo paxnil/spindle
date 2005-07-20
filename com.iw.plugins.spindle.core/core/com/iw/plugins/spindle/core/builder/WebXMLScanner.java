@@ -40,6 +40,7 @@ import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.resources.PathUtils;
 import com.iw.plugins.spindle.core.scanning.AbstractDOMScanner;
+import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
@@ -68,7 +69,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
 
     public WebAppDescriptor scanWebAppDescriptor(IDOMModel source) throws ScannerException
     {
-        return (WebAppDescriptor) scan(source, null);
+        return (WebAppDescriptor) scan(source, new BaseValidator(fBuilder));
     }
 
     protected Object beforeScan()
@@ -350,7 +351,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
     private boolean isTapestryServletOrSubclass(IJavaType candidate, ISourceLocation location)
     {
         if (candidate.equals(fBuilder.fTapestryServletType))
-            return true;
+            return true;      
 
         return checkJavaSubclassOfImplements(fBuilder.fTapestryServletType, candidate, location);
     }
@@ -441,7 +442,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
             IJavaType servletType = checkJavaType(newInfo.classname, nodeLocation);
             if (servletType != null && isTapestryServletOrSubclass(servletType, nodeLocation))
             {
-                newInfo.isServletSubclass = fBuilder.fTapestryServletType.equals(servletType);
+                newInfo.isServletSubclass = !fBuilder.fTapestryServletType.equals(servletType);
 
                 if (newInfo.isServletSubclass)
                 {

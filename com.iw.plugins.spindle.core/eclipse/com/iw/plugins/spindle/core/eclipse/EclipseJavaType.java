@@ -123,8 +123,9 @@ public class EclipseJavaType implements IJavaType
      */
     public boolean equals(Object arg0)
     {
-
-        return fType.equals(arg0);
+        if (!(arg0 instanceof EclipseJavaType))
+            return false;
+        return fType.equals(((EclipseJavaType)arg0).fType);
     }
 
     /*

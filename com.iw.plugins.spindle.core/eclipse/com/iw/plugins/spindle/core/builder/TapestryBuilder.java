@@ -36,7 +36,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
         IWorkbench workbench = TapestryCorePlugin.getDefault().getWorkbench();
         if (workbench.isClosing())
-            return getRequiredProjects(true);
+            throw new OperationCanceledException();
 
         IProject project = getProject();
         if (project == null || !project.isAccessible())

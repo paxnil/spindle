@@ -121,7 +121,7 @@ public class EclipseUtils
   }
 
   /**
-   * Answer true iff the candidate type is a subclass of the base Type
+   * Answer true iff the candidate type is a subtype of the base Type
    * 
    * @param candidate the supposed subclass of the base Type
    * @param baseType the supposed superclass of the candidate Type
@@ -137,10 +137,10 @@ public class EclipseUtils
     ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
     if (hierarchy.exists())
     {
-      IType[] superClasses = hierarchy.getAllSupertypes(candidate);
-      for (int i = 0; i < superClasses.length; i++)
+      IType[] superTypes = hierarchy.getAllSupertypes(candidate);
+      for (int i = 0; i < superTypes.length; i++)
       {
-        match = superClasses[i].equals(baseType);
+        match = superTypes[i].equals(baseType);
         if (match)
           break;
 
