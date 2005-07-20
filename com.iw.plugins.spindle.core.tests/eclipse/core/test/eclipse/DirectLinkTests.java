@@ -29,13 +29,12 @@ public class DirectLinkTests extends AbstractEclipseTestCase
         project = setUpProject("directlink");
     }
 
-    public void testProject()
+    public void testProject() throws CoreException
     {
         assertTrue(project != null && project.exists());
         assertTrue(logger.isEmpty());
-    }
-    
-    public void testHasTapestryNature() throws CoreException {
-        assertNotNull(project.getNature(TapestryCorePlugin.NATURE_ID));
-    }
+        assertProjectHasNature(project, TapestryCorePlugin.NATURE_ID);
+        assertBuildSpecHasBuilder(project, TapestryCorePlugin.BUILDER_ID);
+        assertProjectHasNoTapestryErrorMarkers(project);
+    }   
 }

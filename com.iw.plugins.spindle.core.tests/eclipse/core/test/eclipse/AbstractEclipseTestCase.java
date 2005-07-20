@@ -8,8 +8,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.Properties;
 
+import junit.framework.AssertionFailedError;
+
+import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -18,8 +24,10 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobManager;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.source.IProblem;
 
 import core.test.AbstractTestCase;
 
@@ -32,6 +40,35 @@ import core.test.AbstractTestCase;
  */
 public abstract class AbstractEclipseTestCase extends AbstractTestCase
 {
+    private static String[] COMMON_MARKER_PROPERTIES = new String[]
+        {            
+            IMarker.SEVERITY,
+            IMarker.LOCATION,
+            IMarker.MESSAGE,
+            IMarker.LINE_NUMBER,
+            IMarker.CHAR_START,
+            IMarker.CHAR_END,
+            IMarker.PRIORITY,
+            IProblem.TEMPORARY_FLAG,
+            IProblem.PROBLEM_CODE };
+
+    private static Properties COMMON_MARKER_PROPERTIES_DESC;
+
+    static
+    {
+        COMMON_MARKER_PROPERTIES_DESC = new Properties();
+        COMMON_MARKER_PROPERTIES_DESC.put(IMarker.MARKER, "Type");
+        COMMON_MARKER_PROPERTIES_DESC.put(IMarker.SEVERITY, "Severity");
+        COMMON_MARKER_PROPERTIES_DESC.put(IMarker.LOCATION, "Location");
+        COMMON_MARKER_PROPERTIES_DESC.put(IMarker.LINE_NUMBER, "Line");
+        COMMON_MARKER_PROPERTIES_DESC.put(IMarker.CHAR_START, "CharStart");
+        COMMON_MARKER_PROPERTIES_DESC.put(IMarker.CHAR_END, "CharEnd");
+        COMMON_MARKER_PROPERTIES_DESC.put(IMarker.MESSAGE, "Message");
+        COMMON_MARKER_PROPERTIES_DESC.put(IMarker.PRIORITY, "Priority");
+        COMMON_MARKER_PROPERTIES_DESC.put(IProblem.TEMPORARY_FLAG, "Temporary");
+        COMMON_MARKER_PROPERTIES_DESC.put(IProblem.PROBLEM_CODE, "Code");
+    }
+
     public static String convertToIndependantLineDelimiter(String source)
     {
         if (source.indexOf('\n') == -1 && source.indexOf('\r') == -1)
@@ -86,6 +123,7 @@ public abstract class AbstractEclipseTestCase extends AbstractTestCase
             }
         };
         getWorkspace().run(populate, null);
+        waitForEclipseBuilder();
         return project;
     }
 
@@ -278,4 +316,105 @@ public abstract class AbstractEclipseTestCase extends AbstractTestCase
         return getWorkspace().getRoot();
     }
 
+    public void waitForEclipseBuilder()
+    {
+        IJobManager jobManager = Platform.getJobManager();
+        try
+        {
+            jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+            jobManager.join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+        }
+        catch (InterruptedException e)
+        {
+            // just continue
+        }
+    }
+
+    protected void assertBuildSpecHasBuilder(IProject project, String builderID)
+            throws CoreException
+    {
+        assertNotNull(project);
+        assertNotNull(builderID);
+        IProjectDescription description = project.getDescription();
+        ICommand[] commands = description.getBuildSpec();
+        for (int i = 0; i < commands.length; ++i)
+        {
+            if (commands[i].getBuilderName().equals(builderID))
+                return;
+        }
+
+        throw new AssertionFailedError("Project '" + project + "' does not have builder '"
+                + builderID);
+    }
+
+    protected void assertProjectHasNature(IProject project, String natureID) throws CoreException
+    {
+        assertNotNull(project);
+        assertNotNull(natureID);
+        assertNotNull("Project '" + project + "' does not have nature '" + natureID, project
+                .getNature(natureID));
+    }
+
+    protected IMarker[] getMarkers(IResource resource, String type, boolean includeSubtypes,
+            int depth)
+    {
+        try
+        {
+            return resource.findMarkers(type, includeSubtypes, depth);
+        }
+        catch (CoreException e)
+        {
+            fail(e.getMessage());
+        }
+        return null;
+    }
+
+    protected void assertProjectHasNoTapestryErrorMarkers(IProject project)
+    {
+        IMarker[] markers = getMarkers(
+                project,
+                IProblem.TAPESTRY_PROBLEM_MARKER,
+                true,
+                IResource.DEPTH_INFINITE);
+        if (markers.length > 0)
+        {
+            System.out.println(createMarkerReport(markers));
+
+            fail("project '" + project + "' has " + markers.length + " tapestry error markers");
+        }
+    }
+
+    String createMarkerReport(IMarker[] markers)
+    {
+
+        StringBuffer report = new StringBuffer();
+
+        final String NEWLINE = System.getProperty("line.separator");
+        final char DELIMITER = '\t';
+
+        // create header
+        for (int i = 0; i < COMMON_MARKER_PROPERTIES.length; i++)
+        {
+            report.append(COMMON_MARKER_PROPERTIES_DESC.get(COMMON_MARKER_PROPERTIES[i]));
+            if (i == COMMON_MARKER_PROPERTIES.length - 1)
+                report.append(NEWLINE);
+            else
+                report.append(DELIMITER);
+        }
+
+        for (int i = 0; i < markers.length; i++)
+        {
+            for (int j = 0; j < COMMON_MARKER_PROPERTIES.length; j++)
+            {
+                String value = markers[i].getAttribute(COMMON_MARKER_PROPERTIES[j], "no value");               
+                report.append(value);
+                if (j == COMMON_MARKER_PROPERTIES.length - 1)
+                    report.append(NEWLINE);
+                else
+                    report.append(DELIMITER);
+            }
+        }
+
+        return report.toString();
+    }
 }

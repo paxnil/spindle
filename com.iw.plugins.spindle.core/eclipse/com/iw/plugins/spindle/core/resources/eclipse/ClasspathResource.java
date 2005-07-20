@@ -47,6 +47,7 @@ import com.iw.plugins.spindle.core.TapestryCoreException;
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
+import com.iw.plugins.spindle.core.resources.PathUtils;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
 
@@ -261,5 +262,22 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     {
         return 4783 & getPath().hashCode();
     }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    public String toString()
+    {
+        StringBuffer buffer = new StringBuffer();
+        PathUtils path = new PathUtils(getPath());
+        String name = getName();
+        if (getName() != null)
+            path.append(new PathUtils(name));
+        buffer.append("classpath:" + path.makeRelative().toString());
+        return buffer.toString();
+    }
+
 
 }

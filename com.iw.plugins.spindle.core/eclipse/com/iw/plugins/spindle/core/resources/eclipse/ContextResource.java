@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.Path;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
+import com.iw.plugins.spindle.core.resources.PathUtils;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
@@ -234,13 +235,29 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     public boolean equals(Object obj)
     {
         if (super.equals(obj))
-            return fRoot.equals(((ClasspathResource) obj).fRoot);
+            return fRoot.equals(((ContextResource) obj).fRoot);
         return false;
     }
 
     public int hashCode()
     {
         return 4197 & getPath().hashCode();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    public String toString()
+    {
+        StringBuffer buffer = new StringBuffer();
+        PathUtils path = new PathUtils(getPath());
+        String name = getName();
+        if (getName() != null)
+            path.append(new PathUtils(name));
+        buffer.append("context:" + path.makeRelative().toString());
+        return buffer.toString();
     }
 
 }
