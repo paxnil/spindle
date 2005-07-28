@@ -93,7 +93,7 @@ public abstract class TapestryWizardPage extends WizardPage
   protected void updateStatus(IStatus status)
   {
     fCurrStatus = status;
-    setPageComplete(fCurrStatus != null && !fCurrStatus.matches(IStatus.ERROR));
+    setPageComplete(fCurrStatus == null ? true :  !fCurrStatus.matches(IStatus.ERROR));
     if (fPageVisible)
     {
       applyToStatusLine(this, fCurrStatus);

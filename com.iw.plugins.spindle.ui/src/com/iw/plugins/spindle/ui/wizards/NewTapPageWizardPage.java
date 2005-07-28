@@ -49,8 +49,13 @@ public class NewTapPageWizardPage extends NewTapComponentWizardPage
         XMLFileContextType.PAGE_FILE_CONTEXT_TYPE,
         PreferenceConstants.PAGE_TEMPLATE);
   }
+  
 
-  protected void createSpecificationResource(
+  protected boolean isComponentWizard() {	
+	return false;
+  }
+
+protected void createSpecificationResource(
       IProgressMonitor monitor,
       final IType specClass) throws CoreException, InterruptedException
   {

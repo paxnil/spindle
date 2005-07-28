@@ -66,6 +66,7 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard
   public NewTapestryElementWizard()
   {
     setNeedsProgressMonitor(true);
+    setDialogSettings(UIPlugin.getDefault().getDialogSettings());
   }
 
   /*
