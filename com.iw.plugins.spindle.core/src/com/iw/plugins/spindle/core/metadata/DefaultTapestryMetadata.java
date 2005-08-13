@@ -184,10 +184,7 @@ public class DefaultTapestryMetadata
         catch (IOException e)
         {
             TapestryCore.log("unable to read from .tapestryplugin file", e);
-        }
-
-        if (result == null)
-            result = "";
+        }        
 
         return result;
     }
