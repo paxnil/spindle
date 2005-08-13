@@ -82,6 +82,8 @@ public class ContextRootDecorator extends AbstractDecorator
         if (tproject != null)
         {
           IContainer projectWebContextRoot = tproject.getWebContextFolder();
+          if (projectWebContextRoot == null)
+              return;
           if (container.equals(projectWebContextRoot))
           {
             decoration.addOverlay(Images.getImageDescriptor("project_ovr.gif"));
