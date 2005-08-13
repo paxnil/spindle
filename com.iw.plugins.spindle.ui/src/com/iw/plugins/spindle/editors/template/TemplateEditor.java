@@ -541,5 +541,15 @@ public class TemplateEditor extends Editor
             }
         }
     };
+    
+    protected String[] collectContextMenuPreferencePages() {
+        String[] ids= super.collectContextMenuPreferencePages();
+        String[] more= new String[ids.length + 3];
+        more[0]= "com.iw.plugins.spindle.ui.SpindlePreferences"; //$NON-NLS-1$
+        more[1]= "com.iw.plugins.spindle.ui.SpindleEditorPreferences"; //$NON-NLS-1$       
+        more[2]= "com.iw.plugins.spindle.ui.SpindleTemplatePreferences"; //$NON-NLS-1$       
+        System.arraycopy(ids, 0, more, 3, ids.length);
+        return more;
+    }
 
 }

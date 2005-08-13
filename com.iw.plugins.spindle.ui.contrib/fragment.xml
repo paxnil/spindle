@@ -95,37 +95,37 @@
       <page
             name="Spindle 3"
             class="com.iw.plugins.spindle.ui.preferences.SpindleGeneralPreferencePage"
-            id="SpindlePreferences">
+            id="com.iw.plugins.spindle.ui.SpindlePreferences">
       </page>
       <page
             name="Editors"
-            category="SpindlePreferences"
+            category="com.iw.plugins.spindle.ui.SpindlePreferences"
             class="com.iw.plugins.spindle.ui.preferences.SpindleEditorPreferencePage"
-            id="SpindleEditorPreferences">
+            id="com.iw.plugins.spindle.ui.SpindleEditorPreferences">
       </page>
       <page
             name="Folding"
-            category="SpindleEditorPreferences"
+            category="com.iw.plugins.spindle.ui.SpindleEditorPreferences"
             class="com.iw.plugins.spindle.ui.preferences.SpecFoldingPreferencePage"
-            id="SpindleFoldingPreferences">
+            id="com.iw.plugins.spindle.ui.SpindleFoldingPreferences">
       </page>
       <page
             name="Specification Formatter"
-            category="SpindleEditorPreferences"
+            category="com.iw.plugins.spindle.ui.SpindleEditorPreferences"
             class="com.iw.plugins.spindle.ui.preferences.SpindleFormatterPreferencePage"
-            id="SpindleFormatterPreferences">
+            id="com.iw.plugins.spindle.ui.SpindleFormatterPreferences">
       </page>
       <page
             name="Templates"
-            category="SpindlePreferences"
+            category="com.iw.plugins.spindle.ui.SpindlePreferences"
             class="com.iw.plugins.spindle.ui.preferences.TemplatesPreferencePage"
-            id="SpindleTemplatePreferences">
+            id="com.iw.plugins.spindle.ui.SpindleTemplatePreferences">
       </page>
        <page
             name="Wizard Templates"
-            category="SpindleTemplatePreferences"
+            category="com.iw.plugins.spindle.ui.SpindleTemplatePreferences"
             class="com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage"
-            id="SpindleWizardTemplatePreferences">
+            id="com.iw.plugins.spindle.ui.SpindleWizardTemplatePreferences">
       </page>
    </extension>
 </fragment>
