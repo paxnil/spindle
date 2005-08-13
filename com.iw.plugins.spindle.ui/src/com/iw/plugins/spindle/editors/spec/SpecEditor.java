@@ -193,7 +193,8 @@ public class SpecEditor extends Editor
         IStorage storage = getStorage();
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        manager.pingProjectState(project);
+        if (!storage.isReadOnly())
+        	manager.pingProjectState(project);
 
         Control[] children = parent.getChildren();
         fControl = children[children.length - 1];
