@@ -44,110 +44,95 @@ import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
  * TODO Add Type comment
  * 
  * @author glongman@gmail.com
- * 
  */
 public class JarEntryFileUtil
 {
-  static private final int start = "JarEntryFile[".length();
+    static private final int start = "JarEntryFile[".length();
 
-  public static String getJarPath(JarEntryFile entry)
-  {
-    String content = entry.toString();
-    int stop = content.indexOf("::");
-    return content.substring(start, stop);
-  }
-
-  public static String getPackageName(JarEntryFile entry)
-  {
-    String content = entry.toString();
-    int start = content.indexOf("::");
-    content = content.substring(start + 2, content.length() - 1);
-    int nameLength = entry.getName().length();
-    if (content.length() == nameLength)
-      return "";
-    int stop = content.lastIndexOf('/');
-    return StringUtils.replace(content.substring(0, stop), "/", ".");
-  }
-  public static IPackageFragmentRoot getPackageFragmentRoot(
-      IJavaProject project,
-      JarEntryFile entry) throws CoreException
-  {
-    return getPackageFragmentRoot(project, entry, true);
-  }
-
-  private static IPackageFragmentRoot getPackageFragmentRoot(
-      IJavaProject project,
-      JarEntryFile entry,
-      boolean includeOtherProjects) throws CoreException
-  {
-    String path = getJarPath(entry);
-    IPackageFragmentRoot[] roots = includeOtherProjects ? project
-        .getAllPackageFragmentRoots() : project.getPackageFragmentRoots();
-    for (int i = 0; i < roots.length; i++)
+    public static String getJarPath(JarEntryFile entry)
     {
-      if (roots[i].getKind() != IPackageFragmentRoot.K_BINARY)
-        continue;
-
-      if (((JarPackageFragmentRoot) roots[i]).getJar().getName().equals(path))
-      {
-        return roots[i];
-      }
-    }
-    return null;
-  }
-
-  public static IPackageFragment getPackageFragment(
-      IJavaProject project,
-      JarEntryFile entry) throws CoreException
-  {
-    return getPackageFragment(project, entry, true);
-  }
-
-  private static IPackageFragment getPackageFragment(
-      IJavaProject project,
-      JarEntryFile entry,
-      boolean includeOtherProjects) throws CoreException
-  {
-    IPackageFragmentRoot root = getPackageFragmentRoot(
-        project,
-        entry,
-        includeOtherProjects);
-    if (root == null)
-      return null;
-
-    String packageName = getPackageName(entry);
-    IJavaElement[] elements = root.getChildren();
-    for (int i = 0; i < elements.length; i++)
-    {
-      if (elements[i].getElementType() != IJavaElement.PACKAGE_FRAGMENT)
-        continue;
-
-      if (elements[i].getElementName().equals(packageName))
-        return (IPackageFragment) elements[i];
-    }
-    return null;
-  }
-
-  public static IPackageFragment[] getPackageFragments(
-      IWorkspaceRoot root,
-      JarEntryFile entry) throws CoreException
-  {
-    ArrayList result = new ArrayList();
-    IProject[] projects = root.getProjects();
-    for (int i = 0; i < projects.length; i++)
-    {
-      if (!projects[i].isOpen() || !projects[i].hasNature(JavaCore.NATURE_ID))
-        continue;
-
-      IPackageFragment frag = getPackageFragment(
-          JavaCore.create(projects[i]),
-          entry,
-          false);
-      if (frag != null)
-        result.add(frag);
+        String content = entry.toString();
+        int stop = content.indexOf("::");
+        return content.substring(start, stop);
     }
 
-    return (IPackageFragment[]) result.toArray(new IPackageFragment[result.size()]);
-  }
+    public static String getPackageName(JarEntryFile entry)
+    {
+        String content = entry.toString();
+        int start = content.indexOf("::");
+        content = content.substring(start + 2, content.length() - 1);
+        int nameLength = entry.getName().length();
+        if (content.length() == nameLength)
+            return "";
+        int stop = content.lastIndexOf('/');
+        return StringUtils.replace(content.substring(0, stop), "/", ".");
+    }
+
+    public static IPackageFragmentRoot getPackageFragmentRoot(IJavaProject project,
+            JarEntryFile entry) throws CoreException
+    {
+        return getPackageFragmentRoot(project, entry, true);
+    }
+
+    private static IPackageFragmentRoot getPackageFragmentRoot(IJavaProject project,
+            JarEntryFile entry, boolean includeOtherProjects) throws CoreException
+    {
+        String path = getJarPath(entry);
+        IPackageFragmentRoot[] roots = includeOtherProjects ? project.getAllPackageFragmentRoots()
+                : project.getPackageFragmentRoots();
+        for (int i = 0; i < roots.length; i++)
+        {
+            if (roots[i] instanceof JarPackageFragmentRoot)
+
+                if (((JarPackageFragmentRoot) roots[i]).getJar().getName().equals(path))
+                    return roots[i];
+
+        }
+        return null;
+    }
+
+    public static IPackageFragment getPackageFragment(IJavaProject project, JarEntryFile entry)
+            throws CoreException
+    {
+        return getPackageFragment(project, entry, true);
+    }
+
+    private static IPackageFragment getPackageFragment(IJavaProject project, JarEntryFile entry,
+            boolean includeOtherProjects) throws CoreException
+    {
+        IPackageFragmentRoot root = getPackageFragmentRoot(project, entry, includeOtherProjects);
+        if (root == null)
+            return null;
+
+        String packageName = getPackageName(entry);
+        IJavaElement[] elements = root.getChildren();
+        for (int i = 0; i < elements.length; i++)
+        {
+            if (elements[i].getElementType() != IJavaElement.PACKAGE_FRAGMENT)
+                continue;
+
+            if (elements[i].getElementName().equals(packageName))
+                return (IPackageFragment) elements[i];
+        }
+        return null;
+    }
+
+    public static IPackageFragment[] getPackageFragments(IWorkspaceRoot root, JarEntryFile entry)
+            throws CoreException
+    {
+        ArrayList result = new ArrayList();
+        IProject[] projects = root.getProjects();
+        for (int i = 0; i < projects.length; i++)
+        {
+            if (!projects[i].isOpen() || !projects[i].hasNature(JavaCore.NATURE_ID))
+                continue;
+
+            IPackageFragment frag = getPackageFragment(JavaCore.create(projects[i]), entry, false);
+            if (frag != null)
+                result.add(frag);
+        }
+
+        return (IPackageFragment[]) result.toArray(new IPackageFragment[result.size()]);
+    }
 
 }
