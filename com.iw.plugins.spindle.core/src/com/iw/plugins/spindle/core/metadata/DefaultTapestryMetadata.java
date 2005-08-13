@@ -245,6 +245,8 @@ public class DefaultTapestryMetadata
 
     private IFolder initFolder(String path, boolean create) throws CoreException
     {
+        if (path == null)
+            return null;
         StringTokenizer tokenizer = new StringTokenizer(path, "/\\:");
         IFolder folder = null;
         while (tokenizer.hasMoreTokens())
