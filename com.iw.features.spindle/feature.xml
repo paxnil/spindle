@@ -95,13 +95,6 @@ All Rights Reserved
          version="0.0.0"/>
 
    <plugin
-         id="com.iw.plugins.spindle.docs.default"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
