@@ -203,7 +203,13 @@ public class TapestryOutlinePage extends ContentOutlinePage
       return;
     }
 
-    Display d = treeViewer.getControl().getDisplay();
+    Control control = treeViewer.getControl();
+	Display d = null;
+	if (control != null && !control.isDisposed()) {
+		d = control.getDisplay();
+	} else {
+		d = Display.getDefault(); 
+	}
     d.asyncExec(new Runnable()
     {
       public void run()
