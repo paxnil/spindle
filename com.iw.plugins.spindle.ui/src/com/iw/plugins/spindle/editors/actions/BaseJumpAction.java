@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors.actions;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -146,6 +147,10 @@ public abstract class BaseJumpAction extends BaseEditorAction
     {
       UIPlugin.log(e);
     } 
+  }
+  
+  protected void showMessage(String title, String message) {
+      MessageDialog.openInformation(UIPlugin.getDefault().getActiveWorkbenchShell(), title, message);
   }
 
 

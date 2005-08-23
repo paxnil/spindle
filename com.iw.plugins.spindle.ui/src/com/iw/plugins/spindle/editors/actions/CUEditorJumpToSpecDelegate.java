@@ -114,7 +114,9 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
 
         IEditorInput input = fEditor.getEditorInput();
         IAdaptable file = getInputObject(input);
-        if (file != null)
+        if (file instanceof IClassFile) {
+            showFailedMessage("Jump to Spec is not available for .class files");
+        } else if (file != null)
         {
             // must be a file
             ITapestryProject tproject = (ITapestryProject) file.getAdapter(ITapestryProject.class);
@@ -126,21 +128,30 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
                         .getLastBuildState(fProject, false);
                 // must not be a broken build TODO this can be replaced by making the above call
                 // force a build
-                if (buildState == null && Markers.getBrokenBuildProblemsFor(fProject).length == 0)
+                if (buildState == null && Markers.getBrokenBuildProblemsFor(fProject).length != 0)
                 {
                     buildState = TapestryArtifactManager.getTapestryArtifactManager()
                             .getLastBuildState(fProject, true);
-                }
+                } 
 
-                if (buildState == null)
+                if (buildState == null){
+                    showFailedMessage("Jump to Spec requires that a successful Tapestry build has occured. Check the problem markers on the project.");
                     return;
+                }
+                    
 
                 fType = doResolveType(file);
                 if (fType == null)
                     return;
                 doRun();
+            } else {
+                showFailedMessage("Unable to determine this java file is in a Tapestry project");
             }
-        }
+        } 
+    }
+    
+    protected void showFailedMessage(String message) {
+        showMessage("Jump To Spec Failed", message);
     }
 
     protected IAdaptable getInputObject(IEditorInput input)
@@ -184,8 +195,10 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
         List foundSpecs = TapestryArtifactManager.getTapestryArtifactManager().findTypeRefences(
                 fProject,
                 fType.getFullyQualifiedName());
-        if (foundSpecs.isEmpty())
+        if (foundSpecs.isEmpty()) {
+            showFailedMessage("Unable to reconcile references from Tapestry specs to this class");
             return;
+        }
 
         if (foundSpecs.size() == 1)
         {
