@@ -183,11 +183,8 @@ public class DefaultTapestryMetadata
         }
         catch (IOException e)
         {
-            TapestryCore.log(e);
-        }
-
-        if (result == null)
-            result = "";
+            TapestryCore.log("unable to read from .tapestryplugin file", e);
+        }        
 
         return result;
     }
@@ -248,6 +245,8 @@ public class DefaultTapestryMetadata
 
     private IFolder initFolder(String path, boolean create) throws CoreException
     {
+        if (path == null)
+            return null;
         StringTokenizer tokenizer = new StringTokenizer(path, "/\\:");
         IFolder folder = null;
         while (tokenizer.hasMoreTokens())

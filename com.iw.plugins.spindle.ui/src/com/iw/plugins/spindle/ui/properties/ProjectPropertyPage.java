@@ -155,40 +155,40 @@ public class ProjectPropertyPage extends PropertyPage
         }
     }
 
-    //    class ApplicationContextValidator extends Validator
-    //    {
-    //        public String isValidString(String value)
-    //        {
-    //            return isValid(new Path(value));
-    //        }
+    // class ApplicationContextValidator extends Validator
+    // {
+    // public String isValidString(String value)
+    // {
+    // return isValid(new Path(value));
+    // }
     //
-    //        public String isValid(Object selection)
-    //        {
-    //            try
-    //            {
-    //                IJavaProject jproject = getJavaProject();
-    //                IProject project = (IProject) jproject.getAdapter(IProject.class);
-    //                Path selected = (Path) selection;
+    // public String isValid(Object selection)
+    // {
+    // try
+    // {
+    // IJavaProject jproject = getJavaProject();
+    // IProject project = (IProject) jproject.getAdapter(IProject.class);
+    // Path selected = (Path) selection;
     //
-    //                if (!project.getFolder(selected).exists())
-    //                {
-    //                    return UIPlugin.getString("property-page-wrong-project");
-    //                }
-    //                if (isOnOutputPath(jproject, selected))
-    //                {
-    //                    return UIPlugin.getString("property-page-output-folder");
-    //                }
-    //                if (isOnSourcePath(jproject, selected))
-    //                {
-    //                    return UIPlugin.getString("property-page-no-source-path");
-    //                }
-    //                return null;
-    //            } catch (CoreException e)
-    //            {
-    //                return "error occured!";
-    //            }
-    //        }
-    //    }
+    // if (!project.getFolder(selected).exists())
+    // {
+    // return UIPlugin.getString("property-page-wrong-project");
+    // }
+    // if (isOnOutputPath(jproject, selected))
+    // {
+    // return UIPlugin.getString("property-page-output-folder");
+    // }
+    // if (isOnSourcePath(jproject, selected))
+    // {
+    // return UIPlugin.getString("property-page-no-source-path");
+    // }
+    // return null;
+    // } catch (CoreException e)
+    // {
+    // return "error occured!";
+    // }
+    // }
+    // }
 
     class DialogContextValidator extends Validator
     {
@@ -312,7 +312,7 @@ public class ProjectPropertyPage extends PropertyPage
 
             public void widgetDefaultSelected(SelectionEvent e)
             {
-                //do nothing
+                // do nothing
             }
         });
         try
@@ -500,7 +500,7 @@ public class ProjectPropertyPage extends PropertyPage
         return true;
     }
 
-    //called by isValid() disable if the project is already an old (1.1.X)
+    // called by isValid() disable if the project is already an old (1.1.X)
     // Spindle project
     private void disableAll()
     {
@@ -540,17 +540,17 @@ public class ProjectPropertyPage extends PropertyPage
         return null;
     }
 
-    //  private int getIntPropertyFromWorkspace(QualifiedName key) throws CoreException
-    //  {
-    //    String result = getPropertyFromWorkspace(key);
-    //    try
-    //    {
-    //      return new Integer(result).intValue();
-    //    } catch (NumberFormatException e)
-    //    {
-    //      return TapestryProject.APPLICATION_PROJECT_TYPE;
-    //    }
-    //  }
+    // private int getIntPropertyFromWorkspace(QualifiedName key) throws CoreException
+    // {
+    // String result = getPropertyFromWorkspace(key);
+    // try
+    // {
+    // return new Integer(result).intValue();
+    // } catch (NumberFormatException e)
+    // {
+    // return TapestryProject.APPLICATION_PROJECT_TYPE;
+    // }
+    // }
 
     private String getPropertyFromWorkspace(QualifiedName key) throws CoreException
     {
@@ -563,30 +563,30 @@ public class ProjectPropertyPage extends PropertyPage
         return result;
     }
 
-    //  protected int getProjectType()
-    //  {
-    //    int result = TapestryProject.APPLICATION_PROJECT_TYPE;
-    //    try
-    //    {
-    //      QualifiedName key = new QualifiedName("", PROJECT_TYPE_PROPERTY);
-    //      TapestryProject prj = getTapestryProject();
-    //      if (prj != null)
-    //      {
-    //        result = prj.getProjectType();
+    // protected int getProjectType()
+    // {
+    // int result = TapestryProject.APPLICATION_PROJECT_TYPE;
+    // try
+    // {
+    // QualifiedName key = new QualifiedName("", PROJECT_TYPE_PROPERTY);
+    // TapestryProject prj = getTapestryProject();
+    // if (prj != null)
+    // {
+    // result = prj.getProjectType();
     //
-    //        if (result == -1)
-    //        {
-    //          result = getIntPropertyFromWorkspace(key);
-    //        }
-    //      } else
-    //      {
-    //        result = getIntPropertyFromWorkspace(key);
-    //      }
-    //    } catch (CoreException ex)
-    //    {}
-    //    return result;
+    // if (result == -1)
+    // {
+    // result = getIntPropertyFromWorkspace(key);
+    // }
+    // } else
+    // {
+    // result = getIntPropertyFromWorkspace(key);
+    // }
+    // } catch (CoreException ex)
+    // {}
+    // return result;
     //
-    //  }
+    // }
 
     private boolean isValidatingWebXML()
     {
@@ -633,8 +633,9 @@ public class ProjectPropertyPage extends PropertyPage
                 if (DEBUG)
                     UIPlugin
                             .log("tapestry project is not null - trying to get the context from it..");
-                result = "/"
-                        + prj.getWebContextFolder().getFullPath().removeFirstSegments(1).toString();
+                IFolder webContextFolder = prj.getWebContextFolder();
+                if (webContextFolder != null)
+                    result = "/" + webContextFolder.getFullPath().removeFirstSegments(1).toString();
                 if (result == null || "".equals(result.trim()))
                 {
                     if (DEBUG)
@@ -700,7 +701,7 @@ public class ProjectPropertyPage extends PropertyPage
         addSeparator(composite);
         addApplicationSection(composite);
         addSeparator(composite);
-        //        addLibrarySection(composite);
+        // addLibrarySection(composite);
 
         if (DEBUG)
             UIPlugin.log("Tapestry Properties Page creation done.");
@@ -771,9 +772,9 @@ public class ProjectPropertyPage extends PropertyPage
         // store the values as properties
         IResource resource = (IResource) getElement();
 
-        //    resource.setPersistentProperty(
-        //        new QualifiedName("", PROJECT_TYPE_PROPERTY),
-        //        new Integer(TapestryProject.APPLICATION_PROJECT_TYPE).toString());
+        // resource.setPersistentProperty(
+        // new QualifiedName("", PROJECT_TYPE_PROPERTY),
+        // new Integer(TapestryProject.APPLICATION_PROJECT_TYPE).toString());
 
         resource.setPersistentProperty(
                 new QualifiedName("", CONTEXT_ROOT_PROPERTY),

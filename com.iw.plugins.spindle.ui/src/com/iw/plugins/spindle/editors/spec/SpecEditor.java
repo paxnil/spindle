@@ -193,7 +193,8 @@ public class SpecEditor extends Editor
         IStorage storage = getStorage();
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        manager.pingProjectState(project);
+        if (!storage.isReadOnly())
+        	manager.pingProjectState(project);
 
         Control[] children = parent.getChildren();
         fControl = children[children.length - 1];
@@ -1091,5 +1092,17 @@ public class SpecEditor extends Editor
             return model.getRoot();
 
         }
+    }
+    
+    protected String[] collectContextMenuPreferencePages() {
+        String[] ids= super.collectContextMenuPreferencePages();
+        String[] more= new String[ids.length + 5];
+        more[0]= "com.iw.plugins.spindle.ui.SpindlePreferences"; //$NON-NLS-1$
+        more[1]= "com.iw.plugins.spindle.ui.SpindleEditorPreferences"; //$NON-NLS-1$
+        more[2]= "com.iw.plugins.spindle.ui.SpindleFoldingPreferences"; //$NON-NLS-1$
+        more[3]= "com.iw.plugins.spindle.ui.SpindleFormatterPreferences"; //$NON-NLS-1$
+        more[4]= "com.iw.plugins.spindle.ui.SpindleTemplatePreferences"; //$NON-NLS-1$       
+        System.arraycopy(ids, 0, more, 5, ids.length);
+        return more;
     }
 }

@@ -28,8 +28,6 @@ package com.iw.plugins.spindle.core;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +54,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.internal.Workbench;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -326,7 +323,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
                     prevNatures.length - (natureIndex + 1));
             description.setNatureIds(newNatures);
             project.setDescription(description, null);
-        }
+        }        
         fireCoreListenerEvent();
     }
 
@@ -362,7 +359,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     }
 
     // TODO relink the build even with the Decorators!
-    private static void fireCoreListenerEvent()
+    static void fireCoreListenerEvent()
     {
         if (CoreListeners == null)
             return;
@@ -528,38 +525,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         status.setError(message);
         TapestryException exception = new TapestryException(status);
         return exception;
-    }
-
-    public static boolean isWorkbenchClosing()
-    {
-        IWorkbench workbench = getDefault().getWorkbench();
-        Boolean result = null;
-        try
-        {
-            Method m = workbench.getClass().getMethod("isClosing", new Class[] {});
-            return ((Boolean) m.invoke(workbench, new Object[] {})).booleanValue();
-        }
-        catch (NoSuchMethodException e)
-        {
-            Workbench bench = (Workbench) workbench;
-            return bench.isClosing();
-
-        }
-        catch (RuntimeException e)
-        {
-            TapestryCore.log(e);
-        }
-        catch (IllegalAccessException e)
-        {
-            TapestryCore.log(e);
-        }
-        catch (InvocationTargetException e)
-        {
-            TapestryCore.log(e);
-        }
-        return false;
-
-    }
+    }    
 
     public int getBuildMissPriority()
     {

@@ -136,7 +136,7 @@ public class StringField extends DialogField
   {
     if (textControl != null && !textControl.isDisposed())
     {
-      textControl.setText(value);
+      textControl.setText(value == null ? "" : value);
       if (update)
       {
         fireDialogFieldChanged(this);

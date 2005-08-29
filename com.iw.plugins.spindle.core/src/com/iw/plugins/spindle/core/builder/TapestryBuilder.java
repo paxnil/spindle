@@ -148,12 +148,11 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     {
         TemplateFinder finder = new TemplateFinder();
 
-        IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
+        // IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
         // TemplateFinder finder = new TemplateFinder();
         try
         {
             return finder.getTemplates(specification, collector);
-
         }
         catch (CoreException e)
         {
@@ -202,8 +201,11 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         super();
     }
 
-    /**
-     * @see org.eclipse.core.internal.events.InternalBuilder#build(int, Map, IProgressMonitor)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.core.internal.events.InternalBuilder#build(int, java.util.Map,
+     *      org.eclipse.core.runtime.IProgressMonitor)
      */
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException
     {
@@ -214,8 +216,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         TYPE_CACHE.set(new HashMap());
         STORAGE_CACHE.set(new HashMap());
 
-        IWorkbench workbench = (IWorkbench) TapestryCore.getDefault().getWorkbench();
-        if (TapestryCore.isWorkbenchClosing())
+        IWorkbench workbench = TapestryCore.getDefault().getWorkbench();
+        if (workbench.isClosing())
             return getRequiredProjects(true);
         fCurrentProject = getProject();
         if (fCurrentProject == null || !fCurrentProject.isAccessible())
@@ -357,7 +359,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     State getLastState(IProject project)
     {
         return (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(
-                fCurrentProject,
+                project,
                 false);
     }
 
@@ -488,12 +490,21 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                         + "abort-prereq-not-built", p.getName()));
             }
         }
+        
+        if (fTapestryProject == null)
+            throw new BuilderException("could not obtain the TapestryProject instance!");
+        
+        if (fClasspathRoot == null)
+            throw new BuilderException("could not obtain the ClasspathRoot!");
 
         if (getType(TapestryCore.getString(STRING_KEY + "applicationServletClassname")) == null)
             throw new BuilderException(TapestryCore.getString(STRING_KEY + "tapestry-jar-missing"));
 
-        if (fContextRoot == null || !fContextRoot.exists())
-            throw new BuilderException(TapestryCore.getString(STRING_KEY + "missing-context"));
+        if (fContextRoot == null)
+            throw new BuilderException(TapestryCore.getString(STRING_KEY + "missing-context-bad"));
+
+        if (!fContextRoot.exists())
+            throw new BuilderException(TapestryCore.getString(STRING_KEY + "missing-context", fContextRoot));
 
         IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fContextRoot
                 .getRelativeLocation("WEB-INF/web.xml");
@@ -510,19 +521,16 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      * Method initializeBuilder.
      */
     private void initializeBuilder()
-    {
-
+    {      
         try
         {
             fJavaProject = (IJavaProject) fCurrentProject.getNature(JavaCore.NATURE_ID);
-
         }
         catch (CoreException e)
         {
-            TapestryCore.log(e);
-            throw new BuilderException("could not obtain the Java Project!");
+            TapestryCore.log(e);               
         }
-
+        
         try
         {
             fTapestryProject = (TapestryProject) fCurrentProject.getNature(TapestryCore.NATURE_ID);
@@ -530,13 +538,11 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         }
         catch (CoreException e)
         {
-            TapestryCore.log(e);
-            throw new BuilderException("could not obtain the Tapestry Project!");
+            TapestryCore.log(e);            
         }
 
         fContextRoot = fTapestryProject.getWebContextLocation();
-        if (fContextRoot == null)
-            throw new BuilderException("could not obtain the servlet context root folder");
+       
 
         try
         {
@@ -544,7 +550,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         }
         catch (CoreException e1)
         {
-            throw new BuilderException("could not obtain the Classpath Root!");
+            TapestryCore.log(e1);
         }
 
         fValidateWebXML = fTapestryProject.isValidatingWebXML();

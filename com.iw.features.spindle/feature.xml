@@ -2,7 +2,7 @@
 <feature
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.1.27"
+      version="3.2.1"
       provider-name="Geoffrey Longman"
       image="spindle.gif">
 
@@ -42,7 +42,7 @@ All Rights Reserved
    </license>
 
    <url>
-      <update label="Spindle Updates" url="http://spindle.sourceforge.net/unstable"/>
+      <update label="Spindle Updates" url="http://spindle.sourceforge.net/updates"/>
    </url>
 
    <requires>
@@ -55,30 +55,32 @@ All Rights Reserved
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.compare"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import feature="org.eclipse.jdt" version="3.1.0"/>
+      <import feature="org.eclipse.platform" version="3.1.0"/>
    </requires>
 
    <plugin
          id="net.sf.solareclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.4.0.spindle-dep-6"/>
+         version="0.0.0"/>
 
    <plugin
          id="net.sf.solareclipse.xml.ui"
          download-size="0"
          install-size="0"
-         version="0.4.0.spindle-dep-6"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.xerces"
          download-size="0"
          install-size="0"
-         version="4.0.13"/>
+         version="0.0.0"/>
 
    <plugin
          id="com.iw.plugins.spindle.core"
@@ -91,13 +93,6 @@ All Rights Reserved
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.docs.default"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"

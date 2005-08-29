@@ -3,21 +3,21 @@
 <plugin
    id="com.iw.plugins.spindle.docs"
    name="Spindle 3 Documentation"
-   version="3.1.27"
+   version="3.2.1"
    provider-name="Geoffrey Longman">
 
    <runtime>
    </runtime>
    <requires>
       <import plugin="org.eclipse.help"/>
-   </requires>
+   </requires>  
 
-   <!-- 
-   	extensions to "org.eclipse.help.toc" are made in
-   	fragments to allow for customized content.
-   	
-   	see fragment com.iw.plugins.spindle.doc.default
-   	for an example customized for the default SF install
-   -->    
+   <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="toc.xml"
+            primary="true">
+      </toc>
+   </extension>
 
 </plugin>

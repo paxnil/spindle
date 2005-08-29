@@ -89,9 +89,7 @@ public class FullBuild extends Build
     IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot
         .getRelativeLocation("/org/apache/tapestry/Framework.library");
     FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
-    fFrameworkNamespace = resolver.resolve();
-    //        fFrameworkNamespace =
-    // fNSResolver.resolveFrameworkNamespace(frameworkLocation);
+    fFrameworkNamespace = resolver.resolve();   
   }
 
   /**

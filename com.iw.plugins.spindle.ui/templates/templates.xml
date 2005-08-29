@@ -136,5 +136,23 @@
 -->
 ${cursor}]]>
 </template>
+<template 
+	context="com.iw.plugins.spindle.ui.templateContextType.user" 
+	description="%templateUserSpan.description" 
+	id="com.iw.plugins.spindle.ui.templates.user2" 
+	name="empty span"><![CDATA[
+<span jwcid="@${componentName}" ${cursor}/>	
+	${cursor}
+]]>
+</template>
+<template 
+	context="com.iw.plugins.spindle.ui.templateContextType.user" 
+	description="%templateUserSpan1.description" 
+	id="com.iw.plugins.spindle.ui.templates.user3" 
+	name="non empty span"><![CDATA[
+<span jwcid="@${componentName}" ${cursor}>	
+	${cursor}	
+</span>]]>
+</template>
 
 </templates>

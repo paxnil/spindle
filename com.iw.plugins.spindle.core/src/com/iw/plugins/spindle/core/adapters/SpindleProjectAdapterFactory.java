@@ -136,7 +136,7 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
                     continue;
 
                 lookup.configure(jproject);
-                if (lookup.projectContainsJarEntry((JarEntryFile) jarFile))
+                if (lookup.projectContainsJarEntry(jarFile))
                     return projects[i];
 
             }

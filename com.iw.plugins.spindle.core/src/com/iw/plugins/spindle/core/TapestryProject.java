@@ -81,7 +81,6 @@ public class TapestryProject implements IProjectNature, ITapestryProject
     {
         try
         {
-            ITapestryProject tproject = create(project);
             TapestryCore.removeNatureFromProject(project.getProject(), TapestryCore.NATURE_ID);
         }
         catch (CoreException ex)
@@ -368,7 +367,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject
         }
     }
 
-    private ICommand getTapestryCommand(IProjectDescription description) throws CoreException
+    private ICommand getTapestryCommand(IProjectDescription description) 
     {
         ICommand[] commands = description.getBuildSpec();
         for (int i = 0; i < commands.length; ++i)

@@ -93,7 +93,7 @@ public abstract class TapestryWizardPage extends WizardPage
   protected void updateStatus(IStatus status)
   {
     fCurrStatus = status;
-    setPageComplete(fCurrStatus != null && !fCurrStatus.matches(IStatus.ERROR));
+    setPageComplete(fCurrStatus == null ? true :  !fCurrStatus.matches(IStatus.ERROR));
     if (fPageVisible)
     {
       applyToStatusLine(this, fCurrStatus);
@@ -134,7 +134,7 @@ public abstract class TapestryWizardPage extends WizardPage
    * Finds the most severe status from a array of stati. An error is more severe
    * than a warning, and a warning is more severe than ok.
    */
-  public IStatus getMostSevere(IStatus[] status)
+  public static IStatus getMostSevere(IStatus[] status)
   {
     IStatus max = null;
     for (int i = 0; i < status.length; i++)

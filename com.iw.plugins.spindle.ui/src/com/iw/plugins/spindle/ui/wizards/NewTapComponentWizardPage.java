@@ -29,7 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import org.apache.tapestry.INamespace;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -45,7 +44,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -54,6 +54,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -68,7 +69,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.PageBook;
@@ -108,7 +108,7 @@ import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
 
 public class NewTapComponentWizardPage extends TapestryWizardPage
 {
-
+	/** @deprecated */
     public static final String P_GENERATE_HTML = "new.component.generate.html";
 
     /** @deprecated */
@@ -116,8 +116,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
     /** @deprecated */
     public static final String P_OPENALL = "new.component.open.all";
-
-    public static final String SHOW_ADVANCED_OPTIONS = UIPlugin.PLUGIN_ID + "showAdvanced";
 
     String PAGE_NAME;
 
@@ -189,14 +187,19 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
     protected boolean fBroken = false;
 
-    protected boolean fShowingAdvanced = UIPlugin.getDefault().getPreferenceStore().getBoolean(
-            SHOW_ADVANCED_OPTIONS);
+    protected boolean fShowingAdvanced; 
 
     protected DialogDefaultLocation fDefaultLocation;
+    
+    protected IStatus overallStatus = new SpindleStatus();
 
+    /**
+     * @deprecated
+     * @param pstore
+     */
     public static void initializeDefaultPreferences(IPreferenceStore pstore)
     {
-        pstore.setDefault(P_GENERATE_HTML, true);
+        //pstore.setDefault(P_GENERATE_HTML, true);
         // pstore.setDefault(P_HTML_TO_GENERATE,
         // UIPlugin.getString("TAPESTRY.xmlComment")
         // + UIPlugin.getString("TAPESTRY.genHTMLSource"));
@@ -268,6 +271,10 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         fDefaultLocation = new DialogDefaultLocation(PAGE_NAME + DEFAULT_LOCATION,
                 this instanceof NewTapComponentWizardPage);
 
+    }   
+    
+    protected boolean isComponentWizard() {
+    	return true;
     }
 
     protected PreferenceTemplateSelector createComponentTemplateSelector()
@@ -292,7 +299,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     public void init(IJavaElement jelem, IResource initResource, String prepopulateName)
     {
         WizardDialog container = (WizardDialog) getWizard().getContainer();
-        IRunnableContext context = (IRunnableContext) container;
+        IRunnableContext context = container;
 
         fTapestryProjectDialogField.init(jelem, context);
         if (fTapestryProjectDialogField.isProjectBroken())
@@ -302,18 +309,17 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
             return;
         }
         findPreferenceStore();
-        if (prepopulateName != null)
-        {
-            fComponentNameDialogField.setTextValue(prepopulateName);
-            setCompositeEnabled(fTemplatesGroup, false);
-            setCompositeEnabled(fPageBook, false);
-            fGenerateHTML.setSelection(true);
-            fGenerateHTML.setEnabled(false);
+        
+        if (prepopulateName == null) {
+        	 if (initResource != null && initResource.getType() == IResource.FILE && initResource.getName().endsWith(".html")) {
+             	String name = initResource.getName();
+             	int cut = name.lastIndexOf(".");
+             	prepopulateName = name.substring(0,cut);             
+             }
         }
-        else
-        {
-            fComponentNameDialogField.setTextValue("");
-        }
+        
+        fComponentNameDialogField.setTextValue(prepopulateName == null ? "" : prepopulateName);   
+       
         fNamespaceDialogField.init(
                 fTapestryProjectDialogField,
                 fComponentNameDialogField,
@@ -328,9 +334,15 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         {
             pack = (IPackageFragment) CoreUtils.findElementOfKind(
                     jelem,
-                    IJavaElement.PACKAGE_FRAGMENT);
+                    IJavaElement.PACKAGE_FRAGMENT);                        
         }
-        fLibraryPackageField.setPackageFragment(pack);
+        if (pack == null) {
+        	IDialogSettings settings = getPageDialogSettings();
+        	String savedPackage = settings.get(LIBRARY_PACKAGE_NAME);
+        	fLibraryPackageField.setTextValue(savedPackage == null ? "" : savedPackage);
+        } else {
+        	fLibraryPackageField.setPackageFragment(pack);
+        }
 
         fApplicationLocationField.init(
                 fComponentNameDialogField,
@@ -345,10 +357,39 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         connect(fDefaultLocation);
         fDefaultLocation.addListener(fListener);
 
-        updateAdvancedOptionWidgets();
+        updateAdvancedOptionWidgets();       
 
         updateStatus();
     }
+    
+    public static String SETTINGS_KEY_PAGE = UIPlugin.PLUGIN_ID+".NewTapComponentWizardPageSettings.page";
+    public static String SETTINGS_KEY_COMPONENT = UIPlugin.PLUGIN_ID+".NewTapComponentWizardPageSettings.component";
+    public static String GEN_HTML = "GEN_HTML";
+    public static String SHOW_ADVANCED_OPTIONS = "SHOW_ADVANCED_OPTIONS";
+    public static String LIBRARY_PACKAGE_NAME = "LIBRARY_PACKAGE_NAME";
+    
+    protected IDialogSettings getPageDialogSettings() {
+		IDialogSettings settings = super.getDialogSettings();
+		String key = isComponentWizard() ? SETTINGS_KEY_COMPONENT : SETTINGS_KEY_PAGE;
+		IDialogSettings pageSettings = settings.getSection(key);
+		if (pageSettings == null)
+			pageSettings = settings.addNewSection(key);
+
+		if (pageSettings.get(GEN_HTML) == null) {
+			pageSettings.put(GEN_HTML, true);
+			pageSettings.put(SHOW_ADVANCED_OPTIONS, true);
+			pageSettings.put(LIBRARY_PACKAGE_NAME, "");
+		}
+
+		return pageSettings;
+	}
+    
+    private void savePageSettings() {
+		IDialogSettings settings = getPageDialogSettings();
+		settings.put(GEN_HTML, fGenerateHTML.getSelection());	
+		settings.put(SHOW_ADVANCED_OPTIONS, fShowingAdvanced);
+		settings.put(LIBRARY_PACKAGE_NAME, fLibraryPackageField.getTextValue());
+	}
 
     /**
      *  
@@ -398,6 +439,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     {
         Composite composite = new Composite(container, SWT.NONE);
 
+        fShowingAdvanced = getPageDialogSettings().getBoolean(SHOW_ADVANCED_OPTIONS);
+        
         FormLayout layout = new FormLayout();
         layout.marginWidth = 4;
         layout.marginHeight = 4;
@@ -408,7 +451,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         formData.left = new FormAttachment(0, 0);
         formData.width = 400;
         composite.setLayoutData(formData);
-        
 
         Control nameFields = createComponentNameControl(composite);
         addControl(nameFields, null, 0);
@@ -441,9 +483,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         setFocus();
 
         fNamespaceDialogField.refreshStatus();
-        IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
         fGenerateHTML.addSelectionListener(fListener);
-        fGenerateHTML.setSelection(pstore.getBoolean(P_GENERATE_HTML));
+        getPageDialogSettings().getBoolean(GEN_HTML);
+        fGenerateHTML.setSelection(getPageDialogSettings().getBoolean(GEN_HTML));
     }
 
     private Composite createComponentNameControl(Composite parent)
@@ -463,10 +505,11 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
         fComponentNameDialogField.fillIntoGrid(container, 3);
 
-        int heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
-        int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+        // int heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+        // int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
 
         fToggleAdvancedOptions = new Button(container, SWT.PUSH);
+       
         fToggleAdvancedOptions.setText(fShowingAdvanced ? "Hide Advanced Options"
                 : "Show Advanced Options");
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
@@ -638,8 +681,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
         final boolean addingNewComponent = getWizard().getClass() == NewTapComponentWizard.class;
         final String name = fComponentNameDialogField.getTextValue();
-        final Shell useShell = getShell();
-        final IFolder applicationLocation = fApplicationLocationField.getSpecLocation();
+
         ITapestryProject tproject = fTapestryProjectDialogField.getTapestryProject();
         final IFolder webInf = tproject.getWebContextFolder().getFolder("WEB-INF");
 
@@ -826,6 +868,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
     public boolean performFinish()
     {
+    	savePageSettings();
         return true;
     }
 
@@ -882,12 +925,11 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         {
             if (forTemplate)
             {
-                result = result = ((IFolder) fApplicationLocationField.getTemplateLocation())
-                        .getFile(fileName);
+                result = result = fApplicationLocationField.getTemplateLocation().getFile(fileName);
             }
             else
             {
-                result = ((IFolder) fApplicationLocationField.getSpecLocation()).getFile(fileName);
+                result = fApplicationLocationField.getSpecLocation().getFile(fileName);
             }
         }
         else
@@ -936,7 +978,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     public boolean canFlipToNextPage()
     {
         IStatus status = getCurrentStatus();
-        return super.canFlipToNextPage() && status != null && status.getSeverity() != IStatus.ERROR;
+        return super.canFlipToNextPage() && (status == null ? true : status.getSeverity() != IStatus.ERROR);
     }
 
     private void namespaceChanged()
@@ -965,33 +1007,33 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         updateStatus();
     }
 
-    /**
-     *  
-     */
-    private void simpleComponentNameChanged()
-    {
-        if (fComponentNameDialogField.getStatus().getSeverity() == IStatus.ERROR)
-            return;
-        if (fNamespaceDialogField.getStatus().getSeverity() == IStatus.ERROR)
-            return;
-        SpindleStatus status = (SpindleStatus) fComponentNameDialogField.getStatus();
-        String name = fComponentNameDialogField.getTextValue();
-        INamespace namespace = fNamespaceDialogField.getSelectedNamespace();
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
-                .getSpecificationLocation();
-        if (location.isOnClasspath())
-        {
-            // check if location exists!
-            IFile file = (IFile) location.getStorage();
-            IContainer container = file.getParent();
-            // file =
-        }
-        else
-        {
-            // check if exists in webinf.,
-        }
-
-    }
+//    /**
+//     *  
+//     */
+//    private void simpleComponentNameChanged()
+//    {
+//        if (fComponentNameDialogField.getStatus().getSeverity() == IStatus.ERROR)
+//            return;
+//        if (fNamespaceDialogField.getStatus().getSeverity() == IStatus.ERROR)
+//            return;
+//        SpindleStatus status = (SpindleStatus) fComponentNameDialogField.getStatus();
+//        String name = fComponentNameDialogField.getTextValue();
+//        INamespace namespace = fNamespaceDialogField.getSelectedNamespace();
+//        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+//                .getSpecificationLocation();
+//        if (location.isOnClasspath())
+//        {
+//            // check if location exists!
+//            IFile file = (IFile) location.getStorage();
+//            IContainer container = file.getParent();
+//            // file =
+//        }
+//        else
+//        {
+//            // check if exists in webinf.,
+//        }
+//
+//    }
 
     public String getChosenComponentName()
     {
@@ -1085,10 +1127,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
             {
                 fShowingAdvanced = !fShowingAdvanced;
                 fToggleAdvancedOptions.setText(fShowingAdvanced ? "Hide Advanced Options"
-                        : "Show Advanced Options");
-                UIPlugin.getDefault().getPreferenceStore().setValue(
-                        SHOW_ADVANCED_OPTIONS,
-                        fShowingAdvanced);
+                        : "Show Advanced Options");                
                 updateAdvancedOptionWidgets();
             }
         }

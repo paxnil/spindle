@@ -63,7 +63,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
         workspace.getRoot(),
         "FirstComponentWizardPage");
     addPage(fPage1);
-    fPage2 = new TypeChooseWizardPage("SecondComponentWizardPage", fPage1);
+    fPage2 = new TypeChooseWizardPage("SecondComponentWizardPage", fPage1, false);
     addPage(fPage2);
   }
 
@@ -77,7 +77,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
     IFile java = null;
 
     spec = (IFile) fPage1.getResource();
-    template = (IFile) fPage1.getTemplateFile();
+    template = fPage1.getTemplateFile();
 
     ResourceCreationRunnable createRunnable = new ResourceCreationRunnable();
     // the new spec file;
@@ -200,6 +200,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
     super.createPageControls(pageContainer);
     setWindowTitle(UIPlugin.getString("NewTapComponentWizard.windowtitle"));
     fPage1.init(getInitJavaElement(), getInitResource(), prepopulateName);    
+    fPage2.init(getInitJavaElement());
   }
 
 }
