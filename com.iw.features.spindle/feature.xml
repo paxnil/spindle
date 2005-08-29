@@ -68,43 +68,43 @@ All Rights Reserved
          id="net.sf.solareclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.4.0.spindle-dep-6"/>
 
    <plugin
          id="net.sf.solareclipse.xml.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.4.0.spindle-dep-6"/>
 
    <plugin
          id="org.apache.xerces"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="4.0.13"/>
 
    <plugin
          id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.2.2"/>
 
    <plugin
          id="com.iw.plugins.spindle.docs"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.2.2"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.2.2"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui.contrib"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.2.2"
          fragment="true"/>
 
 </feature>

@@ -24,6 +24,12 @@
    <feature url="features/com.iw.features.spindle.groovy_3.2.1.jar" id="com.iw.features.spindle.groovy" version="3.2.1">
       <category name="add ons"/>
    </feature>
+   <feature url="features/com.iw.features.spindle_3.2.2.jar" id="com.iw.features.spindle" version="3.2.2">
+      <category name="spindle_3_2"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle.groovy_3.2.2.jar" id="com.iw.features.spindle.groovy" version="3.2.2">
+      <category name="add ons"/>
+   </feature>
    <category-def name="spindle_3_1" label="Spindle 3.1 - Eclipse 3.0">
       <description>
          Here are the latest Spindle 3.1 builds. They are targeted towards Eclipse 3.0
