@@ -282,12 +282,12 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         fJumpActions[2] = jumpToTemplate;
     }
 
-    public void createPartControl(Composite parent)
-    {
-        super.createPartControl(parent);
-        IPreferenceStore preferenceStore = getPreferenceStore();
-        fSourceViewerDecorationSupport.install(preferenceStore);
-    }
+//    public void createPartControl(Composite parent)
+//    {
+//        super.createPartControl(parent);
+//        IPreferenceStore preferenceStore = getPreferenceStore();
+//        fSourceViewerDecorationSupport.install(preferenceStore);
+//    }
 
     /*
      * (non-Javadoc)
