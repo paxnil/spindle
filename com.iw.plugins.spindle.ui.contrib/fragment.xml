@@ -111,7 +111,7 @@
       </page>
       <page
             name="Specification Formatter"
-            category="com.iw.plugins.spindle.ui.SpindleEditorPreferences"
+            category="com.iw.plugins.spindle.ui.SpindleEditorPreferences" 
             class="com.iw.plugins.spindle.ui.preferences.SpindleFormatterPreferencePage"
             id="com.iw.plugins.spindle.ui.SpindleFormatterPreferences">
       </page>
@@ -127,5 +127,40 @@
             class="com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage"
             id="com.iw.plugins.spindle.ui.SpindleWizardTemplatePreferences">
       </page>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.quickFixProcessors">
+      <quickFixProcessor
+            name="AbstractMethodsQuickFixProcessor"
+            class="com.iw.plugins.spindle.correction.java.AbstractMethodsQuickFixProcessor"
+            id="com.iw.plugins.spindle.ui.correction.AbstractMethodsQuickFixProcessor">
+            <enablement>
+            <with variable="projectNatures">  
+            	<count value="+"/>  
+            	<iterate operator="and"> 
+            	    <equals value="'com.iw.plugins.spindle.core.tapestrynature'"/>
+            	    <equals value="'org.eclipse.jdt.javanature'"/>               		
+            	</iterate>
+            </with>
+         </enablement> 
+      </quickFixProcessor>      
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.quickAssistProcessors">
+      <quickAssistProcessor
+            name="AbstractMethodQuickAssistProcessor"
+            class="com.iw.plugins.spindle.correction.java.AbstractMethodQuickAssistProcessor"
+            id="com.iw.plugins.spindle.ui.correction.AbstractMethodQuickAssistProcessor">
+         <enablement>
+            <with variable="projectNatures">  
+            	<count value="+"/>  
+            	<iterate operator="and"> 
+            	    <equals value="'com.iw.plugins.spindle.core.tapestrynature'"/>
+            	    <equals value="'org.eclipse.jdt.javanature'"/>               		
+            	</iterate>
+            </with>
+         </enablement>
+      </quickAssistProcessor>      
    </extension>
 </fragment>

@@ -59,9 +59,9 @@ All Rights Reserved
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.compare"/>
-      <import plugin="org.eclipse.core.runtime"/>
       <import feature="org.eclipse.jdt" version="3.1.0"/>
       <import feature="org.eclipse.platform" version="3.1.0"/>
+      <import plugin="org.eclipse.core.runtime" version="2.1.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin

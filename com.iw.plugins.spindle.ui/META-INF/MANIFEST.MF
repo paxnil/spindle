@@ -63,5 +63,6 @@ Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.ui,
  org.eclipse.jface.text,
  org.eclipse.compare,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.core.expressions
 Eclipse-AutoStart: true
