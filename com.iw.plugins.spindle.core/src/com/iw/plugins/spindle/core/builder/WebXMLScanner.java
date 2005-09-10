@@ -479,18 +479,8 @@ public class WebXMLScanner extends AbstractScanner
 
         }
         else
-        {
-            try
-            {
-                location = getApplicationLocation(newInfo, null);
-                checkApplicationLocation(location);
-            }
-            catch (ScannerException e)
-            {
-                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, e.getMessage(), false, IProblem.NOT_QUICK_FIXABLE);
-
-                return false;
-            }
+        {            
+           location = getApplicationLocation(newInfo, null);
         }
 
         newInfo.applicationSpecLocation = location;

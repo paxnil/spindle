@@ -22,7 +22,7 @@
    
    <!--    
    <extension
-         point="org.eclipse.ui.decorators">
+         point="org.eclipse.ui.decorators"> 
       <decorator
             lightweight="true"
             location="TOP_RIGHT"
@@ -620,5 +620,11 @@ the new Spindle
             adaptableType="org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput">
          <adapter type="org.eclipse.core.resources.IStorage"/>
       </factory>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.quickFixProcessors">
+      <quickFixProcessor
+            class="com.iw.plugins.spindle.correction.java.AbstractMethodsQuickFixProcessor"
+            id="com.iw.plugins.spindle.correction.java.AbstractMethodsQuickFixProcessor"/>
    </extension>
 </plugin>
