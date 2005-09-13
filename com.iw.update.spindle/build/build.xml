@@ -52,7 +52,7 @@
           executable="pscp"
           outputproperty="results"
           timeout="500000">
-      <arg line="-l ${user} -pw ${password}  spindle.update.site.archive_${version}.zip glongman@spindle.sourceforge.net:~glongman" />
+      <arg line="-l ${user} -pw ${password}  spindle.update.site.archive_${version}.zip glongman@spindle.sourceforge.net:/home/users/g/gl/glongman" />
     </exec>
     <echo message="${results}" />
   </target>

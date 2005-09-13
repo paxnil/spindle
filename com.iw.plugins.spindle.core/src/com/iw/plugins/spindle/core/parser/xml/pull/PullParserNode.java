@@ -604,4 +604,9 @@ public class PullParserNode implements Node
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, "not supported");
     }
 
+	public Object setUserData(String arg0, Object arg1, org.w3c.dom.UserDataHandler arg2) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
