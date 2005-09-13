@@ -62,7 +62,7 @@ import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
  * 
  * @author glongman@gmail.com
  */
-public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListener
+public class XMLOutlinePage extends ContentOutlinePage //implements XMLModelListener
 {
 
     private SpecEditor fEditor;
@@ -80,55 +80,55 @@ public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListen
     public XMLOutlinePage(SpecEditor editor, IEditorInput input)
     {
         fEditor = editor;
-        connect(input);
+        //connect(input);
     }
 
-    private void connect(IEditorInput input)
-    {
+//    private void connect(IEditorInput input)
+//    {
+//
+//        IDocumentProvider provider = fEditor.getDocumentProvider();
+//
+//        // force creation of the document & the model.
+//        IDocument document = provider.getDocument(input);
+//        IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+//        XMLReconciler model = (modelProvider).getModel(document);
+//        if (model != null)
+//        {
+//            fRoot = model.getRoot();
+//            model.addListener(this);
+//        }
+//    }
 
-        IDocumentProvider provider = fEditor.getDocumentProvider();
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see org.xmen.internal.ui.text.XMLModelListener#modelChanged(org.xmen.internal.ui.text.XMLReconciler)
+//     */
+//    public void modelChanged(XMLReconciler reconciler)
+//    {
+//        setInput(reconciler.getRoot());
+//    }
 
-        // force creation of the document & the model.
-        IDocument document = provider.getDocument(input);
-        IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
-        XMLReconciler model = (modelProvider).getModel(document);
-        if (model != null)
-        {
-            fRoot = model.getRoot();
-            model.addListener(this);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.xmen.internal.ui.text.XMLModelListener#modelChanged(org.xmen.internal.ui.text.XMLReconciler)
-     */
-    public void modelChanged(XMLReconciler reconciler)
-    {
-        setInput(reconciler.getRoot());
-    }
-
-    private void disconnect()
-    {
-        IEditorInput input = fEditor.getEditorInput();
-        IDocumentProvider provider = null;
-        if (input instanceof IFileEditorInput)
-        {
-            provider = UIPlugin.getDefault().getSpecFileDocumentProvider();
-        }
-        else
-        {
-            provider = UIPlugin.getDefault().getSpecStorageDocumentProvider();
-        }
-        IDocument document = provider.getDocument(input);
-        IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
-        XMLReconciler model = modelProvider.getModel(document);
-        if (model != null)
-        {
-            model.removeListener(this);
-        }
-    }
+//    private void disconnect()
+//    {
+//        IEditorInput input = fEditor.getEditorInput();
+//        IDocumentProvider provider = null;
+//        if (input instanceof IFileEditorInput)
+//        {
+//            provider = UIPlugin.getDefault().getSpecFileDocumentProvider();
+//        }
+//        else
+//        {
+//            provider = UIPlugin.getDefault().getSpecStorageDocumentProvider();
+//        }
+//        IDocument document = provider.getDocument(input);
+//        IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+//        XMLReconciler model = modelProvider.getModel(document);
+//        if (model != null)
+//        {
+//            model.removeListener(this);
+//        }
+//    }
 
     public void createControl(Composite parent)
     {
@@ -151,11 +151,11 @@ public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListen
         setInput(fRoot);
     }
 
-    public void dispose()
-    {
-        disconnect();
-        super.dispose();
-    }
+//    public void dispose()
+//    {
+//        disconnect();
+//        super.dispose();
+//    }
 
     public void setInput(final Object input)
     {

@@ -33,6 +33,7 @@ import java.util.List;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -53,11 +54,14 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.PageBook;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.xmen.internal.ui.text.XMLReconciler;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.IReconcileListener;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
 
@@ -66,570 +70,572 @@ import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
  * 
  * @author glongman@gmail.com
  */
-public class MultiPageContentOutline
-    implements
-      IContentOutlinePage,
-      IPageBookViewPage,
-      ISelectionChangedListener,
-      IReconcileListener
-{
+public class MultiPageContentOutline implements IContentOutlinePage,
+		IPageBookViewPage, ISelectionChangedListener, IReconcileListener {
 
-  private static final String SHOW_TAPESTRY_OUTLINE = UIPlugin.PLUGIN_ID
-      + ".mpoutline.showTapestryOutline";
+	private static final String SHOW_TAPESTRY_OUTLINE = UIPlugin.PLUGIN_ID
+			+ ".mpoutline.showTapestryOutline";
 
-  public static final void initializeDefaultPreferences(IPreferenceStore store)
-  {
-    store.setDefault(SHOW_TAPESTRY_OUTLINE, false);
-  }
+	public static final void initializeDefaultPreferences(IPreferenceStore store) {
+		store.setDefault(SHOW_TAPESTRY_OUTLINE, false);
+	}
 
-  private PageBook fPageBook;
-  private ISelectionProvider fSelectionProvider;
-  private SpecEditor fEditor;
-  private IContentOutlinePage fCurrentPage;
-  private MessagePage fMessagePage;
-  private XMLOutlinePage fXMLOutlinePage;
-  private TapestryOutlinePage fTapestryOutlinePage;
-  private List fPages = new ArrayList();
-  private Object fReconciledObject;
-  private boolean fDisposed;
-  private MessagePoster fMessagePoster = new MessagePoster();
-  private PageTurnPoster fPageTurner = new PageTurnPoster();
-  private List fSelectionListeners = new ArrayList();
-  private IPageSite fSite;
-  private MultiPageContentOutline.ToggleAction fToggleAction;
+	private PageBook fPageBook;
 
-  public MultiPageContentOutline(SpecEditor editor, IEditorInput input)
-  {
-    this.fEditor = editor;
-    fToggleAction = new MultiPageContentOutline.ToggleAction(this);
-    fSelectionProvider = editor.getSelectionProvider();
-    fMessagePage = new MessagePage();
-    fXMLOutlinePage = new XMLOutlinePage(editor, input);
-    fTapestryOutlinePage = new TapestryOutlinePage(editor);
-    fCurrentPage = getInitialPage();
-    fEditor.addReconcileListener(this);
-  }
+	private ISelectionProvider fSelectionProvider;
 
-  private IContentOutlinePage getInitialPage()
-  {
-    IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean flag = store.getBoolean(SHOW_TAPESTRY_OUTLINE);
-    if (flag)
-      return fTapestryOutlinePage;
+	private SpecEditor fEditor;
 
-    return fXMLOutlinePage;
-  }
+	private IContentOutlinePage fCurrentPage;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.ui.part.IPageBookViewPage#getSite()
-   */
-  public IPageSite getSite()
-  {
-    return fSite;
-  }
+	private MessagePage fMessagePage;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.ui.part.IPageBookViewPage#init(org.eclipse.ui.part.IPageSite)
-   */
-  public void init(IPageSite site) throws PartInitException
-  {
-    fSite = site;
-    fXMLOutlinePage.init(site);
-    fTapestryOutlinePage.init(site);
-  }
+	private XMLOutlinePage fXMLOutlinePage;
 
-  
-//  public void setInput(Object obj)
-//  {
-//    if (obj instanceof XMLNode)
-//    {
-//      fXMLOutlinePage.setInput(obj);
-//    } else
-//    {
-//      fTapestryOutlinePage.setInput(obj);
-//    }
-//
-//  }
+	private TapestryOutlinePage fTapestryOutlinePage;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.editors.IReconcileListener#reconciled(java.lang.Object)
-   */
-  public void reconciled(Object reconcileResults)
-  {
-    try
-    {
-      fReconciledObject = reconcileResults;
-      fTapestryOutlinePage.setInput(fReconciledObject);
-      if (fCurrentPage == fTapestryOutlinePage || fCurrentPage == fMessagePage)
-      {
-        if (fReconciledObject == null)
-        {
-          fMessagePoster
-              .postMessage("Unable to resolve this outline. \n\nThere may be malformed XML, or the file can not be seen by Tapestry.");
-          fPageTurner.post(fMessagePage);
-        } else
-        {
-          fPageTurner.post(fTapestryOutlinePage);
-        }
-      }
-    } catch (IllegalArgumentException e)
-    {
-      fMessagePoster.postMessage("internalError");
-      fPageTurner.post(fMessagePage);
-    } catch (RuntimeException e)
-    {
-      UIPlugin.log(e);
-      throw e;
-    } finally
-    {
-      fToggleAction.setEnabled(true);
-    }
-  }
+	private List fPages = new ArrayList();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.editors.IReconcileListener#reconcileStarted()
-   */
-  public void reconcileStarted()
-  {
-    fReconciledObject = null;
-    fToggleAction.setEnabled(false);
-  }
+	private Object fReconciledObject;
 
-  
-//  public void addFocusListener(org.eclipse.swt.events.FocusListener listener)
-//  {
-//  }
-  public void addSelectionChangedListener(ISelectionChangedListener listener)
-  {
-    if (!fSelectionListeners.contains(listener))
-      fSelectionListeners.add(listener);
-  }
-  
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
-   */
-  public void createControl(Composite parent)
-  {
-    fPageBook = new PageBook(parent, SWT.NONE);
-    if (fCurrentPage != null)
-      setPageActive(fCurrentPage);
-  }
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.part.IPage#dispose()
-   */
-  public void dispose()
-  {
-    if (fPageBook != null && !fPageBook.isDisposed())
-      fPageBook.dispose();
-    fPageBook = null;
-    fDisposed = true;
-  }
+	private boolean fDisposed;
 
-//  public boolean isDisposed()
-//  {
-//    return fDisposed;
-//  }
+	private MessagePoster fMessagePoster = new MessagePoster();
 
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.part.IPage#getControl()
-   */
-  public Control getControl()
-  {
-    return fPageBook;
-  }
-//  public PageBook getPagebook()
-//  {
-//    return fPageBook;
-//  }
-  public ISelection getSelection()
-  {
-    return fSelectionProvider.getSelection();
-  }
- 
-//  public void makeContributions(
-//      IMenuManager menuManager,
-//      IToolBarManager toolBarManager,
-//      IStatusLineManager statusLineManager)
-//  {
-//  }
-//  public void removeFocusListener(FocusListener listener)
-//  {
-//  }
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-   */
-  public void removeSelectionChangedListener(ISelectionChangedListener listener)
-  {
-    fSelectionListeners.remove(listener);
-  }
+	private PageTurnPoster fPageTurner = new PageTurnPoster();
 
-  
-  private void fireSelectionChange(ISelectionProvider provider, ISelection selection)
-  {
-    SelectionChangedEvent evt = new SelectionChangedEvent(provider, selection);
-    for (Iterator iter = fSelectionListeners.iterator(); iter.hasNext();)
-    {
-      ISelectionChangedListener listener = (ISelectionChangedListener) iter.next();
-      listener.selectionChanged(evt);
-    }
-  }
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-   */
-  public void selectionChanged(SelectionChangedEvent event)
-  {
-    ISelection selection = event.getSelection();
-    if (selection instanceof DoubleClickSelection)
-      fEditor.openTo(((DoubleClickSelection) selection).getFirstElement());
-    fireSelectionChange(event.getSelectionProvider(), selection);
-  }
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.part.IPage#setActionBars(org.eclipse.ui.IActionBars)
-   */
-  public void setActionBars(org.eclipse.ui.IActionBars actionBars)
-  {
-  }
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.part.IPage#setFocus()
-   */
-  public void setFocus()
-  {
-    if (fCurrentPage != null)
-      fCurrentPage.setFocus();
-  }
-  /**
-   * @param page
-   */
-  public void setPageActive(IContentOutlinePage page)
-  {
+	private List fSelectionListeners = new ArrayList();
 
-    synchronized (fEditor) // don't want to call this while a reconciling action
-                           // is occuring!
-    {
-      Control control = fCurrentPage.getControl();
-      if ((control != null && !control.isDisposed()) && page == fCurrentPage)
-        return;
+	private IPageSite fSite;
 
-      if (page == fMessagePage && fCurrentPage != fTapestryOutlinePage)
-        page = fCurrentPage;
+	private MultiPageContentOutline.ToggleAction fToggleAction;
 
-      if (page == fTapestryOutlinePage && fReconciledObject == null)
-        page = fMessagePage;
+	public MultiPageContentOutline(SpecEditor editor, IEditorInput input) {
+		this.fEditor = editor;
+		fToggleAction = new MultiPageContentOutline.ToggleAction(this);
+		fSelectionProvider = editor.getSelectionProvider();
+		fMessagePage = new MessagePage();
+		fXMLOutlinePage = new XMLOutlinePage(editor, input);
+		fTapestryOutlinePage = new TapestryOutlinePage(editor);
+		fCurrentPage = getInitialPage();
+		fEditor.addReconcileListener(this);
+	}
 
-      if (fCurrentPage != null)
-      {
-        fCurrentPage.removeSelectionChangedListener(this);
-      }
-      page.addSelectionChangedListener(this);
-      this.fCurrentPage = page;
-      if (fPageBook == null)
-      {
-        // still not being made
-        return;
-      }
-      control = page.getControl();
-      if (control == null || control.isDisposed())
-      {
-        // first time
-        page.createControl(fPageBook);
-        control = page.getControl();
+	private IContentOutlinePage getInitialPage() {
+		IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+		boolean flag = store.getBoolean(SHOW_TAPESTRY_OUTLINE);
+		if (flag)
+			return fTapestryOutlinePage;
 
-      }
-      fPageBook.showPage(control);
-      this.fCurrentPage = page;
-    }
-    updateToolbar();
-  }
+		return fXMLOutlinePage;
+	}
 
-  private void updateToolbar()
-  {
-    IActionBars bars = getSite().getActionBars();
-    IToolBarManager manager = bars.getToolBarManager();
-    manager.removeAll();
-    if (fCurrentPage == fTapestryOutlinePage)
-      fTapestryOutlinePage.makeContributions(null, manager, null);
-    manager.add(fToggleAction);
-    bars.updateActionBars();
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.IPageBookViewPage#getSite()
+	 */
+	public IPageSite getSite() {
+		return fSite;
+	}
 
-  
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
-   */
-  public void setSelection(ISelection selection)
-  {
-    fXMLOutlinePage.setSelection(selection);
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.IPageBookViewPage#init(org.eclipse.ui.part.IPageSite)
+	 */
+	public void init(IPageSite site) throws PartInitException {
+		fSite = site;
+		fXMLOutlinePage.init(site);
+		fTapestryOutlinePage.init(site);
+	}
 
- 
-  public void switchPages(boolean showTapestry)
-  {
-    if (showTapestry)
-      setPageActive(fTapestryOutlinePage);
-    else
-      setPageActive(fXMLOutlinePage);
-  }
+	// public void setInput(Object obj)
+	// {
+	// if (obj instanceof XMLNode)
+	// {
+	// fXMLOutlinePage.setInput(obj);
+	// } else
+	// {
+	// fTapestryOutlinePage.setInput(obj);
+	// }
+	//
+	// }
 
-  private static class ToggleAction extends Action
-  {
-    private boolean fInitiatedByMe = false;
-    private MultiPageContentOutline fOutline;
-    public ToggleAction(MultiPageContentOutline outline)
-    {
-      super();
-      fOutline = outline;
-      setText("Toggle between outline views");
-      setToolTipText("Toggle between outline views");
-      setImageDescriptor(Images.getImageDescriptor("application16.gif"));
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.iw.plugins.spindle.editors.IReconcileListener#reconciled(java.lang.Object)
+	 */
+	public void reconciled(Object reconcileResults) {
+		try {
+			fReconciledObject = reconcileResults;
+			setXMLOutlineInput();
+			fTapestryOutlinePage.setInput(fReconciledObject);
+			if (fCurrentPage == fTapestryOutlinePage
+					|| fCurrentPage == fMessagePage) {
+				if (fReconciledObject == null) {
+					fMessagePoster
+							.postMessage("Unable to resolve this outline. \n\nThere may be malformed XML, or the file can not be seen by Tapestry.");
+					fPageTurner.post(fMessagePage);
+				} else {
+					fPageTurner.post(fTapestryOutlinePage);
+				}
+			} 
+		} catch (IllegalArgumentException e) {
+			fMessagePoster.postMessage("internalError");
+			fPageTurner.post(fMessagePage);
+		} catch (RuntimeException e) {
+			UIPlugin.log(e);
+			throw e;
+		} finally {
+			fToggleAction.setEnabled(true);
+		}
+	}
 
-      IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-      store.addPropertyChangeListener(new IPropertyChangeListener()
-      {
-        public void propertyChange(PropertyChangeEvent event)
-        {
-          if (event.getProperty().equals(SHOW_TAPESTRY_OUTLINE))
-          {
-            if (fInitiatedByMe == false)
-            {
-              boolean showTapestry = ((Boolean) event.getNewValue()).booleanValue();
-              valueChanged(showTapestry, false);
-              fOutline.switchPages(showTapestry);
-            }
-          }
-        }
-      });
-      boolean checked = store.getBoolean(SHOW_TAPESTRY_OUTLINE);
-      valueChanged(checked, false);
-    }
+	private void setXMLOutlineInput() {
+		IDocumentProvider provider = fEditor.getDocumentProvider();
 
-    public void run()
-    {
+		// force creation of the document & the model.
+		IDocument document = provider.getDocument(fEditor.getEditorInput());
+		IXMLModelProvider modelProvider = UIPlugin.getDefault()
+				.getXMLModelProvider();
+		XMLReconciler model = (modelProvider).getModel(document);
+		fXMLOutlinePage.setInput(model.getRoot());
+	}
+	
+	
 
-      boolean checked = isChecked();
-      fOutline.switchPages(checked);
-      valueChanged(checked, true);
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.iw.plugins.spindle.editors.IReconcileListener#reconcileStarted()
+	 */
+	public void reconcileStarted() {
+		fReconciledObject = null;
+		fToggleAction.setEnabled(false);
+	}
 
-    public void valueChanged(boolean on, boolean store)
-    {
-      setChecked(on);
-      if (store)
-      {
-        fInitiatedByMe = true;
-        UIPlugin.getDefault().getPreferenceStore().setValue(SHOW_TAPESTRY_OUTLINE, on);
-        fInitiatedByMe = false;
+	// public void addFocusListener(org.eclipse.swt.events.FocusListener
+	// listener)
+	// {
+	// }
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		if (!fSelectionListeners.contains(listener))
+			fSelectionListeners.add(listener);
+	}
 
-      }
-    }
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
+	 */
+	public void createControl(Composite parent) {
+		fPageBook = new PageBook(parent, SWT.NONE);
+		if (fCurrentPage != null)
+			setPageActive(fCurrentPage);
+	}
 
-  private class MessagePage implements IContentOutlinePage
-  {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.IPage#dispose()
+	 */
+	public void dispose() {
+		if (fPageBook != null && !fPageBook.isDisposed())
+			fPageBook.dispose();
+		fPageBook = null;
+		fDisposed = true;
+	}
 
-    Control fControl;
-    Label fMessageLabel;
-    String fSavedMessage; //a message might have been posted before the
-                          // creatControl called;s
+	// public boolean isDisposed()
+	// {
+	// return fDisposed;
+	// }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
-     */
-    public void createControl(Composite parent)
-    {
-      Font font = parent.getFont();
-      Composite top = new Composite(parent, SWT.CENTER);
-      top.setLayout(new GridLayout());
-      fControl = top;
-      top.setFont(font);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.IPage#getControl()
+	 */
+	public Control getControl() {
+		return fPageBook;
+	}
 
-      // Sets the layout data for the top composite's
-      // place in its parent's layout.
-      top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	// public PageBook getPagebook()
+	// {
+	// return fPageBook;
+	// }
+	public ISelection getSelection() {
+		return fSelectionProvider.getSelection();
+	}
 
-      createVerticalSpacer(top, 1);
+	// public void makeContributions(
+	// IMenuManager menuManager,
+	// IToolBarManager toolBarManager,
+	// IStatusLineManager statusLineManager)
+	// {
+	// }
+	// public void removeFocusListener(FocusListener listener)
+	// {
+	// }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 */
+	public void removeSelectionChangedListener(
+			ISelectionChangedListener listener) {
+		fSelectionListeners.remove(listener);
+	}
 
-      fMessageLabel = new Label(top, SWT.WRAP);
-      fMessageLabel.setForeground(top.getDisplay().getSystemColor(SWT.COLOR_RED));
-      fMessageLabel.setLayoutData(new GridData(GridData.FILL_BOTH
-          | GridData.GRAB_VERTICAL));
-      fMessageLabel.setText(fSavedMessage == null ? "working..." : fSavedMessage);
-    }
+	private void fireSelectionChange(ISelectionProvider provider,
+			ISelection selection) {
+		SelectionChangedEvent evt = new SelectionChangedEvent(provider,
+				selection);
+		for (Iterator iter = fSelectionListeners.iterator(); iter.hasNext();) {
+			ISelectionChangedListener listener = (ISelectionChangedListener) iter
+					.next();
+			listener.selectionChanged(evt);
+		}
+	}
 
-    /**
-     * Create some empty space.
-     */
-    protected void createVerticalSpacer(Composite comp, int colSpan)
-    {
-      Label label = new Label(comp, SWT.NONE);
-      GridData gd = new GridData();
-      gd.horizontalSpan = colSpan;
-      label.setLayoutData(gd);
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+	 */
+	public void selectionChanged(SelectionChangedEvent event) {
+		ISelection selection = event.getSelection();
+		if (selection instanceof DoubleClickSelection)
+			fEditor
+					.openTo(((DoubleClickSelection) selection)
+							.getFirstElement());
+		fireSelectionChange(event.getSelectionProvider(), selection);
+	}
 
-    public void setMessage(String message)
-    {
-      if (fMessageLabel == null)
-        fSavedMessage = message;
-      else
-        fMessageLabel.setText(message);
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.IPage#setActionBars(org.eclipse.ui.IActionBars)
+	 */
+	public void setActionBars(org.eclipse.ui.IActionBars actionBars) {
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.part.IPage#dispose()
-     */
-    public void dispose()
-    {
-      if (!fMessageLabel.isDisposed())
-        fMessageLabel.dispose();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.part.IPage#setFocus()
+	 */
+	public void setFocus() {
+		if (fCurrentPage != null)
+			fCurrentPage.setFocus();
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.part.IPage#getControl()
-     */
-    public Control getControl()
-    {
-      return fControl;
-    }
+	/**
+	 * @param page
+	 */
+	public void setPageActive(IContentOutlinePage page) {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.part.IPage#setActionBars(org.eclipse.ui.IActionBars)
-     */
-    public void setActionBars(IActionBars actionBars)
-    {
-      MultiPageContentOutline.this.setActionBars(actionBars);
-    }
+		synchronized (fEditor) // don't want to call this while a reconciling
+								// action
+		// is occuring!
+		{
+			Control control = fCurrentPage.getControl();
+			if ((control != null && !control.isDisposed())
+					&& page == fCurrentPage)
+				return;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.part.IPage#setFocus()
-     */
-    public void setFocus()
-    {
-      fMessageLabel.setFocus();
-    }
+			if (page == fMessagePage && fCurrentPage != fTapestryOutlinePage)
+				page = fCurrentPage;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-     */
-    public void addSelectionChangedListener(ISelectionChangedListener listener)
-    {
-    }
+			if (page == fTapestryOutlinePage && fReconciledObject == null)
+				page = fMessagePage;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
-     */
-    public ISelection getSelection()
-    {
-      return null;
-    }
+			if (fCurrentPage != null) {
+				fCurrentPage.removeSelectionChangedListener(this);
+			}
+			page.addSelectionChangedListener(this);
+			this.fCurrentPage = page;
+			if (fPageBook == null) {
+				// still not being made
+				return;
+			}
+			control = page.getControl();
+			if (control == null || control.isDisposed()) {
+				// first time
+				page.createControl(fPageBook);
+				control = page.getControl();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-     */
-    public void removeSelectionChangedListener(ISelectionChangedListener listener)
-    {
-    }
+			}
+			fPageBook.showPage(control);
+			this.fCurrentPage = page;
+		}
+		updateToolbar();
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
-     */
-    public void setSelection(ISelection selection)
-    {
-    }
+	private void updateToolbar() {
+		IActionBars bars = getSite().getActionBars();
+		IToolBarManager manager = bars.getToolBarManager();
+		manager.removeAll();
+		if (fCurrentPage == fTapestryOutlinePage)
+			fTapestryOutlinePage.makeContributions(null, manager, null);
+		manager.add(fToggleAction);
+		bars.updateActionBars();
+	}
 
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+	 */
+	public void setSelection(ISelection selection) {
+		fXMLOutlinePage.setSelection(selection);
+	}
 
-  class MessagePoster implements Runnable
-  {
+	public void switchPages(boolean showTapestry) {
+		if (showTapestry)
+			setPageActive(fTapestryOutlinePage);
+		else
+			setPageActive(fXMLOutlinePage);
+	}
 
-    /** Has the runnable already been posted? */
-    private boolean posted = false;
-    private String message = "take a look at this error!";
+	private static class ToggleAction extends Action {
+		private boolean fInitiatedByMe = false;
 
-    /*
-     * @see Runnable#run()
-     */
-    public void run()
-    {
+		private MultiPageContentOutline fOutline;
 
-      fMessagePage.setMessage(message);
-      posted = true;
-    }
+		public ToggleAction(MultiPageContentOutline outline) {
+			super();
+			fOutline = outline;
+			setText("Toggle between outline views");
+			setToolTipText("Toggle between outline views");
+			setImageDescriptor(Images.getImageDescriptor("application16.gif"));
 
-    /**
-     * Posts this runnable into the event queue.
-     */
-    public void postMessage(String message)
-    {
-      this.message = message;
-      if (posted)
-        return;
+			IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+			store.addPropertyChangeListener(new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					if (event.getProperty().equals(SHOW_TAPESTRY_OUTLINE)) {
+						if (fInitiatedByMe == false) {
+							boolean showTapestry = ((Boolean) event
+									.getNewValue()).booleanValue();
+							valueChanged(showTapestry, false);
+							fOutline.switchPages(showTapestry);
+						}
+					}
+				}
+			});
+			boolean checked = store.getBoolean(SHOW_TAPESTRY_OUTLINE);
+			valueChanged(checked, false);
+		}
 
-      Display d = Display.getDefault();
-      if (d != null && !d.isDisposed())
-      {
-        posted = false;
-        d.asyncExec(this);
-      }
-    }
-  }
+		public void run() {
 
-  class PageTurnPoster implements Runnable
-  {
+			boolean checked = isChecked();
+			fOutline.switchPages(checked);
+			valueChanged(checked, true);
+		}
 
-    /** Has the runnable already been posted? */
-    private boolean posted = false;
-    private IContentOutlinePage page;
+		public void valueChanged(boolean on, boolean store) {
+			setChecked(on);
+			if (store) {
+				fInitiatedByMe = true;
+				UIPlugin.getDefault().getPreferenceStore().setValue(
+						SHOW_TAPESTRY_OUTLINE, on);
+				fInitiatedByMe = false;
 
-    /*
-     * @see Runnable#run()
-     */
-    public void run()
-    {
-      setPageActive(page);
-      posted = false;
-    }
+			}
+		}
+	}
 
-    /**
-     * Posts this runnable into the event queue.
-     */
-    public void post(IContentOutlinePage page)
-    {
-      this.page = page;
-      if (posted)
-        return;
+	private class MessagePage implements IContentOutlinePage {
 
-      Display d = Display.getDefault();
-      if (d != null && !d.isDisposed())
-      {
-        posted = true;
-        d.asyncExec(this);
-      }
-    }
-  };
+		Control fControl;
+
+		Label fMessageLabel;
+
+		String fSavedMessage; // a message might have been posted before the
+
+		// creatControl called;s
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
+		 */
+		public void createControl(Composite parent) {
+			Font font = parent.getFont();
+			Composite top = new Composite(parent, SWT.CENTER);
+			top.setLayout(new GridLayout());
+			fControl = top;
+			top.setFont(font);
+
+			// Sets the layout data for the top composite's
+			// place in its parent's layout.
+			top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			createVerticalSpacer(top, 1);
+
+			fMessageLabel = new Label(top, SWT.WRAP);
+			fMessageLabel.setForeground(top.getDisplay().getSystemColor(
+					SWT.COLOR_RED));
+			fMessageLabel.setLayoutData(new GridData(GridData.FILL_BOTH
+					| GridData.GRAB_VERTICAL));
+			fMessageLabel.setText(fSavedMessage == null ? "working..."
+					: fSavedMessage);
+		}
+
+		/**
+		 * Create some empty space.
+		 */
+		protected void createVerticalSpacer(Composite comp, int colSpan) {
+			Label label = new Label(comp, SWT.NONE);
+			GridData gd = new GridData();
+			gd.horizontalSpan = colSpan;
+			label.setLayoutData(gd);
+		}
+
+		public void setMessage(String message) {
+			if (fMessageLabel == null)
+				fSavedMessage = message;
+			else
+				fMessageLabel.setText(message);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.part.IPage#dispose()
+		 */
+		public void dispose() {
+			if (!fMessageLabel.isDisposed())
+				fMessageLabel.dispose();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.part.IPage#getControl()
+		 */
+		public Control getControl() {
+			return fControl;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.part.IPage#setActionBars(org.eclipse.ui.IActionBars)
+		 */
+		public void setActionBars(IActionBars actionBars) {
+			MultiPageContentOutline.this.setActionBars(actionBars);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.part.IPage#setFocus()
+		 */
+		public void setFocus() {
+			fMessageLabel.setFocus();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+		 */
+		public void addSelectionChangedListener(
+				ISelectionChangedListener listener) {
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
+		 */
+		public ISelection getSelection() {
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+		 */
+		public void removeSelectionChangedListener(
+				ISelectionChangedListener listener) {
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+		 */
+		public void setSelection(ISelection selection) {
+		}
+
+	}
+
+	class MessagePoster implements Runnable {
+
+		/** Has the runnable already been posted? */
+		private boolean posted = false;
+
+		private String message = "take a look at this error!";
+
+		/*
+		 * @see Runnable#run()
+		 */
+		public void run() {
+
+			fMessagePage.setMessage(message);
+			posted = true;
+		}
+
+		/**
+		 * Posts this runnable into the event queue.
+		 */
+		public void postMessage(String message) {
+			this.message = message;
+			if (posted)
+				return;
+
+			Display d = Display.getDefault();
+			if (d != null && !d.isDisposed()) {
+				posted = false;
+				d.asyncExec(this);
+			}
+		}
+	}
+
+	class PageTurnPoster implements Runnable {
+
+		/** Has the runnable already been posted? */
+		private boolean posted = false;
+
+		private IContentOutlinePage page;
+
+		/*
+		 * @see Runnable#run()
+		 */
+		public void run() {
+			setPageActive(page);
+			posted = false;
+		}
+
+		/**
+		 * Posts this runnable into the event queue.
+		 */
+		public void post(IContentOutlinePage page) {
+			this.page = page;
+			if (posted)
+				return;
+
+			Display d = Display.getDefault();
+			if (d != null && !d.isDisposed()) {
+				posted = true;
+				d.asyncExec(this);
+			}
+		}
+	};
 }
