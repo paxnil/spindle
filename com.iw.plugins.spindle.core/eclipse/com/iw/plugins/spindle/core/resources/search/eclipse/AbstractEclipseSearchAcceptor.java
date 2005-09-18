@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle.core.resources.search.eclipse;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IStorage;
@@ -40,20 +42,59 @@ import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAccept
 public abstract class AbstractEclipseSearchAcceptor extends AbstractTapestrySearchAcceptor
 {
 
-    public AbstractEclipseSearchAcceptor()
+    private List fAllowedTemplateExtensions;
+
+    private List fExcludedFiles;
+
+    private List fExcludedExtensions;
+
+    public AbstractEclipseSearchAcceptor(int acceptFlags, List allowedTemplateExtensions,
+            List exclusions)
     {
-        super();
+        super(acceptFlags);
+        fAllowedTemplateExtensions = allowedTemplateExtensions;
+        setupExclusions(exclusions);
     }
 
-    public AbstractEclipseSearchAcceptor(int acceptFlags, List allowedTemplateExtensions)
+    private void setupExclusions(List exclusions)
     {
-        super(acceptFlags, allowedTemplateExtensions);
+        fExcludedFiles = new ArrayList();
+        fExcludedExtensions = new ArrayList();
+        for (Iterator iter = exclusions.iterator(); iter.hasNext();)
+        {
+            String element = (String) iter.next();
+            if (element.startsWith("*."))
+            {
+                fExcludedExtensions.add(element.substring(1));
+            }
+            else
+            {
+                fExcludedFiles.add(element);
+            }
+
+        }
     }
 
     protected String getFileExtension(Object leaf)
     {
         IStorage storage = (IStorage) leaf;
         return storage.getFullPath().getFileExtension();
+    }
+
+    protected boolean isExcluded(Object leaf)
+    {
+        IStorage storage = (IStorage) leaf;
+        String name = storage.getName();
+        
+        if (fExcludedFiles.contains(name))
+            return true;
+        
+        String extension = storage.getFullPath().getFileExtension();
+        
+        if (fExcludedExtensions.contains(extension))
+            return true;
+        
+        return false;
     }
 
 }

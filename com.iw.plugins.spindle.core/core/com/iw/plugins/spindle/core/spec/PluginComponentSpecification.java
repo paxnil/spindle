@@ -786,4 +786,24 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
         return keys(fInjectSpecifications);
     }
 
+	public void addParameter(IParameterSpecification arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public Collection getRequiredParameters() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public boolean isDeprecated() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void setDeprecated(boolean arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

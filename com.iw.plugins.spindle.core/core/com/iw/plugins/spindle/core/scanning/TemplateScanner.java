@@ -291,20 +291,20 @@ public class TemplateScanner extends AbstractScanner
         }
     }
 
-    private String getDefaultBindingType(String parameterName, String metaDefaultBindingType)
-    {
-        String result = null;
-
-        IParameterSpecification ps = fComponentSpec.getParameter(parameterName);
-
-        if (ps != null)
-            result = ps.getDefaultBindingType();
-
-        if (result == null)
-            result = metaDefaultBindingType;
-
-        return result;
-    }
+//    private String getDefaultBindingType(String parameterName, String metaDefaultBindingType)
+//    {
+//        String result = null;
+//
+//        IParameterSpecification ps = fComponentSpec.getParameter(parameterName);
+//
+//        if (ps != null)
+//            result = ps.getDefaultBindingType();
+//
+//        if (result == null)
+//            result = metaDefaultBindingType;
+//
+//        return result;
+//    }
 
     private IBindingSpecification createImplicitBinding(String name, String reference)
     {
@@ -313,7 +313,7 @@ public class TemplateScanner extends AbstractScanner
 
         result.setType(BindingType.PREFIXED);
 
-        String prefix = getDefaultBindingType(name, BindingConstants.LITERAL_PREFIX);
+        String prefix = BindingConstants.LITERAL_PREFIX;
 
         int colonx = reference.indexOf(':');
 

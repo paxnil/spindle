@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import java.util.Collection;
+
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 
@@ -236,4 +238,34 @@ public class PluginParameterSpecification extends DescribableSpecification imple
     {
         this.fDefaultBindingType = defaultBindingType;
     }
+
+	public String getParameterName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setParameterName(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public Collection getAliasNames() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setAliases(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean isDeprecated() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void setDeprecated(boolean arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 }

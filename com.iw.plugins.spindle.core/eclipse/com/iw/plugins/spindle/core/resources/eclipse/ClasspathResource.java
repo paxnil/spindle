@@ -58,7 +58,6 @@ import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
  */
 public class ClasspathResource extends AbstractResource implements IEclipseResource
 {
-
     ClasspathRoot fRoot;
 
     public ClasspathResource(ClasspathRoot root, String path)
@@ -151,7 +150,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
      */
     public void lookup(IResourceAcceptor requestor)
     {
-        String packageName = fRoot.toPackageName(getPath());
+        String packageName = fRoot.toPackageName(this);
         IPackageFragment[] fragments = fRoot.getAllPackageFragments(packageName);
         for (int i = 0; i < fragments.length; i++)
         {
@@ -196,7 +195,6 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
         }
     }
 
-    
     public ISearch getSearch() throws TapestryCoreException
     {
         return fRoot.getSearch();
@@ -262,7 +260,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     {
         return 4783 & getPath().hashCode();
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -278,6 +276,5 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
         buffer.append("classpath:" + path.makeRelative().toString());
         return buffer.toString();
     }
-
 
 }

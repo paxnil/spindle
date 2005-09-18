@@ -112,11 +112,10 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     BuildNotifier fNotifier;
 
     AbstractBuild fBuild;
-    
-    IDOMModelSource fDOMModelSource;
-   
-    private CorePropertySource fProjectPropertySource;
 
+    IDOMModelSource fDOMModelSource;
+
+    private CorePropertySource fProjectPropertySource;
 
     /**
      * Constructor for TapestryBuilder.
@@ -179,10 +178,9 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     abstract Object copyClasspathMemento(Object memento);
 
     abstract void persistState(State state);
-    
+
     abstract WebXMLScanner createWebXMLScanner();
 
- 
     public IPropertySource installBasePropertySource(WebAppDescriptor webAppDescriptor)
     {
         Assert.isTrue(fProjectPropertySource == null, "can't install twice!");
@@ -228,5 +226,4 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         }
         return result;
     }
-
 }

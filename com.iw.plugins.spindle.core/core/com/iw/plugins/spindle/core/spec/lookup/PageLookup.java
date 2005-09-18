@@ -31,7 +31,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 
 /**
- * Lookup class for ComponentSpecifications
+ * Lookup class for PageSpecifications
  * 
  * @author glongman@gmail.com
  * 

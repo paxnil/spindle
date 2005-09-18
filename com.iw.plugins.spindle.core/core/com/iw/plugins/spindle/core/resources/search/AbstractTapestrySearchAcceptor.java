@@ -29,6 +29,8 @@ package com.iw.plugins.spindle.core.resources.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.iw.plugins.spindle.core.util.Assert;
+
 /**
  * Acceptor that will accept/reject things based on the flags set in it.
  * 
@@ -37,104 +39,95 @@ import java.util.List;
 public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
 {
 
-  public static final int ACCEPT_NONE = 0x0100000;
+    public static final int ACCEPT_NONE = 0x0100000;
 
-  public static final int ACCEPT_LIBRARIES = 0x0000001;
+    public static final int ACCEPT_LIBRARIES = 0x0000001;
 
-  /**
-   * Accept flag for specifying components.
-   */
-  public static final int ACCEPT_COMPONENTS = 0x00000002;
-  /**
-   * Accept flag for specifying application.
-   */
-  public static final int ACCEPT_APPLICATIONS = 0x00000004;
-  /**
-   * Accept flag for specifying HTML files
-   */
-  public static final int ACCEPT_HTML = 0x00000008;
-  /**
-   * Accept flag for specifying page files
-   */
-  public static final int ACCEPT_PAGES = 0x00000010;
-  /**
-   * Accept flag for specifying script files
-   */
-  public static final int ACCEPT_SCRIPT = 0x00000020;
-  /**
-   * Accept flag for specifying any tapestry files
-   */
-  public static final int ACCEPT_ANY = 0x00000100;
+    /**
+     * Accept flag for specifying components.
+     */
+    public static final int ACCEPT_COMPONENTS = 0x00000002;
 
-  private List fSeekExtensions;// = Arrays.asList(TapestryBuilder.KnownExtensions);
+    /**
+     * Accept flag for specifying application.
+     */
+    public static final int ACCEPT_APPLICATIONS = 0x00000004;
 
-  private List fResults = new ArrayList();
+    /**
+     * Accept flag for specifying HTML files
+     */
+    public static final int ACCEPT_HTML = 0x00000008;
 
-  private int fAcceptFlags;
+    /**
+     * Accept flag for specifying page files
+     */
+    public static final int ACCEPT_PAGES = 0x00000010;
 
-  public AbstractTapestrySearchAcceptor()
-  {
-    reset(ACCEPT_ANY);
-  }
+    /**
+     * Accept flag for specifying script files
+     */
+    public static final int ACCEPT_SCRIPT = 0x00000020;
 
-  public AbstractTapestrySearchAcceptor(int acceptFlags, List allowedTemplateExtensions)
-  {
-    reset(acceptFlags);
-    fSeekExtensions = allowedTemplateExtensions;
-  }
+    /**
+     * Accept flag for specifying any tapestry files
+     */
+    public static final int ACCEPT_ANY = 0x00000100;
+    
+    private List fResults = new ArrayList();
 
-  public void reset()
-  {
-    fResults.clear();
-  }
+    private int fAcceptFlags;
 
-  public void reset(int flags)
-  {
-    reset();
-    this.fAcceptFlags = flags;
-  }
-  
-  protected abstract String getFileExtension(Object leaf);
+    public AbstractTapestrySearchAcceptor(int acceptFlags)
+    {
+        reset(acceptFlags);
+    }
 
-  protected boolean acceptAsTapestry(Object leaf)
-  {
-    String extension = getFileExtension(leaf);
-    if (!fSeekExtensions.contains(extension))
-      return false;
+    public void reset(int flags)
+    {
+        fResults.clear();
+        this.fAcceptFlags = flags;
+    }
 
-    if ((fAcceptFlags & ACCEPT_ANY) != 0)
-      return true;
+    protected abstract boolean isExcluded(Object leaf);    
 
-    if ("jwc".equals(extension) && (fAcceptFlags & ACCEPT_COMPONENTS) == 0)
-      return false;
+    protected abstract String getFileExtension(Object leaf);
 
-    if ("application".equals(extension) && (fAcceptFlags & ACCEPT_APPLICATIONS) == 0)
-      return false;
+    protected boolean acceptAsTapestry(Object leaf)
+    {
+        String extension = getFileExtension(leaf);
 
-    if ("html".equals(extension) && (fAcceptFlags & ACCEPT_HTML) == 0)
-      return false;
+        if ((fAcceptFlags & ACCEPT_ANY) != 0)
+            return true;
 
-    if ("library".equals(extension) && (fAcceptFlags & ACCEPT_LIBRARIES) == 0)
-      return false;
+        if ("jwc".equals(extension) && (fAcceptFlags & ACCEPT_COMPONENTS) == 0)
+            return false;
 
-    if ("page".equals(extension) && (fAcceptFlags & ACCEPT_PAGES) == 0)
-      return false;
+        if ("application".equals(extension) && (fAcceptFlags & ACCEPT_APPLICATIONS) == 0)
+            return false;
 
-    if ("script".equals(extension) && (fAcceptFlags & ACCEPT_SCRIPT) == 0)
-      return false;
+        if ("html".equals(extension) && (fAcceptFlags & ACCEPT_HTML) == 0)
+            return false;
 
-    return true;
-  }
+        if ("library".equals(extension) && (fAcceptFlags & ACCEPT_LIBRARIES) == 0)
+            return false;
 
-  
-  public final boolean accept(Object parent, Object leaf)
-  {
-    if (!acceptAsTapestry(leaf))
-      return true; // continue the search
+        if ("page".equals(extension) && (fAcceptFlags & ACCEPT_PAGES) == 0)
+            return false;
 
-    return acceptTapestry(parent, leaf);
-  }
+        if ("script".equals(extension) && (fAcceptFlags & ACCEPT_SCRIPT) == 0)
+            return false;       
 
-  /** return false to abort the search * */
-  public abstract boolean acceptTapestry(Object parent, Object leaf);
+        return true;
+    }
+
+    public final boolean accept(Object parent, Object leaf)
+    {
+        if (isExcluded(leaf) || !acceptAsTapestry(leaf))
+            return true; // continue the search
+
+        return acceptTapestry(parent, leaf);
+    }
+
+    /** return false to abort the search * */
+    public abstract boolean acceptTapestry(Object parent, Object leaf);
 }

@@ -73,7 +73,7 @@ public class CoreClasspathContainer implements IClasspathContainer
     {
         if (fClasspathEntries == null)
         {
-            boolean includeContrib = false;
+            boolean includeContrib = true;
             boolean includePortlet = false;
 
             String[] segments = containerPath.segments();

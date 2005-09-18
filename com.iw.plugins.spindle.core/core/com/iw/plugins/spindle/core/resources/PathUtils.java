@@ -12,6 +12,10 @@ package com.iw.plugins.spindle.core.resources;
 
 import java.io.File;
 
+import org.apache.hivemind.Resource;
+import org.apache.tapestry.services.impl.ResourceLocalization;
+
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -26,7 +30,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * will yield the path
  * 
  * <pre>
- *      /a/foo/bar
+ *       /a/foo/bar
  * </pre>
  * 
  * <p>
@@ -86,9 +90,18 @@ public class PathUtils implements Cloneable
     /** Constant value containing the empty path with no device. */
     public static final PathUtils EMPTY = new PathUtils(EMPTY_STRING);
 
-    //Private implementation note: the segments and separators
-    //arrays are never modified, so that they can be shared between
-    //path instances
+    public static String getFolderPath(Resource resource)
+    {
+        String path = resource.getPath();
+        int lastSlashx = path.lastIndexOf('/');
+
+        return path.substring(0, lastSlashx + 1);
+
+    }
+
+    // Private implementation note: the segments and separators
+    // arrays are never modified, so that they can be shared between
+    // path instances
 
     /*
      * (Intentionally not included in javadoc) Private constructor.
@@ -106,7 +119,7 @@ public class PathUtils implements Cloneable
         // no segment validations are done for performance reasons
         this.segments = segments;
         this.device = device;
-        //hashcode is cached in all but the bottom three bits of the separators field
+        // hashcode is cached in all but the bottom three bits of the separators field
         this.separators = (computeHashCode() << 3) | (_separators & ALL_SEPARATORS);
     }
 
@@ -170,7 +183,7 @@ public class PathUtils implements Cloneable
         {
             return this;
         }
-        //XXX workaround, see 1GIGQ9V
+        // XXX workaround, see 1GIGQ9V
         if (isEmpty())
         {
             return new PathUtils(device, segments, HAS_LEADING);
@@ -185,20 +198,20 @@ public class PathUtils implements Cloneable
      */
     public PathUtils append(String tail)
     {
-        //optimize addition of a single segment
+        // optimize addition of a single segment
         if (tail.indexOf(SEPARATOR) == -1
                 && tail.indexOf("\\") == -1 && tail.indexOf(DEVICE_SEPARATOR) == -1) { //$NON-NLS-1$
             int tailLength = tail.length();
             if (tailLength < 3)
             {
-                //some special cases
+                // some special cases
                 if (tailLength == 0 || ".".equals(tail)) { //$NON-NLS-1$
                     return this;
                 }
                 if ("..".equals(tail)) //$NON-NLS-1$
                     return removeLastSegments(1);
             }
-            //just add the segment
+            // just add the segment
             int myLen = segments.length;
             String[] newSegments = new String[myLen + 1];
             System.arraycopy(segments, 0, newSegments, 0, myLen);
@@ -210,7 +223,7 @@ public class PathUtils implements Cloneable
         if (this.isRoot())
             return new PathUtils(device, tail).makeAbsolute();
 
-        //go with easy implementation
+        // go with easy implementation
         return append(new PathUtils(tail));
     }
 
@@ -221,7 +234,7 @@ public class PathUtils implements Cloneable
      */
     public PathUtils append(PathUtils tail)
     {
-        //optimize some easy cases
+        // optimize some easy cases
         if (tail == null || tail.segmentCount() == 0)
             return this;
         if (this.isEmpty())
@@ -229,7 +242,7 @@ public class PathUtils implements Cloneable
         if (this.isRoot())
             return tail.setDevice(device).makeAbsolute();
 
-        //concatenate the two segment arrays
+        // concatenate the two segment arrays
         int myLen = segments.length;
         int tailLen = tail.segmentCount();
         String[] newSegments = new String[myLen + tailLen];
@@ -238,7 +251,7 @@ public class PathUtils implements Cloneable
         {
             newSegments[myLen + i] = tail.segment(i);
         }
-        //use my leading separators and the tail's trailing separator
+        // use my leading separators and the tail's trailing separator
         PathUtils result = new PathUtils(device, newSegments, (separators & (HAS_LEADING | IS_UNC))
                 | (tail.hasTrailingSeparator() ? HAS_TRAILING : 0));
         String tailFirstSegment = newSegments[myLen];
@@ -259,17 +272,17 @@ public class PathUtils implements Cloneable
      */
     private boolean canonicalize()
     {
-        //look for segments that need canonicalizing
+        // look for segments that need canonicalizing
         for (int i = 0, max = segments.length; i < max; i++)
         {
             String segment = segments[i];
             if (segment.charAt(0) == '.' && (segment.equals("..") || segment.equals("."))) { //$NON-NLS-1$ //$NON-NLS-2$
-                //path needs to be canonicalized
+                // path needs to be canonicalized
                 collapseParentReferences();
-                //paths of length 0 have no trailing separator
+                // paths of length 0 have no trailing separator
                 if (segments.length == 0)
                     separators &= (HAS_LEADING | IS_UNC);
-                //recompute hash because canonicalize affects hash
+                // recompute hash because canonicalize affects hash
                 separators = (separators & ALL_SEPARATORS) | (computeHashCode() << 3);
                 return true;
             }
@@ -311,7 +324,7 @@ public class PathUtils implements Cloneable
                     // path is relative. If it is absolute then we can't go any higher than
                     // root so simply toss the .. references.
                     if (!isAbsolute())
-                        stack[stackPointer++] = segment; //stack push
+                        stack[stackPointer++] = segment; // stack push
                 }
                 else
                 {
@@ -320,17 +333,17 @@ public class PathUtils implements Cloneable
                         stack[stackPointer++] = ".."; //$NON-NLS-1$
                     else
                         stackPointer--;
-                    //stack pop
+                    // stack pop
                 }
-                //collapse current references
+                // collapse current references
             }
             else if (!segment.equals(".") || (i == 0 && !isAbsolute())) //$NON-NLS-1$
-                stack[stackPointer++] = segment; //stack push
+                stack[stackPointer++] = segment; // stack push
         }
-        //if the number of segments hasn't changed, then no modification needed
+        // if the number of segments hasn't changed, then no modification needed
         if (stackPointer == segmentCount)
             return;
-        //build the new segment array backwards by popping the stack
+        // build the new segment array backwards by popping the stack
         String[] newSegments = new String[stackPointer];
         System.arraycopy(stack, 0, newSegments, 0, stackPointer);
         this.segments = newSegments;
@@ -398,7 +411,7 @@ public class PathUtils implements Cloneable
         int segmentCount = segments.length;
         for (int i = 0; i < segmentCount; i++)
         {
-            //this function tends to given a fairly even distribution
+            // this function tends to given a fairly even distribution
             hash = hash * 37 + segments[i].hashCode();
         }
         return hash;
@@ -417,7 +430,7 @@ public class PathUtils implements Cloneable
             length++;
         if ((separators & IS_UNC) != 0)
             length++;
-        //add the segment lengths
+        // add the segment lengths
         int max = segments.length;
         if (max > 0)
         {
@@ -425,7 +438,7 @@ public class PathUtils implements Cloneable
             {
                 length += segments[i].length();
             }
-            //add the separator lengths
+            // add the separator lengths
             length += max - 1;
         }
         if ((separators & HAS_TRAILING) != 0)
@@ -509,19 +522,19 @@ public class PathUtils implements Cloneable
         if (!(obj instanceof PathUtils))
             return false;
         PathUtils target = (PathUtils) obj;
-        //check leading separators and hashcode
+        // check leading separators and hashcode
         if ((separators & HASH_MASK) != (target.separators & HASH_MASK))
             return false;
         String[] targetSegments = target.segments;
         int i = segments.length;
-        //check segment count
+        // check segment count
         if (i != targetSegments.length)
             return false;
-        //check segments in reverse order - later segments more likely to differ
+        // check segments in reverse order - later segments more likely to differ
         while (--i >= 0)
             if (!segments[i].equals(targetSegments[i]))
                 return false;
-        //check device last (least likely to differ)
+        // check device last (least likely to differ)
         return device == target.device || (device != null && device.equals(target.device));
     }
 
@@ -585,7 +598,7 @@ public class PathUtils implements Cloneable
         Assert.isNotNull(fullPath);
         this.device = device;
 
-        //indexOf is much faster than replace
+        // indexOf is much faster than replace
         String path = fullPath.indexOf('\\') == -1 ? fullPath : fullPath.replace('\\', SEPARATOR);
 
         int i = path.indexOf(DEVICE_SEPARATOR);
@@ -600,7 +613,7 @@ public class PathUtils implements Cloneable
         path = collapseSlashes(path);
         int len = path.length();
 
-        //compute the separators array
+        // compute the separators array
         if (len < 2)
         {
             if (len == 1 && path.charAt(0) == SEPARATOR)
@@ -616,7 +629,7 @@ public class PathUtils implements Cloneable
         {
             boolean hasLeading = path.charAt(0) == SEPARATOR;
             boolean isUNC = hasLeading && path.charAt(1) == SEPARATOR;
-            //UNC path of length two has no trailing separator
+            // UNC path of length two has no trailing separator
             boolean hasTrailing = !(isUNC && len == 2) && path.charAt(len - 1) == SEPARATOR;
             separators = hasLeading ? HAS_LEADING : 0;
             if (isUNC)
@@ -624,11 +637,11 @@ public class PathUtils implements Cloneable
             if (hasTrailing)
                 separators |= HAS_TRAILING;
         }
-        //compute segments and ensure canonical form
+        // compute segments and ensure canonical form
         segments = computeSegments(path);
         if (!canonicalize())
         {
-            //compute hash now because canonicalize didn't need to do it
+            // compute hash now because canonicalize didn't need to do it
             separators = (separators & ALL_SEPARATORS) | (computeHashCode() << 3);
         }
     }
@@ -640,7 +653,7 @@ public class PathUtils implements Cloneable
      */
     public boolean isAbsolute()
     {
-        //it's absolute if it has a leading separator
+        // it's absolute if it has a leading separator
         return (separators & HAS_LEADING) != 0;
     }
 
@@ -651,7 +664,7 @@ public class PathUtils implements Cloneable
      */
     public boolean isEmpty()
     {
-        //true if no segments and no leading prefix
+        // true if no segments and no leading prefix
         return segments.length == 0 && ((separators & ALL_SEPARATORS) != HAS_LEADING);
 
     }
@@ -701,7 +714,7 @@ public class PathUtils implements Cloneable
      */
     public boolean isRoot()
     {
-        //must have no segments, a leading separator, and not be a UNC path.
+        // must have no segments, a leading separator, and not be a UNC path.
         return this == ROOT
                 || (segments.length == 0 && ((separators & ALL_SEPARATORS) == HAS_LEADING));
     }
@@ -791,7 +804,7 @@ public class PathUtils implements Cloneable
             return this;
         }
         PathUtils result = new PathUtils(device, segments, separators | HAS_LEADING);
-        //may need canonicalizing if it has leading ".." or "." segments
+        // may need canonicalizing if it has leading ".." or "." segments
         if (result.segmentCount() > 0)
         {
             String first = result.segment(0);
@@ -834,7 +847,7 @@ public class PathUtils implements Cloneable
         }
         else
         {
-            //mask out the UNC bit
+            // mask out the UNC bit
             newSeparators &= HAS_LEADING | HAS_TRAILING;
         }
         return new PathUtils(toUNC ? null : device, segments, newSeparators);
@@ -896,7 +909,7 @@ public class PathUtils implements Cloneable
         String[] newSegments = new String[newSize];
         System.arraycopy(this.segments, count, newSegments, 0, newSize);
 
-        //result is always a relative path
+        // result is always a relative path
         return new PathUtils(device, newSegments, separators & HAS_TRAILING);
     }
 
@@ -911,7 +924,7 @@ public class PathUtils implements Cloneable
             return this;
         if (count >= segments.length)
         {
-            //result will have no trailing separator
+            // result will have no trailing separator
             return new PathUtils(device, NO_SEGMENTS, separators & (HAS_LEADING | IS_UNC));
         }
         Assert.isLegal(count > 0);
@@ -982,7 +995,7 @@ public class PathUtils implements Cloneable
                     value.indexOf(PathUtils.DEVICE_SEPARATOR) == (value.length() - 1),
                     "Last character should be the device separator"); //$NON-NLS-1$
         }
-        //return the reciever if the device is the same
+        // return the reciever if the device is the same
         if (value == device || (value != null && value.equals(device)))
             return this;
 
@@ -1006,8 +1019,8 @@ public class PathUtils implements Cloneable
      */
     public String toOSString()
     {
-        //Note that this method is identical to toString except
-        //it uses the OS file separator instead of the path separator
+        // Note that this method is identical to toString except
+        // it uses the OS file separator instead of the path separator
         int resultSize = computeLength();
         if (resultSize <= 0)
             return EMPTY_STRING;
@@ -1027,7 +1040,7 @@ public class PathUtils implements Cloneable
         int len = segments.length - 1;
         if (len >= 0)
         {
-            //append all but the last segment, with separators
+            // append all but the last segment, with separators
             for (int i = 0; i < len; i++)
             {
                 int size = segments[i].length();
@@ -1035,7 +1048,7 @@ public class PathUtils implements Cloneable
                 offset += size;
                 result[offset++] = FILE_SEPARATOR;
             }
-            //append the last segment
+            // append the last segment
             int size = segments[len].length();
             segments[len].getChars(0, size, result, offset);
             offset += size;
@@ -1070,7 +1083,7 @@ public class PathUtils implements Cloneable
         int len = segments.length - 1;
         if (len >= 0)
         {
-            //append all but the last segment, with separators
+            // append all but the last segment, with separators
             for (int i = 0; i < len; i++)
             {
                 int size = segments[i].length();
@@ -1078,7 +1091,7 @@ public class PathUtils implements Cloneable
                 offset += size;
                 result[offset++] = SEPARATOR;
             }
-            //append the last segment
+            // append the last segment
             int size = segments[len].length();
             segments[len].getChars(0, size, result, offset);
             offset += size;

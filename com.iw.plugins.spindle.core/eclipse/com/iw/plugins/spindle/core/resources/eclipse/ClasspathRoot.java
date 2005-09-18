@@ -48,6 +48,7 @@ import com.iw.plugins.spindle.core.TapestryCoreException;
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
+import com.iw.plugins.spindle.core.resources.PathUtils;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
@@ -122,8 +123,10 @@ public class ClasspathRoot implements IResourceRoot
     }
 
 
-    protected String toPackageName(String path)
+    protected String toPackageName(ClasspathResource resource)
     {
+        String path = PathUtils.getFolderPath(resource);
+        
         if (path != null)
         {
             if (path.startsWith("/"))
@@ -266,9 +269,10 @@ public class ClasspathRoot implements IResourceRoot
         String name = location.getName();
         if (name == null)
             return null;
+        
 
         StorageAcceptor acceptor = new StorageAcceptor(name);
-        find(toPackageName(location.getPath()), name, acceptor);
+        find(toPackageName(location), name, acceptor);
         return acceptor.getResult();
     }
 
@@ -279,7 +283,7 @@ public class ClasspathRoot implements IResourceRoot
             return null;
 
         FragmentAcceptor acceptor = new FragmentAcceptor(name);
-        find(toPackageName(location.getPath()), name, acceptor);
+        find(toPackageName(location), name, acceptor);
         return acceptor.getResult();
     }
 

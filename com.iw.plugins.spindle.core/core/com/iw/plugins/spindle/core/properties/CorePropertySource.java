@@ -29,7 +29,7 @@ public class CorePropertySource implements IPropertySource
 
     public String getPropertyValue(String arg0)
     {
-        String result = fChild.getPropertyValue(arg0);
+        String result = fChild == null ? null : fChild.getPropertyValue(arg0);
         if (result != null)
             return result;
         

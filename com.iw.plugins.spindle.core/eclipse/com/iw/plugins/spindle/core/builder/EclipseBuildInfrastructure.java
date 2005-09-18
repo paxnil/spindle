@@ -130,6 +130,10 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     private WebXMLScanner fWebXMLScanner;
 
+    private List fDefaultAllowedTemplateExtensions;
+
+    private List fExcludedTemplateExtensions;
+
     /**
      * Constructor for TapestryBuilder.
      */
@@ -187,18 +191,18 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
                     IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
                     SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-            if (AbstractBuildInfrastructure.DEBUG) 
-                System.err.println("Tapestry build aborted: "+e.getMessage());
+            if (AbstractBuildInfrastructure.DEBUG)
+                System.err.println("Tapestry build aborted: " + e.getMessage());
         }
         catch (BuilderException e)
         {
             fProblemPersister.removeAllProblems(fTapestryProject);
             fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
-                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(), SourceLocation.FOLDER_LOCATION,
-                    false, IProblem.NOT_QUICK_FIXABLE));
-            if (AbstractBuildInfrastructure.DEBUG) 
-                System.err.println("Tapestry build aborted: "+e.getMessage());
-           
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
+                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+            if (AbstractBuildInfrastructure.DEBUG)
+                System.err.println("Tapestry build aborted: " + e.getMessage());
+
         }
         catch (NullPointerException e)
         {
@@ -221,7 +225,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             fBuild.cleanUp();
             fNotifier.done();
             fDeferredActions.clear();
-            TapestryCore.getDefault().buildOccurred();
+            TapestryCore.buildOccurred();
         }
     }
 
@@ -232,7 +236,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
         ArrayList projects = new ArrayList();
         try
-        {
+        {           
             IClasspathEntry[] entries = ((JavaProject) fJavaProject).getExpandedClasspath(true);
             for (int i = 0, length = entries.length; i < length; i++)
             {
@@ -484,7 +488,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         if (fClasspathRoot == null || !fClasspathRoot.exists())
             throw new BuilderException("could not obtain the Classpath Root!");
 
-        fValidateWebXML = fTapestryProject.isValidatingWebXML();        
+        fValidateWebXML = fTapestryProject.isValidatingWebXML();
     }
 
     boolean conflictsWithJavaOutputDirectory(IResource resource)
@@ -510,7 +514,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         try
         {
             searcher = fClasspathRoot.getSearch();
-            searcher.search(new ArtifactCollector()
+            searcher.search(new ArtifactCollector(getBasicAllowedTemplateExtensions(),
+                    getExcludedFileNames())
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
                 {
@@ -538,7 +543,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         try
         {
             searcher = fContextRoot.getSearch();
-            searcher.search(new ArtifactCollector()
+            searcher.search(new ArtifactCollector(getBasicAllowedTemplateExtensions(),
+                    getExcludedFileNames())
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
                 {
@@ -560,16 +566,37 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         }
     }
 
+    // TODO this should be configurable.
+    public List getBasicAllowedTemplateExtensions()
+    {
+        if (fDefaultAllowedTemplateExtensions == null)
+        {
+            fDefaultAllowedTemplateExtensions = new ArrayList();
+            fDefaultAllowedTemplateExtensions.add("html");
+        }
+        return fDefaultAllowedTemplateExtensions;
+    }
+
+    // TODO this should be configurable.
+    public List getExcludedFileNames()
+    {
+        if (fExcludedTemplateExtensions == null)
+        {
+            fExcludedTemplateExtensions = new ArrayList();
+            fExcludedTemplateExtensions.add("package.html");
+        }
+        return fExcludedTemplateExtensions;
+    }
+
     /**
      * A search acceptor that is used to find all the Tapestry artifacts in the web context or the
      * classpath.
      */
     abstract class ArtifactCollector extends AbstractEclipseSearchAcceptor
     {
-
-        public ArtifactCollector()
+        public ArtifactCollector(List allowed, List excluded)
         {
-            super();
+            super(ACCEPT_ANY, allowed, excluded);
         }
 
         public boolean keepGoing()
@@ -585,4 +612,5 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             return true;
         }
     }
+
 }

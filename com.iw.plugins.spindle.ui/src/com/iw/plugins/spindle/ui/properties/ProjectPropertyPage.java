@@ -85,6 +85,8 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.ui.util.Revealer;
 
 /**
@@ -625,7 +627,7 @@ public class ProjectPropertyPage extends PropertyPage
         if (DEBUG)
             UIPlugin.log("getting the context root");
 
-        String result = "/context";
+        String result = null;
         try
         {
             QualifiedName key = new QualifiedName("", CONTEXT_ROOT_PROPERTY);
@@ -636,7 +638,7 @@ public class ProjectPropertyPage extends PropertyPage
                     UIPlugin
                             .log("tapestry project is not null - trying to get the context from it..");
                 result = "/"
-                        + prj.getWebContextFolder().getFullPath().removeFirstSegments(1).toString();
+                        + ((ContextRoot)prj.getWebContextLocation()).getContainer().getFullPath().removeFirstSegments(1).toString();
                 if (result == null || "".equals(result.trim()))
                 {
                     if (DEBUG)
@@ -679,6 +681,9 @@ public class ProjectPropertyPage extends PropertyPage
                 UIPlugin.log("A CoreException occurred accessing the context root");
         }
 
+        if (result == null)
+            result = "/context";
+        
         if (DEBUG)
             UIPlugin.log("returning context root = " + result);
         return result;
