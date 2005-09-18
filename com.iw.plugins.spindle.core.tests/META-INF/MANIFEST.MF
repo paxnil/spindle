@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-Name: Core Tests Fragment
+Bundle-SymbolicName: com.iw.plugins.spindle.core.tests
+Bundle-Version: 1.0.0
+Bundle-ClassPath: tests.jar,
+ cglib-full-2.0.1.jar,
+ easymock.jar,
+ easymockclassextension.jar
+Bundle-Vendor: Geoff Longman
+Fragment-Host: com.iw.plugins.spindle.core;bundle-version="3.1.0"
+Bundle-Localization: plugin
+Require-Bundle: org.junit 

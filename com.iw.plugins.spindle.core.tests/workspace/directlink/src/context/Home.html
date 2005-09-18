@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <title>Tutorial: DirectLink</title>
+  </head>
+  <body>
+    <h1>DirectLink Tutorial</h1>
+        
+<p>
+  The current value is: <span style="font-size:xx-large"><span jwcid="@Insert" value="ognl:counter">37</span></span>
+</p>        
+
+<p>
+  <a href="#" jwcid="by1@DirectLink" listener="listener:doClick" parameters="ognl:1">increment counter by 1</a>
+</p>
+
+<p>
+  <a href="#" jwcid="by5@DirectLink" listener="listener:doClick" parameters="ognl:5">increment counter by 5</a>
+</p>
+
+<p>
+  <a href="#" jwcid="by10@DirectLink" listener="listener:doClick" parameters="ognl:10">increment counter by 10</a>
+</p>
+  
+    <p>
+  <a href="#" jwcid="clear@DirectLink" listener="listener:doClear">clear counter</a>
+</p>
+        
+<p>
+  <a href="#" jwcid="@PageLink" page="Home">refresh</a>
+</p>        
+        
+  </body>
+</html>
