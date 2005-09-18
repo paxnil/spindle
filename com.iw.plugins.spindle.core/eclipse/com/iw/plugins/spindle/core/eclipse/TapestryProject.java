@@ -26,7 +26,6 @@ package com.iw.plugins.spindle.core.eclipse;
  *
  * ***** END LICENSE BLOCK ***** */
 
-import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -48,8 +47,9 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
-import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.IResourceRoot;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
@@ -353,11 +353,11 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return fUsingExternalMetadata;
     }
 
-    public Resource getClasspathRoot()
+    public IResourceRoot getClasspathRoot()
     {
         try
         {
-            return new ClasspathRootLocation(getJavaProject());
+            return new ClasspathRoot(getJavaProject());
         }
         catch (CoreException e)
         {
@@ -372,13 +372,13 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return fWebContextFolder;
     }
 
-    public Resource getWebContextLocation()
+    public IResourceRoot getWebContextLocation()
     {
         IFolder folder = getWebContextFolder();
         if (folder == null || !folder.exists())
             return null;
 
-        return new ContextRootLocation(folder);
+        return new ContextRoot(folder);
     }
 
     protected void addToBuildSpec(String builderID) throws CoreException

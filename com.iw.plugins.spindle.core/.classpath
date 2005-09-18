@@ -15,7 +15,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/hivemind-lib-1.1-beta-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/ognl-2.6.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/oro-2.0.8.jar"/>
-	<classpathentry exported="true" sourcepath="lib/tapestry/src/tapestry-4.0-alpha-3-src.jar" kind="lib" path="lib/tapestry/tapestry-4.0-alpha-3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tapestry/tapestry-4.0-alpha-3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

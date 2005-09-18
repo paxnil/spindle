@@ -36,9 +36,7 @@ import com.iw.plugins.spindle.core.ILogger;
 import com.iw.plugins.spindle.core.IPreferenceConstants;
 import com.iw.plugins.spindle.core.IPreferenceSource;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryException;
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
-import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -103,7 +101,7 @@ public class TapestryCorePlugin extends AbstractUIPlugin implements IPreferenceC
     {
         super();
         plugin = this;
-        ILogger logger = new EclipsePluginLogger(Platform.getLog((Bundle) this), PLUGIN_ID);
+        ILogger logger = new EclipsePluginLogger(Platform.getLog(getBundle()), PLUGIN_ID);
         ICoreListeners coreListeners = new EclipseCoreListeners();
         new TapestryCore(logger, coreListeners, new PropertySource());
 
@@ -144,18 +142,4 @@ public class TapestryCorePlugin extends AbstractUIPlugin implements IPreferenceC
     {
         return getPreferenceStore().getString(key);
     }
-
-    public static void throwErrorException(String message) throws TapestryException
-    {
-        throw createErrorException(message);
-    }
-
-    public static TapestryException createErrorException(String message)
-    {
-        SpindleStatus status = new SpindleStatus();
-        status.setError(message);
-        TapestryException exception = new TapestryException(status);
-        return exception;
-    }
-
 }
