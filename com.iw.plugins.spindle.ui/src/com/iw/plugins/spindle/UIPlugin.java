@@ -73,7 +73,6 @@ import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.SharedTextColors;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.iw.plugins.spindle.editors.documentsAndModels.SpecDocumentSetupParticipant;

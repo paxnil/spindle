@@ -37,7 +37,7 @@ import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.XMLReconciler;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
+import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;

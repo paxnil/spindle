@@ -249,8 +249,8 @@ public abstract class NamespaceResolver
     }
 
     /**
-     * Called during a doResolve to setup the Namespace when it has been configures but just before
-     * child libraries, pages, and components are resolved.
+     * Called during a doResolve to setup the Namespace when it has been configures but  before
+     * any of the contents are resolved.
      */
     protected void namespaceConfigured()
     {
@@ -469,10 +469,7 @@ public abstract class NamespaceResolver
         {
             String type = new PathUtils(jwcs[i].getName()).removeFileExtension().toString();
             if (!result.containsKey(type))
-            {
-                result.put(type, jwcs[i]);
-
-            }
+                result.put(type, jwcs[i]);            
             else if (!jwcs[i].equals(result.get(type)))
 
                 fBuild.fInfrastructure.fProblemPersister.recordProblem(jwcs[i], new DefaultProblem(

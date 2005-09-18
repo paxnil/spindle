@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;

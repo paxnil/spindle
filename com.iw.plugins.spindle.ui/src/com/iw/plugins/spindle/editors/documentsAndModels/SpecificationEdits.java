@@ -42,9 +42,9 @@ import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
-import com.iw.plugins.spindle.core.TapestryPluginException;
-import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryPluginException;
+import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.iw.plugins.spindle.ui.util.UIUtils;

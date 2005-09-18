@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.editors.assist;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContext;
-
 import org.eclipse.swt.graphics.Image;
 
 /**

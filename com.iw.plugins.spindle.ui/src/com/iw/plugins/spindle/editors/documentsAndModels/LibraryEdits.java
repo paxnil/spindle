@@ -32,8 +32,8 @@ import org.eclipse.jface.text.IDocument;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryPluginException;
-import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
+import com.iw.plugins.spindle.core.eclipse.TapestryPluginException;
+import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginComponentTypeDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;

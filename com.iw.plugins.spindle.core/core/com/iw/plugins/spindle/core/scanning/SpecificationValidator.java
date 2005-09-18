@@ -378,13 +378,10 @@ public class SpecificationValidator extends BaseValidator
         else if ("classpath".equals(prefix))
         {
             if (specLoc.isClasspathResource())
-            {
                 root = specLoc;
-            }
             else
-            {
                 root = fClasspathRoot;
-            }
+
         }
         else
         {
@@ -524,7 +521,7 @@ public class SpecificationValidator extends BaseValidator
     {
         Resource useLocation = specLocation;
 
-        if (!((ICoreResource)useLocation).isClasspathResource())
+        if (!((ICoreResource) useLocation).isClasspathResource())
             useLocation = fClasspathRoot.getRelativeResource("/");
 
         return validateResource(useLocation, path, errorKey, source);

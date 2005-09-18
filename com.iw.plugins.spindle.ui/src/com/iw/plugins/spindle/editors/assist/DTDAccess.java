@@ -40,7 +40,6 @@ import org.apache.tapestry.util.MultiKey;
 import org.eclipse.jface.text.IDocument;
 
 import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDAttribute;
