@@ -13,6 +13,7 @@ package com.iw.plugins.spindle.core.resources.eclipse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryCoreException;
+import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
@@ -36,7 +38,13 @@ import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
 
 public class ClasspathSearch implements ISearch
 {
+    private class CachedData
+    {
+        public IPackageFragmentRoot[] roots;
 
+        public HashMap fragments;
+    }
+    
     protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
 
     protected HashMap fPackageFragments;
@@ -44,7 +52,7 @@ public class ClasspathSearch implements ISearch
     protected IJavaProject fJavaProject;
 
     protected ITapestryProject fTapestryProject;
-
+    
     private boolean fInitialized = false;
 
     public ClasspathSearch()
@@ -53,10 +61,16 @@ public class ClasspathSearch implements ISearch
 
     public void configure(Object root) throws TapestryCoreException
     {
-        this.fJavaProject = (IJavaProject) root;
+        fJavaProject = (IJavaProject) root;
         try
         {
-            configureClasspath();
+            Map classpathSearchCache = EclipseBuildInfrastructure.getClasspathSearchCache();
+            CachedData cachedData = null;   
+            
+            if (classpathSearchCache != null)
+                cachedData = (CachedData) classpathSearchCache.get(fJavaProject);
+            
+            configureClasspath(cachedData);
             fInitialized = true;
         }
         catch (CoreException e)
@@ -65,8 +79,19 @@ public class ClasspathSearch implements ISearch
         }
     }
 
+    protected void configureClasspath(CachedData cachedClasspath) throws CoreException
+    {
+        if (cachedClasspath != null)
+        {
+            fPackageFragmentRoots = cachedClasspath.roots;
+            fPackageFragments = cachedClasspath.fragments;
+            return;
+        }
+        configureClasspath();
+    }
+
     /* pull the classpath info we need from the JavaModel */
-    protected void configureClasspath() throws CoreException
+    private void configureClasspath() throws CoreException
     {
         fPackageFragmentRoots = fJavaProject.getAllPackageFragmentRoots();
         fPackageFragments = new HashMap();
@@ -89,6 +114,13 @@ public class ClasspathSearch implements ISearch
                 copy[entry.length] = fragment;
                 fPackageFragments.put(fragment.getElementName(), copy);
             }
+        }
+        Map classpathSearchCache = EclipseBuildInfrastructure.getClasspathSearchCache();
+        if (classpathSearchCache != null) {
+            CachedData cd = new CachedData();
+            cd.roots = fPackageFragmentRoots;
+            cd.fragments = fPackageFragments;
+            classpathSearchCache.put(fJavaProject, cd);
         }
     }
 
@@ -151,7 +183,7 @@ public class ClasspathSearch implements ISearch
             if (packages != null)
             {
                 for (int j = 0, packageCount = packages.length; j < packageCount; j++)
-                {
+                {                   
                     boolean keepGoing = searchInPackage((IPackageFragment) packages[j], acceptor);
                     if (!keepGoing)
                         return;

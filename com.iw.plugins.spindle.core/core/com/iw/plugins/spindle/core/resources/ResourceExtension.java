@@ -1,5 +1,7 @@
 package com.iw.plugins.spindle.core.resources;
 
+import java.util.Properties;
+
 import org.apache.hivemind.Resource;
 
 import com.iw.plugins.spindle.core.TapestryCoreException;
@@ -15,5 +17,5 @@ public interface ResourceExtension
     void lookup(IResourceAcceptor requestor);
 
     ISearch getSearch() throws TapestryCoreException;
-
+    
 }

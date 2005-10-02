@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.core.resources.eclipse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IContainer;
@@ -69,12 +70,14 @@ public class ClasspathRoot implements IResourceRoot
         fJavaProject = project;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.iw.plugins.spindle.core.resources.IResourceRoot#lookup(com.iw.plugins.spindle.core.resources.IResourceAcceptor)
      */
     public void lookup(IResourceAcceptor acceptor)
     {
-        // TODO 
+        // TODO
         throw new Error("not implemented yet");
     }
 
@@ -83,22 +86,23 @@ public class ClasspathRoot implements IResourceRoot
      * 
      * @see com.iw.plugins.spindle.core.resources.ICoreResource#getSearch()
      */
-    public ISearch getSearch() throws TapestryCoreException 
+    public ISearch getSearch() throws TapestryCoreException
     {
         if (fSearch == null)
-        {
             fSearch = new ClasspathSearch();
-            fSearch.configure(fJavaProject);
-        }
-    
+
+        fSearch.configure(fJavaProject);
+
         return fSearch;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.iw.plugins.spindle.core.resources.IResourceRoot#exists()
      */
     public boolean exists()
-    {        
+    {
         return true;
     }
 
@@ -122,11 +126,10 @@ public class ClasspathRoot implements IResourceRoot
         return fJavaProject.getProject();
     }
 
-
     protected String toPackageName(ClasspathResource resource)
     {
         String path = PathUtils.getFolderPath(resource);
-        
+
         if (path != null)
         {
             if (path.startsWith("/"))
@@ -269,7 +272,6 @@ public class ClasspathRoot implements IResourceRoot
         String name = location.getName();
         if (name == null)
             return null;
-        
 
         StorageAcceptor acceptor = new StorageAcceptor(name);
         find(toPackageName(location), name, acceptor);

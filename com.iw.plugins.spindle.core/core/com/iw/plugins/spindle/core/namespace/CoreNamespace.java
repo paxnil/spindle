@@ -34,6 +34,7 @@ import java.util.Map;
 import org.apache.hivemind.Location;
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
+import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -78,6 +79,8 @@ public class CoreNamespace implements ICoreNamespace
     private Map fPages = new HashMap();
 
     private NamespaceResourceLookup fLookup;
+    
+    private IPropertySource fBasePropertySource;
 
     /**
      * Map of {@link ComponentSpecification}keyed on component alias.
@@ -564,15 +567,30 @@ public class CoreNamespace implements ICoreNamespace
     {
         fPageResolver = resolver;
     }
+    
+    public void installBasePropertySource(IPropertySource source) {
+        fBasePropertySource = source;
+    }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.engine.IPropertySource#getPropertyValue(java.lang.String)
      */
     public String getPropertyValue(String propertyName)
     {
+        String result = null;
+        
         if (fSpecification != null)
-            return fSpecification.getProperty(propertyName);
-
+            result = fSpecification.getProperty(propertyName);
+        
+        if (result != null)
+            return result;
+        
+        if (fParent != null)
+            return fParent.getPropertyValue(propertyName);
+        
+        if (fBasePropertySource != null)
+            return fBasePropertySource.getPropertyValue(propertyName);
+            
         return null;
     }
 

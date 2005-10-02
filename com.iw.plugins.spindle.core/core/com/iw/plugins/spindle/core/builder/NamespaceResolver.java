@@ -45,6 +45,7 @@ import org.apache.tapestry.spec.ILibrarySpecification;
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
+import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
 import com.iw.plugins.spindle.core.namespace.PageSpecificationResolver;
@@ -59,8 +60,7 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 
 /**
  * Resolver for a Namespace To resolve a namespace you need: Given, the framework namespace, or null
- * if this is the framework Given, the resource location of the library spec. component resolve
- * rules (library)
+ * if this is the framework 
  * <ul>
  * <li>As declared in the library specification</li>
  * <li>*.jwc in the same folder as the library specification</li>
@@ -79,8 +79,8 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
  * 
  * @author glongman@gmail.com
  */
-public abstract class NamespaceResolver
-{  
+public class NamespaceResolver
+{
     /**
      * collector for any problems not handled by the AbstractBuild
      */
@@ -93,11 +93,11 @@ public abstract class NamespaceResolver
     /**
      * the result Namespace
      */
-    protected ICoreNamespace fResultNamespace;
+    protected CoreNamespace fNamespace;
 
     protected IPropertySource fResultNamespacePropertySource;
 
-    protected String fResultNamespaceTemplateExtension;
+    protected String fNamespaceTemplateExtension;
 
     /**
      * the Tapestry framwork Namespace
@@ -140,37 +140,18 @@ public abstract class NamespaceResolver
         fBuild = build;
     }
 
-    /**
-     * Invoke the resolve. If the namespace can't be resolved, problems have already been added.
-     * 
-     * @return the resolved namespage or null if it couldn't be parsed.
-     */
-    public abstract ICoreNamespace resolve();
-
-    protected ICoreNamespace resolve(String namespaceId, ICoreResource location)
+    public NamespaceResolver(AbstractBuild build, ICoreNamespace framework)
     {
-        this.fNamespaceId = namespaceId;
-        this.fNamespaceSpecLocation = location;
-        ICoreNamespace prebuilt = fBuild.getPreBuiltNamespace(fNamespaceSpecLocation);
-        if (prebuilt != null)
-        {
-            // this can only happen in an incremental build!
-            fResultNamespace = prebuilt;
-        }
-        else
-        {
-            fResultNamespace = fBuild.createNamespace(
-                    fNamespaceId,
-                    fNamespaceSpecLocation,
-                    null);
-            doResolve();
-        }
-        fResultNamespacePropertySource = fBuild.fInfrastructure
-                .createPropertySource(fResultNamespace);
-        fResultNamespaceTemplateExtension = fResultNamespacePropertySource
-                .getPropertyValue("org.apache.tapestry.template-extension");
-        fBuild.templateExtensionSeen(fResultNamespaceTemplateExtension);
-        return fResultNamespace;
+        this(build);
+        fFrameworkNamespace = framework;
+    }
+
+    public void resolve(CoreNamespace namespace)
+    {
+        fNamespace = namespace;
+        doResolve();
+        fNamespaceTemplateExtension = namespace.getPropertyValue(
+                "org.apache.tapestry.template-extension");       
     }
 
     protected void cleanup()
@@ -195,21 +176,20 @@ public abstract class NamespaceResolver
             fWorking = true;
             fComponentStack.clear();
             // fProblemCollector.beginCollecting();
-            if (fResultNamespace == null)
+            if (fNamespace == null)
                 throw new RuntimeException("Null namespace!");
-           
+
             NamespaceResourceLookup lookup = create();
 
-            fResultNamespace.setResourceLookup(lookup);
+            fNamespace.setResourceLookup(lookup);
 
             // set a special component resolver that will prompt recursive
             // component/page resolution
-            fResultNamespace
-                    .setComponentResolver(new BuilderComponentResolver(fFrameworkNamespace));
+            fNamespace.setComponentResolver(new BuilderComponentResolver(fFrameworkNamespace));
 
             // no special page resolver needed
-            fResultNamespace.setPageResolver(new PageSpecificationResolver(fFrameworkNamespace,
-                    fResultNamespace));
+            fNamespace.setPageResolver(new PageSpecificationResolver(fFrameworkNamespace,
+                    fNamespace));
 
             // do any work needed before we go ahead and resolve the pages and
             // components
@@ -249,8 +229,8 @@ public abstract class NamespaceResolver
     }
 
     /**
-     * Called during a doResolve to setup the Namespace when it has been configures but  before
-     * any of the contents are resolved.
+     * Called during a doResolve to setup the Namespace when it has been configures but before any
+     * of the contents are resolved.
      */
     protected void namespaceConfigured()
     {
@@ -263,8 +243,8 @@ public abstract class NamespaceResolver
      */
     protected void namespaceResolved()
     {
-        fResultNamespace.setComponentResolver(new ComponentSpecificationResolver(
-                fFrameworkNamespace, fResultNamespace));
+        fNamespace.setComponentResolver(new ComponentSpecificationResolver(fFrameworkNamespace,
+                fNamespace));
     }
 
     /**
@@ -276,7 +256,7 @@ public abstract class NamespaceResolver
     protected NamespaceResourceLookup create()
     {
         NamespaceResourceLookup lookup = new NamespaceResourceLookup();
-        lookup.configure((PluginLibrarySpecification) fResultNamespace.getSpecification());
+        lookup.configure((PluginLibrarySpecification) fNamespace.getSpecification());
         return lookup;
     }
 
@@ -286,26 +266,15 @@ public abstract class NamespaceResolver
     protected Set getAllPageFileTemplates()
     {
         Set result = new HashSet();
-        List pageNames = fResultNamespace.getPageNames();
+        List pageNames = fNamespace.getPageNames();
         int count = pageNames.size();
         for (int i = 0; i < count; i++)
         {
-            PluginComponentSpecification spec = (PluginComponentSpecification) fResultNamespace
+            PluginComponentSpecification spec = (PluginComponentSpecification) fNamespace
                     .getPageSpecification((String) pageNames.get(i));
 
             result.addAll(spec.getTemplateLocations());
         }
-        // for (Iterator iter = fResultNamespace.getPageNames().iterator();
-        // iter.hasNext();)
-        // {
-        // String name = (String) iter.next();
-        //
-        // PluginComponentSpecification spec =
-        // (PluginComponentSpecification)
-        // fResultNamespace.getPageSpecification(name);
-        //
-        // result.addAll(spec.getTemplateLocations());
-        // }
         return result;
     }
 
@@ -314,43 +283,13 @@ public abstract class NamespaceResolver
      */
     protected void resolveChildNamespaces()
     {
-
-        ILibrarySpecification spec = fResultNamespace.getSpecification();
-        List ids = spec.getLibraryIds();
-        if (!ids.isEmpty())
+        for (Iterator iter = fNamespace.getChildIds().iterator(); iter.hasNext();)
         {
-            for (Iterator iter = ids.iterator(); iter.hasNext();)
-            {
-                String libraryId = (String) iter.next();
-
-                if (fResultNamespace.getChildNamespace(libraryId) != null)
-                    continue;
-
-                ICoreResource namespaceLocation = (ICoreResource) fResultNamespace
-                        .getSpecificationLocation();
-
-                ICoreResource libLocation;
-
-                if (namespaceLocation.isClasspathResource())
-                    libLocation = (ICoreResource) namespaceLocation.getRelativeResource(spec
-                            .getLibrarySpecificationPath(libraryId));
-                else
-                    libLocation = (ICoreResource) fBuild.fInfrastructure.fClasspathRoot
-                            .getRelativeResource(spec.getLibrarySpecificationPath(libraryId));
-
-                if (libLocation.exists())
-                {
-                    NamespaceResolver childResolver = new LibraryResolver(fBuild, fFrameworkNamespace,
-                            fResultNamespace, libraryId, libLocation);
-
-                    childResolver.resolve();
-
-                }
-                else if (fBuild.fInfrastructure.DEBUG)
-                {
-                    System.out.println("not found:" + libLocation);
-                }
-            }
+            String childId = (String) iter.next();
+            CoreNamespace nsChild = (CoreNamespace) fNamespace.getChildNamespace(childId);
+            if (nsChild == null)
+                continue;
+            new NamespaceResolver(fBuild, fFrameworkNamespace).resolve(nsChild);
         }
     }
 
@@ -377,7 +316,7 @@ public abstract class NamespaceResolver
      */
     protected IComponentSpecification resolveComponent(String name, ICoreResource location)
     {
-        IComponentSpecification result = fResultNamespace.getComponentSpecification(name);
+        IComponentSpecification result = fNamespace.getComponentSpecification(name);
 
         if (result != null || location == null)
             return result;
@@ -393,15 +332,15 @@ public abstract class NamespaceResolver
 
         fComponentStack.push(location);
 
-        result = fBuild.resolveIComponentSpecification(
-                fResultNamespace,
+        result = fBuild.parseComponentSpecification(
+                fNamespace,
                 location,
-                fResultNamespaceTemplateExtension,
+                fNamespaceTemplateExtension,
                 null);
 
         if (result != null)
         {
-            fResultNamespace.installComponentSpecification(name, result);
+            fNamespace.installComponentSpecification(name, result);
             fBuild.parseTemplates((PluginComponentSpecification) result);
         }
         fComponentStack.pop();
@@ -444,10 +383,10 @@ public abstract class NamespaceResolver
      */
     private Map getAllJWCFilesForNamespace()
     {
-        ICoreResource location = (ICoreResource) fResultNamespace.getSpecificationLocation();
+        ICoreResource location = (ICoreResource) fNamespace.getSpecificationLocation();
 
         Map result = new HashMap();
-        ILibrarySpecification spec = fResultNamespace.getSpecification();
+        ILibrarySpecification spec = fNamespace.getSpecification();
 
         // pull the ones that are defined in the spec.
         List cTypes = spec.getComponentTypes();
@@ -462,14 +401,14 @@ public abstract class NamespaceResolver
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_JWC);
-        Resource[] jwcs = fResultNamespace.getResourceLookup().lookup(acceptor);
+        Resource[] jwcs = fNamespace.getResourceLookup().lookup(acceptor);
 
         // remaining typed by thier filename
         for (int i = 0; i < jwcs.length; i++)
         {
             String type = new PathUtils(jwcs[i].getName()).removeFileExtension().toString();
             if (!result.containsKey(type))
-                result.put(type, jwcs[i]);            
+                result.put(type, jwcs[i]);
             else if (!jwcs[i].equals(result.get(type)))
 
                 fBuild.fInfrastructure.fProblemPersister.recordProblem(jwcs[i], new DefaultProblem(
@@ -488,10 +427,10 @@ public abstract class NamespaceResolver
      */
     private Map getAllPageFilesForNamespace()
     {
-        ICoreResource location = (ICoreResource) fResultNamespace.getSpecificationLocation();
+        ICoreResource location = (ICoreResource) fNamespace.getSpecificationLocation();
 
         Map result = new HashMap();
-        ILibrarySpecification spec = fResultNamespace.getSpecification();
+        ILibrarySpecification spec = fNamespace.getSpecification();
 
         // pull the ones that are defined in the spec.
         // They are named as defined in the spec.
@@ -504,7 +443,7 @@ public abstract class NamespaceResolver
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_PAGE);
-        Resource[] pages = fResultNamespace.getResourceLookup().lookup(acceptor);
+        Resource[] pages = fNamespace.getResourceLookup().lookup(acceptor);
 
         // remaining named by thier filename
         for (int i = 0; i < pages.length; i++)
@@ -550,7 +489,7 @@ public abstract class NamespaceResolver
      */
     protected String getTemplateExtension()
     {
-        String result = fResultNamespace.getSpecification().getProperty(
+        String result = fNamespace.getSpecification().getProperty(
                 Tapestry.TEMPLATE_EXTENSION_PROPERTY);
         if (result == null)
             return PicassoMigration.DEFAULT_TEMPLATE_EXTENSION;
@@ -563,21 +502,21 @@ public abstract class NamespaceResolver
      */
     protected IComponentSpecification resolvePageFile(String name, ICoreResource location)
     {
-        IComponentSpecification result = fResultNamespace.getPageSpecification(name);
+        IComponentSpecification result = fNamespace.getPageSpecification(name);
         if (result != null || location == null)
             return result;
 
         result = null;
 
-        result = fBuild.resolveIComponentSpecification(
-                fResultNamespace,
+        result = fBuild.parseComponentSpecification(
+                fNamespace,
                 location,
-                fResultNamespaceTemplateExtension,
+                fNamespaceTemplateExtension,
                 null);
 
         if (result != null)
         {
-            fResultNamespace.installPageSpecification(name, result);
+            fNamespace.installPageSpecification(name, result);
             fBuild.parseTemplates((PluginComponentSpecification) result);
         }
         return result;
@@ -588,7 +527,7 @@ public abstract class NamespaceResolver
 
         public BuilderComponentResolver(INamespace framework)
         {
-            super(framework, fResultNamespace);
+            super(framework, fNamespace);
         }
 
         /*

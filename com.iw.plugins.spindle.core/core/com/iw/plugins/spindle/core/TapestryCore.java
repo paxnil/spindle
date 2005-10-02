@@ -133,6 +133,10 @@ public class TapestryCore implements IPreferenceConstants
         String pref = preferenceSource.getString(BUILDER_MARKER_MISSES);
         return convertCoreStatusToPriority(pref);
     }
+    
+    public boolean isMissPriorityIgnore() {
+        return getBuildMissPriority() == convertCoreStatusToPriority(CORE_STATUS_IGNORE);
+    }
 
     public int getHandleAssetProblemPriority()
     {

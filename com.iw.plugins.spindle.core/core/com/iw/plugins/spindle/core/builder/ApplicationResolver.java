@@ -32,20 +32,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.hivemind.Resource;
-
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
-import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.spec.PluginPropertyDeclaration;
 
 /**
  * Namespace resolver for applications Given, the framework namespace, Given, the servlet name from
@@ -83,65 +77,11 @@ public class ApplicationResolver extends NamespaceResolver
      * @param build
      * @param parser
      */
-    public ApplicationResolver(AbstractBuild build, ICoreNamespace framework, ServletInfo servlet)
+    public ApplicationResolver(AbstractBuild build, ICoreNamespace framework)
     {
         super(build);
-        fFrameworkNamespace = framework;
-        fServlet = servlet;
-    }
-
-    public ICoreNamespace resolve()
-    {
-        try
-        {
-
-            fNamespaceSpecLocation = fServlet.applicationSpecLocation;
-            if (fNamespaceSpecLocation != null)
-            {
-                if (!fNamespaceSpecLocation.exists())
-                    throw new BuilderException(CoreMessages.format(
-                            "build-failed-missing-application-spec",
-                            fNamespaceSpecLocation.toString()));
-
-                fResultNamespace = fBuild.createNamespace(
-                        fNamespaceId,
-                        fNamespaceSpecLocation,
-                        null);
-            }
-            else
-            {
-                fResultNamespace = createStandinApplicationNamespace(fServlet);
-                fNamespaceSpecLocation = (ICoreResource) fResultNamespace
-                        .getSpecificationLocation();
-            }
-            if (fResultNamespace != null)
-            {
-                fResultNamespace.setAppNameFromWebXML(fServlet.name);
-                PluginLibrarySpecification spec = (PluginLibrarySpecification) fResultNamespace
-                        .getSpecification();
-                for (Iterator iter = fServlet.parameters.keySet().iterator(); iter.hasNext();)
-                {
-                    String key = (String) iter.next();
-                    PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(key,
-                            (String) fServlet.parameters.get(key));
-                    spec.addPropertyDeclaration(declaration);
-                }
-
-                fResultNamespacePropertySource = fBuild.fInfrastructure
-                        .createPropertySource(fResultNamespace);
-                fResultNamespaceTemplateExtension = fResultNamespacePropertySource
-                        .getPropertyValue("org.apache.tapestry.template-extension");
-                fBuild.templateExtensionSeen(fResultNamespaceTemplateExtension);
-
-                doResolve();
-            }
-            return fResultNamespace;
-        }
-        finally
-        {
-            cleanup();
-        }
-    }
+        fFrameworkNamespace = framework;       
+    }    
 
     /**
      * Every namespace has a Namespace resource lookup object for finding files according to
@@ -153,35 +93,14 @@ public class ApplicationResolver extends NamespaceResolver
     {
         NamespaceResourceLookup lookup = new NamespaceResourceLookup();
         lookup.configure(
-                (PluginApplicationSpecification) fResultNamespace.getSpecification(),
+                (PluginApplicationSpecification) fNamespace.getSpecification(),
                 fBuild.fInfrastructure.fContextRoot,
                 fServlet.name);
 
         return lookup;
     }
 
-    /**
-     * Tapestry allows there to be no explicit application file. In this case we use a standin
-     * application spec.
-     * 
-     * @param servlet
-     *            the info culled from web.xml
-     * @return a namespace rooted in WEB-INF.
-     */
-    protected ICoreNamespace createStandinApplicationNamespace(ServletInfo servlet)
-    {
-
-        PluginApplicationSpecification applicationSpec = new PluginApplicationSpecification();
-        Resource virtualLocation = fBuild.fInfrastructure.fContextRoot
-                .getRelativeResource("/WEB-INF/");
-        applicationSpec.setSpecificationLocation(virtualLocation);
-        applicationSpec.setName(servlet.name);
-
-        CoreNamespace result = new CoreNamespace(null, applicationSpec);
-
-        return result;
-    }
-
+   
     /**
      * We adjust here to account for specless pages.
      * 
@@ -224,7 +143,7 @@ public class ApplicationResolver extends NamespaceResolver
      */
     protected void resolveSpeclessPages(Set componentTemplates)
     {
-        if (!fResultNamespace.isApplicationNamespace())
+        if (!fNamespace.isApplicationNamespace())
             return;
 
         //now gather all the templates seen so far.
@@ -255,7 +174,7 @@ public class ApplicationResolver extends NamespaceResolver
                         
                         extension = fullname.substring(cut + 1);
                     } 
-                    if (fResultNamespaceTemplateExtension.equals(extension)
+                    if (fNamespaceTemplateExtension.equals(extension)
                             && !allTemplates.contains(location))
                         speclessPages.add(location);
                 }
@@ -276,11 +195,11 @@ public class ApplicationResolver extends NamespaceResolver
 
         List filtered = TemplateFinder.filterTemplateList(
                 speclessPages,
-                fResultNamespaceTemplateExtension);
+                fNamespaceTemplateExtension);
         for (Iterator iter = filtered.iterator(); iter.hasNext();)
         {
             ICoreResource location = (ICoreResource) iter.next();
-            resolveSpeclessPage(location, fResultNamespaceTemplateExtension);
+            resolveSpeclessPage(location, fNamespaceTemplateExtension);
         }
     }
 
@@ -296,7 +215,7 @@ public class ApplicationResolver extends NamespaceResolver
         PluginComponentSpecification specification = new PluginComponentSpecification();
         specification.setPageSpecification(true);
         specification.setSpecificationLocation(location);
-        specification.setNamespace(fResultNamespace);
+        specification.setNamespace(fNamespace);
 
         specification.setTemplateLocations(TemplateFinder.scanForTemplates(
                 specification,
@@ -309,7 +228,7 @@ public class ApplicationResolver extends NamespaceResolver
         if (dotx > 0)
             name = name.substring(0, dotx);
 
-        fResultNamespace.installPageSpecification(name, specification);
+        fNamespace.installPageSpecification(name, specification);
         fBuild.parseTemplates(specification);
 
         fBuild.fBuildQueue.finished(specification.getTemplateLocations());
@@ -321,10 +240,10 @@ public class ApplicationResolver extends NamespaceResolver
     protected Set getAllComponentTemplates()
     {
         Set result = new HashSet();
-        for (Iterator iter = fResultNamespace.getComponentTypes().iterator(); iter.hasNext();)
+        for (Iterator iter = fNamespace.getComponentTypes().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
-            PluginComponentSpecification spec = (PluginComponentSpecification) fResultNamespace
+            PluginComponentSpecification spec = (PluginComponentSpecification) fNamespace
                     .getComponentSpecification(type);
             result.addAll(spec.getTemplateLocations());
         }

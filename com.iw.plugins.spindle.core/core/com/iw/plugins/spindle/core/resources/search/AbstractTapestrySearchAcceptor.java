@@ -28,11 +28,20 @@ package com.iw.plugins.spindle.core.resources.search;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.iw.plugins.spindle.core.util.Assert;
+import java.util.Set;
 
 /**
- * Acceptor that will accept/reject things based on the flags set in it.
+ * Acceptor that will accept/reject things based on the flags set in it. Will only accept the most
+ * standard tapestry file extensions:
+ * <ul>
+ * <li>.application
+ * <li>
+ * <li>.library
+ * <li>
+ * <li>.jwc</li>
+ * <li>.page</li>
+ * <li>.html</li>
+ * <li>.srcipt</li>
  * 
  * @author glongman@gmail.com
  */
@@ -54,9 +63,9 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
     public static final int ACCEPT_APPLICATIONS = 0x00000004;
 
     /**
-     * Accept flag for specifying HTML files
+     * Accept flag for specifying template files
      */
-    public static final int ACCEPT_HTML = 0x00000008;
+    public static final int ACCEPT_TEMPLATE = 0x00000008;
 
     /**
      * Accept flag for specifying page files
@@ -72,13 +81,16 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
      * Accept flag for specifying any tapestry files
      */
     public static final int ACCEPT_ANY = 0x00000100;
-    
+
     private List fResults = new ArrayList();
 
     private int fAcceptFlags;
 
-    public AbstractTapestrySearchAcceptor(int acceptFlags)
+    private Set fAllowedTemplateExtensions;
+
+    public AbstractTapestrySearchAcceptor(int acceptFlags, Set allowedTemplateExtensions)
     {
+        fAllowedTemplateExtensions = allowedTemplateExtensions;
         reset(acceptFlags);
     }
 
@@ -88,7 +100,7 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
         this.fAcceptFlags = flags;
     }
 
-    protected abstract boolean isExcluded(Object leaf);    
+    protected abstract boolean isExcluded(Object leaf);
 
     protected abstract String getFileExtension(Object leaf);
 
@@ -96,28 +108,37 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
     {
         String extension = getFileExtension(leaf);
 
-        if ((fAcceptFlags & ACCEPT_ANY) != 0)
+        boolean acceptAny = (fAcceptFlags & ACCEPT_ANY) != 0;
+
+        if ("jwc".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_COMPONENTS) != 0))
             return true;
 
-        if ("jwc".equals(extension) && (fAcceptFlags & ACCEPT_COMPONENTS) == 0)
-            return false;
+        if ("application".equals(extension)
+                && (!acceptAny || (fAcceptFlags & ACCEPT_APPLICATIONS) != 0))
+            return true;
 
-        if ("application".equals(extension) && (fAcceptFlags & ACCEPT_APPLICATIONS) == 0)
-            return false;
+        if ("library".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_LIBRARIES) == 0))
+            return true;
 
-        if ("html".equals(extension) && (fAcceptFlags & ACCEPT_HTML) == 0)
-            return false;
+        if ("page".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_PAGES) == 0))
+            return true;
 
-        if ("library".equals(extension) && (fAcceptFlags & ACCEPT_LIBRARIES) == 0)
-            return false;
+        if ("script".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_SCRIPT) == 0))
+            return true;
 
-        if ("page".equals(extension) && (fAcceptFlags & ACCEPT_PAGES) == 0)
-            return false;
+        if (fAllowedTemplateExtensions == null || fAllowedTemplateExtensions.isEmpty())
+        {
+            if ("html".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_TEMPLATE) == 0))
+                return true;
+        }
+        else
+        {
+            if (fAllowedTemplateExtensions.contains(extension)
+                    && (!acceptAny || (fAcceptFlags & ACCEPT_TEMPLATE) == 0))
+                return true;
+        }
 
-        if ("script".equals(extension) && (fAcceptFlags & ACCEPT_SCRIPT) == 0)
-            return false;       
-
-        return true;
+        return false;
     }
 
     public final boolean accept(Object parent, Object leaf)

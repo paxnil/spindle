@@ -26,17 +26,26 @@
 
 package com.iw.plugins.spindle.core.resources.search;
 
-import com.iw.plugins.spindle.core.TapestryCoreException;
 
+import com.iw.plugins.spindle.core.TapestryCoreException;
 
 /**
  * Interface for all kinds of searches in the Tapestry context
  * 
  * @author glongman@gmail.com
- * 
  */
 public interface ISearch
 {
-  public abstract void configure(Object root) throws TapestryCoreException;
-  public abstract void search(ISearchAcceptor acceptor);
+    /**
+     * Each search starts from a root. Any implementation may allow extra parameters to be passed as a 
+     * Properties object. 
+     * <p>
+     * Implementers decide what roots and parameters to accept but they all must accept a null value for parameters.
+     * @param root the root of the search.
+     * @throws TapestryCoreException 
+     */
+    public abstract void configure(Object root)
+            throws TapestryCoreException;
+
+    public abstract void search(ISearchAcceptor acceptor);
 }

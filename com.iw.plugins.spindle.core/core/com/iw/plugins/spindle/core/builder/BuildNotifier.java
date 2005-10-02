@@ -140,6 +140,10 @@ public class BuildNotifier
       }
     }
   }
+  
+  public float getPercentComplete() {
+      return this.fPercentComplete;
+  }
 
   public void updateProgressDelta(float percentWorked)
   {

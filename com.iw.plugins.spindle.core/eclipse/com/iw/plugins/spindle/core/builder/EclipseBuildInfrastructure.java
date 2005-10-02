@@ -30,10 +30,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -72,6 +72,7 @@ import com.iw.plugins.spindle.core.resources.search.eclipse.AbstractEclipseSearc
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.SourceLocation;
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
@@ -85,24 +86,24 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     private final Bundle systemBundle = Platform.getBundle("org.eclipse.osgi");
 
-    private static ThreadLocal PACKAGE_CACHE;
+    private static String  PACKAGE_CACHE = "PACKAGE_CACHE";
 
-    private static ThreadLocal STORAGE_CACHE;
-
-    static
-    {
-        PACKAGE_CACHE = new ThreadLocal();
-        STORAGE_CACHE = new ThreadLocal();
-    }
+    private static String STORAGE_CACHE = "STORAGE_CACHE"; 
+    
+    private static String CLASSPATH_SEARCH_CACHE = "CLASSPATH_SEARCH_CACHE"; 
 
     public static Map getPackageCache()
     {
-        return (Map) PACKAGE_CACHE.get();
+        return getOrCreateCache(PACKAGE_CACHE);
     }
 
     public static Map getStorageCache()
     {
-        return (Map) STORAGE_CACHE.get();
+        return getOrCreateCache(STORAGE_CACHE);
+    }
+    
+    public static Map getClasspathSearchCache() {
+        return getOrCreateCache(CLASSPATH_SEARCH_CACHE);
     }
 
     // TODO this is really ugly, but I need this fast.
@@ -128,11 +129,9 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     IResourceDelta fDelta;
 
-    private WebXMLScanner fWebXMLScanner;
+    private WebXMLScanner fWebXMLScanner;    
 
-    private List fDefaultAllowedTemplateExtensions;
-
-    private List fExcludedTemplateExtensions;
+    private List fExcludedFileNames;
 
     /**
      * Constructor for TapestryBuilder.
@@ -150,10 +149,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     {
         fProblemPersister = new Markers();
 
-        fNotifier.begin();
-
-        PACKAGE_CACHE.set(new HashMap());
-        STORAGE_CACHE.set(new HashMap());
+        fNotifier.begin();        
 
         boolean ok = false;
 
@@ -215,9 +211,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             throw e;
         }
         finally
-        {
-            PACKAGE_CACHE.set(null);
-            STORAGE_CACHE.set(null);
+        {           
             if (!ok)
                 // If the build failed, clear the previously built state,
                 // forcing a full build next time.
@@ -508,13 +502,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /**
      * Find and add all files with Tapestry extensions found in the classpath to a List.
      */
-    public void findAllTapestryArtifactsInClasspath(final ArrayList found)
+    public void findAllTapestryArtifactsInClasspath(Set knownTemplateExtensions, final ArrayList found)
     {
+        Assert.isLegal(knownTemplateExtensions != null && !knownTemplateExtensions.isEmpty());        
         ISearch searcher = null;
         try
         {
             searcher = fClasspathRoot.getSearch();
-            searcher.search(new ArtifactCollector(getBasicAllowedTemplateExtensions(),
+            searcher.search(new ArtifactCollector(knownTemplateExtensions,
                     getExcludedFileNames())
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
@@ -537,13 +532,13 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /**
      * Find and add all files with Tapestry extensions found in the web context to a List.
      */
-    public void findAllTapestryArtifactsInWebContext(final ArrayList found)
+    public void findAllTapestryArtifactsInWebContext(Set knownTemplateExtensions, final ArrayList found)
     {
         ISearch searcher = null;
         try
         {
             searcher = fContextRoot.getSearch();
-            searcher.search(new ArtifactCollector(getBasicAllowedTemplateExtensions(),
+            searcher.search(new ArtifactCollector(knownTemplateExtensions,
                     getExcludedFileNames())
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
@@ -567,25 +562,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     }
 
     // TODO this should be configurable.
-    public List getBasicAllowedTemplateExtensions()
-    {
-        if (fDefaultAllowedTemplateExtensions == null)
-        {
-            fDefaultAllowedTemplateExtensions = new ArrayList();
-            fDefaultAllowedTemplateExtensions.add("html");
-        }
-        return fDefaultAllowedTemplateExtensions;
-    }
-
-    // TODO this should be configurable.
     public List getExcludedFileNames()
     {
-        if (fExcludedTemplateExtensions == null)
+        if (fExcludedFileNames == null)
         {
-            fExcludedTemplateExtensions = new ArrayList();
-            fExcludedTemplateExtensions.add("package.html");
+            fExcludedFileNames = new ArrayList();
+            fExcludedFileNames.add("package.html");
         }
-        return fExcludedTemplateExtensions;
+        return fExcludedFileNames;
     }
 
     /**
@@ -594,9 +578,9 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
      */
     abstract class ArtifactCollector extends AbstractEclipseSearchAcceptor
     {
-        public ArtifactCollector(List allowed, List excluded)
+        public ArtifactCollector(Set allowed, List excluded)
         {
-            super(ACCEPT_ANY, allowed, excluded);
+            super(ACCEPT_ANY, allowed, excluded); 
         }
 
         public boolean keepGoing()

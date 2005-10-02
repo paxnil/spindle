@@ -28,8 +28,11 @@ package com.iw.plugins.spindle.core.builder;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.hivemind.Resource;
+
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.dom.IDOMModel;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
@@ -37,6 +40,7 @@ import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.SourceLocation;
+import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 
 /**
  * Builds a Tapestry project from scratch.
@@ -70,6 +74,19 @@ public class FullBuild extends AbstractBuild
         findDeclaredApplication();
     }
 
+    /**
+     * Resolve the Tapesty framework namespace
+     */
+    protected void resolveFramework()
+    {        
+        new FrameworkResolver(this).resolve(fFrameworkNamespace);
+    }
+    
+    protected void resolveApplication()
+    {
+        new ApplicationResolver(this, fFrameworkNamespace).resolve(fApplicationNamespace);        
+    }
+    
     protected void postBuild()
     {
         BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
@@ -77,29 +94,6 @@ public class FullBuild extends AbstractBuild
         {
             listener.dump();
         }
-    }
-
-    /**
-     * Resolve the Tapesty framework namespace
-     */
-    protected void resolveFramework()
-    {
-        ICoreResource frameworkLocation = (ICoreResource) fInfrastructure.fClasspathRoot
-                .getRelativeResource("/org/apache/tapestry/Framework.library");
-        FrameworkResolver resolver = new FrameworkResolver(this, frameworkLocation);
-        fFrameworkNamespace = resolver.resolve();
-        // fFrameworkNamespace =
-        // fNSResolver.resolveFrameworkNamespace(frameworkLocation);
-    }
-
-    /**
-     * Resolve the application namespace
-     */
-    protected void doBuild()
-    {
-        ApplicationResolver resolver = new ApplicationResolver(this, fFrameworkNamespace,
-                fApplicationServlet);
-        fApplicationNamespace = resolver.resolve();
     }
 
     public void saveState()
@@ -113,6 +107,7 @@ public class FullBuild extends AbstractBuild
         newState.fFileSpecificationMap = fFileSpecificationMap;
         newState.fBinarySpecificationMap = fBinarySpecificationMap;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
+        newState.fSeenTemplateExtensionsClasspath = fSeenTemplateExtensionsClasspath;
         newState.fApplicationServlet = fApplicationServlet;
         newState.fWebAppDescriptor = fWebAppDescriptor;
         newState.fPrimaryNamespace = fApplicationNamespace;
@@ -149,6 +144,46 @@ public class FullBuild extends AbstractBuild
     public void cleanUp()
     {
         super.cleanUp();
+    }
+    
+//  returns unresolved namespace tree
+    protected CoreNamespace getApplicationNamespace()
+    {
+        findDeclaredApplication();
+        
+        if (fApplicationServlet == null)
+            return null;
+            
+        CoreNamespace result = null;
+        ICoreResource nsLocation = fApplicationServlet.applicationSpecLocation;
+        if (nsLocation != null)
+        {
+            if (!nsLocation.exists())
+                throw new BuilderException(CoreMessages.format(
+                        "build-failed-missing-application-spec",
+                        nsLocation.toString()));
+
+            result = getNamespaceTree(null, nsLocation, null);
+        }
+        else
+        {
+            result = createStandinApplicationNamespace(fApplicationServlet);
+        }
+        
+        return result;
+    }
+
+    protected CoreNamespace createStandinApplicationNamespace(ServletInfo servlet)
+    {
+
+        PluginApplicationSpecification applicationSpec = new PluginApplicationSpecification();
+        Resource virtualLocation = fInfrastructure.fContextRoot.getRelativeResource("/WEB-INF/");
+        applicationSpec.setSpecificationLocation(virtualLocation);
+        applicationSpec.setName(servlet.name);
+
+        CoreNamespace result = new CoreNamespace(null, applicationSpec);
+
+        return result;
     }
 
     protected void findDeclaredApplication()

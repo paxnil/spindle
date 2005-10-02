@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.engine.IPropertySource;
@@ -51,6 +52,7 @@ import com.iw.plugins.spindle.core.util.IProblemPeristManager;
  */
 public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 {
+    
     public static final String STRING_KEY = "builder-";
 
     public static final String APPLICATION_EXTENSION = "application";
@@ -75,28 +77,40 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
 
     public static boolean DEBUG = true;
-
-    protected static ThreadLocal TYPE_CACHE;
-
-    protected static ThreadLocal PROPERTY_SOURCE_CACHE;
+    
+    private static final String TYPE_CACHE = "TYPE_CACHE";
+    
+    protected static ThreadLocal BUILD_CACHE;    
 
     static
     {
-        TYPE_CACHE = new ThreadLocal();
-        PROPERTY_SOURCE_CACHE = new ThreadLocal();
+        BUILD_CACHE  = new ThreadLocal();        
     }
 
     // TODO this is really ugly, but I need this fast.
     public static List fDeferredActions = new ArrayList();
+    
+    private static Map getBuildCache() {
+        return (Map) BUILD_CACHE.get();
+    }
 
     public static Map getTypeCache()
     {
-        return (Map) TYPE_CACHE.get();
+        return getOrCreateCache(TYPE_CACHE);
     }
 
-    public static Map getPropertySourceCache()
+    protected static Map getOrCreateCache(String key)
     {
-        return (Map) PROPERTY_SOURCE_CACHE.get();
+        Map buildCache = getBuildCache();
+        if (buildCache == null)
+            return null;
+        
+        Map result = (Map) buildCache.get(key);
+        if (result == null) {
+            result = new HashMap();
+            buildCache.put(key, result);
+        }
+        return result;
     }
 
     ITapestryProject fTapestryProject;
@@ -113,9 +127,9 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     AbstractBuild fBuild;
 
-    IDOMModelSource fDOMModelSource;
+    IDOMModelSource fDOMModelSource;    
 
-    private CorePropertySource fProjectPropertySource;
+    CorePropertySource fProjectPropertySource;
 
     /**
      * Constructor for TapestryBuilder.
@@ -152,24 +166,22 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     public final void build(boolean requestIncremental, Map args)
     {
-        TYPE_CACHE.set(new HashMap());
-        PROPERTY_SOURCE_CACHE.set(new HashMap());
+        BUILD_CACHE.set(new HashMap());        
         try
         {
             executeBuild(requestIncremental, args);
         }
         finally
         {
-            TYPE_CACHE.set(null);
-            PROPERTY_SOURCE_CACHE.set(null);
+            BUILD_CACHE.set(null);
         }
     }
 
     abstract void executeBuild(boolean requestIncremental, Map args);
-
-    abstract void findAllTapestryArtifactsInClasspath(ArrayList found);
-
-    abstract void findAllTapestryArtifactsInWebContext(ArrayList found);
+    
+    abstract void findAllTapestryArtifactsInClasspath(Set knownTemplateExtensions, ArrayList found);    
+    
+    abstract void findAllTapestryArtifactsInWebContext(Set knownTemplateExtensions, ArrayList found);
 
     abstract State getLastState();
 
@@ -186,44 +198,5 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         Assert.isTrue(fProjectPropertySource == null, "can't install twice!");
         fProjectPropertySource = new CorePropertySource(webAppDescriptor);
         return fProjectPropertySource;
-    }
-
-    public IPropertySource createPropertySource(INamespace namespace)
-    {
-        IPropertySource result = findPropertySource(namespace);
-        if (result == null)
-            result = cachePropertySource(fProjectPropertySource, namespace);
-
-        return result;
-    }
-
-    public IPropertySource createPropertySource(PluginComponentSpecification spec)
-    {
-        CorePropertySource result = findPropertySource(spec);
-        if (result == null)
-        {
-            INamespace namespace = spec.getNamespace();
-            CorePropertySource nsPS = (CorePropertySource) createPropertySource(namespace);
-            result = cachePropertySource(nsPS, spec);
-        }
-        return result;
-    }
-
-    private CorePropertySource findPropertySource(IPropertySource child)
-    {
-        Map map = (Map) PROPERTY_SOURCE_CACHE.get();
-        return (CorePropertySource) map.get(child);
-    }
-
-    private CorePropertySource cachePropertySource(CorePropertySource parent, IPropertySource child)
-    {
-        Map map = (Map) PROPERTY_SOURCE_CACHE.get();
-        CorePropertySource result = (CorePropertySource) map.get(child);
-        if (result == null)
-        {
-            result = (CorePropertySource) parent.createChildPropertySource(child);
-            map.put(child, result);
-        }
-        return result;
-    }
+    }        
 }

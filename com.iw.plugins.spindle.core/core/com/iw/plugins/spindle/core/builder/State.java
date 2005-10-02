@@ -54,7 +54,7 @@ import com.iw.plugins.spindle.core.resources.IResourceRoot;
 public class State
 {
 
-  public static byte VERSION = 0x0001;
+  public static byte VERSION = 0x0002;
 
   IResourceRoot fContextRoot;
   byte fVersion = VERSION;
@@ -81,8 +81,11 @@ public class State
   // map containing all of the above
   private Map fSpecificationMap = new CompositeMap();
 
-  //  list of known template extensions
-  List fSeenTemplateExtensions;
+  //  list of known template extensions (in the context)
+  Set fSeenTemplateExtensions;
+  
+//list of known template extensions (in the classpath)
+  Set fSeenTemplateExtensionsClasspath;
 
   // the results of parsing web.xml
   ServletInfo fApplicationServlet;

@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.core.resources.search.eclipse;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IStorage;
 
@@ -42,17 +43,14 @@ import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAccept
 public abstract class AbstractEclipseSearchAcceptor extends AbstractTapestrySearchAcceptor
 {
 
-    private List fAllowedTemplateExtensions;
-
     private List fExcludedFiles;
 
     private List fExcludedExtensions;
 
-    public AbstractEclipseSearchAcceptor(int acceptFlags, List allowedTemplateExtensions,
+    public AbstractEclipseSearchAcceptor(int acceptFlags, Set allowedTemplateExtensions,
             List exclusions)
     {
-        super(acceptFlags);
-        fAllowedTemplateExtensions = allowedTemplateExtensions;
+        super(acceptFlags, allowedTemplateExtensions);
         setupExclusions(exclusions);
     }
 
@@ -71,7 +69,6 @@ public abstract class AbstractEclipseSearchAcceptor extends AbstractTapestrySear
             {
                 fExcludedFiles.add(element);
             }
-
         }
     }
 
@@ -85,16 +82,15 @@ public abstract class AbstractEclipseSearchAcceptor extends AbstractTapestrySear
     {
         IStorage storage = (IStorage) leaf;
         String name = storage.getName();
-        
+
         if (fExcludedFiles.contains(name))
             return true;
-        
+
         String extension = storage.getFullPath().getFileExtension();
-        
+
         if (fExcludedExtensions.contains(extension))
             return true;
-        
+
         return false;
     }
-
 }
