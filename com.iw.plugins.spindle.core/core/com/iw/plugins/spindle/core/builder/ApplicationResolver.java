@@ -69,7 +69,7 @@ public class ApplicationResolver extends NamespaceResolver
     /**
      * information culled from the servlet - Application namespaces only
      */
-    protected ServletInfo fServlet;
+    protected String fServletName;
 
     private Set fDefinitelyNotSpeclessPages;
 
@@ -77,7 +77,7 @@ public class ApplicationResolver extends NamespaceResolver
      * @param build
      * @param parser
      */
-    public ApplicationResolver(AbstractBuild build, ICoreNamespace framework)
+    public ApplicationResolver(AbstractBuild build, ICoreNamespace framework, String servletName)
     {
         super(build);
         fFrameworkNamespace = framework;       
@@ -95,7 +95,7 @@ public class ApplicationResolver extends NamespaceResolver
         lookup.configure(
                 (PluginApplicationSpecification) fNamespace.getSpecification(),
                 fBuild.fInfrastructure.fContextRoot,
-                fServlet.name);
+                fServletName);
 
         return lookup;
     }

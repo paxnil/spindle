@@ -117,10 +117,10 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     // extensions actually processed
     protected Set fSeenTemplateExtensions;
 
-    protected Set fSeenTemplateExtensionsClasspath;
-
-    // extensions declared as properties in namespaces.
+    // extensions declared in namepaces.
     protected Set fDeclaredTemplateExtensions;
+
+    protected Set fDeclaredTemplateExtensionsClasspath;
 
     protected Map fTemplateMap;
 
@@ -162,7 +162,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         fMissingTypes = new ArrayList();
         fProcessedLocations = new HashMap();
         fSeenTemplateExtensions = new HashSet();
-        fSeenTemplateExtensionsClasspath = new HashSet();
+        fDeclaredTemplateExtensions = new HashSet();
+        fDeclaredTemplateExtensionsClasspath = new HashSet();
         fTemplateMap = new HashMap();
         fFileSpecificationMap = new HashMap();
         fBinarySpecificationMap = new HashMap();
@@ -171,39 +172,39 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     public void build() throws BuilderException
     {
-        
+        preBuild();
+
         fNotifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                + "locating-namespaces"));    
-        
+                + "locating-namespaces"));
+
         fFrameworkNamespace = getFrameworkNamespace();
-        
+
         fApplicationNamespace = getApplicationNamespace();
-        
+
         fApplicationNamespace.installBasePropertySource(fInfrastructure.fProjectPropertySource);
 
         fNotifier.updateProgressDelta(0.05f);
 
         fNotifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                + "locating-artifacts"));                  
-                
+                + "locating-artifacts"));
+
         // this may not be a definitive list if namespaces
         // in the application declare custom template extensions
         fBuildQueue.addAll(findAllTapestryArtifacts());
-        
+
         fNotifier.updateProgressDelta(0.05f);
-        
+
         fNotifier.setProcessingProgressPer(0.9f / fBuildQueue.getWaitingCount());
-        
+
         try
-        {
-            preBuild();  
-            
+        {            
+
             fNotifier.setProcessingProgressPer(0.005f);
-            
-            resolveFramework();                        
-                        
+
+            resolveFramework();
+
             resolveApplication();
-            
+
             fNotifier.updateProgressDelta(0.05f);
 
             postBuild();
@@ -218,7 +219,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         if (fBuildQueue.hasWaiting() && !TapestryCore.getDefault().isMissPriorityIgnore())
         {
-            int missPriority = TapestryCore.getDefault().getBuildMissPriority();           
+            int missPriority = TapestryCore.getDefault().getBuildMissPriority();
             while (fBuildQueue.getWaitingCount() > 0)
             {
 
@@ -236,7 +237,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         System.out.println(" file specification count" + fFileSpecificationMap.keySet().size());
         System.out.println(" binary specification count" + fBinarySpecificationMap.keySet().size());
         saveState();
-    }    
+    }
 
     protected void recordBuildMiss(int missPriority, Resource resource)
     {
@@ -320,10 +321,11 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected List findAllTapestryArtifacts()
     {
         ArrayList found = new ArrayList();
-        fInfrastructure.findAllTapestryArtifactsInWebContext(fSeenTemplateExtensions, found);
-        fInfrastructure.findAllTapestryArtifactsInClasspath(fSeenTemplateExtensionsClasspath, found);
+        fInfrastructure.findAllTapestryArtifactsInWebContext(fDeclaredTemplateExtensions, found);
+        fInfrastructure
+                .findAllTapestryArtifactsInClasspath(fDeclaredTemplateExtensionsClasspath, found);
         return found;
-    }    
+    }
 
     /**
      * Completely process an application specification file, recording any problems encountered.
@@ -633,7 +635,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * being built *is* the framework library. If so it skips this step.
      */
     protected abstract void resolveFramework();
-    
+
     protected abstract void resolveApplication();
 
     protected IComponentSpecification parseComponentSpecification(ICoreNamespace namespace,
@@ -739,14 +741,20 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     /**
      * Template extensions seen during a build are stored in the State Used by Incremental builds.
      */
-    public void templateExtensionSeen(String extension, boolean isClasspath)
+    public void templateExtensionSeen(String extension)
     {
+        if (extension == null)
+            return;        
+        fSeenTemplateExtensions.add(extension);
+    }
+    
+    public void templateExtensionDeclared(String extension, boolean isClasspath) {
         if (extension == null)
             return;
         if (isClasspath)
-            fSeenTemplateExtensionsClasspath.add(extension);
+            fDeclaredTemplateExtensionsClasspath.add(extension);
         else
-            fSeenTemplateExtensions.add(extension);
+            fDeclaredTemplateExtensions.add(extension);
     }
 
     /**
@@ -890,11 +898,37 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         result.installBasePropertySource(DefaultProperties.getInstance());
 
+        ILibrarySpecification spec = result.getSpecification();
+
+        String templateExtension = spec.getProperty("org.apache.tapestry.template-extension");
+        // if its not null, it has already been registered.
+        // otherwise, we must register the default.
+        if (templateExtension == null)
+            templateExtensionDeclared(DefaultProperties.getInstance().getPropertyValue(
+                    "org.apache.tapestry.template-extension"), true);
+
         return result;
     }
-    
-    protected abstract CoreNamespace getApplicationNamespace();
 
+    protected CoreNamespace getApplicationNamespace() {
+        
+        CoreNamespace result = doGetApplicationNamespace();
+        
+        result.installBasePropertySource(DefaultProperties.getInstance());
+
+        ILibrarySpecification spec = result.getSpecification();
+
+        String templateExtension = spec.getProperty("org.apache.tapestry.template-extension");
+        // if its not null, it has already been registered.
+        // otherwise, we must register the default.
+        if (templateExtension == null)
+            templateExtensionDeclared(DefaultProperties.getInstance().getPropertyValue(
+                    "org.apache.tapestry.template-extension"), false);
+
+        return result;
+    }
+
+    protected abstract CoreNamespace doGetApplicationNamespace();
     // returns unresolved namespace tree
     // assumes id is valid and location exists.
     protected CoreNamespace getNamespaceTree(String namespaceId, ICoreResource location,
@@ -909,11 +943,9 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         ILibrarySpecification nsSpec = result.getSpecification();
 
-        String templateExtension = result
-                .getPropertyValue("org.apache.tapestry.template-extension");
-        
-        if (templateExtension != null)
-            templateExtensionSeen(templateExtension, nsLocation.isClasspathResource());
+        templateExtensionDeclared(
+                nsSpec.getProperty("org.apache.tapestry.template-extension"),
+                nsLocation.isClasspathResource());
 
         for (Iterator iter = nsSpec.getLibraryIds().iterator(); iter.hasNext();)
         {

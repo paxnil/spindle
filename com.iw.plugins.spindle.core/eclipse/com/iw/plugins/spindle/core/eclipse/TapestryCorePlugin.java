@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.core.eclipse;
  * ***** END LICENSE BLOCK ***** */
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

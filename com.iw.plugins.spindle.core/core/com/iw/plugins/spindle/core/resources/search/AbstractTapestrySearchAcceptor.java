@@ -110,31 +110,31 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
 
         boolean acceptAny = (fAcceptFlags & ACCEPT_ANY) != 0;
 
-        if ("jwc".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_COMPONENTS) != 0))
+        if ("jwc".equals(extension) && (acceptAny || (fAcceptFlags & ACCEPT_COMPONENTS) != 0))
             return true;
 
         if ("application".equals(extension)
-                && (!acceptAny || (fAcceptFlags & ACCEPT_APPLICATIONS) != 0))
+                && (acceptAny || (fAcceptFlags & ACCEPT_APPLICATIONS) != 0))
             return true;
 
-        if ("library".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_LIBRARIES) == 0))
+        if ("library".equals(extension) && (acceptAny || (fAcceptFlags & ACCEPT_LIBRARIES) != 0))
             return true;
 
-        if ("page".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_PAGES) == 0))
+        if ("page".equals(extension) && (acceptAny || (fAcceptFlags & ACCEPT_PAGES) != 0))
             return true;
 
-        if ("script".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_SCRIPT) == 0))
+        if ("script".equals(extension) && (acceptAny || (fAcceptFlags & ACCEPT_SCRIPT) != 0))
             return true;
 
         if (fAllowedTemplateExtensions == null || fAllowedTemplateExtensions.isEmpty())
         {
-            if ("html".equals(extension) && (!acceptAny || (fAcceptFlags & ACCEPT_TEMPLATE) == 0))
+            if ("html".equals(extension) && (acceptAny || (fAcceptFlags & ACCEPT_TEMPLATE) != 0))
                 return true;
         }
         else
         {
             if (fAllowedTemplateExtensions.contains(extension)
-                    && (!acceptAny || (fAcceptFlags & ACCEPT_TEMPLATE) == 0))
+                    && (acceptAny || (fAcceptFlags & ACCEPT_TEMPLATE) != 0))
                 return true;
         }
 
@@ -146,6 +146,7 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
         if (isExcluded(leaf) || !acceptAsTapestry(leaf))
             return true; // continue the search
 
+        //returing false means stop the search
         return acceptTapestry(parent, leaf);
     }
 

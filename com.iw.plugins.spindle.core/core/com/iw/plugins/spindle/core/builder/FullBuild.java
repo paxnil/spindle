@@ -84,7 +84,7 @@ public class FullBuild extends AbstractBuild
     
     protected void resolveApplication()
     {
-        new ApplicationResolver(this, fFrameworkNamespace).resolve(fApplicationNamespace);        
+        new ApplicationResolver(this, fFrameworkNamespace, fApplicationServlet.name).resolve(fApplicationNamespace);        
     }
     
     protected void postBuild()
@@ -107,7 +107,10 @@ public class FullBuild extends AbstractBuild
         newState.fFileSpecificationMap = fFileSpecificationMap;
         newState.fBinarySpecificationMap = fBinarySpecificationMap;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
-        newState.fSeenTemplateExtensionsClasspath = fSeenTemplateExtensionsClasspath;
+        
+        newState.fDeclatedTemplateExtensions = fDeclaredTemplateExtensions;
+        newState.fDeclaredTemplateExtensionsClasspath = fDeclaredTemplateExtensionsClasspath;
+        
         newState.fApplicationServlet = fApplicationServlet;
         newState.fWebAppDescriptor = fWebAppDescriptor;
         newState.fPrimaryNamespace = fApplicationNamespace;
@@ -147,10 +150,8 @@ public class FullBuild extends AbstractBuild
     }
     
 //  returns unresolved namespace tree
-    protected CoreNamespace getApplicationNamespace()
-    {
-        findDeclaredApplication();
-        
+    protected CoreNamespace doGetApplicationNamespace()
+    {       
         if (fApplicationServlet == null)
             return null;
             

@@ -36,5 +36,5 @@ package com.iw.plugins.spindle.core.resources.templates;
  */
 public interface ITemplateFinderListener
 {
-  public void templateExtensionSeen(String extension, boolean isClasspath);
+  public void templateExtensionSeen(String extension);
 }

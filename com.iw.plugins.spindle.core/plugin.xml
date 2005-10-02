@@ -96,7 +96,7 @@
    
    <extension
          point="org.eclipse.core.runtime.preferences">
-      <initializer class="com.iw.plugins.spindle.core.PreferenceInitializer"/>
+      <initializer class="com.iw.plugins.spindle.core.eclipse.PreferenceInitializer"/>
    </extension>
 
    <extension

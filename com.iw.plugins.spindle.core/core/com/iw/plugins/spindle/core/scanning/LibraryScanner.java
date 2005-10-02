@@ -235,6 +235,9 @@ public class LibraryScanner extends SpecificationScanner
     protected boolean scanExtension(ILibrarySpecification specification, Node node)
             throws ScannerException
     {
+        if (!isElement(node, "extension"))
+            return false;
+        
         String name = getAttribute(node, "name", true);
 
         fValidator.validatePattern(

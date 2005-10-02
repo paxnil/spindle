@@ -296,7 +296,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
 
                 String seek_extension = source
                         .getPropertyValue("org.apache.tapestry.template-extension");
-                templateExtensionSeen(seek_extension, null);
+                
                 result.setTemplateLocations(TemplateFinder.scanForTemplates(
                         result,
                         seek_extension,

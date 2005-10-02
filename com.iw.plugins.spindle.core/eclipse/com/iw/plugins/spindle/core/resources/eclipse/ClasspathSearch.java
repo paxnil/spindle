@@ -250,8 +250,9 @@ public class ClasspathSearch implements ISearch
                 continue;
             }
 
-            if (requestor.accept(pkg, fileInJar))
-                return false; // stop the search
+            //requestor can stop the search by returning false
+            return requestor.accept(pkg, fileInJar);
+                
         }
         return true; // continue the search.
     }
@@ -286,9 +287,8 @@ public class ClasspathSearch implements ISearch
                 continue;
             }
 
-            if (requestor.accept(pkg, (IStorage) file))
-                return false; // stop the search
-
+            //requestor can stop the search by returning false.
+            return requestor.accept(pkg, (IStorage) file);
         }
         return true; // continue the search
     }

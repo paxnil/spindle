@@ -56,7 +56,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer impleme
         store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
         store.setDefault(BUILDER_MARKER_MISSES, CORE_STATUS_WARN);
         store.setDefault(BUILDER_HANDLE_ASSETS, CORE_STATUS_WARN);
-        store.addPropertyChangeListener((IPropertyChangeListener) TapestryCorePlugin.getDefault());
+        //store.addPropertyChangeListener((IPropertyChangeListener) TapestryCorePlugin.getDefault());
     }
 
 }

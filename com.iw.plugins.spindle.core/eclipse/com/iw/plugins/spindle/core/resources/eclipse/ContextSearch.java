@@ -76,7 +76,9 @@ public class ContextSearch implements ISearch
     {
       TapestryCore.log(e);
     } catch (StopSearchingException e1)
-    {}
+    {
+        //eat it
+    }
   }
 
   class Visitor implements IResourceVisitor

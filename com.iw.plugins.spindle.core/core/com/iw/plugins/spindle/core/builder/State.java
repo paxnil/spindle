@@ -1,4 +1,5 @@
 package com.iw.plugins.spindle.core.builder;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -39,253 +40,262 @@ import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
 
 /**
- * An object intended to store the state of the build between builds. Normally,
- * a builder's output is the result of compiling source files, and the State is
- * merely there to make things like incremental builds possible.
- * 
- * This is true for Tapestry but different in that the build state is *the*
- * result of the build!
- * 
- * TODO extend design so that States can be persisted!
- * 
+ * An object intended to store the state of the build between builds. Normally, a builder's output
+ * is the result of compiling source files, and the State is merely there to make things like
+ * incremental builds possible. This is true for Tapestry but different in that the build state is
+ * *the* result of the build! TODO extend design so that States can be persisted!
  * 
  * @author glongman@gmail.com
  */
 public class State
 {
 
-  public static byte VERSION = 0x0002;
+    public static byte VERSION = 0x0002;
 
-  IResourceRoot fContextRoot;
-  byte fVersion = VERSION;
-  int fBuildNumber;
-  Map fBinaryNamespaces = new HashMap();
-  Object fLastKnownClasspath;
+    IResourceRoot fContextRoot;
 
-  // following are used to determine if an incremental Tapestry build is
-  // required at all.
+    byte fVersion = VERSION;
 
-  // list of IResources to java types in the project
-  List fJavaDependencies;
+    int fBuildNumber;
 
-  // list of fullyQualified names of types not found during a build
-  List fMissingJavaTypes;
+    Map fBinaryNamespaces = new HashMap();
 
-  // map template storages to components
-  Map fTemplateMap;
+    Object fLastKnownClasspath;
 
-  // map spec files to specification objects
-  Map fFileSpecificationMap;
-  // map binary spec files to specification objects
-  Map fBinarySpecificationMap;
-  // map containing all of the above
-  private Map fSpecificationMap = new CompositeMap();
+    // following are used to determine if an incremental Tapestry build is
+    // required at all.
 
-  //  list of known template extensions (in the context)
-  Set fSeenTemplateExtensions;
-  
-//list of known template extensions (in the classpath)
-  Set fSeenTemplateExtensionsClasspath;
+    // list of IResources to java types in the project
+    List fJavaDependencies;
 
-  // the results of parsing web.xml
-  ServletInfo fApplicationServlet;
-  WebAppDescriptor fWebAppDescriptor;
+    // list of fullyQualified names of types not found during a build
+    List fMissingJavaTypes;
 
-  // the main namespace result of the last build.
-  ICoreNamespace fPrimaryNamespace;
+    // map template storages to components
+    Map fTemplateMap;
 
-  // the frameowrk namespace for this project
-  ICoreNamespace fFrameworkNamespace;
+    // map spec files to specification objects
+    Map fFileSpecificationMap;
 
-  //templates that do not contain implicit components and thus may not need
-  // reparsing
-  //during a subsequent incremental build.
-  List fCleanTemplates;
+    // map binary spec files to specification objects
+    Map fBinarySpecificationMap;
 
-  /**
-   * Constructor for State.
-   */
-  State()
-  {
-    //do nothing.
-  }
+    // map containing all of the above
+    private Map fSpecificationMap = new CompositeMap();
 
-  /**
-   * Constructor State.
-   * 
-   * @param builder
-   */
-  State(AbstractBuildInfrastructure infrastructure)
-  {   
-    fContextRoot = infrastructure.fContextRoot;
-    fBuildNumber = 0;
-  }
+    // list of known template extensions (in the context)
+    Set fSeenTemplateExtensions;
 
-  void markAsBrokenBuild()
-  {
-    fBuildNumber = -1;
-  }
-  // used by incremental builds only
-  void copyFrom(State lastState, AbstractBuildInfrastructure infrastructure)
-  {
-    fContextRoot = lastState.fContextRoot; 
-    fBuildNumber = lastState.fBuildNumber + 1;
-    fBinaryNamespaces = new HashMap(lastState.fBinaryNamespaces);
-    fBinarySpecificationMap = new HashMap(lastState.fBinarySpecificationMap);
-    fLastKnownClasspath = infrastructure.copyClasspathMemento(lastState.fLastKnownClasspath);
-    fApplicationServlet = lastState.fApplicationServlet;
-    fWebAppDescriptor = lastState.fWebAppDescriptor;
-    fPrimaryNamespace = lastState.fPrimaryNamespace;
-    fFrameworkNamespace = lastState.fFrameworkNamespace;
+    // list of known template extensions (in the classpath)
+    Set fSeenTemplateExtensionsClasspath;
 
-  }
+    // the results of parsing web.xml
+    ServletInfo fApplicationServlet;
 
-  void write(DataOutputStream out) throws IOException
-  {
-  }
+    WebAppDescriptor fWebAppDescriptor;
 
-  static State read(DataInputStream in) throws IOException
-  {
-    return null;
-  }
+    // the main namespace result of the last build.
+    ICoreNamespace fPrimaryNamespace;
 
-  public Map getTemplateMap()
-  {
-    return fTemplateMap;
-  }
+    // the frameowrk namespace for this project
+    ICoreNamespace fFrameworkNamespace;
 
-  public Map getSpecificationMap()
-  {
-    return fSpecificationMap;
-  }
+    // templates that do not contain implicit components and thus may not need
+    // reparsing
+    // during a subsequent incremental build.
+    List fCleanTemplates;
 
-  class CompositeMap implements Map
-  {
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#clear()
+    public Set fDeclatedTemplateExtensions;
+
+    public Set fDeclaredTemplateExtensionsClasspath;
+
+    /**
+     * Constructor for State.
      */
-    public void clear()
+    State()
     {
-      throw new UnsupportedOperationException();
+        // do nothing.
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Constructor State.
      * 
-     * @see java.util.Map#containsKey(java.lang.Object)
+     * @param builder
      */
-    public boolean containsKey(Object key)
+    State(AbstractBuildInfrastructure infrastructure)
     {
-      return fBinaryNamespaces.containsKey(key) || fFileSpecificationMap.containsKey(key);
+        fContextRoot = infrastructure.fContextRoot;
+        fBuildNumber = 0;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#containsValue(java.lang.Object)
-     */
-    public boolean containsValue(Object value)
+    void markAsBrokenBuild()
     {
-      throw new UnsupportedOperationException();
+        fBuildNumber = -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#entrySet()
-     */
-    public Set entrySet()
+    // used by incremental builds only
+    void copyFrom(State lastState, AbstractBuildInfrastructure infrastructure)
     {
-      throw new UnsupportedOperationException();
+        fContextRoot = lastState.fContextRoot;
+        fBuildNumber = lastState.fBuildNumber + 1;
+        fBinaryNamespaces = new HashMap(lastState.fBinaryNamespaces);
+        fBinarySpecificationMap = new HashMap(lastState.fBinarySpecificationMap);
+        fLastKnownClasspath = infrastructure.copyClasspathMemento(lastState.fLastKnownClasspath);
+        fApplicationServlet = lastState.fApplicationServlet;
+        fWebAppDescriptor = lastState.fWebAppDescriptor;
+        fPrimaryNamespace = lastState.fPrimaryNamespace;
+        fFrameworkNamespace = lastState.fFrameworkNamespace;
+        fDeclatedTemplateExtensions = lastState.fDeclatedTemplateExtensions;
+        fDeclaredTemplateExtensionsClasspath = lastState.fDeclaredTemplateExtensionsClasspath;
+
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#get(java.lang.Object)
-     */
-    public Object get(Object key)
+    void write(DataOutputStream out) throws IOException
     {
-      Object binary = fBinarySpecificationMap.get(key);
-      if (binary != null)
-        return binary;
-      return fFileSpecificationMap.get(key);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#isEmpty()
-     */
-    public boolean isEmpty()
+    static State read(DataInputStream in) throws IOException
     {
-      return fBinaryNamespaces.isEmpty() && fFileSpecificationMap.isEmpty();
+        return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#keySet()
-     */
-    public Set keySet()
+    public Map getTemplateMap()
     {
-      HashSet result = new HashSet(fBinarySpecificationMap.keySet());
-      result.addAll(fFileSpecificationMap.keySet());
-      return result;
+        return fTemplateMap;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#put(java.lang.Object, java.lang.Object)
-     */
-    public Object put(Object key, Object value)
+    public Map getSpecificationMap()
     {
-      throw new UnsupportedOperationException();
+        return fSpecificationMap;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#putAll(java.util.Map)
-     */
-    public void putAll(Map t)
+    class CompositeMap implements Map
     {
-      throw new UnsupportedOperationException();
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#clear()
+         */
+        public void clear()
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#containsKey(java.lang.Object)
+         */
+        public boolean containsKey(Object key)
+        {
+            return fBinaryNamespaces.containsKey(key) || fFileSpecificationMap.containsKey(key);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#containsValue(java.lang.Object)
+         */
+        public boolean containsValue(Object value)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#entrySet()
+         */
+        public Set entrySet()
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#get(java.lang.Object)
+         */
+        public Object get(Object key)
+        {
+            Object binary = fBinarySpecificationMap.get(key);
+            if (binary != null)
+                return binary;
+            return fFileSpecificationMap.get(key);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#isEmpty()
+         */
+        public boolean isEmpty()
+        {
+            return fBinaryNamespaces.isEmpty() && fFileSpecificationMap.isEmpty();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#keySet()
+         */
+        public Set keySet()
+        {
+            HashSet result = new HashSet(fBinarySpecificationMap.keySet());
+            result.addAll(fFileSpecificationMap.keySet());
+            return result;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#put(java.lang.Object, java.lang.Object)
+         */
+        public Object put(Object key, Object value)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#putAll(java.util.Map)
+         */
+        public void putAll(Map t)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#remove(java.lang.Object)
+         */
+        public Object remove(Object key)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#size()
+         */
+        public int size()
+        {
+
+            return fBinaryNamespaces.size() + fFileSpecificationMap.size();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Map#values()
+         */
+        public Collection values()
+        {
+            throw new UnsupportedOperationException();
+        }
+
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#remove(java.lang.Object)
-     */
-    public Object remove(Object key)
-    {
-      throw new UnsupportedOperationException();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#size()
-     */
-    public int size()
-    {
-
-      return fBinaryNamespaces.size() + fFileSpecificationMap.size();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Map#values()
-     */
-    public Collection values()
-    {
-      throw new UnsupportedOperationException();
-    }
-
-  }
 }
