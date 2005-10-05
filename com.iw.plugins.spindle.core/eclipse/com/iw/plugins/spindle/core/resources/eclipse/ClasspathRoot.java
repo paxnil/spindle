@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryCoreException;
+import com.iw.plugins.spindle.core.builder.AbstractBuild;
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
@@ -279,7 +280,7 @@ public class ClasspathRoot implements IResourceRoot
     }
 
     IPackageFragment findExactPackageFragment(ClasspathResource location)
-    {
+    {        
         String name = location.getName();
         if (name == null)
             return null;
@@ -288,8 +289,8 @@ public class ClasspathRoot implements IResourceRoot
         find(toPackageName(location), name, acceptor);
         return acceptor.getResult();
     }
-
-    IPackageFragment[] getAllPackageFragments(String packageName)
+    
+    public IPackageFragment[] getAllPackageFragments(String packageName)
     {
         Map cache = EclipseBuildInfrastructure.getPackageCache();
 

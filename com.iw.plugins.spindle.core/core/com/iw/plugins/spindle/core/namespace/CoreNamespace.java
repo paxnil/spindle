@@ -497,6 +497,10 @@ public class CoreNamespace implements ICoreNamespace
         }
         return fPageLookup;
     }
+    
+    public String getAppNameFromWebXML() {
+        return fAppNameFromWebXML;
+    }
 
     public void setAppNameFromWebXML(String name)
     {

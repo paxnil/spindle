@@ -236,8 +236,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
      *      com.iw.plugins.spindle.core.resources.ICoreResource, java.lang.String)
      */
     protected IComponentSpecification parseComponentSpecification(ICoreNamespace namespace,
-            ICoreResource location, String templateExtension,
-            String encoding)
+            ICoreResource location, String encoding)
     {
         PluginComponentSpecification result = null;
 
@@ -261,7 +260,6 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                 return super.parseComponentSpecification(
                         namespace,
                         location,
-                        templateExtension,
                         encoding);
             }
         }
@@ -273,7 +271,6 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             return super.parseComponentSpecification(
                     namespace,
                     location,
-                    templateExtension,
                     encoding);
         }
 

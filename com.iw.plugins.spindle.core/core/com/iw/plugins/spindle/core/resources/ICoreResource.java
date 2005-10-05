@@ -29,6 +29,8 @@ import java.io.InputStream;
 
 import org.apache.hivemind.Resource;
 
+import com.iw.plugins.spindle.core.builder.NamespaceClashException;
+
 
 /**
  * Extends
@@ -52,5 +54,7 @@ public interface ICoreResource extends Resource, ResourceExtension
    * is responsible for closing the stream when finished.
    */
   public InputStream getContents();
+  
+  public boolean clashesWith(ICoreResource resource);
 
 }

@@ -40,6 +40,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -76,7 +78,30 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     {
         super(root.getPath(fragment, storage));
         fRoot = root;
-    }
+    }    
+
+    public boolean clashesWith(ICoreResource resource)
+    {        
+        if (this == resource)
+            return true;
+        
+        if (!resource.isClasspathResource())
+            return false;
+               
+        IPath mine = new Path(this.getPath());
+        IPath other = new Path(resource.getPath());
+        
+        if (mine.equals(other))
+            return true;
+        
+        if (mine.isPrefixOf(other))
+            return true;
+        
+        if (other.isPrefixOf(mine))
+            return true;
+        
+        return false;                
+    }    
 
     protected Resource newResource(String path)
     {

@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hivemind.Resource;
-import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -67,7 +66,6 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  * Abstract base class for full and incremental builds
@@ -96,7 +94,9 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return (IDependencyListener) DEPENDENCY_LISTENER_HOLDER.get();
     }
 
-    protected CoreNamespace fApplicationNamespace;
+    protected List fApplicationNamespaces;
+    
+    protected List fLibraryNamespaces;
 
     protected BuilderQueue fBuildQueue;
 
@@ -126,9 +126,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected Map fFileSpecificationMap;
 
-    protected Map fBinarySpecificationMap; // binary specs (from jars) never
+    protected Map fBinarySpecificationMap; // binary specs (from jars) never change
 
-    // change
     protected AbstractBuildInfrastructure fInfrastructure;
 
     protected List fCleanTemplates; // templates that contain no implicit
@@ -167,6 +166,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         fTemplateMap = new HashMap();
         fFileSpecificationMap = new HashMap();
         fBinarySpecificationMap = new HashMap();
+        fLibraryNamespaces = new ArrayList();
         fCleanTemplates = new ArrayList();
     }
 
@@ -179,9 +179,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         fFrameworkNamespace = getFrameworkNamespace();
 
-        fApplicationNamespace = getApplicationNamespace();
-
-        fApplicationNamespace.installBasePropertySource(fInfrastructure.fProjectPropertySource);
+        fApplicationNamespaces = getApplicationNamespaces();        
 
         fNotifier.updateProgressDelta(0.05f);
 
@@ -197,13 +195,17 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         fNotifier.setProcessingProgressPer(0.9f / fBuildQueue.getWaitingCount());
 
         try
-        {            
+        {
 
             fNotifier.setProcessingProgressPer(0.005f);
 
             resolveFramework();
-
-            resolveApplication();
+            
+            for (Iterator iter = fApplicationNamespaces.iterator(); iter.hasNext();)
+            {
+                CoreNamespace application = (CoreNamespace) iter.next();
+                resolveApplication(application.getAppNameFromWebXML(), application);                
+            }           
 
             fNotifier.updateProgressDelta(0.05f);
 
@@ -264,7 +266,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         fMissingTypes = null;
         fProcessedLocations = null;
         fSeenTemplateExtensions = null;
-        fApplicationNamespace = null;
+        fApplicationNamespaces = null;
+        fLibraryNamespaces = null;
         fFrameworkNamespace = null;
         fBuildQueue = null;
         fNotifier = null;
@@ -292,22 +295,25 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         ICoreNamespace result = null;
 
-        ILibrarySpecification lib = null;
+        PluginLibrarySpecification lib = null;
 
         String name = location.getName();
 
         if (name.endsWith(".application"))
-            lib = parseApplicationSpecification(location, encoding);
+            lib = (PluginLibrarySpecification) parseApplicationSpecification(location, encoding);
         else if (name.endsWith(".library"))
-            lib = parseLibrarySpecification(location, encoding);
+            lib = (PluginLibrarySpecification) parseLibrarySpecification(location, encoding);
 
         if (lib != null)
         {
             result = new CoreNamespace(id, lib);
         }
 
-        ((BaseSpecLocatable) lib).setNamespace(result);
-
+        lib.setNamespace(result);
+        
+        if (lib.getSpecificationType() == BaseSpecification.LIBRARY_SPEC)
+            fLibraryNamespaces.add(result);
+        
         return result;
     }
 
@@ -322,8 +328,9 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     {
         ArrayList found = new ArrayList();
         fInfrastructure.findAllTapestryArtifactsInWebContext(fDeclaredTemplateExtensions, found);
-        fInfrastructure
-                .findAllTapestryArtifactsInClasspath(fDeclaredTemplateExtensionsClasspath, found);
+        fInfrastructure.findAllTapestryArtifactsInClasspath(
+                fDeclaredTemplateExtensionsClasspath,
+                found);
         return found;
     }
 
@@ -500,8 +507,18 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected void parseTemplates(PluginComponentSpecification spec)
     {
 
-        String componentAttributeName = spec.getNamespace().getPropertyValue(
-                "org.apache.tapestry.jwcid-attribute-name");
+        String componentAttributeName = spec
+                .getProperty("org.apache.tapestry.jwcid-attribute-name");
+        if (componentAttributeName == null)
+        {
+            componentAttributeName = spec.getNamespace().getSpecification().getProperty(
+                    "org.apache.tapestry.jwcid-attribute-name");
+        }
+        if (componentAttributeName == null)
+        {
+            componentAttributeName = DefaultProperties.getInstance().getPropertyValue(
+                    "org.apache.tapestry.jwcid-attribute-name");
+        }
 
         TemplateScanner scanner = new TemplateScanner();
         for (Iterator iter = spec.getTemplateLocations().iterator(); iter.hasNext();)
@@ -636,18 +653,16 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      */
     protected abstract void resolveFramework();
 
-    protected abstract void resolveApplication();
+    protected abstract void resolveApplication(String name, CoreNamespace namespace);
 
     protected IComponentSpecification parseComponentSpecification(ICoreNamespace namespace,
-            ICoreResource location, String templateExtension, String encoding)
+            ICoreResource location, String encoding)
 
     {
         // to avoid double parsing specs that are accessible
         // by multiple means in Tapestry
         if (fProcessedLocations.containsKey(location))
             return (IComponentSpecification) fProcessedLocations.get(location);
-
-        Assert.isNotNull(templateExtension);
 
         PluginComponentSpecification result = null;
         IDOMModel model = null;
@@ -672,14 +687,6 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                     try
                     {
                         result = (PluginComponentSpecification) scanner.scan(model, scanValidator);
-                        if (result != null)
-                        {
-                            result.setTemplateLocations(TemplateFinder.scanForTemplates(
-                                    result,
-                                    templateExtension,
-                                    fInfrastructure.fTapestryProject,
-                                    scanner));
-                        }
                     }
                     finally
                     {
@@ -697,14 +704,32 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                     dummy.makePlaceHolder();
                     dummy.setSpecificationLocation(location);
                     dummy.setNamespace(namespace);
-                    dummy.setTemplateLocations(TemplateFinder.scanForTemplates(
-                            dummy,
-                            templateExtension,
-                            fInfrastructure.fTapestryProject,
-                            null));
                     result = dummy;
                 }
 
+                String templateExtension = result
+                        .getProperty("org.apache.tapestry.template-extension");
+
+                if (templateExtension == null)
+                {
+                    ILibrarySpecification nsSpec = namespace.getSpecification();
+                    templateExtension = nsSpec
+                            .getProperty("org.apache.tapestry.template-extension");
+                }
+
+                if (templateExtension == null)
+                {
+                    templateExtension = DefaultProperties.getInstance().getPropertyValue(
+                            "org.apache.tapestry.template-extension");
+                }
+
+                templateExtensionSeen(templateExtension);
+
+                result.setTemplateLocations(TemplateFinder.scanForTemplates(
+                        result,
+                        templateExtension,
+                        fInfrastructure.fTapestryProject,
+                        null));
             }
             catch (IOException e)
             {
@@ -731,11 +756,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected void finished(Resource location)
     {
-        if (fBuildQueue.isWaiting(location))
-        {
-            fBuildQueue.finished(location);
-            fNotifier.processed(location);
-        }
+        fBuildQueue.finished(location);
+        fNotifier.processed(location);
     }
 
     /**
@@ -744,11 +766,12 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     public void templateExtensionSeen(String extension)
     {
         if (extension == null)
-            return;        
+            return;
         fSeenTemplateExtensions.add(extension);
     }
-    
-    public void templateExtensionDeclared(String extension, boolean isClasspath) {
+
+    public void templateExtensionDeclared(String extension, boolean isClasspath)
+    {
         if (extension == null)
             return;
         if (isClasspath)
@@ -910,25 +933,31 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return result;
     }
 
-    protected CoreNamespace getApplicationNamespace() {
+    protected List getApplicationNamespaces()
+    {
+        List result = doGetApplicationNamespaces();
         
-        CoreNamespace result = doGetApplicationNamespace();
+        for (Iterator iter = result.iterator(); iter.hasNext();)
+        {
+            CoreNamespace ns = (CoreNamespace) iter.next();
+            
+            ns.installBasePropertySource(fInfrastructure.fProjectPropertySource);
+
+            ILibrarySpecification spec = ns.getSpecification();
+
+            String templateExtension = spec.getProperty("org.apache.tapestry.template-extension");
+            // if its not null, it has already been registered.
+            // otherwise, we must register the default.
+            if (templateExtension == null)
+                templateExtensionDeclared(DefaultProperties.getInstance().getPropertyValue(
+                        "org.apache.tapestry.template-extension"), false);            
+        }
         
-        result.installBasePropertySource(DefaultProperties.getInstance());
-
-        ILibrarySpecification spec = result.getSpecification();
-
-        String templateExtension = spec.getProperty("org.apache.tapestry.template-extension");
-        // if its not null, it has already been registered.
-        // otherwise, we must register the default.
-        if (templateExtension == null)
-            templateExtensionDeclared(DefaultProperties.getInstance().getPropertyValue(
-                    "org.apache.tapestry.template-extension"), false);
-
         return result;
     }
 
-    protected abstract CoreNamespace doGetApplicationNamespace();
+    protected abstract List doGetApplicationNamespaces();
+
     // returns unresolved namespace tree
     // assumes id is valid and location exists.
     protected CoreNamespace getNamespaceTree(String namespaceId, ICoreResource location,

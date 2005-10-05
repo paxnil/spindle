@@ -97,8 +97,6 @@ public class NamespaceResolver
 
     protected IPropertySource fResultNamespacePropertySource;
 
-    protected String fNamespaceTemplateExtension;
-
     /**
      * the Tapestry framwork Namespace
      */
@@ -149,9 +147,7 @@ public class NamespaceResolver
     public void resolve(CoreNamespace namespace)
     {
         fNamespace = namespace;
-        doResolve();
-        fNamespaceTemplateExtension = namespace.getPropertyValue(
-                "org.apache.tapestry.template-extension");       
+        doResolve();         
     }
 
     protected void cleanup()
@@ -335,7 +331,6 @@ public class NamespaceResolver
         result = fBuild.parseComponentSpecification(
                 fNamespace,
                 location,
-                fNamespaceTemplateExtension,
                 null);
 
         if (result != null)
@@ -511,7 +506,6 @@ public class NamespaceResolver
         result = fBuild.parseComponentSpecification(
                 fNamespace,
                 location,
-                fNamespaceTemplateExtension,
                 null);
 
         if (result != null)

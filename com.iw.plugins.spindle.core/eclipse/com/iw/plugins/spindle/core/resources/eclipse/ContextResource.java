@@ -39,10 +39,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.PathUtils;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
@@ -68,6 +70,29 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     {
         this(root, root.findRelativePath(resource));
     }
+    
+    public boolean clashesWith(ICoreResource resource)
+    {
+        if (this == resource)
+            return true;
+        
+        if (resource.isClasspathResource())
+            return false;
+               
+        IPath mine = new Path(this.getPath()).removeTrailingSeparator().makeAbsolute();
+        IPath other = new Path(resource.getPath()).removeTrailingSeparator().makeAbsolute();
+        
+        if (mine.equals(other))
+            return true;
+        
+        if (mine.isPrefixOf(other))
+            return true;
+        
+        if (other.isPrefixOf(mine))
+            return true;
+        
+        return false;                
+    }    
 
     /*
      * (non-Javadoc)

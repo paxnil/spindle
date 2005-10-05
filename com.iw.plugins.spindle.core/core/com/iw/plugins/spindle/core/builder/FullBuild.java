@@ -26,7 +26,10 @@
 package com.iw.plugins.spindle.core.builder;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.hivemind.Resource;
 
@@ -50,7 +53,7 @@ import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 public class FullBuild extends AbstractBuild
 {
 
-    protected ServletInfo fApplicationServlet;
+    protected ServletInfo [] fApplicationServlets;
 
     protected WebAppDescriptor fWebAppDescriptor;
 
@@ -71,7 +74,7 @@ public class FullBuild extends AbstractBuild
     protected void preBuild()
     {
         setDependencyListener(new BuilderDependencyListener());
-        findDeclaredApplication();
+        findDeclaredApplications();
     }
 
     /**
@@ -82,9 +85,9 @@ public class FullBuild extends AbstractBuild
         new FrameworkResolver(this).resolve(fFrameworkNamespace);
     }
     
-    protected void resolveApplication()
+    protected void resolveApplication(String name, CoreNamespace namespace)
     {
-        new ApplicationResolver(this, fFrameworkNamespace, fApplicationServlet.name).resolve(fApplicationNamespace);        
+        new ApplicationResolver(this, fFrameworkNamespace, name).resolve(namespace);        
     }
     
     protected void postBuild()
@@ -98,51 +101,43 @@ public class FullBuild extends AbstractBuild
 
     public void saveState()
     {
-        State newState = new State(fInfrastructure);
-        // newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
-        newState.fLastKnownClasspath = fInfrastructure.getClasspathMemento();
-        newState.fJavaDependencies = fFoundTypes;
-        newState.fMissingJavaTypes = fMissingTypes;
-        newState.fTemplateMap = fTemplateMap;
-        newState.fFileSpecificationMap = fFileSpecificationMap;
-        newState.fBinarySpecificationMap = fBinarySpecificationMap;
-        newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
-        
-        newState.fDeclatedTemplateExtensions = fDeclaredTemplateExtensions;
-        newState.fDeclaredTemplateExtensionsClasspath = fDeclaredTemplateExtensionsClasspath;
-        
-        newState.fApplicationServlet = fApplicationServlet;
-        newState.fWebAppDescriptor = fWebAppDescriptor;
-        newState.fPrimaryNamespace = fApplicationNamespace;
-        newState.fFrameworkNamespace = fFrameworkNamespace;
-        newState.fCleanTemplates = fCleanTemplates;
-
-        // save the processed binary libraries
-        saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
-        fInfrastructure.persistState(newState);
+//        State newState = new State(fInfrastructure);
+//        // newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
+//        newState.fLastKnownClasspath = fInfrastructure.getClasspathMemento();
+//        newState.fJavaDependencies = fFoundTypes;
+//        newState.fMissingJavaTypes = fMissingTypes;
+//        newState.fTemplateMap = fTemplateMap;
+//        newState.fFileSpecificationMap = fFileSpecificationMap;
+//        newState.fBinarySpecificationMap = fBinarySpecificationMap;
+//        newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
+//        
+//        newState.fDeclatedTemplateExtensions = fDeclaredTemplateExtensions;
+//        newState.fDeclaredTemplateExtensionsClasspath = fDeclaredTemplateExtensionsClasspath;
+//        
+//        newState.fApplicationServlets = fApplicationServlets;
+//        newState.fWebAppDescriptor = fWebAppDescriptor;
+//        newState.fPrimaryNamespace = fApplicationNamespace;
+//        newState.fFrameworkNamespace = fFrameworkNamespace;
+//        newState.fCleanTemplates = fCleanTemplates;
+//
+//        // save the processed binary libraries
+//        saveBinaryLibraries(fLibraryNamespaces, newState);
+//        fInfrastructure.persistState(newState);
     }
+    
+    
 
-    protected void saveBinaryLibraries(ICoreNamespace framework, ICoreNamespace namespace,
-            State state)
+    private void saveBinaryLibraries(List libs, State state)
     {
-        saveBinaryLibraries(framework, state);
-        saveBinaryLibraries(namespace, state);
-    }
-
-    private void saveBinaryLibraries(ICoreNamespace namespace, State state)
-    {
-        ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
-        if (location.isBinaryResource())
-            state.fBinaryNamespaces.put(location, namespace);
-
-        for (Iterator iter = namespace.getChildIds().iterator(); iter.hasNext();)
+        for (Iterator iter = libs.iterator(); iter.hasNext();)
         {
-            String id = (String) iter.next();
-            ICoreNamespace child = (ICoreNamespace) namespace.getChildNamespace(id);
-            if (child != null)
-                saveBinaryLibraries(child, state);
+            ICoreNamespace libNS = (ICoreNamespace) iter.next();
+            ICoreResource location = (ICoreResource) libNS.getSpecificationLocation();
+            if (location.isBinaryResource())
+                state.fBinaryNamespaces.put(location, libNS);
         }
-    }
+        
+    }    
 
     public void cleanUp()
     {
@@ -150,28 +145,39 @@ public class FullBuild extends AbstractBuild
     }
     
 //  returns unresolved namespace tree
-    protected CoreNamespace doGetApplicationNamespace()
-    {       
-        if (fApplicationServlet == null)
-            return null;
-            
-        CoreNamespace result = null;
-        ICoreResource nsLocation = fApplicationServlet.applicationSpecLocation;
-        if (nsLocation != null)
-        {
-            if (!nsLocation.exists())
-                throw new BuilderException(CoreMessages.format(
-                        "build-failed-missing-application-spec",
-                        nsLocation.toString()));
-
-            result = getNamespaceTree(null, nsLocation, null);
-        }
-        else
-        {
-            result = createStandinApplicationNamespace(fApplicationServlet);
-        }
+    protected List doGetApplicationNamespaces()
+    {    
+        List namespaces = new ArrayList();
         
-        return result;
+        if (fApplicationServlets == null || fApplicationServlets.length == 0)
+            return Collections.EMPTY_LIST;
+        
+        for (int i=0;i<fApplicationServlets.length;i++)
+        {            
+            
+            CoreNamespace result = null;
+            ICoreResource nsLocation = fApplicationServlets[i].applicationSpecLocation;
+            if (nsLocation != null)
+            {
+                if (!nsLocation.exists())
+                    throw new BuilderException(CoreMessages.format(
+                            "build-failed-missing-application-spec",
+                            nsLocation.toString()));
+
+                result = getNamespaceTree(null, nsLocation, null);
+            }
+            else
+            {
+                result = createStandinApplicationNamespace(fApplicationServlets[i]);
+            }
+            
+            
+            result.setAppNameFromWebXML(fApplicationServlets[i].name);
+            
+            namespaces.add(result);
+        }
+                
+        return namespaces;
     }
 
     protected CoreNamespace createStandinApplicationNamespace(ServletInfo servlet)
@@ -187,7 +193,7 @@ public class FullBuild extends AbstractBuild
         return result;
     }
 
-    protected void findDeclaredApplication()
+    protected void findDeclaredApplications()
     {
         ICoreResource webXML = (ICoreResource) fInfrastructure.fContextRoot
                 .getRelativeResource("WEB-INF/web.xml");
@@ -237,19 +243,19 @@ public class FullBuild extends AbstractBuild
                             .format(AbstractBuildInfrastructure.STRING_KEY
                                     + "abort-no-valid-application-servlets-found"));
 
-                ServletInfo[] servletInfos = descriptor.getServletInfos();
-                if (servletInfos == null || servletInfos.length == 0)
+                fApplicationServlets = descriptor.getServletInfos();
+                if (fApplicationServlets == null || fApplicationServlets.length == 0)
 
                     throw new BrokenWebXMLException(CoreMessages
                             .format(AbstractBuildInfrastructure.STRING_KEY
                                     + "abort-no-valid-application-servlets-found"));
 
-                if (servletInfos.length > 1)
-                    throw new BrokenWebXMLException(CoreMessages
-                            .format(AbstractBuildInfrastructure.STRING_KEY
-                                    + "abort-too-many-valid-servlets-found"));
+//                if (servletInfos.length > 1)
+//                    throw new BrokenWebXMLException(CoreMessages
+//                            .format(AbstractBuildInfrastructure.STRING_KEY
+//                                    + "abort-too-many-valid-servlets-found"));
 
-                fApplicationServlet = servletInfos[0];
+                //fApplicationServlets = servletInfos[0];
                 fWebAppDescriptor = descriptor;
                 fInfrastructure.installBasePropertySource(fWebAppDescriptor);
             }

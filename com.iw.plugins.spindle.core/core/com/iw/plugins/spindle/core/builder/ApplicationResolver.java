@@ -34,6 +34,7 @@ import java.util.Set;
 
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
+import com.iw.plugins.spindle.core.properties.DefaultProperties;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
@@ -132,7 +133,7 @@ public class ApplicationResolver extends NamespaceResolver
     }
 
     /**
-     * Resolve all of the specless pages in the application. Only applications can have specless
+     * Resolve all of the specless pages in the application. Only the application namespace can have specless
      * pages. We find the specless pages by a process of elimination. By definition a specless page
      * is a template file located in the context root. However, pages and components can have thier
      * templates in the context root. So we find the specless page templates by excluding those
@@ -148,9 +149,19 @@ public class ApplicationResolver extends NamespaceResolver
 
         //now gather all the templates seen so far.
         //they are definitely not spec-less pages!
+        
+        //we know that the application NS and the global properties will provide the
+        //template extension for specless pages.
+        
+        String templateExtension = fNamespace.getSpecification().getProperty("org.apache.tapestry.template-extension");
+        if (templateExtension == null) {
+            templateExtension = DefaultProperties.getInstance().getPropertyValue("org.apache.tapestry.template-extension");
+        }
+        
         final List allTemplates = new ArrayList(componentTemplates);
         allTemplates.addAll(getAllPageFileTemplates());
         final List speclessPages = new ArrayList();
+        final String speclessPageTemplateExtension = templateExtension;
         //now find all the html files in the application root
 
         IResourceRoot appRoot = fBuild.fInfrastructure.fContextRoot;
@@ -174,7 +185,7 @@ public class ApplicationResolver extends NamespaceResolver
                         
                         extension = fullname.substring(cut + 1);
                     } 
-                    if (fNamespaceTemplateExtension.equals(extension)
+                    if (speclessPageTemplateExtension.equals(extension)
                             && !allTemplates.contains(location))
                         speclessPages.add(location);
                 }
@@ -195,11 +206,11 @@ public class ApplicationResolver extends NamespaceResolver
 
         List filtered = TemplateFinder.filterTemplateList(
                 speclessPages,
-                fNamespaceTemplateExtension);
+                templateExtension);
         for (Iterator iter = filtered.iterator(); iter.hasNext();)
         {
             ICoreResource location = (ICoreResource) iter.next();
-            resolveSpeclessPage(location, fNamespaceTemplateExtension);
+            resolveSpeclessPage(location, templateExtension);
         }
     }
 
@@ -230,12 +241,12 @@ public class ApplicationResolver extends NamespaceResolver
 
         fNamespace.installPageSpecification(name, specification);
         fBuild.parseTemplates(specification);
-
+        fBuild.templateExtensionSeen(templateExtension);
         fBuild.fBuildQueue.finished(specification.getTemplateLocations());
     }
 
     /**
-     * @return List a list of all the templates for all components in this Namespace
+     * @return List a list of all the templates for all components in this Namespace (that have specs)
      */
     protected Set getAllComponentTemplates()
     {
