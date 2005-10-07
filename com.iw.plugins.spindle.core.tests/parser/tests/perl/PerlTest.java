@@ -29,8 +29,9 @@ package tests.perl;
 import java.util.Locale;
 
 import junit.framework.TestCase;
+import core.resources.I18NResourceAcceptor;
 
-import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
+
 
 /**
  *  Tests for the PERL expression used to find localized Templates.

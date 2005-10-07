@@ -69,10 +69,11 @@ import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
+
+import core.resources.ICoreResource;
 
 /**
  * Base class for editor actions

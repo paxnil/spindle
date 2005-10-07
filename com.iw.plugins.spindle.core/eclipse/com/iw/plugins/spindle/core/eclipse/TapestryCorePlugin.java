@@ -32,12 +32,14 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-import com.iw.plugins.spindle.core.ICoreListeners;
-import com.iw.plugins.spindle.core.ILogger;
-import com.iw.plugins.spindle.core.IPreferenceConstants;
-import com.iw.plugins.spindle.core.IPreferenceSource;
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
+
+import core.ICoreListeners;
+import core.ILogger;
+import core.IPreferenceConstants;
+import core.IPreferenceSource;
+import core.TapestryCore;
 
 /**
  * The main plugin class to be used in the desktop.

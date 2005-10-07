@@ -50,9 +50,10 @@ import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.assist.usertemplates.UserTemplateAccess;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
+
+import core.util.XMLUtil;
 
 /**
  * TemplateFactory factory for creating file contents from Templates.

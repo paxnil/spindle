@@ -37,10 +37,12 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.extensions.IBeanSpecificationValidator;
-import com.iw.plugins.spindle.core.extensions.SpindleExtensionException;
-import com.iw.plugins.spindle.core.util.Assert;
+
+
+import core.TapestryCore;
+import core.extensions.IBeanSpecificationValidator;
+import core.extensions.SpindleExtensionException;
+import core.util.Assert;
 
 /**
  * BeanSpecificationValidators Container for all of the IBeanSpecificationValidator contributed
@@ -103,7 +105,7 @@ public class EclipseBeanSpecificationValidators implements IBeanSpecificationVal
                                         + ext.getUniqueIdentifier()
                                         + "'. class '"
                                         + ce[j].getAttribute("class")
-                                        + "' does not implement com.iw.plugins.spindle.core.IBeanSpecificationValidator");
+                                        + "' does not implement core.IBeanSpecificationValidator");
                         continue;
                     }
                 }
@@ -119,7 +121,7 @@ public class EclipseBeanSpecificationValidators implements IBeanSpecificationVal
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.extensions.IBeanSpecificationValidator#canValidate(org.apache.tapestry.spec.IBeanSpecification)
+     * @see core.extensions.IBeanSpecificationValidator#canValidate(org.apache.tapestry.spec.IBeanSpecification)
      */
     public boolean canValidate(IBeanSpecification bean)
     {
@@ -147,7 +149,7 @@ public class EclipseBeanSpecificationValidators implements IBeanSpecificationVal
 
     
     /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.extensions.IBeanSpecificationValidator#validate(org.apache.tapestry.spec.IBeanSpecification)
+     * @see core.extensions.IBeanSpecificationValidator#validate(org.apache.tapestry.spec.IBeanSpecification)
      */
     public void validate(IBeanSpecification bean) throws SpindleExtensionException
     {

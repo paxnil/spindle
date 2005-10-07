@@ -36,7 +36,9 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.apache.xerces.xni.parser.XMLInputSource;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+import core.TapestryCore;
+
+
 
 /**
  * Entity resolver that pulls DTDs out of the plugin classpath

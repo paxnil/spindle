@@ -29,10 +29,12 @@ import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLParserConfiguration;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.source.ISourceLocationResolver;
+
 import com.iw.plugins.spindle.xerces.parser.XercesDOMElementSourceLocationInfo;
 import com.iw.plugins.spindle.xerces.parser.xml.event.ElementXMLEventInfo;
+
+import core.TapestryCore;
+import core.source.ISourceLocationResolver;
 
 public class TapestryDOMParser extends DOMParser
 {

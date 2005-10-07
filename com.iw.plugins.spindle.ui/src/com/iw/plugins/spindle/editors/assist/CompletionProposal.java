@@ -34,7 +34,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.Assert;
+
+import core.util.Assert;
 
 /**
  * Base class for Completion Proposals (that are not template based!)

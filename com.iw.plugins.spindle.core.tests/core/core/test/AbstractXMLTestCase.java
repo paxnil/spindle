@@ -17,11 +17,11 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.iw.plugins.spindle.core.parser.dom.IDOMModel;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.source.SourceLocation;
-import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
+import core.parser.dom.IDOMModel;
+import core.source.ISourceLocation;
+import core.source.ISourceLocationInfo;
+import core.source.SourceLocation;
+import core.util.XMLPublicIDUtil;
 
 public abstract class AbstractXMLTestCase extends AbstractTestCase
 {

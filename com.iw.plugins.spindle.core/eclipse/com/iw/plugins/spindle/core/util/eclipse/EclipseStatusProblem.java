@@ -2,10 +2,11 @@ package com.iw.plugins.spindle.core.util.eclipse;
 
 import org.eclipse.core.runtime.IStatus;
 
-import com.iw.plugins.spindle.core.source.DefaultProblem;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.util.Assert;
+
+import core.source.DefaultProblem;
+import core.source.IProblem;
+import core.source.ISourceLocation;
+import core.util.Assert;
 
 public class EclipseStatusProblem extends DefaultProblem
 {

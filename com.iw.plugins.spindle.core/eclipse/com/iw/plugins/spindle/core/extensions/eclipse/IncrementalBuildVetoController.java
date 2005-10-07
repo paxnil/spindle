@@ -36,7 +36,9 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+import core.TapestryCore;
+
+
 
 /**
  * IncrementalBuildVetoController TODO add something here

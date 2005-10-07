@@ -75,19 +75,15 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.actions.RequiredSaveEditorAction;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.eclipse.ProjectPreferenceStore;
 import com.iw.plugins.spindle.core.eclipse.TapestryPluginException;
-import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
-import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.util.Files;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.editors.documentsAndModels.ApplicationEdits;
@@ -104,6 +100,12 @@ import com.iw.plugins.spindle.ui.wizards.fields.ContainerDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.NamespaceDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.PackageDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
+
+import core.ITapestryProject;
+import core.namespace.CoreNamespace;
+import core.spec.PluginApplicationSpecification;
+import core.spec.PluginLibrarySpecification;
+import core.util.Files;
 
 public class NewTapComponentWizardPage extends TapestryWizardPage
 {

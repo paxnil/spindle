@@ -44,14 +44,16 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCoreException;
+
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
-import com.iw.plugins.spindle.core.resources.PathUtils;
-import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
+
+import core.TapestryCore;
+import core.TapestryCoreException;
+import core.resources.ICoreResource;
+import core.resources.IResourceAcceptor;
+import core.resources.PathUtils;
+import core.resources.search.ISearch;
 
 /**
  * Implementation of ICoreResource for resources found within classpath.
@@ -129,7 +131,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#isBinary()
+     * @see core.resources.ICoreResource#isBinary()
      */
     public boolean isBinaryResource()
     {
@@ -140,7 +142,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#isClasspathResource()
+     * @see core.resources.ICoreResource#isClasspathResource()
      */
     public boolean isClasspathResource()
     {
@@ -150,7 +152,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#getContents()
+     * @see core.resources.ICoreResource#getContents()
      */
     public InputStream getContents()
     {
@@ -171,7 +173,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
+     * @see core.resources.ICoreResource#seek(core.resources.IResourceLocationRequestor)
      */
     public void lookup(IResourceAcceptor requestor)
     {
@@ -245,7 +247,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#getProject()
+     * @see core.resources.ICoreResource#getProject()
      */
     public IProject getProject()
     {
@@ -256,7 +258,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource#getStorage()
+     * @see core.resources.eclipse.IEclipseResource#getStorage()
      */
     public IStorage getStorage()
     {

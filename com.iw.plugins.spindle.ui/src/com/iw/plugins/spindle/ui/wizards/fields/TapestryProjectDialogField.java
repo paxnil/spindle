@@ -46,15 +46,17 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
+
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.builder.State;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
-import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
+
+import core.ITapestryProject;
+import core.builder.State;
+import core.source.IProblem;
 
 /**
  * 

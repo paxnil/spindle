@@ -40,21 +40,23 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IStorage;
 
-import com.iw.plugins.spindle.core.IJavaTypeFinder;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
+
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
-import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
-import com.iw.plugins.spindle.core.source.DefaultProblem;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
+
+import core.IJavaTypeFinder;
+import core.namespace.ICoreNamespace;
+import core.resources.ICoreResource;
+import core.resources.templates.TemplateFinder;
+import core.scanning.IScannerValidator;
+import core.scanning.SpecificationValidator;
+import core.source.DefaultProblem;
+import core.source.IProblem;
+import core.source.IProblemCollector;
+import core.source.ISourceLocation;
+import core.spec.PluginApplicationSpecification;
+import core.spec.PluginComponentSpecification;
+import core.spec.PluginLibrarySpecification;
 
 /**
  * New Incremental AbstractBuild - this one revalidates specs if thier underlying resource has not
@@ -75,7 +77,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveApplication(com.iw.plugins.spindle.core.parser.Parser,
+     * @see core.builder.AbstractBuild#resolveApplication(core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
     protected IApplicationSpecification parseApplicationSpecification(Resource location, String encoding)
@@ -153,7 +155,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveLibrarySpecification(com.iw.plugins.spindle.core.parser.Parser,
+     * @see core.builder.AbstractBuild#resolveLibrarySpecification(core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
     protected ILibrarySpecification parseLibrarySpecification(Resource location, String encoding)
@@ -230,10 +232,10 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveIComponentSpecification(com.iw.plugins.spindle.core.parser.Parser,
-     *      com.iw.plugins.spindle.core.namespace.ICoreNamespace,
+     * @see core.builder.AbstractBuild#resolveIComponentSpecification(core.parser.Parser,
+     *      core.namespace.ICoreNamespace,
      *      org.eclipse.core.resources.IStorage,
-     *      com.iw.plugins.spindle.core.resources.ICoreResource, java.lang.String)
+     *      core.resources.ICoreResource, java.lang.String)
      */
     protected IComponentSpecification parseComponentSpecification(ICoreNamespace namespace,
             ICoreResource location, String encoding)
@@ -337,7 +339,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#parseTemplates(com.iw.plugins.spindle.core.spec.PluginComponentSpecification)
+     * @see core.builder.AbstractBuild#parseTemplates(core.spec.PluginComponentSpecification)
      */
     protected void parseTemplates(PluginComponentSpecification spec)
     {
@@ -414,8 +416,8 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(int,
-         *      com.iw.plugins.spindle.core.source.ISourceLocation, java.lang.String, boolean)
+         * @see core.source.IProblemCollector#addProblem(int,
+         *      core.source.ISourceLocation, java.lang.String, boolean)
          */
         public void addProblem(int severity, ISourceLocation location, String message,
                 boolean isTemporary, int code)
@@ -428,7 +430,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(com.iw.plugins.spindle.core.source.IProblem)
+         * @see core.source.IProblemCollector#addProblem(core.source.IProblem)
          */
         public void addProblem(IProblem problem)
         {
@@ -438,7 +440,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.source.IProblemCollector#beginCollecting()
+         * @see core.source.IProblemCollector#beginCollecting()
          */
         public void beginCollecting()
         {
@@ -448,7 +450,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.source.IProblemCollector#endCollecting()
+         * @see core.source.IProblemCollector#endCollecting()
          */
         public void endCollecting()
         {
@@ -458,7 +460,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.source.IProblemCollector#getProblems()
+         * @see core.source.IProblemCollector#getProblems()
          */
         public IProblem[] getProblems()
         {
@@ -470,7 +472,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#recordBuildMiss(int,
+     * @see core.builder.AbstractBuild#recordBuildMiss(int,
      *      org.eclipse.core.resources.IResource)
      */
     protected void recordBuildMiss(int missPriority, Resource resource)

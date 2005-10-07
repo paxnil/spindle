@@ -36,15 +36,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
+
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableComboBoxDialogField;
+
+import core.ITapestryProject;
+import core.namespace.ICoreNamespace;
+import core.resources.ICoreResource;
+import core.util.Assert;
 
 public class NamespaceDialogField extends UneditableComboBoxDialogField
 {

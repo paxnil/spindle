@@ -64,17 +64,18 @@ import org.eclipse.swt.widgets.Table;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.core.scanning.BaseValidator;
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.spec.PluginBindingSpecification;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringField;
 import com.iw.plugins.spindle.ui.widgets.SectionWidget;
+
+import core.scanning.BaseValidator;
+import core.scanning.IScannerValidator;
+import core.scanning.ScannerException;
+import core.source.IProblem;
+import core.spec.PluginBindingSpecification;
+import core.util.XMLUtil;
 
 /**
  * @author gwl

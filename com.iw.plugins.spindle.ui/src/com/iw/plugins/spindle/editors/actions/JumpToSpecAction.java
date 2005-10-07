@@ -30,10 +30,11 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
+
+import core.resources.ICoreResource;
+import core.spec.BaseSpecLocatable;
+import core.util.Assert;
 
 /**
  * Jump from spec/template editors to associated java files

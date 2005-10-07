@@ -6,12 +6,14 @@ import org.apache.xerces.dom.DocumentImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.dom.IDOMModel;
-import com.iw.plugins.spindle.core.parser.dom.IDOMModelSource;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+
+
+import core.TapestryCore;
+import core.parser.dom.IDOMModel;
+import core.parser.dom.IDOMModelSource;
+import core.resources.ICoreResource;
+import core.source.IProblem;
+import core.source.ISourceLocationInfo;
 
 /**
  * This implementation DOES not use reference counting - a new model is constructed each time one is

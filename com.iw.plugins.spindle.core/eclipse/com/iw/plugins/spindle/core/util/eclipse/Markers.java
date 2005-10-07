@@ -33,14 +33,16 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.util.IProblemPeristManager;
+
+import core.CoreMessages;
+import core.ITapestryProject;
+import core.TapestryCore;
+import core.resources.ICoreResource;
+import core.source.IProblem;
+import core.util.IProblemPeristManager;
 
 /**
  * Marker utililties

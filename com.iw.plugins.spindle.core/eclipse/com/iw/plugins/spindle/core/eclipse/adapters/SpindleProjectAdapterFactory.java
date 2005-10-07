@@ -18,12 +18,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IFileEditorInput;
 
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCoreException;
+
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathSearch;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
+
+import core.ITapestryProject;
+import core.TapestryCore;
+import core.TapestryCoreException;
 
 /**
  * @author Administrator TODO To change the template for this generated type comment go to Window -

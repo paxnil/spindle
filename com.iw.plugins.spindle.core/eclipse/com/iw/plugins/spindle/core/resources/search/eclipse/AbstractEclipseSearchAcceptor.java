@@ -33,7 +33,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IStorage;
 
-import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAcceptor;
+import core.resources.search.AbstractTapestrySearchAcceptor;
 
 /**
  * Acceptor that will accept/reject things based on the flags set in it.

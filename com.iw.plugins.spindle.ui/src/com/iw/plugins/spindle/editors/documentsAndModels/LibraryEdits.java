@@ -33,16 +33,17 @@ import org.eclipse.jface.text.IDocument;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryPluginException;
-import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.spec.PluginComponentTypeDeclaration;
-import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
-import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.IndentingWriter;
-import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.wutka.dtd.DTD;
+
+import core.parser.dom.validator.DOMValidator;
+import core.source.ISourceLocationInfo;
+import core.spec.PluginComponentTypeDeclaration;
+import core.spec.PluginLibrarySpecification;
+import core.spec.PluginPageDeclaration;
+import core.util.Assert;
+import core.util.IndentingWriter;
+import core.util.XMLPublicIDUtil;
+import core.util.XMLUtil;
 
 /**
  * LibraryEdits - helper for adding page and component declarations to a Library

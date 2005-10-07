@@ -45,10 +45,11 @@ import org.eclipse.swt.graphics.Image;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDElement;
 import com.wutka.dtd.DTDItemType;
+
+import core.util.Assert;
 
 /**
  * ProposalFactory factory methods for common proposals.

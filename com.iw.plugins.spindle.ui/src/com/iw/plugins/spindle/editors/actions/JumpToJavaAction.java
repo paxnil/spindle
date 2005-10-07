@@ -42,16 +42,18 @@ import org.eclipse.ui.IStorageEditorInput;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
+
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.extensions.eclipse.EclipseComponentTypeResourceResolvers;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.extensions.eclipse.EclipseComponentTypeResourceResolver;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
+
+import core.ITapestryProject;
+import core.resources.ICoreResource;
+import core.util.Assert;
 
 /**
  * Jump from spec/template editors to associated java files
@@ -107,7 +109,7 @@ public class JumpToJavaAction extends BaseJumpAction
             IType type = resolveType(typeName);
             if (type != null)
             {
-                EclipseComponentTypeResourceResolvers resolver = new EclipseComponentTypeResourceResolvers();
+                EclipseComponentTypeResourceResolver resolver = new EclipseComponentTypeResourceResolver();
                 if (!resolver.canResolve(type))
                     return type;
 
@@ -175,7 +177,7 @@ public class JumpToJavaAction extends BaseJumpAction
                                 IComponentSpecification componentSpec = (IComponentSpecification) fEditor
                                         .getSpecification();
 
-                                EclipseComponentTypeResourceResolvers resolver = new EclipseComponentTypeResourceResolvers();
+                                EclipseComponentTypeResourceResolver resolver = new EclipseComponentTypeResourceResolver();
                                 if (!resolver.canResolve(javaType))
                                     return javaType;
 

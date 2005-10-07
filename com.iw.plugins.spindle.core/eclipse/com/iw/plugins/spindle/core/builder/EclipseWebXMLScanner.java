@@ -4,11 +4,15 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.IJavaType;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.source.IProblem;
+
+
+import core.CoreMessages;
+import core.IJavaType;
+import core.TapestryCore;
+import core.builder.AbstractBuild;
+import core.builder.WebXMLScanner;
+import core.scanning.ScannerException;
+import core.source.IProblem;
 
 /**
  * @author gwl
@@ -25,7 +29,7 @@ public class EclipseWebXMLScanner extends WebXMLScanner
     
 
     /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.WebXMLScanner#getApplicationPathFromServlet(com.iw.plugins.spindle.core.IJavaType)
+     * @see core.builder.WebXMLScanner#getApplicationPathFromServlet(core.IJavaType)
      */
     protected String getApplicationPathFromServletSubclassOverride(IJavaType servletType) throws ScannerException
     {

@@ -48,14 +48,17 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.spec.BaseSpecification;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
+
+import core.ITapestryProject;
+import core.TapestryCore;
+import core.builder.State;
+import core.spec.BaseSpecification;
+import core.util.Assert;
 
 /**
  * The <code>TapestryArtifactManager</code> manages all the Tapestry Artifacts in the workspace.

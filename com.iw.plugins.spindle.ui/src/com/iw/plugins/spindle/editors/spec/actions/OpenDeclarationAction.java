@@ -45,17 +45,19 @@ import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
+
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.extensions.eclipse.EclipseComponentTypeResourceResolvers;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.extensions.eclipse.EclipseComponentTypeResourceResolver;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
-import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
 import com.iw.plugins.spindle.ui.util.UIUtils;
+
+import core.ITapestryProject;
+import core.resources.ICoreResource;
+import core.spec.BaseSpecLocatable;
+import core.spec.PluginComponentSpecification;
 
 /**
  * Open an interesting thing, if possible.
@@ -410,7 +412,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         if (useComponentResolver)
         {
-            EclipseComponentTypeResourceResolvers resolver = new EclipseComponentTypeResourceResolvers();
+            EclipseComponentTypeResourceResolver resolver = new EclipseComponentTypeResourceResolver();
 
             if (resolver.canResolve(type))
             {

@@ -84,26 +84,10 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
+
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
-import com.iw.plugins.spindle.core.scanning.ComponentScanner;
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.scanning.LibraryScanner;
-import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.scanning.SpecificationScanner;
-import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
-import com.iw.plugins.spindle.core.scanning.W3CAccess;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
@@ -113,6 +97,24 @@ import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
 import com.iw.plugins.spindle.editors.spec.outline.MultiPageContentOutline;
 import com.iw.plugins.spindle.xerces.parser.Parser;
+
+import core.ITapestryProject;
+import core.namespace.ICoreNamespace;
+import core.scanning.ApplicationScanner;
+import core.scanning.ComponentScanner;
+import core.scanning.IScannerValidator;
+import core.scanning.LibraryScanner;
+import core.scanning.ScannerException;
+import core.scanning.SpecificationScanner;
+import core.scanning.SpecificationValidator;
+import core.scanning.W3CAccess;
+import core.source.IProblem;
+import core.source.IProblemCollector;
+import core.source.ISourceLocation;
+import core.source.ISourceLocationInfo;
+import core.spec.BaseSpecLocatable;
+import core.spec.PluginComponentSpecification;
+import core.util.Assert;
 
 /**
  * Editor for Tapestry Spec files
@@ -504,7 +506,7 @@ public class SpecEditor extends Editor
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.editors.ISelfReconcilingEditor#reconcile(com.iw.plugins.spindle.core.parser.IProblemCollector,
+     * @see com.iw.plugins.spindle.editors.ISelfReconcilingEditor#reconcile(core.parser.IProblemCollector,
      *      org.eclipse.core.runtime.IProgressMonitor)
      */
     public void reconcile(IProblemCollector collector, IProgressMonitor monitor)

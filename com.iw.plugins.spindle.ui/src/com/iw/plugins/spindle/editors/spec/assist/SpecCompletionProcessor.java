@@ -37,13 +37,14 @@ import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.XMLReconciler;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
-import com.iw.plugins.spindle.core.util.IndentingWriter;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
+
+import core.parser.dom.validator.DOMValidator;
+import core.util.IndentingWriter;
+import core.util.XMLUtil;
 
 /**
  * Base class for context assist processors for Tapestry specss

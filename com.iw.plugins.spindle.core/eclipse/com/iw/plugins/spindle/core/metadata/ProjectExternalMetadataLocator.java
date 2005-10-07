@@ -43,13 +43,15 @@ import org.eclipse.core.runtime.IRegistryChangeEvent;
 import org.eclipse.core.runtime.IRegistryChangeListener;
 import org.eclipse.core.runtime.Platform;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+
+import core.TapestryCore;
 
 /**
  * <p>
  * This class provides project metadata as found by contributions to the extension point
- * <i>com.iw.plugins.spindle.core.projectMetadataLocator </i> Each contibution is queried in turn
+ * <i>core.projectMetadataLocator </i> Each contibution is queried in turn
  * and the first one to return a valid result wins.
  * </p>
  * <p>

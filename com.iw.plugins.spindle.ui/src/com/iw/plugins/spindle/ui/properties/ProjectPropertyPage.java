@@ -78,16 +78,18 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.ui.util.Revealer;
+
+import core.CoreMessages;
+import core.ITapestryProject;
+import core.TapestryCore;
 
 /**
  * Property Page that is added to all Java Projects.

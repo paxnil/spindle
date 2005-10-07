@@ -23,17 +23,16 @@ import junit.framework.AssertionFailedError;
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
 
-import com.iw.plugins.spindle.core.ICoreListeners;
-import com.iw.plugins.spindle.core.IJavaType;
-import com.iw.plugins.spindle.core.IJavaTypeFinder;
-import com.iw.plugins.spindle.core.IPreferenceSource;
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.IResourceRoot;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-
+import core.ICoreListeners;
+import core.IJavaType;
+import core.IJavaTypeFinder;
+import core.IPreferenceSource;
+import core.ITapestryProject;
+import core.TapestryCore;
+import core.resources.IResourceRoot;
+import core.source.IProblem;
+import core.source.IProblemCollector;
+import core.source.ISourceLocation;
 import core.test.TestLogger.LoggingEvent;
 
 /**

@@ -25,8 +25,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.core.util.eclipse;
 
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.util.Assert;
+
+import core.source.ISourceLocation;
+import core.util.Assert;
 
 /**
  * SpindleStatusWithLocation

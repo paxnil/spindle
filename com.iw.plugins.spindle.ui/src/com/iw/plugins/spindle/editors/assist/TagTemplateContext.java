@@ -36,7 +36,7 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 
-import com.iw.plugins.spindle.core.util.Assert;
+import core.util.Assert;
 
 public class TagTemplateContext extends DocumentTemplateContext
 {

@@ -26,9 +26,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobManager;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.source.IProblem;
-
+import core.TapestryCore;
+import core.source.IProblem;
 import core.test.AbstractTestCase;
 
 /**
@@ -291,7 +290,7 @@ public abstract class AbstractEclipseTestCase extends AbstractTestCase
     {
         try
         {
-            URL platformURL = Platform.getBundle("com.iw.plugins.spindle.core.tests").getEntry("/");
+            URL platformURL = Platform.getBundle("spindle.core.tests").getEntry("/");
             return new File(Platform.asLocalURL(platformURL).getFile()).getAbsolutePath();
         }
         catch (IOException e)

@@ -62,19 +62,11 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
+
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.scanning.BaseValidator;
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.scanning.TemplateScanner;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.template.actions.MoveToSpecAction;
@@ -82,6 +74,16 @@ import com.iw.plugins.spindle.editors.template.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.template.actions.ShowInPackageExplorerAction;
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDParser;
+
+import core.CoreMessages;
+import core.ITapestryProject;
+import core.namespace.ICoreNamespace;
+import core.scanning.BaseValidator;
+import core.scanning.IScannerValidator;
+import core.scanning.ScannerException;
+import core.scanning.TemplateScanner;
+import core.source.IProblemCollector;
+import core.spec.PluginComponentSpecification;
 
 /**
  * HTML Editor.

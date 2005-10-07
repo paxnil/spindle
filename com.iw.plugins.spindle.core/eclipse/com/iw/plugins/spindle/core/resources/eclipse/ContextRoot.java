@@ -35,11 +35,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
-import com.iw.plugins.spindle.core.resources.IResourceRoot;
-import com.iw.plugins.spindle.core.resources.search.ISearch;
+
+
+import core.TapestryCore;
+import core.resources.ICoreResource;
+import core.resources.IResourceAcceptor;
+import core.resources.IResourceRoot;
+import core.resources.search.ISearch;
 
 /**
  * Used for the roots
@@ -64,7 +66,7 @@ public class ContextRoot implements IResourceRoot
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.IResourceRoot#lookup(com.iw.plugins.spindle.core.resources.IResourceAcceptor)
+     * @see core.resources.IResourceRoot#lookup(core.resources.IResourceAcceptor)
      */
     public void lookup(IResourceAcceptor requestor)
     {
@@ -94,7 +96,7 @@ public class ContextRoot implements IResourceRoot
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.IResourceRoot#getSearch()
+     * @see core.resources.IResourceRoot#getSearch()
      */
     public ISearch getSearch()
     {
@@ -109,7 +111,7 @@ public class ContextRoot implements IResourceRoot
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.IResourceRoot#exists()
+     * @see core.resources.IResourceRoot#exists()
      */
     public boolean exists()
     {
@@ -122,7 +124,7 @@ public class ContextRoot implements IResourceRoot
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.IResourceRoot#getRelativeResource(java.lang.String)
+     * @see core.resources.IResourceRoot#getRelativeResource(java.lang.String)
      */
     public Resource getRelativeResource(String path)
     {

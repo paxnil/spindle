@@ -34,11 +34,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 
+
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ICoreListener;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+
+import core.ICoreListener;
+import core.ITapestryProject;
 
 /**
  * Decorator that indicates Tapestry projects

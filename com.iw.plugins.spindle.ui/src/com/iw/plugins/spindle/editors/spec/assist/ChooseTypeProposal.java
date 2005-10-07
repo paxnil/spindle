@@ -48,7 +48,8 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.Assert;
+
+import core.util.Assert;
 
 /**
  * Proposal that gets it contents from the user!

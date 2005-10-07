@@ -28,7 +28,9 @@ package com.iw.plugins.spindle.core.util.eclipse;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.util.Assert;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+import core.TapestryCore;
+
+
 
 /**
  * @author GWL Copyright 2002, Intelligent Works Incoporated All Rights Reserved

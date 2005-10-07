@@ -43,7 +43,8 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
-import com.iw.plugins.spindle.core.source.IProblem;
+
+import core.source.IProblem;
 
 /**
  * Base class for actions that need to use the workbench selection

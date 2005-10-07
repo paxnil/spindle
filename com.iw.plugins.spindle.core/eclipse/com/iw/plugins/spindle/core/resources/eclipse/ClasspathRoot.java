@@ -44,16 +44,18 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCoreException;
-import com.iw.plugins.spindle.core.builder.AbstractBuild;
+
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
-import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
-import com.iw.plugins.spindle.core.resources.IResourceRoot;
-import com.iw.plugins.spindle.core.resources.PathUtils;
-import com.iw.plugins.spindle.core.resources.search.ISearch;
-import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
+
+import core.TapestryCore;
+import core.TapestryCoreException;
+import core.builder.AbstractBuild;
+import core.resources.IResourceAcceptor;
+import core.resources.IResourceRoot;
+import core.resources.PathUtils;
+import core.resources.search.ISearch;
+import core.resources.search.ISearchAcceptor;
 
 /**
  * Used for the root of the Classpath
@@ -74,7 +76,7 @@ public class ClasspathRoot implements IResourceRoot
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.IResourceRoot#lookup(com.iw.plugins.spindle.core.resources.IResourceAcceptor)
+     * @see core.resources.IResourceRoot#lookup(core.resources.IResourceAcceptor)
      */
     public void lookup(IResourceAcceptor acceptor)
     {
@@ -85,7 +87,7 @@ public class ClasspathRoot implements IResourceRoot
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#getSearch()
+     * @see core.resources.ICoreResource#getSearch()
      */
     public ISearch getSearch() throws TapestryCoreException
     {
@@ -100,7 +102,7 @@ public class ClasspathRoot implements IResourceRoot
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.IResourceRoot#exists()
+     * @see core.resources.IResourceRoot#exists()
      */
     public boolean exists()
     {
@@ -110,7 +112,7 @@ public class ClasspathRoot implements IResourceRoot
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.IResourceRoot#getRelativeResource(java.lang.String)
+     * @see core.resources.IResourceRoot#getRelativeResource(java.lang.String)
      */
     public Resource getRelativeResource(String path)
     {

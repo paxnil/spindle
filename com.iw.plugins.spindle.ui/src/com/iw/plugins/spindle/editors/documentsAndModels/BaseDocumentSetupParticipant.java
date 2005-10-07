@@ -39,8 +39,9 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.internal.ui.text.XMLReconciler;
 
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.util.UIUtils;
+
+import core.util.Assert;
 
 /**
  * BaseDocumentSetupParticipant TODO add something here

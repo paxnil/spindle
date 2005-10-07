@@ -35,8 +35,9 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
+
+import core.util.Assert;
 
 /**
  * Base class for actions that cause a jump from one editor to another

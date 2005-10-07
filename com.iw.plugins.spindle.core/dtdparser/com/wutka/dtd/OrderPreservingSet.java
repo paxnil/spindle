@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.iw.plugins.spindle.core.util.Assert;
+import core.util.Assert;
 
 /**
  * A Set that preserves the order things are added

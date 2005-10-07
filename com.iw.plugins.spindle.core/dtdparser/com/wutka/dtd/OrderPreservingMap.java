@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.iw.plugins.spindle.core.util.Assert;
+import core.util.Assert;
 
 /**
  * A map that preserves the order things are added

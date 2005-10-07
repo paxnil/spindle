@@ -39,8 +39,7 @@ import java.util.Vector;
 import org.apache.tapestry.util.MultiKey;
 import org.eclipse.jface.text.IDocument;
 
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.util.Assert;
+
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDAttribute;
 import com.wutka.dtd.DTDComment;
@@ -49,6 +48,9 @@ import com.wutka.dtd.DTDElement;
 import com.wutka.dtd.DTDEnumeration;
 import com.wutka.dtd.DTDItem;
 import com.wutka.dtd.DTDSequence;
+
+import core.CoreMessages;
+import core.util.Assert;
 
 /**
  * Helper class for accessing DTD information

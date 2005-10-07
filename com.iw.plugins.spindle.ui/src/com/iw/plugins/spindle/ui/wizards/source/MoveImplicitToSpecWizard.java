@@ -56,16 +56,17 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.spec.PluginBindingSpecification;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.spec.PluginContainedComponent;
-import com.iw.plugins.spindle.core.util.IndentingWriter;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
+
+import core.resources.ICoreResource;
+import core.source.ISourceLocation;
+import core.source.ISourceLocationInfo;
+import core.spec.PluginBindingSpecification;
+import core.spec.PluginComponentSpecification;
+import core.spec.PluginContainedComponent;
+import core.util.IndentingWriter;
+import core.util.XMLUtil;
 
 /**
  * Wizard to move in implicit (@ComponentType) declaration from a Template to a

@@ -29,15 +29,13 @@ package tests.Parser;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.xerces.dom.DocumentImpl;
 import org.w3c.dom.Document;
 
-import com.iw.plugins.spindle.core.parser.dom.IDOMModel;
-import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.util.Files;
 import com.iw.plugins.spindle.xerces.parser.Parser;
 
+import core.parser.dom.IDOMModel;
+import core.parser.dom.validator.DOMValidator;
+import core.source.IProblem;
 import core.test.AbstractXMLTestCase;
 
 /**

@@ -39,15 +39,7 @@ import org.apache.xerces.xni.parser.XMLParseException;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.source.DefaultProblem;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.source.ISourceLocationResolver;
-import com.iw.plugins.spindle.core.source.SourceLocation;
-import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.Files;
+
 import com.iw.plugins.spindle.xerces.document.BadLocationException;
 import com.iw.plugins.spindle.xerces.document.Document;
 import com.iw.plugins.spindle.xerces.document.FindReplaceDocumentAdapter;
@@ -57,6 +49,16 @@ import com.iw.plugins.spindle.xerces.parser.xml.dom.TapestryDOMParser;
 import com.iw.plugins.spindle.xerces.parser.xml.dom.TapestryDOMParserConfiguration;
 import com.iw.plugins.spindle.xerces.parser.xml.pull.TapestryPullParser;
 import com.iw.plugins.spindle.xerces.parser.xml.pull.TapestryPullParserConfiguration;
+
+import core.TapestryCore;
+import core.source.DefaultProblem;
+import core.source.IProblem;
+import core.source.IProblemCollector;
+import core.source.ISourceLocation;
+import core.source.ISourceLocationResolver;
+import core.source.SourceLocation;
+import core.util.Assert;
+import core.util.Files;
 
 /**
  * The xml parser used in the builds. can be used to dom-parse or pull-parse XML content Validates
@@ -307,7 +309,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationResolver#getLineOffset(int)
+     * @see core.source.ISourceLocationResolver#getLineOffset(int)
      */
     public int getLineOffset(int parserReportedLineNumber)
     {
@@ -423,7 +425,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationResolver#getTagNameLocation(com.iw.plugins.spindle.core.source.ISourceLocation)
+     * @see core.source.ISourceLocationResolver#getTagNameLocation(core.source.ISourceLocation)
      */
     public ISourceLocation getTagNameLocation(String elementName,
             ISourceLocation elementStartLocation)

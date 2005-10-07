@@ -32,8 +32,9 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
+
+import core.util.Assert;
 
 /**
  * an ISelectionValidator that validates the type of the elements.

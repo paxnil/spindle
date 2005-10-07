@@ -44,11 +44,12 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryPluginException;
-import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 import com.wutka.dtd.DTD;
+
+import core.parser.dom.validator.DOMValidator;
+import core.util.Assert;
 
 /**
  * SpecificationEdits base class for creating an Edit to change a specification

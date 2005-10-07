@@ -50,21 +50,23 @@ import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
+
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
+
+import core.ITapestryProject;
+import core.TapestryCore;
+import core.resources.ICoreResource;
+import core.resources.IResourceRoot;
+import core.spec.PluginComponentSpecification;
 
 /**
  * Content assist inside of attribute values

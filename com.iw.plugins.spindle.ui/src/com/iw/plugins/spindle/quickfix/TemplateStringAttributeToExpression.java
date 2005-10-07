@@ -42,8 +42,9 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.ui.util.UIUtils;
+
+import core.source.IProblem;
 
 /**
  * <p>

@@ -38,7 +38,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 
-import com.iw.plugins.spindle.core.source.IProblem;
+import core.source.IProblem;
 
 /**
  * Annotation representating an <code>IProblem</code>.

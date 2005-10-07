@@ -26,13 +26,15 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCoreException;
+
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
-import com.iw.plugins.spindle.core.resources.search.ISearch;
-import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
+
+import core.ITapestryProject;
+import core.TapestryCore;
+import core.TapestryCoreException;
+import core.resources.search.ISearch;
+import core.resources.search.ISearchAcceptor;
 
 // does not stay up to date as time goes on!
 

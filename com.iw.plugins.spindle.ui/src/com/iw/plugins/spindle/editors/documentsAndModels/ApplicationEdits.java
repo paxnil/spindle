@@ -27,7 +27,7 @@ package com.iw.plugins.spindle.editors.documentsAndModels;
 
 import org.eclipse.jface.text.IDocument;
 
-import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
+import core.spec.PluginApplicationSpecification;
 
 /**
  * ApplicationEdits TODO add something here

@@ -35,8 +35,8 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
-import com.iw.plugins.spindle.core.resources.search.ISearch;
-import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
+import core.resources.search.ISearch;
+import core.resources.search.ISearchAcceptor;
 
 /**
  * A search for looking into resource deltas!
@@ -53,7 +53,7 @@ public class ResourceDeltaSearch implements ISearch, IResourceDeltaVisitor
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.search.ISearch#configure(java.lang.Object)
+     * @see core.resources.search.ISearch#configure(java.lang.Object)
      */
     public void configure(Object root)
     {
@@ -63,7 +63,7 @@ public class ResourceDeltaSearch implements ISearch, IResourceDeltaVisitor
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.search.ISearch#search(com.iw.plugins.spindle.core.resources.search.ISearchAcceptor)
+     * @see core.resources.search.ISearch#search(core.resources.search.ISearchAcceptor)
      */
     public void search(ISearchAcceptor acceptor)
     {

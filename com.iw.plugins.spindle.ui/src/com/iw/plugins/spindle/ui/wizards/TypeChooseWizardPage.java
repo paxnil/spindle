@@ -60,12 +60,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
@@ -75,6 +74,9 @@ import com.iw.plugins.spindle.ui.wizards.fields.NamespaceDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.PackageDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.RawTypeDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
+
+import core.ITapestryProject;
+import core.resources.ICoreResource;
 
 /**
  * TypeChooseWizardPage wizard page for choosing or creating new Tapestry

@@ -45,8 +45,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.util.Assert;
+
+import core.source.IProblem;
+import core.util.Assert;
 
 /**
  * A Utility class

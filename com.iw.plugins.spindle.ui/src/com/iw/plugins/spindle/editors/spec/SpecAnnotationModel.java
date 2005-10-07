@@ -38,9 +38,10 @@ import org.eclipse.ui.IFileEditorInput;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.editors.ProblemAnnotation;
 import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
+
+import core.source.IProblem;
 
 /**
  * Model for Spec annotations - of course only files and not jar entries will
@@ -123,7 +124,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(com.iw.plugins.spindle.core.source.IProblem)
+   * @see core.source.IProblemCollector#addProblem(core.source.IProblem)
    */
   public void addProblem(IProblem problem)
   {
@@ -149,7 +150,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.core.parser.IProblemCollector#endCollecting()
+   * @see core.parser.IProblemCollector#endCollecting()
    */
   public void endCollecting()
   {

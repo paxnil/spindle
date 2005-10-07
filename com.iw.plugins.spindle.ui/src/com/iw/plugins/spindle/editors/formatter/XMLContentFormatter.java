@@ -38,7 +38,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
 
-import com.iw.plugins.spindle.core.util.Assert;
+import core.util.Assert;
 
 /**
  * a formatter for XML content.

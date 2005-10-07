@@ -70,7 +70,8 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.spec.IIdentifiable;
+
+import core.spec.IIdentifiable;
 
 /**
  * TODO Add Type comment

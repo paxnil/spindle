@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Display;
 
-import com.iw.plugins.spindle.core.ICoreListener;
-import com.iw.plugins.spindle.core.ICoreListeners;
+import core.ICoreListener;
+import core.ICoreListeners;
+
+
 
 /**
  * @author gwl

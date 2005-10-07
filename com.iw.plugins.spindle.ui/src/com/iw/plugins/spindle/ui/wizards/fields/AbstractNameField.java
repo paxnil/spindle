@@ -26,9 +26,10 @@ package com.iw.plugins.spindle.ui.wizards.fields;
 import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringField;
+
+import core.util.Assert;
 
 public abstract class AbstractNameField extends StringField
 {

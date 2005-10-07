@@ -42,15 +42,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.jdom.Document;
 
+
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
-import com.iw.plugins.spindle.core.util.IndentingWriter;
-import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
 import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
@@ -58,6 +55,11 @@ import com.iw.plugins.spindle.ui.wizards.factories.IFactoryTemplateSource;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;
 import com.iw.plugins.spindle.xmlinspector.WebXMLInspector;
+
+import core.CoreMessages;
+import core.util.IndentingWriter;
+import core.util.XMLPublicIDUtil;
+import core.util.XMLUtil;
 
 /**
  * @author glongman@gmail.com

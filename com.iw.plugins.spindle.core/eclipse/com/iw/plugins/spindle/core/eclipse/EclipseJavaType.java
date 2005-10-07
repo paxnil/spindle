@@ -3,10 +3,12 @@ package com.iw.plugins.spindle.core.eclipse;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.iw.plugins.spindle.core.IJavaType;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.util.Assert;
+
 import com.iw.plugins.spindle.core.util.eclipse.EclipseUtils;
+
+import core.IJavaType;
+import core.TapestryCore;
+import core.util.Assert;
 
 
 /**
@@ -25,7 +27,7 @@ public class EclipseJavaType implements IJavaType
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.IJavaType#exists()
+     * @see core.IJavaType#exists()
      */
     public boolean exists()
     {
@@ -35,7 +37,7 @@ public class EclipseJavaType implements IJavaType
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.IJavaType#getName()
+     * @see core.IJavaType#getName()
      */
     public String getFullyQualifiedName()
     {
@@ -45,7 +47,7 @@ public class EclipseJavaType implements IJavaType
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.IJavaType#getUnderlier()
+     * @see core.IJavaType#getUnderlier()
      */
     public Object getUnderlier()
     {
@@ -55,7 +57,7 @@ public class EclipseJavaType implements IJavaType
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.IJavaType#isBinary()
+     * @see core.IJavaType#isBinary()
      */
     public boolean isBinary()
     {
@@ -65,7 +67,7 @@ public class EclipseJavaType implements IJavaType
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.IJavaType#isInterface()
+     * @see core.IJavaType#isInterface()
      */
     public boolean isInterface()
     {
@@ -83,7 +85,7 @@ public class EclipseJavaType implements IJavaType
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.IJavaType#isInterface()
+     * @see core.IJavaType#isInterface()
      */
     public boolean isAnnotation()
     {
@@ -101,7 +103,7 @@ public class EclipseJavaType implements IJavaType
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.IJavaType#isSuperTypeOf(com.iw.plugins.spindle.core.IJavaType)
+     * @see core.IJavaType#isSuperTypeOf(core.IJavaType)
      */
     public boolean isSuperTypeOf(IJavaType candidate)
     {

@@ -38,12 +38,13 @@ import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
-import com.iw.plugins.spindle.core.parser.template.CoreTemplateParser;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
+
+import core.parser.template.CoreTemplateParser;
+import core.spec.PluginComponentSpecification;
+import core.util.Assert;
 
 /**
  * Helper class for Template ContentAssistProcessors

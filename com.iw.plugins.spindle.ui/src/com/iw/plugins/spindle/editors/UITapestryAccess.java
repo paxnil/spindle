@@ -43,11 +43,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.XMLUtil;
+
+import core.namespace.ComponentSpecificationResolver;
+import core.namespace.ICoreNamespace;
+import core.spec.PluginComponentSpecification;
+import core.util.Assert;
+import core.util.XMLUtil;
 
 /**
  * Access Tapestry Artifacts for various UI tasks. public methods are not meant

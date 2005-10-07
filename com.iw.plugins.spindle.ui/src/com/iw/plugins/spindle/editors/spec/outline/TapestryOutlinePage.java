@@ -62,15 +62,16 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.scanning.BaseValidator;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.spec.BaseSpecification;
-import com.iw.plugins.spindle.core.spec.IIdentifiable;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
+
+import core.scanning.BaseValidator;
+import core.source.ISourceLocationInfo;
+import core.spec.BaseSpecification;
+import core.spec.IIdentifiable;
+import core.spec.PluginComponentSpecification;
+import core.spec.PluginLibrarySpecification;
+import core.util.Assert;
 
 /**
  * Outline view for Spec Editor that shows parse results only.

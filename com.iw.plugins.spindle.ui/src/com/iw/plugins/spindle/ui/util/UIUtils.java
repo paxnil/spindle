@@ -57,13 +57,14 @@ import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.editors.formatter.DoctypeEditFormatWorker;
 import com.iw.plugins.spindle.editors.formatter.FixedMultiPassContentFormatter;
 import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
 import com.iw.plugins.spindle.editors.formatter.MasterFormattingStrategy;
 import com.iw.plugins.spindle.editors.formatter.SlaveFormattingStrategy;
 import com.iw.plugins.spindle.editors.formatter.StartTagEditFormatWorker;
+
+import core.resources.ICoreResource;
 
 /**
  * Access to features exposed by the JDT UI plugin

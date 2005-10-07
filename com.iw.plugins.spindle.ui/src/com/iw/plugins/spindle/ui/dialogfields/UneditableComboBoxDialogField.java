@@ -34,8 +34,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.widgets.UneditableComboBox;
+
+import core.util.Assert;
 
 public class UneditableComboBoxDialogField extends DialogField
 {

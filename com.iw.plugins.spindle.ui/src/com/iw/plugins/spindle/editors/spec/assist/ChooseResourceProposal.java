@@ -35,9 +35,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.core.resources.IResourceRoot;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
+
+import core.resources.IResourceRoot;
+import core.util.Assert;
 
 /**
  * Proposal that gets its value from the user!

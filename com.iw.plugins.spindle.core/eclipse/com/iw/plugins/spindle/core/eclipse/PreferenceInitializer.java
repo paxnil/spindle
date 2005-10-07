@@ -27,9 +27,10 @@ package com.iw.plugins.spindle.core.eclipse;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
 
-import com.iw.plugins.spindle.core.IPreferenceConstants;
+import core.IPreferenceConstants;
+
+
 
 /**
  * Preference Initializer for the Spindle Core
@@ -56,6 +57,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer impleme
         store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
         store.setDefault(BUILDER_MARKER_MISSES, CORE_STATUS_WARN);
         store.setDefault(BUILDER_HANDLE_ASSETS, CORE_STATUS_WARN);
+        store.setDefault(NAMESPACE_CLASH_SEVERITY, CORE_STATUS_ERROR);
         //store.addPropertyChangeListener((IPropertyChangeListener) TapestryCorePlugin.getDefault());
     }
 

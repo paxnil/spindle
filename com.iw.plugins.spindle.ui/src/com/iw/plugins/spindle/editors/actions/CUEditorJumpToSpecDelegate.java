@@ -42,13 +42,15 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
+
+import core.ITapestryProject;
+import core.resources.ICoreResource;
+import core.spec.BaseSpecLocatable;
 
 /**
  * Action to Jump from a java file editor to a related tapestry spec (if one exists)
@@ -241,7 +243,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.ICoreResource)
+         * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction.ChooseLocationPopup#getImage(core.resources.ICoreResource)
          */
         protected Image getImage(ICoreResource location)
         {

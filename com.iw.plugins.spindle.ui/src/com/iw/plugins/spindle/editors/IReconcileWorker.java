@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.editors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import com.iw.plugins.spindle.core.source.IProblemCollector;
+import core.source.IProblemCollector;
 
 /**
  * Called by Reconcilers on editors that perform thier own.

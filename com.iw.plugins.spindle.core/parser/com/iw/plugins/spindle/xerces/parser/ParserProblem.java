@@ -1,6 +1,6 @@
 package com.iw.plugins.spindle.xerces.parser;
 
-import com.iw.plugins.spindle.core.source.DefaultProblem;
+import core.source.DefaultProblem;
 
 public class ParserProblem extends DefaultProblem
 {   

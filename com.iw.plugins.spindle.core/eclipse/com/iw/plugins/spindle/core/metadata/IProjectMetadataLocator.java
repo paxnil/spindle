@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * Implementations will return web metadata that Spindle needs to operate. Implementations are
  * registerd by natureId by adding and extension to the point
- * <i>com.iw.plugins.spindle.core.projectMetadataLocator </i>
+ * <i>core.projectMetadataLocator </i>
  */
 public interface IProjectMetadataLocator
 {

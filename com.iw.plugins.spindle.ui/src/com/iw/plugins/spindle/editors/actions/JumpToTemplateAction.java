@@ -39,12 +39,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
-import com.iw.plugins.spindle.core.spec.BaseSpecification;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
+
+import core.resources.ICoreResource;
+import core.spec.BaseSpecification;
+import core.spec.PluginComponentSpecification;
+import core.util.Assert;
 
 /**
  * Jump from spec/template editors to associated java files
@@ -176,7 +177,7 @@ public class JumpToTemplateAction extends BaseJumpAction
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.ICoreResource)
+     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(core.resources.ICoreResource)
      */
     protected Image getImage(ICoreResource location)
     {

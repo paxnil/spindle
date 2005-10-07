@@ -27,10 +27,11 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.source.DefaultProblem;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
+
+import core.source.DefaultProblem;
+import core.source.IProblem;
+import core.source.IProblemCollector;
+import core.source.ISourceLocation;
 
 public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationModel implements
         IProblemCollector
@@ -451,8 +452,8 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(int,
-     *      com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
+     * @see core.parser.IProblemCollector#addProblem(int,
+     *      core.parser.ISourceLocation, java.lang.String)
      */
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
@@ -463,7 +464,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(com.iw.plugins.spindle.core.parser.IProblem)
+     * @see core.parser.IProblemCollector#addProblem(core.parser.IProblem)
      */
     public void addProblem(IProblem problem)
     {
@@ -475,7 +476,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.parser.IProblemCollector#getProblems()
+     * @see core.parser.IProblemCollector#getProblems()
      */
     public IProblem[] getProblems()
     {

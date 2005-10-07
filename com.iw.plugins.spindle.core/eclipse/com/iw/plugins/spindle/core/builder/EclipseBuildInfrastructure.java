@@ -56,25 +56,36 @@ import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.osgi.framework.Bundle;
 
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCoreException;
+
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.parser.dom.IDOMModelSource;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
-import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.eclipse.AbstractEclipseSearchAcceptor;
-import com.iw.plugins.spindle.core.source.DefaultProblem;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.SourceLocation;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
+
+import core.CoreMessages;
+import core.TapestryCore;
+import core.TapestryCoreException;
+import core.builder.AbstractBuildInfrastructure;
+import core.builder.BrokenWebXMLException;
+import core.builder.BuildNotifier;
+import core.builder.BuilderException;
+import core.builder.ClashException;
+import core.builder.FullBuild;
+import core.builder.IBuildAction;
+import core.builder.State;
+import core.builder.WebXMLScanner;
+import core.parser.dom.IDOMModelSource;
+import core.resources.ICoreResource;
+import core.resources.search.ISearch;
+import core.source.DefaultProblem;
+import core.source.IProblem;
+import core.source.SourceLocation;
+import core.util.Assert;
 
 /**
  * The Tapestry Builder, kicks off full and incremental builds.
@@ -86,11 +97,11 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     private final Bundle systemBundle = Platform.getBundle("org.eclipse.osgi");
 
-    private static String  PACKAGE_CACHE = "PACKAGE_CACHE";
+    private static String PACKAGE_CACHE = "PACKAGE_CACHE";
 
-    private static String STORAGE_CACHE = "STORAGE_CACHE"; 
-    
-    private static String CLASSPATH_SEARCH_CACHE = "CLASSPATH_SEARCH_CACHE"; 
+    private static String STORAGE_CACHE = "STORAGE_CACHE";
+
+    private static String CLASSPATH_SEARCH_CACHE = "CLASSPATH_SEARCH_CACHE";
 
     public static Map getPackageCache()
     {
@@ -101,8 +112,9 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     {
         return getOrCreateCache(STORAGE_CACHE);
     }
-    
-    public static Map getClasspathSearchCache() {
+
+    public static Map getClasspathSearchCache()
+    {
         return getOrCreateCache(CLASSPATH_SEARCH_CACHE);
     }
 
@@ -127,9 +139,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     IClasspathEntry[] fClasspath;
 
-    IResourceDelta fDelta;
-
-    private WebXMLScanner fWebXMLScanner;    
+    IResourceDelta fDelta;    
 
     private List fExcludedFileNames;
 
@@ -149,7 +159,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     {
         fProblemPersister = new Markers();
 
-        fNotifier.begin();        
+        fNotifier.begin();
 
         boolean ok = false;
 
@@ -190,6 +200,27 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             if (AbstractBuildInfrastructure.DEBUG)
                 System.err.println("Tapestry build aborted: " + e.getMessage());
         }
+        catch (ClashException e)
+        {
+            fProblemPersister.removeAllProblems(fTapestryProject);
+            ICoreResource requestor = e.getRequestor();
+            fProblemPersister.recordProblem(requestor, new DefaultProblem(
+                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-REQUESTOR",
+                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+
+            ICoreResource owner = e.getOwner();
+            fProblemPersister.recordProblem(owner, new DefaultProblem(
+                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-OWNER",
+                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+
+            fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR,
+                    "Tapestry Build can't proceed due to namespace clashes",
+                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+            
+            if (AbstractBuildInfrastructure.DEBUG)
+                System.err.println("Tapestry build aborted: " + e.getMessage());
+        }
         catch (BuilderException e)
         {
             fProblemPersister.removeAllProblems(fTapestryProject);
@@ -211,7 +242,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             throw e;
         }
         finally
-        {           
+        {
             if (!ok)
                 // If the build failed, clear the previously built state,
                 // forcing a full build next time.
@@ -230,7 +261,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
         ArrayList projects = new ArrayList();
         try
-        {           
+        {
             IClasspathEntry[] entries = ((JavaProject) fJavaProject).getExpandedClasspath(true);
             for (int i = 0, length = entries.length; i < length; i++)
             {
@@ -264,9 +295,9 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.AbstractBuildInfrastructure#getClasspathMemento()
+     * @see core.builder.AbstractBuildInfrastructure#getClasspathMemento()
      */
-    Object getClasspathMemento()
+    public Object getClasspathMemento()
     {
         return fClasspath;
     }
@@ -274,9 +305,9 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.AbstractBuildInfrastructure#copyClasspathMemento()
+     * @see core.builder.AbstractBuildInfrastructure#copyClasspathMemento()
      */
-    Object copyClasspathMemento(Object memento)
+    public Object copyClasspathMemento(Object memento)
     {
         IClasspathEntry[] source = (IClasspathEntry[]) memento;
         IClasspathEntry[] result = new IClasspathEntry[source.length];
@@ -284,14 +315,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         return result;
     }
 
-    State getLastState()
+    public State getLastState()
     {
         return (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(
                 fCurrentProject,
                 false);
     }
 
-    void persistState(State state)
+    public void persistState(State state)
     {
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
                 fCurrentProject,
@@ -301,9 +332,9 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.AbstractBuildInfrastructure#createWebXMLScanner()
+     * @see core.builder.AbstractBuildInfrastructure#createWebXMLScanner()
      */
-    WebXMLScanner createWebXMLScanner()
+    public WebXMLScanner createWebXMLScanner()
     {
         return new EclipseWebXMLScanner(fBuild);
     }
@@ -311,7 +342,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /**
      * Method clearLastState.
      */
-    private void clearLastState()
+    public void clearLastState()
     {
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
                 fCurrentProject,
@@ -502,15 +533,15 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /**
      * Find and add all files with Tapestry extensions found in the classpath to a List.
      */
-    public void findAllTapestryArtifactsInClasspath(Set knownTemplateExtensions, final ArrayList found)
+    public void findAllTapestryArtifactsInClasspath(Set knownTemplateExtensions,
+            final ArrayList found)
     {
-        Assert.isLegal(knownTemplateExtensions != null && !knownTemplateExtensions.isEmpty());        
+        Assert.isLegal(knownTemplateExtensions != null && !knownTemplateExtensions.isEmpty());
         ISearch searcher = null;
         try
         {
             searcher = fClasspathRoot.getSearch();
-            searcher.search(new ArtifactCollector(knownTemplateExtensions,
-                    getExcludedFileNames())
+            searcher.search(new ArtifactCollector(knownTemplateExtensions, getExcludedFileNames())
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
                 {
@@ -532,14 +563,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /**
      * Find and add all files with Tapestry extensions found in the web context to a List.
      */
-    public void findAllTapestryArtifactsInWebContext(Set knownTemplateExtensions, final ArrayList found)
+    public void findAllTapestryArtifactsInWebContext(Set knownTemplateExtensions,
+            final ArrayList found)
     {
         ISearch searcher = null;
         try
         {
             searcher = fContextRoot.getSearch();
-            searcher.search(new ArtifactCollector(knownTemplateExtensions,
-                    getExcludedFileNames())
+            searcher.search(new ArtifactCollector(knownTemplateExtensions, getExcludedFileNames())
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
                 {
@@ -580,7 +611,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     {
         public ArtifactCollector(Set allowed, List excluded)
         {
-            super(ACCEPT_ANY, allowed, excluded); 
+            super(ACCEPT_ANY, allowed, excluded);
         }
 
         public boolean keepGoing()

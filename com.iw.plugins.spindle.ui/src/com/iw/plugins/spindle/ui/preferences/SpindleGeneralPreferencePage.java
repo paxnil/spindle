@@ -42,9 +42,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
+
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
+
+import core.TapestryCore;
 
 /**
  * @author GWL

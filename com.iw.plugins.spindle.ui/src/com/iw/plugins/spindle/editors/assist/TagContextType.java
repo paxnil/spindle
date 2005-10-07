@@ -45,7 +45,8 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.Assert;
+
+import core.util.Assert;
 
 /**
  * AttributeContextType TODO add something here

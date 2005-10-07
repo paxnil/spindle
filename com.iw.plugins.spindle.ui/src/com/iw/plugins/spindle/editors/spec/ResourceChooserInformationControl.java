@@ -57,12 +57,13 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
-import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
 import com.iw.plugins.spindle.editors.util.BusyIndicatorSpindle;
+
+import core.resources.IResourceRoot;
+import core.spec.BaseSpecLocatable;
 
 /**
  * InformationControl for choosing Assets

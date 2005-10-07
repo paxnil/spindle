@@ -54,9 +54,11 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
+
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+
+import core.TapestryCore;
 
 /**
  * As addition to the JavaCapabilityConfigurationPage, the wizard does an early project creation (so

@@ -24,7 +24,7 @@
       <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="com.iw.plugins.spindle.core" export="true"/>
+      <import plugin="spindle.core" export="true"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="net.sf.solareclipse.ui"/>
       <import plugin="net.sf.solareclipse.xml.ui"/>
@@ -55,7 +55,7 @@
       <classpathContainerPage
             name="Tapestry Framework (plugin default)"
             class="com.iw.plugins.spindle.ui.classpath.CoreContainerWizardPage"
-            id="com.iw.plugins.spindle.core.TAPESTRY_FRAMEWORK">
+            id="spindle.core.TAPESTRY_FRAMEWORK">
       </classpathContainerPage>
    </extension>
    

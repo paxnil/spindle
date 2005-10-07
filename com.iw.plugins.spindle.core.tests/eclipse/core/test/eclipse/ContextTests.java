@@ -11,11 +11,11 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 
+import core.resources.ICoreResource;
+import core.resources.IResourceAcceptor;
 import core.test.SuiteOfTestCases;
 
 public class ContextTests extends AbstractEclipseTestCase

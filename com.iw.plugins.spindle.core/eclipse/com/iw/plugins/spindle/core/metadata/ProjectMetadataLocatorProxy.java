@@ -12,8 +12,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.TapestryCore;
+import core.CoreMessages;
+import core.TapestryCore;
+
+
 
 /**
  * Instances of this class represent metadata locators found to be contributed via the locators
@@ -50,7 +52,7 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.metadata.IProjectMetadataLocator#getWebContextRootFolder(org.eclipse.core.resources.IProject,
+     * @see core.metadata.IProjectMetadataLocator#getWebContextRootFolder(org.eclipse.core.resources.IProject,
      *      java.lang.String)
      */
     public IFolder getWebContextRootFolder(String natureId, IProject project) throws CoreException

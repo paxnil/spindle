@@ -39,7 +39,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
-import com.iw.plugins.spindle.core.util.Assert;
+
+import core.util.Assert;
 
 class ResourceCreationRunnable implements IRunnableWithProgress
 {

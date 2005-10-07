@@ -51,7 +51,6 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.actions.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
@@ -60,6 +59,8 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
 import com.iw.plugins.spindle.ui.widgets.PixelConverter;
 import com.iw.plugins.spindle.ui.widgets.ResizableWizardDialog;
 import com.iw.plugins.spindle.ui.wizards.source.MoveImplicitToSpecWizard;
+
+import core.spec.PluginComponentSpecification;
 
 /**
  * Move an implictly declared component from the template to the specification

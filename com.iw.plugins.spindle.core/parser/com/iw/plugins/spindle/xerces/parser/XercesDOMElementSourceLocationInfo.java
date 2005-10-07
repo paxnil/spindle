@@ -32,14 +32,16 @@ import java.util.Set;
 
 import org.apache.hivemind.Resource;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.source.ISourceLocationResolver;
-import com.iw.plugins.spindle.core.source.SourceLocation;
+
 import com.iw.plugins.spindle.xerces.parser.xml.event.ElementXMLEventInfo;
 import com.iw.plugins.spindle.xerces.parser.xml.event.SimpleXMLEventInfo;
 import com.iw.plugins.spindle.xerces.parser.xml.event.XMLEnityEventInfo;
+
+import core.TapestryCore;
+import core.source.ISourceLocation;
+import core.source.ISourceLocationInfo;
+import core.source.ISourceLocationResolver;
+import core.source.SourceLocation;
 
 public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
 {
@@ -120,7 +122,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getOffset()
+     * @see core.source.ISourceLocationInfo#getOffset()
      */
     public int getOffset()
     {
@@ -130,7 +132,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getLength()
+     * @see core.source.ISourceLocationInfo#getLength()
      */
     public int getLength()
     {
@@ -148,7 +150,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#hasAttributes()
+     * @see core.source.ISourceLocationInfo#hasAttributes()
      */
     public boolean hasAttributes()
     {
@@ -158,7 +160,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#isEmptyTag()
+     * @see core.source.ISourceLocationInfo#isEmptyTag()
      */
     public boolean isEmptyTag()
     {
@@ -168,7 +170,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getSourceLocation()
+     * @see core.source.ISourceLocationInfo#getSourceLocation()
      */
     public ISourceLocation getSourceLocation()
     {
@@ -180,7 +182,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getContentSourceLocation()
+     * @see core.source.ISourceLocationInfo#getContentSourceLocation()
      */
     public ISourceLocation getContentSourceLocation()
     {
@@ -195,7 +197,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getStartTagSourceLocation()
+     * @see core.source.ISourceLocationInfo#getStartTagSourceLocation()
      */
     public ISourceLocation getStartTagSourceLocation()
     {
@@ -208,7 +210,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getTagNameLocation()
+     * @see core.source.ISourceLocationInfo#getTagNameLocation()
      */
     public ISourceLocation getTagNameLocation()
     {
@@ -218,7 +220,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getEndTagSourceLocation()
+     * @see core.source.ISourceLocationInfo#getEndTagSourceLocation()
      */
     public ISourceLocation getEndTagSourceLocation()
     {
@@ -230,7 +232,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getAttributeSourceLocation(java.lang.String)
+     * @see core.source.ISourceLocationInfo#getAttributeSourceLocation(java.lang.String)
      */
     public ISourceLocation getAttributeSourceLocation(String rawname)
     {
@@ -248,7 +250,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getAttributeNames()
+     * @see core.source.ISourceLocationInfo#getAttributeNames()
      */
     public Set getAttributeNames()
     {
@@ -403,7 +405,7 @@ public class XercesDOMElementSourceLocationInfo implements ISourceLocationInfo
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#setResource(org.apache.hivemind.Resource)
+     * @see core.source.ISourceLocationInfo#setResource(org.apache.hivemind.Resource)
      */
     public void setResource(Resource location)
     {

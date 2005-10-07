@@ -35,7 +35,8 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
+
+import core.source.IProblemCollector;
 
 public class ReconcilingStrategy
     implements

@@ -83,7 +83,7 @@ public class TapestryDOMParserConfiguration extends StandardParserConfiguration
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.core.parser.xml.StandardParserConfiguration#createDTDValidator()
+   * @see core.parser.xml.StandardParserConfiguration#createDTDValidator()
    */
   protected XMLDTDValidator createDTDValidator()
   {

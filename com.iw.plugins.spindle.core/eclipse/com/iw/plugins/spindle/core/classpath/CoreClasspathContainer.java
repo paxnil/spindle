@@ -41,9 +41,11 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
 
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+
+import core.CoreMessages;
+import core.TapestryCore;
 
 /**
  * Tapestry library container - resolves a classpath container variable to the Tapestry Libraries.

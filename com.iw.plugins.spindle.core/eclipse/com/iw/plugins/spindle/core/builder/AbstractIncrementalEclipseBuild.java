@@ -19,12 +19,19 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.extensions.eclipse.IncrementalBuildVetoController;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.util.eclipse.EclipseUtils;
+
+import core.TapestryCore;
+import core.builder.AbstractBuildInfrastructure;
+import core.builder.BuilderException;
+import core.builder.FullBuild;
+import core.builder.IIncrementalBuild;
+import core.builder.State;
+import core.namespace.ICoreNamespace;
+import core.resources.ICoreResource;
 
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
@@ -62,7 +69,7 @@ import com.iw.plugins.spindle.core.util.eclipse.EclipseUtils;
  * 
  * TODO Not Used anymore - to be removed
  * 
- * @see com.iw.plugins.spindle.core.builder.IncrementalProjectBuild
+ * @see core.builder.IncrementalProjectBuild
  *
  * @author glongman@gmail.com
  */
@@ -188,7 +195,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild()
+   * @see core.builder.IIncrementalBuild#canIncrementalBuild()
    */
   public boolean canIncrementalBuild()
   {
@@ -399,7 +406,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.core.builder.FullBuild#saveState()
+   * @see core.builder.FullBuild#saveState()
    */
   public void saveState()
   {

@@ -58,8 +58,9 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.builder.AbstractBuildInfrastructure;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
+
+import core.builder.AbstractBuildInfrastructure;
 
 /**
  * Reveals IStorages in the workbench as editors are selected

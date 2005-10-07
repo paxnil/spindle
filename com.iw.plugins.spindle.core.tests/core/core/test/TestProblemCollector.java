@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.iw.plugins.spindle.core.source.DefaultProblem;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
+import core.source.DefaultProblem;
+import core.source.IProblem;
+import core.source.IProblemCollector;
+import core.source.ISourceLocation;
+
+
 
 public class TestProblemCollector implements IProblemCollector
 {

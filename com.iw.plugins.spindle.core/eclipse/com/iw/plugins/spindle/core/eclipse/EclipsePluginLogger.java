@@ -6,7 +6,9 @@ import java.io.StringWriter;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import com.iw.plugins.spindle.core.ILogger;
+import core.ILogger;
+
+
 
 /**
  * @author gwl

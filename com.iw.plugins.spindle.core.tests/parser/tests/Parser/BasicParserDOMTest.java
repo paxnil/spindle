@@ -33,9 +33,10 @@ import junit.framework.TestCase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.scanning.W3CAccess;
-import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.xerces.parser.Parser;
+
+import core.scanning.W3CAccess;
+import core.source.IProblem;
 
 /**
  *  Basic Sanity Test for Parser

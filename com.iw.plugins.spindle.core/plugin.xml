@@ -5,7 +5,7 @@
    name="Spindle Core Plugin"
    version="3.1.21"
    provider-name="Geoffrey Longman"
-   class="com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin">
+   class="spindle.core.eclipse.TapestryCorePlugin">
 
    <runtime>
       <library name="core.jar">
@@ -96,7 +96,7 @@
    
    <extension
          point="org.eclipse.core.runtime.preferences">
-      <initializer class="com.iw.plugins.spindle.core.eclipse.PreferenceInitializer"/>
+      <initializer class="spindle.core.eclipse.PreferenceInitializer"/>
    </extension>
 
    <extension
@@ -105,7 +105,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="com.iw.plugins.spindle.core.eclipse.TapestryProject">
+               class="spindle.core.eclipse.TapestryProject">
          </run>
       </runtime>
       <requires-nature
@@ -118,7 +118,7 @@
          point="org.eclipse.core.resources.builders">
       <builder>
          <run
-               class="com.iw.plugins.spindle.core.builder.TapestryBuilder">
+               class="spindle.core.builder.TapestryBuilder">
          </run>
       </builder>
    </extension>
@@ -139,7 +139,7 @@
          name="Tapestry Build Problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="com.iw.plugins.spindle.core.problemmarker">
+            type="spindle.core.problemmarker">
       </super>     
       <persistent
             value="true">
@@ -150,7 +150,7 @@
          name="Tapestry Fatal Problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="com.iw.plugins.spindle.core.problemmarker">
+            type="spindle.core.problemmarker">
       </super>
      
       <persistent
@@ -162,7 +162,7 @@
          name="Tapestry Parser Problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="com.iw.plugins.spindle.core.problemmarker">
+            type="spindle.core.problemmarker">
       </super>
       
       <persistent
@@ -172,8 +172,8 @@
    <extension
          point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
-            class="com.iw.plugins.spindle.core.classpath.CoreClasspathContainerInitializer"
-            id="com.iw.plugins.spindle.core.TAPESTRY_FRAMEWORK">
+            class="spindle.core.classpath.CoreClasspathContainerInitializer"
+            id="spindle.core.TAPESTRY_FRAMEWORK">
       </classpathContainerInitializer>
    </extension>
    <extension         
@@ -181,22 +181,22 @@
          point="org.eclipse.core.runtime.adapters">
       <factory
             adaptableType="org.eclipse.core.resources.IResource"
-            class="com.iw.plugins.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
-         <adapter type="com.iw.plugins.spindle.core.ITapestryProject"/>
+            class="spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
+         <adapter type="spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
       </factory>
       <factory
             adaptableType="org.eclipse.core.resources.IStorage"
-            class="com.iw.plugins.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
-         <adapter type="com.iw.plugins.spindle.core.ITapestryProject"/>
+            class="spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
+         <adapter type="spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
       </factory>      
        <factory
             adaptableType="org.eclipse.ui.IFileEditorInput"
-            class="com.iw.plugins.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
-         <adapter type="com.iw.plugins.spindle.core.ITapestryProject"/>
+            class="spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
+         <adapter type="spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
       </factory>

@@ -34,10 +34,11 @@ import org.eclipse.ui.IEditorActionDelegate;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
-import com.iw.plugins.spindle.core.spec.BaseSpecification;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+
+import core.resources.ICoreResource;
+import core.spec.BaseSpecLocatable;
+import core.spec.BaseSpecification;
+import core.spec.PluginComponentSpecification;
 
 /**
  * Action to Jump from a java file editor to a related tapestry template (if one exists)
@@ -116,7 +117,7 @@ public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.ICoreResource)
+     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(core.resources.ICoreResource)
      */
     protected Image getImage(ICoreResource location)
     {

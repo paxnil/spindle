@@ -40,8 +40,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.UserDataHandler;
 
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.util.Assert;
+
+import core.source.ISourceLocationInfo;
+import core.util.Assert;
 
 /**
  * The implementation of org.w3c.dom.Node for the PullParser

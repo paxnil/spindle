@@ -43,8 +43,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.widgets.PixelConverter;
+
+import core.util.Assert;
 
 /**
  * @author GWL

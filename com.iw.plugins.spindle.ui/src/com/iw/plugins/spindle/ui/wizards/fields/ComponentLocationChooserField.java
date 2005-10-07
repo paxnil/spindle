@@ -47,13 +47,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
+
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextResource;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 import com.iw.plugins.spindle.ui.widgets.ContainerSelectionDialog;
+
+import core.ITapestryProject;
 
 /**
  * ComponentLocationChooserField TODO add something here

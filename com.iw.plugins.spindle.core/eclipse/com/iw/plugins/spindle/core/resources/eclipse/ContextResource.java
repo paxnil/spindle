@@ -42,12 +42,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
-import com.iw.plugins.spindle.core.resources.PathUtils;
-import com.iw.plugins.spindle.core.resources.search.ISearch;
+
+import core.TapestryCore;
+import core.resources.ICoreResource;
+import core.resources.IResourceAcceptor;
+import core.resources.PathUtils;
+import core.resources.search.ISearch;
 
 /**
  * Implementation of ICoreResource for resources found within the context of a web application (in
@@ -116,7 +118,7 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#exists()
+     * @see core.resources.ICoreResource#exists()
      */
     public boolean exists()
     {
@@ -126,7 +128,7 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#getSearch()
+     * @see core.resources.ICoreResource#getSearch()
      */
     public ISearch getSearch()
     {
@@ -136,7 +138,7 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#isBinaryResource()
+     * @see core.resources.ICoreResource#isBinaryResource()
      */
     public boolean isBinaryResource()
     {
@@ -146,7 +148,7 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#lookup(com.iw.plugins.spindle.core.resources.IResourceAcceptor)
+     * @see core.resources.ICoreResource#lookup(core.resources.IResourceAcceptor)
      */
     public void lookup(IResourceAcceptor requestor)
     {
@@ -169,7 +171,7 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#getContents()
+     * @see core.resources.ICoreResource#getContents()
      */
     public InputStream getContents()
     {
@@ -226,7 +228,7 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource#getProject()
+     * @see core.resources.eclipse.IEclipseResource#getProject()
      */
     public IProject getProject()
     {
@@ -239,7 +241,7 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.resources.ICoreResource#isClasspathResource()
+     * @see core.resources.ICoreResource#isClasspathResource()
      */
     public boolean isClasspathResource()
     {

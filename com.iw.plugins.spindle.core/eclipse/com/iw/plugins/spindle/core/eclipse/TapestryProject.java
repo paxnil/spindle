@@ -40,19 +40,21 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.iw.plugins.spindle.core.IJavaType;
-import com.iw.plugins.spindle.core.IJavaTypeFinder;
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
-import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
+
+import core.IJavaType;
+import core.IJavaTypeFinder;
+import core.ITapestryProject;
+import core.TapestryCore;
+import core.resources.IResourceRoot;
 
 /**
  * The Tapestry project nature. Configures and Deconfigures the builder 
@@ -459,7 +461,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.ITapestryProject#findType(java.lang.String)
+     * @see core.ITapestryProject#findType(java.lang.String)
      */
     public IJavaType findType(String fullyQualifiedName)
     {
@@ -503,7 +505,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.IJavaTypeFinder#isCachingJavaTypes()
+     * @see core.IJavaTypeFinder#isCachingJavaTypes()
      */
     public boolean isCachingJavaTypes()
     {

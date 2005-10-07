@@ -28,9 +28,10 @@ package com.iw.plugins.spindle.editors.spec.assist;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
+
+import core.util.Assert;
 
 /**
  * Contains Helper methods for content assist in specs

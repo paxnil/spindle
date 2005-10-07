@@ -33,8 +33,10 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
+
+import core.TapestryCore;
 /**
  * A concrete preference store implementation based on an internal
  * <code>java.util.Properties</code> object, with support for persisting the

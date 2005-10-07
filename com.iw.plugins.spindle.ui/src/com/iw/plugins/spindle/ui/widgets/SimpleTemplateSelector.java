@@ -50,9 +50,10 @@ import org.eclipse.swt.widgets.Label;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.wizards.factories.TemplateFactory;
+
+import core.util.Assert;
 
 /**
  * TemplateSelector a class that creates a combo that is populated with

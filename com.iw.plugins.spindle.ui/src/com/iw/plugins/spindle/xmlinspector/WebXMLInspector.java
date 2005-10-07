@@ -23,11 +23,13 @@ import org.jdom.input.DefaultJDOMFactory;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.dom.validator.DOMValidator;
-import com.iw.plugins.spindle.core.util.Assert;
+
 import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.wutka.dtd.DTD;
+
+import core.TapestryCore;
+import core.parser.dom.validator.DOMValidator;
+import core.util.Assert;
 
 /**
  * @author Administrator

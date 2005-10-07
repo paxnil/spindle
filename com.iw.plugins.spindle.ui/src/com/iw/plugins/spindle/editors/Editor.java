@@ -66,10 +66,6 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.ICoreResource;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 import com.iw.plugins.spindle.editors.actions.JumpToJavaAction;
 import com.iw.plugins.spindle.editors.actions.JumpToNextAttributeAction;
@@ -77,6 +73,11 @@ import com.iw.plugins.spindle.editors.actions.JumpToNextTagAction;
 import com.iw.plugins.spindle.editors.actions.JumpToSpecAction;
 import com.iw.plugins.spindle.editors.actions.JumpToTemplateAction;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
+
+import core.namespace.ICoreNamespace;
+import core.resources.ICoreResource;
+import core.source.IProblemCollector;
+import core.spec.BaseSpecLocatable;
 
 /**
  * Abstract base class for Editors.

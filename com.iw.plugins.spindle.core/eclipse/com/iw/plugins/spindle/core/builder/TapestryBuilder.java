@@ -15,6 +15,8 @@ import org.osgi.framework.Bundle;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.xerces.parser.XercesDOMModelSource;
 
+import core.builder.AbstractBuildInfrastructure;
+
 /**
  * @author gwl
  */

@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.iw.plugins.spindle.core.ILogger;
+import core.ILogger;
+
 
 public class TestLogger implements ILogger
 {
@@ -38,7 +39,7 @@ public class TestLogger implements ILogger
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.ILogger#log(java.lang.String)
+     * @see spindle.core.ILogger#log(java.lang.String)
      */
     public void log(String msg)
     {
@@ -48,7 +49,7 @@ public class TestLogger implements ILogger
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.ILogger#log(java.lang.Throwable)
+     * @see spindle.core.ILogger#log(java.lang.Throwable)
      */
     public void log(Throwable ex)
     {
@@ -58,7 +59,7 @@ public class TestLogger implements ILogger
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.ILogger#log(java.lang.String, java.lang.Throwable)
+     * @see spindle.core.ILogger#log(java.lang.String, java.lang.Throwable)
      */
     public void log(String message, Throwable ex)
     {

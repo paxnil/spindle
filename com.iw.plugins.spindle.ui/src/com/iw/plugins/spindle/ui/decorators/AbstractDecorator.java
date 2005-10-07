@@ -34,8 +34,10 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-import com.iw.plugins.spindle.core.ICoreListener;
-import com.iw.plugins.spindle.core.TapestryCore;
+import core.ICoreListener;
+import core.TapestryCore;
+
+
 
 /**
  * Base class for label decorators

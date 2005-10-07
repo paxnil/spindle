@@ -29,8 +29,9 @@ package all.tests.core;
 import junit.framework.Test;
 import all.tests.Tests;
 
-import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolverTests;
-import com.iw.plugins.spindle.core.scanning.ApplicationScannerTest;
+
+import core.namespace.ComponentSpecificationResolverTests;
+import core.scanning.ApplicationScannerTest;
 
 /**
  * @author glongman@gmail.com

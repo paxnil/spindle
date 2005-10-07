@@ -68,11 +68,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
+
 import com.iw.plugins.spindle.editors.SharedTextColors;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.iw.plugins.spindle.editors.documentsAndModels.SpecDocumentSetupParticipant;
@@ -82,6 +78,12 @@ import com.iw.plugins.spindle.editors.documentsAndModels.TemplateDocumentSetupPa
 import com.iw.plugins.spindle.editors.template.TemplateTextTools;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 import com.iw.plugins.spindle.ui.util.Revealer;
+
+import core.CoreMessages;
+import core.spec.PluginApplicationSpecification;
+import core.spec.PluginComponentSpecification;
+import core.spec.PluginLibrarySpecification;
+import core.util.XMLPublicIDUtil;
 
 /**
  * The main plugin class to be used in the desktop.

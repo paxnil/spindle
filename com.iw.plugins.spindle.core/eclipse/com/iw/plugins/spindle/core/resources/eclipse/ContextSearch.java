@@ -33,9 +33,10 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.search.ISearch;
-import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
+
+import core.TapestryCore;
+import core.resources.search.ISearch;
+import core.resources.search.ISearchAcceptor;
 
 // does not stay up to date as time goes on!
 

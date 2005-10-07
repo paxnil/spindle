@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.ui.wizards.fields;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import com.iw.plugins.spindle.core.util.Assert;
+import core.util.Assert;
 
 /**
  * Allows views to filter by type.

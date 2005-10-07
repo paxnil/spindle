@@ -51,13 +51,15 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
+
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;
+
+import core.TapestryCore;
+import core.util.XMLPublicIDUtil;
 
 /**
  * A wizard page for creating a new Tapestry web project.
