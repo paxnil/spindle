@@ -54,5 +54,7 @@ public interface ICoreResource extends Resource, ResourceExtension
   public InputStream getContents();
   
   public boolean clashesWith(ICoreResource resource);
+  
+  public boolean isFolder();
 
 }

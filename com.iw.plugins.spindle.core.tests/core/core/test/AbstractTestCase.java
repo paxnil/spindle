@@ -280,7 +280,7 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
 
     public void setUpSuite() throws Exception
     {
-        super.setUpSuite();
+        super.setUpSuite();       
         setUpTapestryCore();
     }
 

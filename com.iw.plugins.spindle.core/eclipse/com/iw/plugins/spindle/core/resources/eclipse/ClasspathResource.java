@@ -43,7 +43,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragment;
-
+import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
@@ -80,30 +80,35 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
     {
         super(root.getPath(fragment, storage));
         fRoot = root;
-    }    
+    }
 
     public boolean clashesWith(ICoreResource resource)
-    {        
+    {
         if (this == resource)
             return true;
-        
+
         if (!resource.isClasspathResource())
             return false;
-               
-        IPath mine = new Path(this.getPath());
-        IPath other = new Path(resource.getPath());
-        
+
+        IPath mine = new Path(this.getPath()).makeAbsolute();
+        if (!TapestryCore.isNull(getName()))
+            mine = mine.removeLastSegments(1);
+
+        IPath other = new Path(resource.getPath()).makeAbsolute();
+        if (!TapestryCore.isNull(resource.getName()))
+            other = other.removeLastSegments(1);
+
         if (mine.equals(other))
             return true;
-        
+
         if (mine.isPrefixOf(other))
             return true;
-        
+
         if (other.isPrefixOf(mine))
             return true;
-        
-        return false;                
-    }    
+
+        return false;
+    }
 
     protected Resource newResource(String path)
     {
@@ -112,18 +117,31 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
 
     public boolean exists()
     {
-        IStorage storage = getStorage();
-        if (storage != null)
+        if (!isFolder())
         {
-            if (storage instanceof IResource)
+            IStorage storage = getStorage();
+            if (storage != null)
             {
-                IResource resource = (IResource) storage;
-                return resource.exists();
+                if (storage instanceof IResource)
+                {
+                    IResource resource = (IResource) storage;
+                    return resource.exists();
+                }
+                else
+                {
+                    return true;
+                }
             }
-            else
-            {
+        }
+        else
+        {
+
+            IPath path = new Path(getPath()).makeAbsolute().removeTrailingSeparator();
+            if (path.segmentCount() == 0) // default package
                 return true;
-            }
+            IPackageFragment [] fragments = fRoot.getAllPackageFragments(fRoot.toPackageName(this));
+            return fragments != null && fragments.length > 0 && fragments[0].exists();
+
         }
         return false;
     }
@@ -168,6 +186,11 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
         }
 
         return null;
+    }
+    
+    public boolean isFolder()
+    {
+        return TapestryCore.isNull(getName());
     }
 
     /*

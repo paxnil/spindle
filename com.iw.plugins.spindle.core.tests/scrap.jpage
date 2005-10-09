@@ -1,0 +1,6 @@
+String _path = "/poo/goo";
+
+int lastSlashx = _path.lastIndexOf('/');
+
+_path.substring(0, lastSlashx + 1);
+_path.substring(lastSlashx + 1);

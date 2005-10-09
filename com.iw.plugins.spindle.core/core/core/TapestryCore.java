@@ -35,7 +35,7 @@ package core;
  */
 public class TapestryCore implements IPreferenceConstants
 {
-    public static final String IDENTIFIER = "core";
+    public static final String IDENTIFIER = "com.iw.plugins.spindle.core";
 
     public static final String SERVLET_2_2_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
 

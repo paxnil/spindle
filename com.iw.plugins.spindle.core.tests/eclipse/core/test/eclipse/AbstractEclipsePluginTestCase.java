@@ -37,7 +37,7 @@ import core.test.AbstractTestCase;
  * 
  * @author gwl
  */
-public abstract class AbstractEclipseTestCase extends AbstractTestCase
+public abstract class AbstractEclipsePluginTestCase extends AbstractTestCase
 {
     private static String[] COMMON_MARKER_PROPERTIES = new String[]
         {            
@@ -92,7 +92,7 @@ public abstract class AbstractEclipseTestCase extends AbstractTestCase
         return buffer.toString();
     }
 
-    public AbstractEclipseTestCase(String name)
+    public AbstractEclipsePluginTestCase(String name)
     {
         super(name);
     }
@@ -290,7 +290,7 @@ public abstract class AbstractEclipseTestCase extends AbstractTestCase
     {
         try
         {
-            URL platformURL = Platform.getBundle("spindle.core.tests").getEntry("/");
+            URL platformURL = Platform.getBundle("com.iw.plugins.spindle.core.tests").getEntry("/");
             return new File(Platform.asLocalURL(platformURL).getFile()).getAbsolutePath();
         }
         catch (IOException e)

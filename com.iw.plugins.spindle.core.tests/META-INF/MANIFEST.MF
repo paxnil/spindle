@@ -7,6 +7,32 @@ Bundle-ClassPath: tests.jar,
  easymock.jar,
  easymockclassextension.jar
 Bundle-Vendor: Geoff Longman
-Fragment-Host: com.iw.plugins.spindle.core
+Fragment-Host: com.iw.plugins.spindle.core;bundle-version="4.0.0"
 Bundle-Localization: plugin
 Require-Bundle: org.junit 
+Provide-Package: all.tests,
+ all.tests.core,
+ all.tests.eclipse,
+ all.tests.parser,
+ com.iw.plugins.spindle.core.resources.eclipse,
+ com.iw.plugins.spindle.core.test,
+ core.build,
+ core.namespace,
+ core.scanning,
+ core.test,
+ core.test.eclipse,
+ net.sf.cglib.beans,
+ net.sf.cglib.core,
+ net.sf.cglib.proxy,
+ net.sf.cglib.reflect,
+ net.sf.cglib.transform,
+ net.sf.cglib.transform.hook,
+ net.sf.cglib.transform.impl,
+ net.sf.cglib.util,
+ org.easymock,
+ org.easymock.classextension,
+ org.easymock.internal,
+ org.objectweb.asm,
+ tests.Parser,
+ tests.TapestryDOMParser,
+ tests.perl

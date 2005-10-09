@@ -75,14 +75,19 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
     
     public boolean clashesWith(ICoreResource resource)
     {
-        if (this == resource)
+        if (this.equals(resource))
             return true;
         
         if (resource.isClasspathResource())
             return false;
-               
-        IPath mine = new Path(this.getPath()).removeTrailingSeparator().makeAbsolute();
-        IPath other = new Path(resource.getPath()).removeTrailingSeparator().makeAbsolute();
+        
+        IPath mine = new Path(this.getPath()).makeAbsolute();
+        if (!TapestryCore.isNull(getName()))
+            mine = mine.removeLastSegments(1);
+        
+        IPath other = new Path(resource.getPath()).makeAbsolute();
+        if (!TapestryCore.isNull(resource.getName()))
+            other = other.removeLastSegments(1);
         
         if (mine.equals(other))
             return true;
@@ -122,7 +127,16 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
      */
     public boolean exists()
     {
-        return getStorage() != null;
+        if (!isFolder())            
+            return getStorage() != null;
+        
+        IContainer container = getContainer();
+        return container != null && container.exists();
+    }
+    
+    public boolean isFolder()
+    {
+        return TapestryCore.isNull(getName());
     }
 
     /*

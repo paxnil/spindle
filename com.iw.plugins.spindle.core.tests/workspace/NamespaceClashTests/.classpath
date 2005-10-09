@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="com.iw.plugins.spindle.core.TAPESTRY_FRAMEWORK"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src/frameworkNoClash"/>
+	<classpathentry kind="src" path="src/frameworkNoClash1"/>
+	<classpathentry kind="src" path="src/frameworkClash"/>
+	<classpathentry kind="src" path="src/frameworkClash1"/>
+	<classpathentry kind="output" path="context/WEB-INF/classes"/>
+</classpath>

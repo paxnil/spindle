@@ -40,7 +40,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
@@ -57,8 +56,7 @@ import core.TapestryCore;
 import core.resources.IResourceRoot;
 
 /**
- * The Tapestry project nature. Configures and Deconfigures the builder 
- * TODO the metadata stuff is
+ * The Tapestry project nature. Configures and Deconfigures the builder TODO the metadata stuff is
  * to be extracted to generic land.
  * 
  * @author glongman@gmail.com
@@ -92,7 +90,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
     {
         try
         {
-             EclipsePluginUtils.removeNatureFromProject(
+            EclipsePluginUtils.removeNatureFromProject(
                     project.getProject(),
                     TapestryCorePlugin.NATURE_ID);
         }
@@ -350,6 +348,19 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return fValidateWebXML;
     }
 
+    /**
+     * DO NOT USE - for testing purposes only.
+     * <p>
+     * Callers may also need to call {@link #setMetaDataLoaded(boolean)} with <code>true</code> to
+     * ensure the value passed is not overwritten.
+     * 
+     * @param flag
+     */
+    public void setValidatingWebXML(boolean flag)
+    {
+        fValidateWebXML = flag;
+    }
+
     public boolean isUsingExternalMetadata()
     {
         return fUsingExternalMetadata;
@@ -372,6 +383,29 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
     {
         checkMetadata();
         return fWebContextFolder;
+    }
+
+    /**
+     * DO NOT USE - for testing purposes only.
+     * <p>
+     * Callers may also need to call {@link #setMetaDataLoaded(boolean)} with <code>true</code> to
+     * ensure the value passed is not overwritten.
+     * 
+     * @param folder
+     */
+    public void setWebContextFolder(IFolder folder)
+    {
+        fWebContextFolder = folder;
+    }
+
+    /**
+     * DO NOT USE - for testing purposes only.
+     * 
+     * @param flag
+     */
+    public void setMetaDataLoaded(boolean flag)
+    {
+        fMetadataLoaded = flag;
     }
 
     public IResourceRoot getWebContextLocation()
@@ -414,7 +448,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         }
     }
 
-    private ICommand getTapestryCommand(IProjectDescription description) 
+    private ICommand getTapestryCommand(IProjectDescription description)
     {
         ICommand[] commands = description.getBuildSpec();
         for (int i = 0; i < commands.length; ++i)

@@ -18,7 +18,7 @@ import core.resources.ICoreResource;
 import core.resources.IResourceAcceptor;
 import core.test.SuiteOfTestCases;
 
-public class ContextTests extends AbstractEclipseTestCase
+public class ContextTests extends AbstractEclipsePluginTestCase
 {
     IProject project;
 
@@ -37,6 +37,7 @@ public class ContextTests extends AbstractEclipseTestCase
         super.setUpSuite();
         project = setUpProject("ContextResourceTests");
     }
+    
 
     public void testProject()
     {

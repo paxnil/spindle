@@ -20,7 +20,7 @@ import com.iw.plugins.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory
 import core.ITapestryProject;
 import core.test.SuiteOfTestCases;
 
-public class ProjectAdapterFactoryTests extends AbstractEclipseTestCase
+public class ProjectAdapterFactoryTests extends AbstractEclipsePluginTestCase
 {
     IProject aaCoreAdaptersProject;
 

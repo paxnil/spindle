@@ -27,11 +27,8 @@ package com.iw.plugins.spindle.core.eclipse;
  * ***** END LICENSE BLOCK ***** */
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-
 
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
 
@@ -109,6 +106,18 @@ public class TapestryCorePlugin extends AbstractUIPlugin implements IPreferenceC
         new TapestryCore(logger, coreListeners, new PropertySource());
 
     }
+    
+    
+
+    /* (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(BundleContext context) throws Exception
+    {        
+        super.start(context);       
+    }
+
+
 
     /*
      * (non-Javadoc)

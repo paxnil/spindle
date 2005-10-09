@@ -9,7 +9,7 @@ import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 
 import core.test.SuiteOfTestCases;
 
-public class DirectLinkTests extends AbstractEclipseTestCase
+public class DirectLinkTests extends AbstractEclipsePluginTestCase
 {
     IProject project;
 

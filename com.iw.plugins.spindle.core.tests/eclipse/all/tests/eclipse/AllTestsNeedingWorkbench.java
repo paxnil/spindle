@@ -1,7 +1,8 @@
 package all.tests.eclipse;
 
-import all.tests.Tests;
 import junit.framework.Test;
+import all.tests.Tests;
+import core.build.ResourceClashTests;
 import core.test.eclipse.ContextTests;
 import core.test.eclipse.DirectLinkTests;
 import core.test.eclipse.ProjectAdapterFactoryTests;
@@ -47,6 +48,6 @@ public class AllTestsNeedingWorkbench extends Tests
 
     static Class[] getAllTestClasses()
     {
-        return new Class[] {ContextTests.class, ProjectAdapterFactoryTests.class, DirectLinkTests.class};
+        return new Class[] {DirectLinkTests.class, ResourceClashTests.class, ContextTests.class, ProjectAdapterFactoryTests.class};
     }
 }

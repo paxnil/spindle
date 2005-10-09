@@ -33,6 +33,10 @@ public class ClashDetector
         {
             ICoreResource existing = (ICoreResource) ((ICoreNamespace) iter.next())
                     .getSpecificationLocation();
+            
+            if (candidate == existing)
+                continue;
+            
             if (existing.clashesWith(candidate))
                 throw new ClashException(candidate, existing, null);
         }
