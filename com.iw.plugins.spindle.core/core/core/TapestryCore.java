@@ -1,5 +1,7 @@
 package core;
 
+import core.util.Assert;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -57,10 +59,17 @@ public class TapestryCore implements IPreferenceConstants
      */
     public TapestryCore(ILogger logger, ICoreListeners coreListeners, IPreferenceSource source)
     {
+        Assert.isTrue(instance == null, "Can't init TapestryCore more than once!");
         instance = this;
         this.logger = logger;
         this.coreListeners = coreListeners;
         this.preferenceSource = source;
+    }
+    
+    void doDestroy() {
+        this.logger = null;
+        this.coreListeners = null;
+        this.preferenceSource = null;
     }
 
     /** for testing only */
@@ -85,6 +94,16 @@ public class TapestryCore implements IPreferenceConstants
     public static TapestryCore getDefault()
     {
         return instance;
+    }
+    
+    /**
+     * only for use by unit tests.
+     */
+    public static void destroy() {
+        if (instance != null) {
+            instance.doDestroy();
+            instance = null;
+        }
     }
 
     static public void log(String msg)

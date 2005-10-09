@@ -344,10 +344,9 @@ public abstract class SpecificationScanner extends AbstractDOMScanner
     {
         if (!fIsTapestry_4_0)
             return scanProperty_3_0(holder, node);
-        if (!isElement(node, "meta"))
-            return false;
-        scanProperty(holder, node, "key", "value");
-        return true;
+       
+        return scanProperty(holder, node, "key", "value");
+       
     }
 
     private boolean scanProperty_3_0(IPluginPropertyHolder holder, Node node)
@@ -359,9 +358,12 @@ public abstract class SpecificationScanner extends AbstractDOMScanner
         return true;
     }
 
-    private void scanProperty(IPluginPropertyHolder holder, Node node, String keyAttribute,
+    private boolean  scanProperty(IPluginPropertyHolder holder, Node node, String keyAttribute,
             String valueAttribute) throws ScannerException
     {
+        if (!isElement(node, "meta"))
+            return false;
+        
         String name = getAttribute(node, keyAttribute, false);
 
         if (holder.getProperty(name) != null)
@@ -403,6 +405,8 @@ public abstract class SpecificationScanner extends AbstractDOMScanner
         }
 
         holder.addPropertyDeclaration(declaration);
+        
+        return true;
     }
 
     /**

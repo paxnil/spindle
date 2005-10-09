@@ -66,7 +66,7 @@ public class NamespaceResourceLookup
             fLocations.add(contextRoot.getRelativeResource("/WEB-INF/" + servletName));
         }
         fLocations.add(contextRoot.getRelativeResource("/WEB-INF/"));
-        fLocations.add(contextRoot);
+        fLocations.add(contextRoot.getRelativeResource("/"));
     }
 
     public Resource[] lookup(IResourceAcceptor acceptor)

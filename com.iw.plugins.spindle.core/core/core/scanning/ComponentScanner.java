@@ -33,7 +33,6 @@ import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.BindingType;
 import org.w3c.dom.Node;
 
-
 import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 import com.iw.plugins.spindle.messages.PageloadMessages;
 import com.iw.plugins.spindle.messages.ParseMessages;
@@ -83,7 +82,7 @@ public class ComponentScanner extends SpecificationScanner
         String extension = null;
         int index = name.lastIndexOf(".");
         if (index >= 0)
-            name.substring(index + 1);
+            extension = name.substring(index + 1);
         else
             return null;
 
@@ -238,7 +237,7 @@ public class ComponentScanner extends SpecificationScanner
     protected boolean scanBean(PluginComponentSpecification specification, Node node)
             throws ScannerException
     {
-        if (isElement(node, "bean"))
+        if (!isElement(node, "bean"))
             return false;
 
         String name = getAttribute(node, "name", true);
@@ -407,24 +406,22 @@ public class ComponentScanner extends SpecificationScanner
         {
             if (!fIsTapestry_4_0)
             {
-                if (isElement(node, "binding") && scanBinding_3_0(contained, child))
+                if (scanBinding_3_0(contained, child))
                     continue;
 
-                if (isElement(node, "listener-binding")
-                        && scanListenerBinding_3_0(contained, child))
+                if (scanListenerBinding_3_0(contained, child))
                     continue;
 
-                if (isElement(node, "message-binding") && scanMessageBinding_3_0(contained, child))
+                if (scanMessageBinding_3_0(contained, child))
                     continue;
 
-                if (isElement(node, "static-binding") && scanStaticBinding_3_0(contained, child))
+                if (scanStaticBinding_3_0(contained, child))
                     continue;
 
-                if (isElement(node, "inherited-binding")
-                        && scanInhertiedBinding_3_0(contained, child))
+                if (scanInhertiedBinding_3_0(contained, child))
                     continue;
             }
-            else if (isElement(node, "binding") && scanBinding_4_0(contained, child))
+            else if (scanBinding_4_0(contained, child))
                 continue;
 
             if (scanMeta(contained, child))
@@ -441,6 +438,9 @@ public class ComponentScanner extends SpecificationScanner
     private boolean scanBinding_4_0(PluginContainedComponent component, Node node)
             throws ScannerException
     {
+        if (!isElement(node, "binding"))
+            return false;
+
         String name = getBindingName(component, node);
         String value = null;
         try
@@ -469,6 +469,9 @@ public class ComponentScanner extends SpecificationScanner
     private boolean scanInhertiedBinding_3_0(PluginContainedComponent component, Node node)
             throws ScannerException
     {
+        if (!isElement(node, "inherited-binding"))
+            return false;
+
         String name = getBindingName(component, node);
         String parameterName = getAttribute(node, "parameter-name");
 
@@ -487,6 +490,9 @@ public class ComponentScanner extends SpecificationScanner
     private boolean scanStaticBinding_3_0(PluginContainedComponent component, Node node)
             throws ScannerException
     {
+        if (!isElement(node, "static-binding"))
+            return false;
+
         String name = getBindingName(component, node);
         String value = null;
         boolean fromAttribute = true;
@@ -512,8 +518,8 @@ public class ComponentScanner extends SpecificationScanner
         location.setResource(component.getLocation().getResource());
         spec.setLocation(location);
 
-//        ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, "value")
-//                : getBestGuessSourceLocation(node, true);
+        // ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, "value")
+        // : getBestGuessSourceLocation(node, true);
 
         component.setBinding(name, spec);
         return true;
@@ -522,6 +528,9 @@ public class ComponentScanner extends SpecificationScanner
     private boolean scanMessageBinding_3_0(PluginContainedComponent component, Node node)
             throws ScannerException
     {
+        if (!isElement(node, "message-binding"))
+            return false;
+
         String name = getBindingName(component, node);
         String key = getAttribute(node, "key");
 
@@ -540,6 +549,9 @@ public class ComponentScanner extends SpecificationScanner
     private boolean scanBinding_3_0(PluginContainedComponent component, Node node)
             throws ScannerException
     {
+        if (!isElement(node, "binding"))
+            return false;
+
         String name = getBindingName(component, node);
         String expression = null;
         boolean fromAttribute = true;
@@ -628,6 +640,9 @@ public class ComponentScanner extends SpecificationScanner
     protected boolean scanListenerBinding_3_0(PluginContainedComponent component, Node node)
             throws ScannerException
     {
+        if (!isElement(node, "listener-binding"))
+            return false;
+
         String name = getBindingName(component, node);
 
         String language = getAttribute(node, "language");
@@ -686,7 +701,7 @@ public class ComponentScanner extends SpecificationScanner
     protected boolean scanParameter(PluginComponentSpecification specification, Node node)
             throws ScannerException
     {
-        if (isElement(node, "parameter"))
+        if (!isElement(node, "parameter"))
             return false;
 
         String name = getAttribute(node, "name", true);
@@ -799,31 +814,11 @@ public class ComponentScanner extends SpecificationScanner
     protected boolean scanPropertySpecification(PluginComponentSpecification spec, Node node)
             throws ScannerException
     {
-        if (!fIsTapestry_4_0)
-            return scanPropertySpecification_3_0(spec, node);
-
-        if (!isElement(node, "property"))
-            return false;
-        return scanPropertySpecification(spec, node, "persist");
-    }
-
-    protected boolean scanPropertySpecification_3_0(PluginComponentSpecification spec, Node node)
-            throws ScannerException
-    {
-        if (!isElement(node, "property-specification"))
-            return false;
-
-        return scanPropertySpecification(spec, node, "persistence");
-    }
-
-    protected boolean scanPropertySpecification(PluginComponentSpecification spec, Node node,
-            String persistAttribute) throws ScannerException
-    {
 
         if (!fIsTapestry_4_0 && !isElement(node, "property-specification"))
             return false;
 
-        if (!isElement(node, "property"))
+        else if (!isElement(node, "property"))
             return false;
 
         String name = getAttribute(node, "name", true);

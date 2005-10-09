@@ -233,6 +233,10 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
 
         new TapestryCore(logger, listeners, preferenceSource);
     }
+    
+    protected void destroyTapestryCore() {
+        TapestryCore.destroy();
+    }
 
     /**
      * Converts the actual list to an array and invokes
@@ -282,6 +286,14 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
     {
         super.setUpSuite();       
         setUpTapestryCore();
+    }
+    
+    
+
+    public void tearDownSuite() throws Exception
+    {        
+        super.tearDownSuite();
+        destroyTapestryCore();
     }
 
     protected void setUp() throws Exception

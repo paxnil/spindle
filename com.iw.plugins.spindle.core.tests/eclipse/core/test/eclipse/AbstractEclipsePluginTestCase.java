@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobManager;
 
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+
 import core.TapestryCore;
 import core.source.IProblem;
 import core.test.AbstractTestCase;
@@ -40,16 +42,8 @@ import core.test.AbstractTestCase;
 public abstract class AbstractEclipsePluginTestCase extends AbstractTestCase
 {
     private static String[] COMMON_MARKER_PROPERTIES = new String[]
-        {            
-            IMarker.SEVERITY,
-            IMarker.LOCATION,
-            IMarker.MESSAGE,
-            IMarker.LINE_NUMBER,
-            IMarker.CHAR_START,
-            IMarker.CHAR_END,
-            IMarker.PRIORITY,
-            IProblem.TEMPORARY_FLAG,
-            IProblem.PROBLEM_CODE };
+    { IMarker.SEVERITY, IMarker.LOCATION, IMarker.MESSAGE, IMarker.LINE_NUMBER, IMarker.CHAR_START,
+            IMarker.CHAR_END, IMarker.PRIORITY, IProblem.TEMPORARY_FLAG, IProblem.PROBLEM_CODE };
 
     private static Properties COMMON_MARKER_PROPERTIES_DESC;
 
@@ -99,9 +93,16 @@ public abstract class AbstractEclipsePluginTestCase extends AbstractTestCase
 
     protected void setUpTapestryCore()
     {
-        // TapestryCore already exists in the Eclipse env - we need to
-        // intercept log entries.
+        // force plugin to load.
+        TapestryCorePlugin.getDefault();
+
+        // we need to intercept log entries.
         TapestryCore.getDefault().setLogger(logger);
+    }
+
+    protected void destroyTapestryCore()
+    {
+        // do nothing, we are running in Eclipse and TapestryCore is never torn down
     }
 
     protected IProject setUpProject(final String projectName) throws CoreException, IOException
@@ -405,7 +406,7 @@ public abstract class AbstractEclipsePluginTestCase extends AbstractTestCase
         {
             for (int j = 0; j < COMMON_MARKER_PROPERTIES.length; j++)
             {
-                String value = markers[i].getAttribute(COMMON_MARKER_PROPERTIES[j], "no value");               
+                String value = markers[i].getAttribute(COMMON_MARKER_PROPERTIES[j], "no value");
                 report.append(value);
                 if (j == COMMON_MARKER_PROPERTIES.length - 1)
                     report.append(NEWLINE);

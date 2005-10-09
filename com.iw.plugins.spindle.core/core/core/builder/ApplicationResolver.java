@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 
+import core.TapestryCore;
 import core.namespace.ICoreNamespace;
 import core.namespace.NamespaceResourceLookup;
 import core.properties.DefaultProperties;
@@ -115,6 +116,9 @@ public class ApplicationResolver extends NamespaceResolver
             resolveComponents();
             fDefinitelyNotSpeclessPages = getAllComponentTemplates();
             resolvePages();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            TapestryCore.log(e);
         }
         finally
         {
