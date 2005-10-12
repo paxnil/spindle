@@ -53,6 +53,7 @@ import core.spec.PluginParameterSpecification;
 import core.spec.PluginPropertySpecification;
 import core.spec.PluginReservedParameterDeclaration;
 import core.spec.bean.PluginBindingBeanInitializer;
+import core.util.Assert;
 
 /**
  * Scanner that turns a node tree into a IComponentSpecification
@@ -92,6 +93,11 @@ public class ComponentScanner extends SpecificationScanner
         fIsPageSpec = extension.equals("page");
         fSeenTemplateAsset = false;
         return new PluginComponentSpecification();
+    }
+
+    protected void checkPropertySource()
+    {
+        Assert.isNotNull(fPropertySource);
     }
 
     /*
@@ -594,6 +600,7 @@ public class ComponentScanner extends SpecificationScanner
 
         if (componentClassname == null)
         {
+            //check the "packages" thingy
             if (fIsPageSpec)
 
                 specification.setComponentClassName(fPropertySource
@@ -601,7 +608,7 @@ public class ComponentScanner extends SpecificationScanner
 
             else
 
-                // TODO it appears that there is no default for components!
+                // TODO it appears that the default for components is not configurable!
                 specification.setComponentClassName("org.apache.tapestry.BaseComponent");
 
         }

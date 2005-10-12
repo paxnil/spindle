@@ -104,10 +104,7 @@ public class TemplateScanner extends AbstractScanner
 
     private ITemplateParserDelegate fParserDelegate = new ScannerDelegate();
 
-    private List fSeenIds = new ArrayList();
-
-    /** @dperecated */
-    private SpecFactory fSpecificationFactory;
+    private List fSeenIds = new ArrayList();    
 
     private ICoreResource fTemplateLocation;
 
@@ -263,8 +260,7 @@ public class TemplateScanner extends AbstractScanner
         if (!fContainsImplicitComponents)
             fContainsImplicitComponents = true;
 
-        PluginContainedComponent result = (PluginContainedComponent) fSpecificationFactory
-                .createContainedComponent();
+        PluginContainedComponent result = new PluginContainedComponent();
         result.setIdentifier(id);
         result.setType(componentType);
 
@@ -310,8 +306,7 @@ public class TemplateScanner extends AbstractScanner
 
     private IBindingSpecification createImplicitBinding(String name, String reference)
     {
-        PluginBindingSpecification result = (PluginBindingSpecification) fSpecificationFactory
-                .createBindingSpecification();
+        PluginBindingSpecification result = new PluginBindingSpecification();                
 
         result.setType(BindingType.PREFIXED);
 
@@ -821,17 +816,7 @@ public class TemplateScanner extends AbstractScanner
     protected Object beforeScan() throws ScannerException
     {
         return new ArrayList();
-    }
-
-    /**
-     * @deprecated
-     * Sets the SpecFactory which instantiates Tapestry spec objects.
-     */
-
-    public void setFactory(SpecFactory factory)
-    {
-        fSpecificationFactory = factory;
-    }
+    }     
 
     public void setEncoding(String encoding)
     {
@@ -841,17 +826,6 @@ public class TemplateScanner extends AbstractScanner
     public String getEncoding()
     {
         return fEncoding;
-    }
-
-    /**
-     * Returns the current SpecFactory which instantiates Tapestry spec objects.
-     * 
-     * @since 1.0.9
-     */
-
-    public SpecFactory getFactory()
-    {
-        return fSpecificationFactory;
     }
 
     private class ScannerDelegate implements ITemplateParserDelegate

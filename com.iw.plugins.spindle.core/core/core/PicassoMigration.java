@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.tapestry.IBinding;
+import org.apache.tapestry.pageload.ComponentClassProviderContext;
 
 
 import core.scanning.IScannerValidator;
@@ -91,5 +92,9 @@ public class PicassoMigration
             return DEFAULT_ASSET;
 
        return ASSET_TYPES.indexOf(prefix);
+    }
+    
+    public static String provideComponentClassName(ComponentClassProviderContext context) {
+        
     }
 }

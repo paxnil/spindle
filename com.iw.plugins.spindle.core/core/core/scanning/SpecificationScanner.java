@@ -83,6 +83,8 @@ public abstract class SpecificationScanner extends AbstractDOMScanner
      */
     protected Object beforeScan() throws ScannerException
     {
+        checkPropertySource();
+        
         IDOMModel model = getDOMModel();
         if (!isDocumentModel(model))
             return null;
@@ -100,8 +102,13 @@ public abstract class SpecificationScanner extends AbstractDOMScanner
             throw new ScannerException(CoreMessages.format(XMLPublicIDUtil.SPEC_DTD_ERROR_KEY),
                     false, IProblem.SPINDLE_INVALID_PUBLIC_ID);
         }
+        
         fRootNode = document.getDocumentElement();
         return document;
+    }
+    
+    protected void checkPropertySource() {
+      //by default it's ok to have a null property source.  
     }
 
     /**
@@ -422,28 +429,6 @@ public abstract class SpecificationScanner extends AbstractDOMScanner
                 continue;
         }
     }
-
-    // /**
-    // * Sets the SpecFactory which instantiates Tapestry spec objects.
-    // * @de
-    // * @since 1.0.9
-    // */
-    //
-    // public void setFactory(SpecFactory factory)
-    // {
-    // fSpecificationFactory = factory;
-    // }
-    //
-    // /**
-    // * Returns the current SpecFactory which instantiates Tapestry spec objects.
-    // *
-    // * @since 1.0.9
-    // */
-    //
-    // public SpecFactory getFactory()
-    // {
-    // return fSpecificationFactory;
-    // }
 
     /**
      * Used with many elements that allow a value to be specified as either an attribute, or as

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hivemind.Resource;
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -198,6 +199,18 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             // this may not be a definitive list if namespaces
             // in the application declare custom template extensions
             fBuildQueue.addAll(findAllTapestryArtifacts());
+            
+            //we need to eliminate the mark as "processed" ns locations we already visited.
+            for (Iterator iter = fApplicationNamespaces.iterator(); iter.hasNext();)
+            {
+                INamespace ns = (INamespace) iter.next();
+                fBuildQueue.finished(ns.getSpecificationLocation());
+            }
+            for (Iterator iter = fLibraryNamespaces.iterator(); iter.hasNext();)
+            {
+                INamespace ns = (INamespace) iter.next();
+                fBuildQueue.finished(ns.getSpecificationLocation());
+            }
 
             fNotifier.updateProgressDelta(0.05f);
 
