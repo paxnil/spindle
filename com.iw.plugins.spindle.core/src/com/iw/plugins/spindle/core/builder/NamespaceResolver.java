@@ -326,14 +326,14 @@ public abstract class NamespaceResolver
                 IResourceWorkspaceLocation namespaceLocation = (IResourceWorkspaceLocation) fResultNamespace
                         .getSpecificationLocation();
 
-                IResourceWorkspaceLocation libLocation;
-
-                if (namespaceLocation.isOnClasspath())
-                    libLocation = (IResourceWorkspaceLocation) namespaceLocation
-                            .getRelativeLocation(spec.getLibrarySpecificationPath(libraryId));
-                else
+                String specificationPath = spec.getLibrarySpecificationPath(libraryId);
+                
+                IResourceWorkspaceLocation libLocation = (IResourceWorkspaceLocation) namespaceLocation.getRelativeLocation(specificationPath);
+                
+                if (libLocation.getStorage() == null && specificationPath.startsWith("/"))
                     libLocation = (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot
-                            .getRelativeLocation(spec.getLibrarySpecificationPath(libraryId));
+                    .getRelativeLocation(specificationPath);
+                
 
                 if (libLocation.getStorage() != null)
                 {

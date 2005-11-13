@@ -388,7 +388,7 @@ public class BaseValidator implements IScannerValidator
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(java.lang.String,
      *      java.lang.String, com.iw.plugins.spindle.core.parser.ISourceLocation)
      */
-    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path,
+    public boolean validateLibraryResourceLocation(IResourceLocation parentSpecLocation, String path,
             String errorKey, ISourceLocation source) throws ScannerException
     {
         return false;

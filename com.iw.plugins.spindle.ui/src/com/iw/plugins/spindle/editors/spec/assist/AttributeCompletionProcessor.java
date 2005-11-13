@@ -411,7 +411,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         if ("library".equals(fTagName) && "specification-path".equals(fAttributeName)
                 && fIsAttributeTerminated)
-            return chooseClasspathPath(ChooseResourceProposal.INCLUDE_LIBRARY_EXTENSION);
+            return chooseLibraryPath(ChooseResourceProposal.INCLUDE_LIBRARY_EXTENSION);
 
         return Collections.EMPTY_LIST;
     }
@@ -631,8 +631,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         IStorage storage = fEditor.getStorage();
         if (storage == null)
             return Collections.EMPTY_LIST;
-        
-        IJavaProject jproject = (IJavaProject)storage.getAdapter(IJavaProject.class);
+
+        IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
         if (jproject == null)
             return Collections.EMPTY_LIST;
 
@@ -646,10 +646,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     {
         IStorage storage = fEditor.getStorage();
         ITapestryProject tproject = null;
-        
-        if (storage != null)        
+
+        if (storage != null)
             tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
-        
+
         if (tproject == null)
             return Collections.EMPTY_LIST;
 
@@ -657,20 +657,33 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     }
 
-    private List chooseClasspathPath(ChooseResourceProposal.Filter filter)
+    private List chooseLibraryPath(ChooseResourceProposal.Filter filter)
     {
         IStorage storage = fEditor.getStorage();
         ITapestryProject tproject = null;
-        
-        if (storage != null)        
+
+        if (storage != null)
             tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)
             return Collections.EMPTY_LIST;
 
+        IResourceWorkspaceLocation editorLocation = fEditor.getLocation();
+        AbstractRootLocation[] roots;
         try
         {
-            return choosePath(filter, tproject.getClasspathRoot());
+            if (editorLocation.isOnClasspath())
+            {
+                roots = new AbstractRootLocation[]
+                { tproject.getClasspathRoot() };
+            }
+            else
+            {
+                roots = new AbstractRootLocation[]
+                { tproject.getWebContextLocation(), tproject.getClasspathRoot() };
+            }
+
+            return choosePath(filter, roots);
 
         }
         catch (CoreException e)
@@ -686,8 +699,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         IStorage storage = fEditor.getStorage();
         ITapestryProject tproject = null;
-        
-        if (storage != null)        
+
+        if (storage != null)
             tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)
@@ -726,7 +739,13 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private List choosePath(ChooseResourceProposal.Filter filter, AbstractRootLocation root)
     {
-        if (root == null)
+        return choosePath(filter, new AbstractRootLocation[]
+        { root });
+    }
+
+    private List choosePath(ChooseResourceProposal.Filter filter, AbstractRootLocation[] roots)
+    {
+        if (roots == null)
             return Collections.EMPTY_LIST;
 
         List result = new ArrayList();
@@ -736,16 +755,23 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         fEditor.getContentAssistant().enableAutoInsert(true);
 
         ChooseResourceProposal proposal = new ChooseResourceProposal((SpecEditor) fEditor, state,
-                root, fDocumentOffset, fValueLocation.x, fAttributeValue.length());
+                roots, fDocumentOffset, fValueLocation.x, fAttributeValue.length());
 
-        if (root.isOnClasspath())
+        if (roots.length == 2)
         {
-            proposal.setContainerExclusionFilter(proposal.EXCLUDE_PACKAGES);
-            proposal.setFileExclusionFilter(proposal.EXCLUDE_PACKAGE_DOT_HTML);
+            proposal.setPackageExclusionFilter(ChooseResourceProposal.EXCLUDE_PACKAGES);
+            proposal.setFileExclusionFilter(ChooseResourceProposal.EXCLUDE_PACKAGE_DOT_HTML);
+            proposal.setContainerExclusionFilter(ChooseResourceProposal.EXCLUDE_CVS_FOLDERS);
         }
         else
         {
-            proposal.setContainerExclusionFilter(proposal.EXCLUDE_CVS_FOLDERS);
+            AbstractRootLocation root = roots[0];
+            proposal.setFileExclusionFilter(ChooseResourceProposal.EXCLUDE_PACKAGE_DOT_HTML);
+            if (root.isOnClasspath())
+                proposal.setPackageExclusionFilter(ChooseResourceProposal.EXCLUDE_PACKAGES);
+            else
+                proposal.setContainerExclusionFilter(ChooseResourceProposal.EXCLUDE_CVS_FOLDERS);
+
         }
 
         proposal.setExtensionInclusionFilter(filter);
@@ -759,8 +785,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     {
         IStorage storage = fEditor.getStorage();
         ITapestryProject tproject = null;
-        
-        if (storage != null)        
+
+        if (storage != null)
             tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)
@@ -806,271 +832,271 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         return result;
     }
 
-    //    public static class ChooseTypeProposal implements ICompletionProposal
-    //    {
+    // public static class ChooseTypeProposal implements ICompletionProposal
+    // {
     //
-    //        protected IJavaProject jproject;
-    //        String chosenType;
-    //        boolean includeInterfaces;
-    //        int documentOffset;
-    //        int replacementOffset;
-    //        int replacementLength;
+    // protected IJavaProject jproject;
+    // String chosenType;
+    // boolean includeInterfaces;
+    // int documentOffset;
+    // int replacementOffset;
+    // int replacementLength;
     //
-    //        public ChooseTypeProposal(
-    //            IJavaProject project,
-    //            boolean includeInterfaces,
-    //            int documentOffset,
-    //            int replacementOffset,
-    //            int replacementLength)
-    //        {
-    //            Assert.isNotNull(project);
-    //            jproject = project;
-    //            this.includeInterfaces = includeInterfaces;
-    //            this.documentOffset = documentOffset;
-    //            this.replacementOffset = replacementOffset;
-    //            this.replacementLength = replacementLength;
-    //        }
+    // public ChooseTypeProposal(
+    // IJavaProject project,
+    // boolean includeInterfaces,
+    // int documentOffset,
+    // int replacementOffset,
+    // int replacementLength)
+    // {
+    // Assert.isNotNull(project);
+    // jproject = project;
+    // this.includeInterfaces = includeInterfaces;
+    // this.documentOffset = documentOffset;
+    // this.replacementOffset = replacementOffset;
+    // this.replacementLength = replacementLength;
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-    //         */
-    //        public void apply(IDocument document)
-    //        {
-    //            chosenType = chooseType("Java Type Chooser");
-    //            if (chosenType != null)
-    //            {
-    //                if (chosenType.length() == 0)
-    //                {
-    //                    chosenType = null;
-    //                    return;
-    //                }
+    // */
+    // public void apply(IDocument document)
+    // {
+    // chosenType = chooseType("Java Type Chooser");
+    // if (chosenType != null)
+    // {
+    // if (chosenType.length() == 0)
+    // {
+    // chosenType = null;
+    // return;
+    // }
     //
-    //                try
-    //                {
-    //                    document.replace(replacementOffset, replacementLength, chosenType);
-    //                } catch (BadLocationException x)
-    //                {
-    //                    // ignore
-    //                }
+    // try
+    // {
+    // document.replace(replacementOffset, replacementLength, chosenType);
+    // } catch (BadLocationException x)
+    // {
+    // // ignore
+    // }
     //
-    //            }
+    // }
     //
-    //        }
+    // }
     //
-    //        protected String chooseType(String title)
-    //        {
+    // protected String chooseType(String title)
+    // {
     //
-    //            Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
-    //            try
-    //            {
+    // Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
+    // try
+    // {
     //
-    //                if (jproject == null)
-    //                    return null;
+    // if (jproject == null)
+    // return null;
     //
-    //                IJavaSearchScope scope = createSearchScope(jproject);
+    // IJavaSearchScope scope = createSearchScope(jproject);
     //
-    //                SelectionDialog dialog =
-    //                    JavaUI.createTypeDialog(
-    //                        shell,
-    //                        new ProgressMonitorDialog(shell),
-    //                        scope,
-    //                        (includeInterfaces
-    //                            ? IJavaElementSearchConstants.CONSIDER_TYPES
-    //                            : IJavaElementSearchConstants.CONSIDER_CLASSES),
-    //                        false);
+    // SelectionDialog dialog =
+    // JavaUI.createTypeDialog(
+    // shell,
+    // new ProgressMonitorDialog(shell),
+    // scope,
+    // (includeInterfaces
+    // ? IJavaElementSearchConstants.CONSIDER_TYPES
+    // : IJavaElementSearchConstants.CONSIDER_CLASSES),
+    // false);
     //
-    //                dialog.setTitle(includeInterfaces ? "Java Type Chooser" : "Java Class
+    // dialog.setTitle(includeInterfaces ? "Java Type Chooser" : "Java Class
     // Chooser");
-    //                dialog.setMessage("Choose " + (includeInterfaces ? "Type" : "a Class"));
+    // dialog.setMessage("Choose " + (includeInterfaces ? "Type" : "a Class"));
     //
-    //                if (dialog.open() == dialog.OK)
-    //                {
-    //                    IType chosen = (IType) dialog.getResult()[0];
-    //                    return chosen.getFullyQualifiedName(); //FirstResult();
-    //                }
-    //            } catch (CoreException jmex)
-    //            {
-    //                ErrorDialog.openError(shell, "Spindle error", "unable to continue",
+    // if (dialog.open() == dialog.OK)
+    // {
+    // IType chosen = (IType) dialog.getResult()[0];
+    // return chosen.getFullyQualifiedName(); //FirstResult();
+    // }
+    // } catch (CoreException jmex)
+    // {
+    // ErrorDialog.openError(shell, "Spindle error", "unable to continue",
     // jmex.getStatus());
-    //            }
-    //            return null;
-    //        }
+    // }
+    // return null;
+    // }
     //
-    //        protected IJavaSearchScope createSearchScope(IJavaElement element) throws
+    // protected IJavaSearchScope createSearchScope(IJavaElement element) throws
     // JavaModelException
-    //        {
-    //            JavaSearchScope scope = new JavaSearchScope();
-    //            scope.add(element);
-    //            return scope;
-    //        }
+    // {
+    // JavaSearchScope scope = new JavaSearchScope();
+    // scope.add(element);
+    // return scope;
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-    //         */
-    //        public String getAdditionalProposalInfo()
-    //        {
-    //            return "Note due to a known pre-existing bug in eclispe:\n\n [Bug 45193]
+    // */
+    // public String getAdditionalProposalInfo()
+    // {
+    // return "Note due to a known pre-existing bug in eclispe:\n\n [Bug 45193]
     // hierarchy scope search only shows types that exist in jars\n\nThe search
     // can't be limited to Tapestry types";
-    //        }
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-    //         */
-    //        public IContextInformation getContextInformation()
-    //        {
-    //            return null;
-    //        }
+    // */
+    // public IContextInformation getContextInformation()
+    // {
+    // return null;
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-    //         */
-    //        public String getDisplayString()
-    //        {
-    //            return "Choose Type Dialog";
-    //        }
+    // */
+    // public String getDisplayString()
+    // {
+    // return "Choose Type Dialog";
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-    //         */
-    //        public Image getImage()
-    //        {
-    //            return Images.getSharedImage("opentype.gif");
-    //        }
+    // /* (non-Javadoc)
+    // * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+    // */
+    // public Image getImage()
+    // {
+    // return Images.getSharedImage("opentype.gif");
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-    //         */
-    //        public Point getSelection(IDocument document)
-    //        {
-    //            if (chosenType == null)
-    //                return new Point(documentOffset, 0);
+    // */
+    // public Point getSelection(IDocument document)
+    // {
+    // if (chosenType == null)
+    // return new Point(documentOffset, 0);
     //
-    //            return new Point(replacementOffset + chosenType.length(), 0);
-    //        }
+    // return new Point(replacementOffset + chosenType.length(), 0);
+    // }
     //
-    //    }
+    // }
 
-    //    public static class ChooseResourceProposal implements ICompletionProposal
-    //    {
+    // public static class ChooseResourceProposal implements ICompletionProposal
+    // {
     //
-    //        SpecEditor editor;
-    //        AbstractRootLocation root;
+    // SpecEditor editor;
+    // AbstractRootLocation root;
     //
-    //        String chosenAsset;
+    // String chosenAsset;
     //
-    //        int fDocumentOffset;
-    //        int replacementOffset;
-    //        int replacementLength;
+    // int fDocumentOffset;
+    // int replacementOffset;
+    // int replacementLength;
     //
-    //        public ChooseResourceProposal(
-    //            SpecEditor specEditor,
-    //            AbstractRootLocation rootObject,
-    //            int fDocumentOffset,
-    //            int replacementOffset,
-    //            int replacementLength)
-    //        {
-    //            Assert.isNotNull(specEditor);
-    //            Assert.isNotNull(rootObject);
-    //            editor = specEditor;
-    //            root = rootObject;
+    // public ChooseResourceProposal(
+    // SpecEditor specEditor,
+    // AbstractRootLocation rootObject,
+    // int fDocumentOffset,
+    // int replacementOffset,
+    // int replacementLength)
+    // {
+    // Assert.isNotNull(specEditor);
+    // Assert.isNotNull(rootObject);
+    // editor = specEditor;
+    // root = rootObject;
     //
-    //            this.fDocumentOffset = fDocumentOffset;
-    //            this.replacementOffset = replacementOffset;
-    //            this.replacementLength = replacementLength;
-    //        }
+    // this.fDocumentOffset = fDocumentOffset;
+    // this.replacementOffset = replacementOffset;
+    // this.replacementLength = replacementLength;
+    // }
     //
-    //        public AbstractRootLocation getRootLocation()
-    //        {
-    //            return root;
-    //        }
+    // public AbstractRootLocation getRootLocation()
+    // {
+    // return root;
+    // }
     //
-    //        public void setChosenAsset(String chosenAsset)
-    //        {
-    //            this.chosenAsset = chosenAsset;
-    //        }
+    // public void setChosenAsset(String chosenAsset)
+    // {
+    // this.chosenAsset = chosenAsset;
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-    //         */
-    //        public void apply(IDocument document)
-    //        {
-    //            if (chosenAsset == null)
-    //            {
-    //                editor.invokeAssetChooser(this);
-    //            } else
-    //            {
-    //                if (chosenAsset.length() == 0)
-    //                {
-    //                    chosenAsset = null;
-    //                    return;
-    //                }
+    // */
+    // public void apply(IDocument document)
+    // {
+    // if (chosenAsset == null)
+    // {
+    // editor.invokeAssetChooser(this);
+    // } else
+    // {
+    // if (chosenAsset.length() == 0)
+    // {
+    // chosenAsset = null;
+    // return;
+    // }
     //
-    //                try
-    //                {
-    //                    document.replace(replacementOffset, replacementLength, chosenAsset);
-    //                } catch (BadLocationException x)
-    //                {
-    //                    // ignore
-    //                }
+    // try
+    // {
+    // document.replace(replacementOffset, replacementLength, chosenAsset);
+    // } catch (BadLocationException x)
+    // {
+    // // ignore
+    // }
     //
-    //            }
+    // }
     //
-    //        }
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-    //         */
-    //        public String getAdditionalProposalInfo()
-    //        {
-    //            return null;
-    //        }
+    // */
+    // public String getAdditionalProposalInfo()
+    // {
+    // return null;
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-    //         */
-    //        public IContextInformation getContextInformation()
-    //        {
-    //            return null;
-    //        }
+    // */
+    // public IContextInformation getContextInformation()
+    // {
+    // return null;
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-    //         */
-    //        public String getDisplayString()
-    //        {
-    //            return "Choose Asset";
-    //        }
+    // */
+    // public String getDisplayString()
+    // {
+    // return "Choose Asset";
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-    //         */
-    //        public Image getImage()
-    //        {
-    //            return Images.getSharedImage("opentype.gif");
-    //        }
+    // /* (non-Javadoc)
+    // * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+    // */
+    // public Image getImage()
+    // {
+    // return Images.getSharedImage("opentype.gif");
+    // }
     //
-    //        /* (non-Javadoc)
-    //         * @see
+    // /* (non-Javadoc)
+    // * @see
     // org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-    //         */
-    //        public Point getSelection(IDocument document)
-    //        {
-    //            if (chosenAsset == null)
-    //                return new Point(fDocumentOffset, 0);
+    // */
+    // public Point getSelection(IDocument document)
+    // {
+    // if (chosenAsset == null)
+    // return new Point(fDocumentOffset, 0);
     //
-    //            return new Point(replacementOffset + chosenAsset.length(), 0);
-    //        }
+    // return new Point(replacementOffset + chosenAsset.length(), 0);
+    // }
     //
-    //    }
+    // }
 
 }

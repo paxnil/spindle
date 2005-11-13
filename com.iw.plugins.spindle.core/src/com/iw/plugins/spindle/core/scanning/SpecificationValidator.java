@@ -605,15 +605,17 @@ public class SpecificationValidator extends BaseValidator
         return true;
     }
 
-    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path,
+    public boolean validateLibraryResourceLocation(IResourceLocation parentSpecLocation, String path,
             String errorKey, ISourceLocation source) throws ScannerException
     {
-        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) specLocation;
+        IResourceWorkspaceLocation baseLocation = (IResourceWorkspaceLocation) parentSpecLocation;
+        
+        IResourceWorkspaceLocation libraryLocation = (IResourceWorkspaceLocation) baseLocation.getRelativeLocation(path);
+        
+        if (libraryLocation.getStorage() == null && path.startsWith("/"))
+            baseLocation = fClasspathRoot;
 
-        if (!useLocation.isOnClasspath())
-            useLocation = fClasspathRoot;
-
-        return validateResourceLocation(useLocation, path, errorKey, source);
+        return validateResourceLocation(baseLocation, path, errorKey, source);
     }
 
     /**

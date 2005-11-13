@@ -205,7 +205,7 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path,
+    public boolean validateLibraryResourceLocation(IResourceLocation parentSpecLocation, String path,
             String errorKey, ISourceLocation source) throws ScannerException;
 
     /**
