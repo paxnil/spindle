@@ -362,7 +362,7 @@ public abstract class UITapestryAccess
   public UITapestryAccess(Editor editor) throws IllegalArgumentException
   {
     fNamespace = editor.getNamespace();
-    Assert.isLegal(fNamespace != null);
+    Assert.isLegal(fNamespace != null, "can't determine the namespace for "+editor.getEditorInput().getName());
     IStorage storage = editor.getStorage();
     IProject project = (IProject)storage.getAdapter(IProject.class);    
     setFrameworkNamespace((ICoreNamespace) TapestryArtifactManager

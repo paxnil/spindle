@@ -193,6 +193,9 @@ public class ApplicationResolver extends NamespaceResolver
             resolveComponents();
             fDefinitelyNotSpeclessPages = getAllComponentTemplates();
             resolvePages();
+        } catch (RuntimeException e) {
+            TapestryCore.log(e);
+            throw(e);
         }
         finally
         {

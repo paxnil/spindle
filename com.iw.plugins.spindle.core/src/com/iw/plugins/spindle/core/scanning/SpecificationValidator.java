@@ -443,35 +443,47 @@ public class SpecificationValidator extends BaseValidator
         IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) root
                 .getRelativeLocation(assetPath);
         String fileName = relative.getName();
-
-        if (relative.getStorage() == null)
+        try
         {
-            IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(
-                    relative,
-                    fileName);
-
-            if (I18NEquivalents.length > 0)
+            if (relative.getStorage() == null)
             {
-                int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
-                if (handleI18NPriority >= 0)
+                IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(
+                        relative,
+                        fileName);
+
+                if (I18NEquivalents.length > 0)
                 {
-                    addProblem(handleI18NPriority, errorLoc, TapestryCore.getString(
-                            "scan-component-missing-asset-but-has-i18n",
+                    int handleI18NPriority = TapestryCore.getDefault()
+                            .getHandleAssetProblemPriority();
+                    if (handleI18NPriority >= 0)
+                    {
+                        addProblem(handleI18NPriority, errorLoc, TapestryCore.getString(
+                                "scan-component-missing-asset-but-has-i18n",
+                                assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
+                                        : assetSpecName,
+                                relative.toString()), true, IProblem.NOT_QUICK_FIXABLE);
+                    }
+                }
+                else
+                {
+                    addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
+                            "scan-component-missing-asset",
                             assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
                                     : assetSpecName,
-                            relative.toString()), true, IProblem.NOT_QUICK_FIXABLE);
-                }
-            }
-            else
-            {
-                addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
-                        "scan-component-missing-asset",
-                        assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
-                                : assetSpecName,
-                        relative.toString()), true, IProblem.COMPONENT_MISSING_ASSET);
+                            relative.toString()), true, IProblem.COMPONENT_MISSING_ASSET);
 
+                }
+                return false;
             }
-            return false;
+        }
+        catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+            addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
+                    "scan-component-missing-asset",
+                    assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
+                            : assetSpecName,
+                    relative.toString()), true, IProblem.COMPONENT_MISSING_ASSET);
         }
 
         return true;
@@ -605,13 +617,14 @@ public class SpecificationValidator extends BaseValidator
         return true;
     }
 
-    public boolean validateLibraryResourceLocation(IResourceLocation parentSpecLocation, String path,
-            String errorKey, ISourceLocation source) throws ScannerException
+    public boolean validateLibraryResourceLocation(IResourceLocation parentSpecLocation,
+            String path, String errorKey, ISourceLocation source) throws ScannerException
     {
         IResourceWorkspaceLocation baseLocation = (IResourceWorkspaceLocation) parentSpecLocation;
-        
-        IResourceWorkspaceLocation libraryLocation = (IResourceWorkspaceLocation) baseLocation.getRelativeLocation(path);
-        
+
+        IResourceWorkspaceLocation libraryLocation = (IResourceWorkspaceLocation) baseLocation
+                .getRelativeLocation(path);
+
         if (libraryLocation.getStorage() == null && path.startsWith("/"))
             baseLocation = fClasspathRoot;
 
