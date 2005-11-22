@@ -3,37 +3,13 @@
    <description url="http://spindle.sourceforge.net/updates ">
       Eclipse update site for Spindle builds.
    </description>
-   <feature url="features/com.iw.features.spindle.groovy_3.1.20.jar" id="com.iw.features.spindle.groovy" version="3.1.20">
-      <category name="add ons"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.1.26.jar" id="com.iw.features.spindle" version="3.1.26">
-      <category name="spindle_3_1"/>
-   </feature>
    <feature url="features/com.iw.features.spindle_3.1.27.jar" id="com.iw.features.spindle" version="3.1.27">
       <category name="spindle_3_1"/>
    </feature>
-   <feature url="features/com.iw.features.spindle.groovy_3.2.0.jar" id="com.iw.features.spindle.groovy" version="3.2.0">
-      <category name="add ons"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle.groovy_3.2.1.jar" id="com.iw.features.spindle.groovy" version="3.2.1">
-      <category name="add ons"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.2.2.jar" id="com.iw.features.spindle" version="3.2.2">
+   <feature url="features/com.iw.features.spindle_3.2.5.jar" id="com.iw.features.spindle" version="3.2.5">
       <category name="spindle_3_2"/>
    </feature>
-   <feature url="features/com.iw.features.spindle.groovy_3.2.2.jar" id="com.iw.features.spindle.groovy" version="3.2.2">
-      <category name="add ons"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle.groovy_3.2.3.jar" id="com.iw.features.spindle.groovy" version="3.2.3">
-      <category name="add ons"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.2.3.jar" id="com.iw.features.spindle" version="3.2.3">
-      <category name="spindle_3_2"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.2.4.jar" id="com.iw.features.spindle" version="3.2.4">
-      <category name="spindle_3_2"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle.groovy_3.2.4.jar" id="com.iw.features.spindle.groovy" version="3.2.4">
+   <feature url="features/com.iw.features.spindle.groovy_3.2.5.jar" id="com.iw.features.spindle.groovy" version="3.2.5">
       <category name="add ons"/>
    </feature>
    <category-def name="spindle_3_1" label="Spindle 3.1 - Eclipse 3.0">
@@ -53,7 +29,7 @@ Add Ons are always located in the unstable update site.
    <category-def name="old" label="Older Spindle Stuff"/>
    <category-def name="spindle_3_2" label="Spindle 3.2  - for Eclipse 3.1">
       <description>
-         Builds of Spindle targeted for Eclipse 3.1 (Final)
+         Builds of Spindle targeted for Eclipse 3.1.X
       </description>
    </category-def>
 </site>
