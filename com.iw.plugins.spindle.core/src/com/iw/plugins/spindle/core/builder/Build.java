@@ -498,6 +498,9 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
         if (fProcessedLocations.containsKey(useLocation))
             return (ILibrarySpecification) fProcessedLocations.get(useLocation);
 
+        if (storage instanceof IFile)
+            Markers.removeProblemsFor((IFile)storage);
+        
         try
         {
             Document document = parseToDocument(
@@ -581,6 +584,8 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
             IStorage storage = location.getStorage();
             if (storage != null)
             {
+                if (storage instanceof IFile)
+                    Markers.removeProblemsFor((IFile)storage);
 
                 fTemplateMap.put(storage, spec);
 
@@ -740,6 +745,10 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
 
         PluginComponentSpecification result = null;
         if (storage != null)
+            
+            if (storage instanceof IFile)
+                Markers.removeProblemsFor((IFile)storage);
+            
             try
             {
                 Document document = parseToDocument(
