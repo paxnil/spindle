@@ -72,7 +72,7 @@ public class ApplicationResolver extends NamespaceResolver
     /**
      * information culled from the servlet - Application namespaces only
      */
-    protected String fServletName;
+    protected String servletName;
 
     private Set fDefinitelyNotSpeclessPages;
 
@@ -83,7 +83,7 @@ public class ApplicationResolver extends NamespaceResolver
     public ApplicationResolver(AbstractBuild build, ICoreNamespace framework, String servletName)
     {
         super(build);
-        fFrameworkNamespace = framework;       
+        frameworkNamespace = framework;       
     }    
 
     /**
@@ -96,9 +96,9 @@ public class ApplicationResolver extends NamespaceResolver
     {
         NamespaceResourceLookup lookup = new NamespaceResourceLookup();
         lookup.configure(
-                (PluginApplicationSpecification) fNamespace.getSpecification(),
-                fBuild.fInfrastructure.fContextRoot,
-                fServletName);
+                (PluginApplicationSpecification) namespace.getSpecification(),
+                build.contextRoot,
+                servletName);
 
         return lookup;
     }
@@ -149,7 +149,7 @@ public class ApplicationResolver extends NamespaceResolver
      */
     protected void resolveSpeclessPages(Set componentTemplates)
     {
-        if (!fNamespace.isApplicationNamespace())
+        if (!namespace.isApplicationNamespace())
             return;
 
         //now gather all the templates seen so far.
@@ -158,18 +158,18 @@ public class ApplicationResolver extends NamespaceResolver
         //we know that the application NS and the global properties will provide the
         //template extension for specless pages.
         
-        String templateExtension = fNamespace.getSpecification().getProperty("org.apache.tapestry.template-extension");
+        String templateExtension = namespace.getSpecification().getProperty("org.apache.tapestry.template-extension");
         if (templateExtension == null) {
             templateExtension = DefaultProperties.getInstance().getPropertyValue("org.apache.tapestry.template-extension");
         }
         
         final List allTemplates = new ArrayList(componentTemplates);
-        allTemplates.addAll(getAllPageFileTemplates());
+        allTemplates.addAll(getAllPageSpecTemplates());
         final List speclessPages = new ArrayList();
         final String speclessPageTemplateExtension = templateExtension;
         //now find all the html files in the application root
 
-        IResourceRoot appRoot = fBuild.fInfrastructure.fContextRoot;
+        IResourceRoot appRoot = build.contextRoot;
 
         IResourceAcceptor acceptor = new IResourceAcceptor()
         {
@@ -231,12 +231,12 @@ public class ApplicationResolver extends NamespaceResolver
         PluginComponentSpecification specification = new PluginComponentSpecification();
         specification.setPageSpecification(true);
         specification.setSpecificationLocation(location);
-        specification.setNamespace(fNamespace);
+        specification.setNamespace(namespace);
 
         specification.setTemplateLocations(TemplateFinder.scanForTemplates(
                 specification,
                 templateExtension,
-                fBuild.fInfrastructure.fTapestryProject,
+                build.tapestryProject,
                 null));
 
         String name = location.getName();
@@ -244,10 +244,10 @@ public class ApplicationResolver extends NamespaceResolver
         if (dotx > 0)
             name = name.substring(0, dotx);
 
-        fNamespace.installPageSpecification(name, specification);
-        fBuild.parseTemplates(specification);
-        fBuild.templateExtensionSeen(templateExtension);
-        fBuild.fBuildQueue.finished(specification.getTemplateLocations());
+        namespace.installPageSpecification(name, specification);
+        build.parseTemplates(specification);
+        build.templateExtensionSeen(templateExtension);
+        build.buildQueue.finished(specification.getTemplateLocations());
     }
 
     /**
@@ -256,10 +256,10 @@ public class ApplicationResolver extends NamespaceResolver
     protected Set getAllComponentTemplates()
     {
         Set result = new HashSet();
-        for (Iterator iter = fNamespace.getComponentTypes().iterator(); iter.hasNext();)
+        for (Iterator iter = namespace.getComponentTypes().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
-            PluginComponentSpecification spec = (PluginComponentSpecification) fNamespace
+            PluginComponentSpecification spec = (PluginComponentSpecification) namespace
                     .getComponentSpecification(type);
             result.addAll(spec.getTemplateLocations());
         }

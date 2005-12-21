@@ -1,14 +1,10 @@
 package core.builder;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
 import core.namespace.ICoreNamespace;
 import core.resources.ICoreResource;
-import core.util.Assert;
 
 public class ClashDetector
 {
@@ -26,20 +22,20 @@ public class ClashDetector
     public static void checkNamspaceClash(ICoreNamespace ns, List existingNS, String errorKey)
             throws ClashException
     {
-        Assert.isNotNull(ns);
-        Assert.isNotNull(existingNS);
-        ICoreResource candidate = (ICoreResource) ns.getSpecificationLocation();
-        for (Iterator iter = existingNS.iterator(); iter.hasNext();)
-        {
-            ICoreResource existing = (ICoreResource) ((ICoreNamespace) iter.next())
-                    .getSpecificationLocation();
-            
-            if (candidate == existing)
-                continue;
-            
-            if (existing.clashesWith(candidate))
-                throw new ClashException(candidate, existing, null);
-        }
+//        Assert.isNotNull(ns);
+//        Assert.isNotNull(existingNS);
+//        ICoreResource candidate = (ICoreResource) ns.getSpecificationLocation();
+//        for (Iterator iter = existingNS.iterator(); iter.hasNext();)
+//        {
+//            ICoreResource existing = (ICoreResource) ((ICoreNamespace) iter.next())
+//                    .getSpecificationLocation();
+//            
+//            if (candidate == existing)
+//                continue;
+//            
+//            if (existing.clashesWith(candidate))
+//                throw new ClashException(candidate, existing, null);
+//        }
     }
 
     private Map fNamespaceMap;
@@ -58,27 +54,27 @@ public class ClashDetector
     public void claimResourceForNamespace(ICoreResource resource, ICoreNamespace namespace,
             String errorKey) throws ClashException
     {
-        Assert.isNotNull(resource);
-        Assert.isNotNull(namespace);
-
-        if (fNamespaceMap == null)
-            fNamespaceMap = new HashMap();
-
-        ICoreNamespace existing = (ICoreNamespace) fNamespaceMap.get(resource);
-        if (existing != null)
-        {
-            if (!existing.equals(namespace))
-            {
-                ICoreResource requestor = (ICoreResource) namespace.getSpecificationLocation();
-                ICoreResource owner = (ICoreResource) existing.getSpecificationLocation();
-                // TODO add useful info for an error marker.
-                throw new ClashException(requestor, owner, resource);
-            }
-        }
-        else
-        {
-            fNamespaceMap.put(resource, namespace);
-        }
+//        Assert.isNotNull(resource);
+//        Assert.isNotNull(namespace);
+//
+//        if (fNamespaceMap == null)
+//            fNamespaceMap = new HashMap();
+//
+//        ICoreNamespace existing = (ICoreNamespace) fNamespaceMap.get(resource);
+//        if (existing != null)
+//        {
+//            if (!existing.equals(namespace))
+//            {
+//                ICoreResource requestor = (ICoreResource) namespace.getSpecificationLocation();
+//                ICoreResource owner = (ICoreResource) existing.getSpecificationLocation();
+//                // TODO add useful info for an error marker.
+//                throw new ClashException(requestor, owner, resource);
+//            }
+//        }
+//        else
+//        {
+//            fNamespaceMap.put(resource, namespace);
+//        }
     }
 
     /**
@@ -90,23 +86,23 @@ public class ClashDetector
      */
     public void claimTemplateForComponent(ICoreResource component, ICoreResource template) throws ClashException
     {
-        Assert.isNotNull(component);
-        Assert.isNotNull(template);
-
-        if (fResourceMap == null)
-            fResourceMap = new HashMap();
-
-        ICoreResource existingComponent = (ICoreResource) fResourceMap.get(template);
-        if (existingComponent != null)
-        {
-            if (!existingComponent.equals(component))
-                // TODO add useful info for an error marker.
-                throw new ClashException(component, existingComponent, template);
-        }
-        else
-        {
-            fResourceMap.put(template, component);
-        }
+//        Assert.isNotNull(component);
+//        Assert.isNotNull(template);
+//
+//        if (fResourceMap == null)
+//            fResourceMap = new HashMap();
+//
+//        ICoreResource existingComponent = (ICoreResource) fResourceMap.get(template);
+//        if (existingComponent != null)
+//        {
+//            if (!existingComponent.equals(component))
+//                // TODO add useful info for an error marker.
+//                throw new ClashException(component, existingComponent, template);
+//        }
+//        else
+//        {
+//            fResourceMap.put(template, component);
+//        }
     }
 
     public void clear()

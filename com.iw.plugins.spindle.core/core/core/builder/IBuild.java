@@ -28,15 +28,21 @@ package core.builder;
 
 import core.IJavaTypeFinder;
 
-
 /**
  * Interface for Builders
  * 
  * @author glongman@gmail.com
- * 
  */
 public interface IBuild extends IJavaTypeFinder
 {
-  public void build() throws BuilderException;
-  public void cleanUp();
+    public static interface IPostBuildRunnable
+    {
+        public void run(IBuild build);
+    }
+
+    void build() throws BuilderException;
+
+    void addPostBuildRunnable(IPostBuildRunnable runnable);
+
+    void cleanUp();
 }

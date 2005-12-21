@@ -24,7 +24,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 {
     private final Bundle systemBundle = Platform.getBundle("org.eclipse.osgi");
 
-    private EclipseBuildInfrastructure fInfrastructure;
+    private EclipseBuildInfrastructure infrastructure;
 
     public TapestryBuilder()
     {
@@ -48,10 +48,10 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             System.out.println("\nStarting build of " + project.getName() + " @ "
                     + new Date(System.currentTimeMillis()));
 
-        fInfrastructure = new EclipseBuildInfrastructure(project, monitor, getDelta(project),
+        infrastructure = new EclipseBuildInfrastructure(project, monitor, getDelta(project),
                 new XercesDOMModelSource());
 
-        fInfrastructure.build(kind != FULL_BUILD, args);
+        infrastructure.build(kind != FULL_BUILD, args);
 
         long stop = System.currentTimeMillis();
         if (AbstractBuildInfrastructure.DEBUG)
@@ -64,7 +64,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
     private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites)
     {
-        return fInfrastructure.getRequiredProjects(includeBinaryPrerequisites);
+        return infrastructure.getRequiredProjects(includeBinaryPrerequisites);
 
     }
 

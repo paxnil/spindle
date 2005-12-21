@@ -30,7 +30,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +56,6 @@ import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.osgi.framework.Bundle;
 
-
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
@@ -76,7 +75,6 @@ import core.builder.BuildNotifier;
 import core.builder.BuilderException;
 import core.builder.ClashException;
 import core.builder.FullBuild;
-import core.builder.IBuildAction;
 import core.builder.State;
 import core.builder.WebXMLScanner;
 import core.parser.dom.IDOMModelSource;
@@ -91,6 +89,9 @@ import core.util.Assert;
  * The Tapestry Builder, kicks off full and incremental builds.
  * 
  * @author glongman@gmail.com
+ */
+/**
+ * @author GLONGMAN
  */
 public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 {
@@ -118,9 +119,6 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         return getOrCreateCache(CLASSPATH_SEARCH_CACHE);
     }
 
-    // TODO this is really ugly, but I need this fast.
-    public static List fDeferredActions = new ArrayList();
-
     public static State readState(DataInputStream in) throws IOException
     {
         return State.read(in);
@@ -131,17 +129,19 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         ((State) state).write(out);
     }
 
-    IProject fCurrentProject;
+    IProject currentIProject;
 
-    IJavaProject fJavaProject;
+    IJavaProject javaProject;
 
-    IWorkspaceRoot fWorkspaceRoot;
+    IWorkspaceRoot workspaceRoot;
 
-    IClasspathEntry[] fClasspath;
+    IClasspathEntry[] classpathEntries;
 
-    IResourceDelta fDelta;    
+    IResourceDelta fDelta;
 
-    private List fExcludedFileNames;
+    private List excludedFileNames;
+    
+    private boolean projectSupportsAnnotations = false;
 
     /**
      * Constructor for TapestryBuilder.
@@ -150,22 +150,40 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             IResourceDelta delta, IDOMModelSource domModelSource)
     {
         super();
-        fCurrentProject = project;
-        fNotifier = new BuildNotifier(monitor, fCurrentProject);
-        fDOMModelSource = domModelSource;
+        currentIProject = project;
+        notifier = new BuildNotifier(monitor, currentIProject);
+        this.domModelSource = domModelSource;
+        projectSupportsAnnotations = doesProjectSupportJavaAnnotations(project);
+    }
+
+    public List getAllAnnotatedComponentTypes(String packages)
+    {
+        // IJavaTypes TODO implement
+        return Collections.EMPTY_LIST;
+    }
+
+    public List getAllAnnotatedPageTypes(String packages)
+    {
+        // IJavaTypes TODO implement
+        return Collections.EMPTY_LIST;
+    }
+
+    public boolean projectSupportsAnnotations()
+    {        
+        return projectSupportsAnnotations;
     }
 
     public void executeBuild(boolean requestIncremental, Map args)
     {
-        fProblemPersister = new Markers();
+        problemPersister = new Markers();
 
-        fNotifier.begin();
+        notifier.begin();
 
         boolean ok = false;
 
         try
         {
-            fNotifier.checkCancel();
+            notifier.checkCancel();
             initialize();
             if (isWorthBuilding())
             {
@@ -178,11 +196,6 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
                 {
                     buildIncremental();
                 }
-                for (Iterator iter = fDeferredActions.iterator(); iter.hasNext();)
-                {
-                    IBuildAction action = (IBuildAction) iter.next();
-                    action.run();
-                }
                 ok = true;
             }
         }
@@ -194,7 +207,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         }
         catch (BrokenWebXMLException e)
         {
-            fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
+            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
                     IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
                     SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
             if (AbstractBuildInfrastructure.DEBUG)
@@ -202,29 +215,29 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         }
         catch (ClashException e)
         {
-            fProblemPersister.removeAllProblems(fTapestryProject);
+            problemPersister.removeAllProblems(tapestryProject);
             ICoreResource requestor = e.getRequestor();
-            fProblemPersister.recordProblem(requestor, new DefaultProblem(
+            problemPersister.recordProblem(requestor, new DefaultProblem(
                     IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-REQUESTOR",
                     SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
 
             ICoreResource owner = e.getOwner();
-            fProblemPersister.recordProblem(owner, new DefaultProblem(
+            problemPersister.recordProblem(owner, new DefaultProblem(
                     IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-OWNER",
                     SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
 
-            fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
+            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
                     IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR,
                     "Tapestry Build can't proceed due to namespace clashes",
                     SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-            
+
             if (AbstractBuildInfrastructure.DEBUG)
                 System.err.println("Tapestry build aborted: " + e.getMessage());
         }
         catch (BuilderException e)
         {
-            fProblemPersister.removeAllProblems(fTapestryProject);
-            fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
+            problemPersister.removeAllProblems(tapestryProject);
+            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
                     IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
                     SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
             if (AbstractBuildInfrastructure.DEBUG)
@@ -247,22 +260,21 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
                 // If the build failed, clear the previously built state,
                 // forcing a full build next time.
                 clearLastState();
-            fBuild.cleanUp();
-            fNotifier.done();
-            fDeferredActions.clear();
+            build.cleanUp();
+            notifier.done();            
             TapestryCore.buildOccurred();
         }
     }
 
     public IProject[] getRequiredProjects(boolean includeBinaryPrerequisites)
     {
-        if (fJavaProject == null || fWorkspaceRoot == null)
+        if (javaProject == null || workspaceRoot == null)
             return new IProject[0];
 
         ArrayList projects = new ArrayList();
         try
         {
-            IClasspathEntry[] entries = ((JavaProject) fJavaProject).getExpandedClasspath(true);
+            IClasspathEntry[] entries = ((JavaProject) javaProject).getExpandedClasspath(true);
             for (int i = 0, length = entries.length; i < length; i++)
             {
                 IClasspathEntry entry = JavaCore.getResolvedClasspathEntry(entries[i]);
@@ -272,7 +284,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
                     IProject p = null;
                     if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT)
                     {
-                        IProject workspaceProject = fWorkspaceRoot.getProject(path.lastSegment());
+                        IProject workspaceProject = workspaceRoot.getProject(path.lastSegment());
                         if (workspaceProject.hasNature(TapestryCorePlugin.NATURE_ID))
                             p = workspaceProject;
 
@@ -299,7 +311,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
      */
     public Object getClasspathMemento()
     {
-        return fClasspath;
+        return classpathEntries;
     }
 
     /*
@@ -318,14 +330,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     public State getLastState()
     {
         return (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(
-                fCurrentProject,
+                currentIProject,
                 false);
     }
 
     public void persistState(State state)
     {
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
-                fCurrentProject,
+                currentIProject,
                 state);
     }
 
@@ -336,7 +348,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
      */
     public WebXMLScanner createWebXMLScanner()
     {
-        return new EclipseWebXMLScanner(fBuild);
+        return new EclipseWebXMLScanner(build);
     }
 
     /**
@@ -345,7 +357,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     public void clearLastState()
     {
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
-                fCurrentProject,
+                currentIProject,
                 null);
     }
 
@@ -357,15 +369,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         if (AbstractBuildInfrastructure.DEBUG)
             System.out.println("FULL Tapestry build");
 
-        fNotifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
+        notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                 + "full-build-starting"));
 
-        fProblemPersister.removeProblems(fTapestryProject);
+        problemPersister.removeProblems(tapestryProject);
 
-        fBuild = new FullBuild(this);
+        build = new FullBuild(this);
 
-        fBuild.build();
-
+        build.build();
     }
 
     private void buildIncremental() throws BuilderException, CoreException
@@ -378,11 +389,11 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             if (!incBuild.needsIncrementalBuild())
                 return;
 
-            fBuild = incBuild;
+            build = incBuild;
             if (DEBUG)
                 System.out.println("Incremental Tapestry build");
 
-            fNotifier.subTask(CoreMessages.format(STRING_KEY + "incremental-build-starting"));
+            notifier.subTask(CoreMessages.format(STRING_KEY + "incremental-build-starting"));
             incBuild.build();
         }
         else
@@ -399,12 +410,12 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     private boolean isWorthBuilding()
     {
 
-        if (fJavaProject == null)
+        if (javaProject == null)
             throw new BuilderException(CoreMessages.format(STRING_KEY + "non-java-projects"));
 
         try
         {
-            fClasspath = fJavaProject.getResolvedClasspath(true);
+            classpathEntries = javaProject.getResolvedClasspath(true);
         }
         catch (JavaModelException e3)
         {
@@ -413,7 +424,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
         try
         {
-            IResource resource = fJavaProject.getUnderlyingResource();
+            IResource resource = javaProject.getUnderlyingResource();
             IMarker[] jprojectMarkers = new IMarker[0];
             if (resource != null && resource.exists())
                 jprojectMarkers = resource.findMarkers(
@@ -431,8 +442,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
         try
         {
-            IPath outputPath = fJavaProject.getOutputLocation();
-            IPath projectPath = fJavaProject.getPath();
+            IPath outputPath = javaProject.getOutputLocation();
+            IPath projectPath = javaProject.getPath();
 
             if (projectPath.equals(outputPath))
                 throw new BuilderException(CoreMessages.format(STRING_KEY
@@ -459,14 +470,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             }
         }
 
-        if (fTapestryProject.findType(CoreMessages.format(STRING_KEY
-                + "applicationServletClassname")) == null)
+        if (tapestryProject.findType(CoreMessages
+                .format(STRING_KEY + "applicationServletClassname")) == null)
             throw new BuilderException(CoreMessages.format(STRING_KEY + "tapestry-jar-missing"));
 
-        if (fContextRoot == null || !fContextRoot.exists())
+        if (contextRoot == null || !contextRoot.exists())
             throw new BuilderException(CoreMessages.format(STRING_KEY + "missing-context"));
 
-        ICoreResource webXML = (ICoreResource) fContextRoot.getRelativeResource("WEB-INF/web.xml");
+        ICoreResource webXML = (ICoreResource) contextRoot.getRelativeResource("WEB-INF/web.xml");
 
         if (!webXML.exists())
             throw new BuilderException(CoreMessages.format(
@@ -483,7 +494,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     {
         try
         {
-            fJavaProject = (IJavaProject) fCurrentProject.getNature(JavaCore.NATURE_ID);
+            javaProject = (IJavaProject) currentIProject.getNature(JavaCore.NATURE_ID);
 
         }
         catch (CoreException e)
@@ -494,9 +505,9 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
         try
         {
-            TapestryProject project = (TapestryProject) fCurrentProject
+            TapestryProject project = (TapestryProject) currentIProject
                     .getNature(TapestryCorePlugin.NATURE_ID);
-            fTapestryProject = project;
+            tapestryProject = project;
             project.clearMetadata();
         }
         catch (CoreException e)
@@ -505,22 +516,22 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             throw new BuilderException("could not obtain the Tapestry Project!");
         }
 
-        fContextRoot = fTapestryProject.getWebContextLocation();
-        if (fContextRoot == null || !fContextRoot.exists())
+        contextRoot = tapestryProject.getWebContextLocation();
+        if (contextRoot == null || !contextRoot.exists())
             throw new BuilderException("could not obtain the servlet context root folder");
 
-        fClasspathRoot = fTapestryProject.getClasspathRoot();
-        if (fClasspathRoot == null || !fClasspathRoot.exists())
+        classpathRoot = tapestryProject.getClasspathRoot();
+        if (classpathRoot == null || !classpathRoot.exists())
             throw new BuilderException("could not obtain the Classpath Root!");
 
-        fValidateWebXML = fTapestryProject.isValidatingWebXML();
+        validateWebXML = tapestryProject.isValidatingWebXML();
     }
 
     boolean conflictsWithJavaOutputDirectory(IResource resource)
     {
         try
         {
-            IPath containerPath = fJavaProject.getOutputLocation();
+            IPath containerPath = javaProject.getOutputLocation();
             return containerPath.isPrefixOf(resource.getFullPath());
         }
         catch (JavaModelException e)
@@ -540,13 +551,13 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         ISearch searcher = null;
         try
         {
-            searcher = fClasspathRoot.getSearch();
+            searcher = contextRoot.getSearch();
             searcher.search(new ArtifactCollector(knownTemplateExtensions, getExcludedFileNames())
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
                 {
                     IPackageFragment fragment = (IPackageFragment) parent;
-                    ClasspathRoot root = (ClasspathRoot) fClasspathRoot;
+                    ClasspathRoot root = (ClasspathRoot) classpathRoot;
                     ICoreResource location = new ClasspathResource(root, fragment, (IStorage) leaf);
                     found.add(location);
 
@@ -569,14 +580,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         ISearch searcher = null;
         try
         {
-            searcher = fContextRoot.getSearch();
+            searcher = contextRoot.getSearch();
             searcher.search(new ArtifactCollector(knownTemplateExtensions, getExcludedFileNames())
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
                 {
                     IResource resource = (IResource) leaf;
-                    ContextRoot contextRoot = (ContextRoot) fContextRoot;
-                    ICoreResource coreResource = new ContextResource(contextRoot, resource);
+                    ContextRoot ctxRoot = (ContextRoot) contextRoot;
+                    ICoreResource coreResource = new ContextResource(ctxRoot, resource);
 
                     if (coreResource.exists() && !conflictsWithJavaOutputDirectory(resource))
                         found.add(coreResource);
@@ -595,12 +606,12 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     // TODO this should be configurable.
     public List getExcludedFileNames()
     {
-        if (fExcludedFileNames == null)
+        if (excludedFileNames == null)
         {
-            fExcludedFileNames = new ArrayList();
-            fExcludedFileNames.add("package.html");
+            excludedFileNames = new ArrayList();
+            excludedFileNames.add("package.html");
         }
-        return fExcludedFileNames;
+        return excludedFileNames;
     }
 
     /**
@@ -618,7 +629,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         {
             try
             {
-                fNotifier.checkCancel();
+                notifier.checkCancel();
             }
             catch (OperationCanceledException e)
             {
@@ -626,6 +637,45 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             }
             return true;
         }
+    }
+    
+    private boolean doesProjectSupportJavaAnnotations(IProject project) {
+        if (project == null || !project.exists() || !project.isAccessible())
+            return false;
+        
+        IJavaProject jproject = JavaCore.create(project);
+        
+        if (project == null || !project.exists())
+            return false;
+        
+        Map options = jproject.getOptions(true);
+        
+        String target = (String)options.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
+        
+        if (target == null)
+            return false;
+        
+        float version = Float.parseFloat(target);
+        
+        if (version < 1.5)
+            return false;
+        
+        System.out.println("target: "+target);
+        
+        String sourceCompatibility = (String)options.get(JavaCore.COMPILER_SOURCE);
+        
+        if (sourceCompatibility == null)
+            return false;
+        
+        float compat = Float.parseFloat(sourceCompatibility);
+        
+        if (compat < 1.5)
+            return false;
+        
+        System.out.println("sourceCompatibility: "+sourceCompatibility);
+        
+        return true;
+        
     }
 
 }

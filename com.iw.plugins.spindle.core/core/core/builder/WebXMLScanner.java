@@ -56,9 +56,9 @@ import core.source.ISourceLocation;
 public abstract class WebXMLScanner extends AbstractDOMScanner
 {
 
-    protected AbstractBuild fBuilder;
+    protected AbstractBuild builder;
 
-    protected ArrayList fSeenServletNames;
+    protected ArrayList seenServletNames;
 
     /**
      * Constructor for WebXMLProcessor.
@@ -66,17 +66,17 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
     public WebXMLScanner(AbstractBuild fullBuilder)
     {
         super();
-        this.fBuilder = fullBuilder;
+        this.builder = fullBuilder;
     }
 
     public WebAppDescriptor scanWebAppDescriptor(IDOMModel source) throws ScannerException
     {
-        return (WebAppDescriptor) scan(source, new BaseValidator(fBuilder));
+        return (WebAppDescriptor) scan(source, new BaseValidator(builder));
     }
 
     protected Object beforeScan()
     {
-        fSeenServletNames = new ArrayList();
+        seenServletNames = new ArrayList();
         return new WebAppDescriptor();
     }
 
@@ -152,8 +152,8 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
 
     protected IJavaType checkJavaType(String className, ISourceLocation location)
     {
-        IJavaType found = fBuilder.findType(className);
-        fBuilder.typeChecked(className, found);
+        IJavaType found = builder.findType(className);
+        builder.typeChecked(className, found);
 
         if (found == null)
             addProblem(IProblem.ERROR, location, DefaultTapestryMessages.format(
@@ -251,12 +251,12 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
     {
         if (path != null)
         {
-            return check(fBuilder.fInfrastructure.fClasspathRoot, path);
+            return check(builder.classpathRoot, path);
         }
         else
         {
 
-            IResourceRoot context = fBuilder.fInfrastructure.fContextRoot;
+            IResourceRoot context = builder.contextRoot;
             String servletName = info.name;
             String expectedName = servletName + ".application";
 
@@ -352,10 +352,10 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
 
     private boolean isTapestryServletOrSubclass(IJavaType candidate, ISourceLocation location)
     {
-        if (candidate.equals(fBuilder.fTapestryServletType))
+        if (candidate.equals(builder.tapestryServletType))
             return true;      
 
-        return checkJavaSubclassOfImplements(fBuilder.fTapestryServletType, candidate, location);
+        return checkJavaSubclassOfImplements(builder.tapestryServletType, candidate, location);
     }
 
     protected boolean extractServletInitParameter(Node initParamNode, ServletInfo currentInfo)
@@ -444,7 +444,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
             IJavaType servletType = checkJavaType(newInfo.classname, nodeLocation);
             if (servletType != null && isTapestryServletOrSubclass(servletType, nodeLocation))
             {
-                newInfo.isServletSubclass = !fBuilder.fTapestryServletType.equals(servletType);
+                newInfo.isServletSubclass = !builder.tapestryServletType.equals(servletType);
 
                 if (newInfo.isServletSubclass)
                 {
@@ -521,7 +521,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
         }
         else
         {
-            if (fSeenServletNames.contains(servletName))
+            if (seenServletNames.contains(servletName))
             {
                 addProblem(IProblem.WARNING, bestGuessSourceLocation, CoreMessages.format(
                         "web-xml-servlet-duplicate-name",
@@ -529,7 +529,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
             }
             else
             {
-                fSeenServletNames.add(servletName);
+                seenServletNames.add(servletName);
                 newInfo.name = servletName;
             }
         }

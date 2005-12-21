@@ -65,7 +65,7 @@ public class FrameworkResolver extends NamespaceResolver
    */
   protected void namespaceResolved()
   {
-    fFrameworkNamespace = fNamespace;
+    frameworkNamespace = namespace;
 
     resolveChildNamespaces();
 

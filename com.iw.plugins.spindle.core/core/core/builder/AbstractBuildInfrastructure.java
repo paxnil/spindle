@@ -115,23 +115,23 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         return result;
     }
 
-    protected ITapestryProject fTapestryProject;
+    protected ITapestryProject tapestryProject;
 
-    protected IResourceRoot fContextRoot;
+    protected IResourceRoot contextRoot;
 
-    protected IResourceRoot fClasspathRoot;
+    protected IResourceRoot classpathRoot;
 
-    protected IProblemPeristManager fProblemPersister;
+    protected IProblemPeristManager problemPersister;
 
-    protected boolean fValidateWebXML;
+    protected boolean validateWebXML;
 
-    protected BuildNotifier fNotifier;
+    protected BuildNotifier notifier;
 
-    protected AbstractBuild fBuild;
+    protected AbstractBuild build;
 
-    protected IDOMModelSource fDOMModelSource;
+    protected IDOMModelSource domModelSource;
 
-    protected CorePropertySource fProjectPropertySource;
+    protected CorePropertySource projectPropertySource;
 
     /**
      * Constructor for TapestryBuilder.
@@ -148,7 +148,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         if (cache != null && cache.containsKey(fullyQualifiedName))
             return (IJavaType) cache.get(fullyQualifiedName);
 
-        IJavaType result = fTapestryProject.findType(fullyQualifiedName);
+        IJavaType result = tapestryProject.findType(fullyQualifiedName);
 
         if (cache != null)
             cache.put(fullyQualifiedName, result);
@@ -237,8 +237,14 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     public IPropertySource installBasePropertySource(WebAppDescriptor webAppDescriptor)
     {
-        Assert.isTrue(fProjectPropertySource == null, "can't install twice!");
-        fProjectPropertySource = new CorePropertySource(webAppDescriptor);
-        return fProjectPropertySource;
+        Assert.isTrue(projectPropertySource == null, "can't install twice!");
+        projectPropertySource = new CorePropertySource(webAppDescriptor);
+        return projectPropertySource;
     }
+
+    public abstract boolean projectSupportsAnnotations();
+
+    public abstract List getAllAnnotatedComponentTypes(String packages);
+    
+    public abstract List getAllAnnotatedPageTypes(String packages);
 }

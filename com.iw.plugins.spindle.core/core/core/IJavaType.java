@@ -24,6 +24,11 @@ public interface IJavaType
      * @return the FQN of the underlier represented by this instance
      */
     String getFullyQualifiedName();
+    
+    /**
+     * @return the name minus the package parts
+     */
+    String getSimpleName();
 
     /**
      * @return the underlying type represented by this instance

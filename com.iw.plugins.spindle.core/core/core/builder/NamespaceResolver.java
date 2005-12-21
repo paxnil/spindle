@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.hivemind.HiveMind;
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.Tapestry;
@@ -42,19 +43,18 @@ import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
-
-
 import core.CoreMessages;
+import core.IJavaType;
 import core.TapestryCore;
 import core.namespace.ComponentSpecificationResolver;
 import core.namespace.CoreNamespace;
 import core.namespace.ICoreNamespace;
 import core.namespace.NamespaceResourceLookup;
 import core.namespace.PageSpecificationResolver;
-import core.properties.DefaultProperties;
 import core.resources.ICoreResource;
 import core.resources.PathUtils;
 import core.resources.TapestryResourceLocationAcceptor;
+import core.resources.templates.TemplateFinder;
 import core.source.DefaultProblem;
 import core.source.IProblem;
 import core.source.SourceLocation;
@@ -92,45 +92,45 @@ public class NamespaceResolver
     /**
      * the instance of IBuild that instantiated the first Resolver
      */
-    protected AbstractBuild fBuild;
+    protected AbstractBuild build;
 
     /**
      * the result Namespace
      */
-    protected CoreNamespace fNamespace;
+    protected CoreNamespace namespace;
 
     protected IPropertySource fResultNamespacePropertySource;
 
     /**
      * the Tapestry framwork Namespace
      */
-    protected ICoreNamespace fFrameworkNamespace;
+    protected ICoreNamespace frameworkNamespace;
 
     /**
      * the location of the library spec that defines the Namespace being resolved
      */
-    protected ICoreResource fNamespaceSpecLocation;
+    protected ICoreResource namespaceSpecLocation;
 
     /**
      * The id of the Namespace being resolved
      */
-    protected String fNamespaceId;
+    protected String namespaceId;
 
     /**
      * A map of all component names -> locations in the Namespace being resolved
      */
-    protected Map fJwcFiles;
+    protected Map jwcFiles;
 
     /**
      * a stack of the components being resolved its an error for a component to be in the stack more
      * than once! If this happens, there is a circular dependency!
      */
-    protected Stack fComponentStack = new Stack();
+    protected Stack componentStack = new Stack();
 
     /**
      * The resolver is not threadsafe
      */
-    protected boolean fWorking;
+    protected boolean working;
 
     /**
      * flag to indicate that this resolver is resolving the Tapestry Framework Namespace
@@ -139,57 +139,56 @@ public class NamespaceResolver
     public NamespaceResolver(AbstractBuild build)
     {
         super();
-        fBuild = build;
+        this.build = build;
     }
 
     public NamespaceResolver(AbstractBuild build, ICoreNamespace framework)
     {
         this(build);
-        fFrameworkNamespace = framework;
+        frameworkNamespace = framework;
     }
 
     public void resolve(CoreNamespace namespace)
     {
-        fNamespace = namespace;
+        this.namespace = namespace;
         doResolve();
     }
 
     protected void cleanup()
     {
-        fComponentStack.clear();
-        fFrameworkNamespace = null;
-        fNamespaceId = null;
-        fNamespaceSpecLocation = null;
-        fWorking = false;
-        fJwcFiles = null;
+        componentStack.clear();
+        frameworkNamespace = null;
+        namespaceId = null;
+        namespaceSpecLocation = null;
+        working = false;
+        jwcFiles = null;
     }
 
     protected void doResolve()
     {
-        if (fWorking)
+        if (working)
         {
             throw new RuntimeException("can't call resolve while resolving!");
         }
 
         try
         {
-            fWorking = true;
-            fComponentStack.clear();
+            working = true;
+            componentStack.clear();
             // fProblemCollector.beginCollecting();
-            if (fNamespace == null)
+            if (namespace == null)
                 throw new RuntimeException("Null namespace!");
 
             NamespaceResourceLookup lookup = create();
 
-            fNamespace.setResourceLookup(lookup);
+            namespace.setResourceLookup(lookup);
 
             // set a special component resolver that will prompt recursive
             // component/page resolution
-            fNamespace.setComponentResolver(new BuilderComponentResolver(fFrameworkNamespace));
+            namespace.setComponentResolver(new BuilderComponentResolver(frameworkNamespace));
 
             // no special page resolver needed
-            fNamespace.setPageResolver(new PageSpecificationResolver(fFrameworkNamespace,
-                    fNamespace));
+            namespace.setPageResolver(new PageSpecificationResolver(frameworkNamespace, namespace));
 
             // do any work needed before we go ahead and resolve the pages and
             // components
@@ -213,7 +212,7 @@ public class NamespaceResolver
         }
         finally
         {
-            fWorking = false;
+            working = false;
         }
 
     }
@@ -243,8 +242,8 @@ public class NamespaceResolver
      */
     protected void namespaceResolved()
     {
-        fNamespace.setComponentResolver(new ComponentSpecificationResolver(fFrameworkNamespace,
-                fNamespace));
+        namespace.setComponentResolver(new ComponentSpecificationResolver(frameworkNamespace,
+                namespace));
     }
 
     /**
@@ -256,21 +255,21 @@ public class NamespaceResolver
     protected NamespaceResourceLookup create()
     {
         NamespaceResourceLookup lookup = new NamespaceResourceLookup();
-        lookup.configure((PluginLibrarySpecification) fNamespace.getSpecification());
+        lookup.configure((PluginLibrarySpecification) namespace.getSpecification());
         return lookup;
     }
 
     /**
      * @return List a list of all the templates for all page files in this Namespace
      */
-    protected Set getAllPageFileTemplates()
+    protected Set getAllPageSpecTemplates()
     {
         Set result = new HashSet();
-        List pageNames = fNamespace.getPageNames();
+        List pageNames = namespace.getPageNames();
         int count = pageNames.size();
         for (int i = 0; i < count; i++)
         {
-            PluginComponentSpecification spec = (PluginComponentSpecification) fNamespace
+            PluginComponentSpecification spec = (PluginComponentSpecification) namespace
                     .getPageSpecification((String) pageNames.get(i));
 
             result.addAll(spec.getTemplateLocations());
@@ -283,13 +282,13 @@ public class NamespaceResolver
      */
     protected void resolveChildNamespaces()
     {
-        for (Iterator iter = fNamespace.getChildIds().iterator(); iter.hasNext();)
+        for (Iterator iter = namespace.getChildIds().iterator(); iter.hasNext();)
         {
             String childId = (String) iter.next();
-            CoreNamespace nsChild = (CoreNamespace) fNamespace.getChildNamespace(childId);
+            CoreNamespace nsChild = (CoreNamespace) namespace.getChildNamespace(childId);
             if (nsChild == null)
                 continue;
-            new NamespaceResolver(fBuild, fFrameworkNamespace).resolve(nsChild);
+            new NamespaceResolver(build, frameworkNamespace).resolve(nsChild);
         }
     }
 
@@ -298,26 +297,33 @@ public class NamespaceResolver
      */
     protected void resolveComponents()
     {
-        fJwcFiles = getAllJWCFilesForNamespace();
+        jwcFiles = getAllJWCFilesForNamespace();
 
-        for (Iterator iter = fJwcFiles.keySet().iterator(); iter.hasNext();)
+        for (Iterator iter = jwcFiles.keySet().iterator(); iter.hasNext();)
         {
             String name = (String) iter.next();
-            ICoreResource location = (ICoreResource) fJwcFiles.get(name);
+            ICoreResource location = (ICoreResource) jwcFiles.get(name);
             resolveComponent(name, location);
+        }
+
+        Map specless = resolveAllAnnotatedSpeclessComponentsForNamespace();
+        for (Iterator iter = specless.keySet().iterator(); iter.hasNext();)
+        {
+            String name = (String) iter.next();
+            jwcFiles.put(name, specless.get(name));
         }
     }
 
     /**
      * resolve a single component. As this method is called recursively, we keep a stack recording
      * the components being resolved. If we are asked to resolve a component that is already on the
-     * stack, we throw a runtime exception as this is an indication that there is a circular
+     * stack, we throw a runtime exception as this is an indication that there is a recursive
      * dependancy between components.
      */
     protected IComponentSpecification resolveComponent(String name, ICoreResource location)
     {
 
-        IComponentSpecification result = fNamespace.getComponentSpecification(name);
+        IComponentSpecification result = namespace.getComponentSpecification(name);
 
         if (result != null)
             return result;
@@ -326,7 +332,7 @@ public class NamespaceResolver
 
         result = null;
 
-        if (fComponentStack.contains(location))
+        if (componentStack.contains(location))
         {
             throw new BuilderException(CoreMessages.format(
                     "build-failed-circular-component-reference",
@@ -339,61 +345,61 @@ public class NamespaceResolver
         try
         {
             if (location.exists())
-                fBuild.fClashDetector.claimResourceForNamespace(
-                        location,
-                        fNamespace,
-                        "key");
+                build.clashDetector.claimResourceForNamespace(location, namespace, "key");
 
-            fComponentStack.push(location);
+            componentStack.push(location);
 
-            result = fBuild.parseComponentSpecification(fNamespace, location, null);
+            result = build.parseComponentSpecification(namespace, location, null);
 
             if (result != null)
             {
-                fNamespace.installComponentSpecification(name, result);
-                
+                namespace.installComponentSpecification(name, result);
+
                 PluginComponentSpecification pluginComponentSpecification = ((PluginComponentSpecification) result);
-                
+
                 claimTemplates(location, pluginComponentSpecification.getTemplateLocations());
-                fBuild.parseTemplates(pluginComponentSpecification);
+                build.parseTemplates(pluginComponentSpecification);
             }
-            fComponentStack.pop();
+
+            componentStack.pop();
 
         }
         catch (ClashException e)
         {
-            fBuild.fInfrastructure.fProblemPersister.recordProblem(location, clashProblem(e
-                    .getMessage()));
+            build.problemPersister.recordProblem(location, clashProblem(e.getMessage()));
             e.printStackTrace();
         }
         return result;
     }
-    
-    private void claimTemplates(ICoreResource specLocation, List templates) {
+
+    private void claimTemplates(ICoreResource specLocation, List templates)
+    {
         for (Iterator iter = templates.iterator(); iter.hasNext();)
         {
             ICoreResource template = (ICoreResource) iter.next();
             try
             {
-                fBuild.fClashDetector.claimTemplateForComponent(specLocation, template);
+                build.clashDetector.claimTemplateForComponent(specLocation, template);
             }
             catch (ClashException e)
             {
-                
-                //FIXME this is wrong, no message comes in the exception.
-                //need to add markers with a message!
-                fBuild.fInfrastructure.fProblemPersister.recordProblem(template, clashProblem("PUT CLASH MESSAGE HERE"));
+
+                // FIXME this is wrong, no message comes in the exception.
+                // need to add markers with a message!
+                build.problemPersister.recordProblem(
+                        template,
+                        clashProblem("PUT CLASH MESSAGE HERE"));
                 e.printStackTrace();
                 iter.remove();
-            }            
+            }
         }
     }
 
     private IProblem clashProblem(String message)
     {
         int severity = TapestryCore.getDefault().getNamespaceClashPriority();
-        return new DefaultProblem(IProblem.TAPESTRY_CLASH_PROBLEM, severity, message, SourceLocation.FILE_LOCATION, false,
-                IProblem.NOT_QUICK_FIXABLE);
+        return new DefaultProblem(IProblem.TAPESTRY_CLASH_PROBLEM, severity, message,
+                SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE);
     }
 
     /**
@@ -406,7 +412,7 @@ public class NamespaceResolver
     {
         List result = new ArrayList();
         result.add(location);
-        Stack clone = (Stack) fComponentStack.clone();
+        Stack clone = (Stack) componentStack.clone();
 
         ICoreResource sloc = (ICoreResource) clone.pop();
 
@@ -432,10 +438,10 @@ public class NamespaceResolver
      */
     private Map getAllJWCFilesForNamespace()
     {
-        ICoreResource location = (ICoreResource) fNamespace.getSpecificationLocation();
+        ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
 
         Map result = new HashMap();
-        ILibrarySpecification spec = fNamespace.getSpecification();
+        ILibrarySpecification spec = namespace.getSpecification();
 
         // pull the ones that are defined in the spec.
         List cTypes = spec.getComponentTypes();
@@ -450,7 +456,7 @@ public class NamespaceResolver
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_JWC);
-        Resource[] jwcs = fNamespace.getResourceLookup().lookup(acceptor);
+        Resource[] jwcs = namespace.getResourceLookup().lookup(acceptor);
 
         // remaining typed by thier filename
         for (int i = 0; i < jwcs.length; i++)
@@ -460,15 +466,73 @@ public class NamespaceResolver
                 result.put(type, jwcs[i]);
             else if (!jwcs[i].equals(result.get(type)))
 
-                fBuild.fInfrastructure.fProblemPersister.recordProblem(jwcs[i], new DefaultProblem(
-                        IProblem.ERROR, CoreMessages.format(
-                                "builder-hidden-jwc-file",
-                                jwcs[i],
-                                result.get(type)), SourceLocation.FILE_LOCATION, false,
+                build.problemPersister.recordProblem(jwcs[i], new DefaultProblem(IProblem.ERROR,
+                        CoreMessages.format("builder-hidden-jwc-file", jwcs[i], result.get(type)),
+                        SourceLocation.FILE_LOCATION, false,
                         IProblem.SPINDLE_BUILDER_HIDDEN_JWC_FILE));
 
         }
         return result;
+    }
+
+    private Map resolveAllAnnotatedSpeclessComponentsForNamespace()
+    {
+        Map result = new HashMap();
+        if (build.infrastructure.projectSupportsAnnotations())
+        {
+            ILibrarySpecification spec = namespace.getSpecification();
+
+            String packages = namespace
+                    .getPropertyValue("org.apache.tapestry.component-class-packages");
+
+            if (!HiveMind.isBlank(packages))
+            {
+                List annotatedComponentTypes = build.infrastructure
+                        .getAllAnnotatedComponentTypes(packages);
+                for (Iterator iter = annotatedComponentTypes.iterator(); iter.hasNext();)
+                {
+                    IJavaType type = (IJavaType) iter.next();
+                    String simpleName = type.getSimpleName();
+
+                    ICoreResource location = (ICoreResource) namespace.getSpecificationLocation()
+                            .getRelativeResource(simpleName + ".jwc");
+
+                    resolveSpeclessComponent(location, type);
+
+                    result.put(simpleName, location);
+                }
+            }
+        }
+        return result;
+    }
+
+    protected void resolveSpeclessComponent(ICoreResource location, IJavaType componentType)
+    {
+        PluginComponentSpecification specification = new PluginComponentSpecification();
+        specification.setPageSpecification(false);
+        specification.setSpecificationLocation(location);
+        specification.setNamespace(namespace);
+        specification.setComponentClassName(componentType.getFullyQualifiedName());
+
+        build.scanComponentSpecificationAnnotations(specification);
+
+        String templateExtension = build.getComponentTemplateExtension(namespace, specification);
+
+        specification.setTemplateLocations(TemplateFinder.scanForTemplates(
+                specification,
+                templateExtension,
+                build.tapestryProject,
+                null));
+
+        String name = location.getName();
+        int dotx = name.lastIndexOf('.');
+        if (dotx > 0)
+            name = name.substring(0, dotx);
+
+        namespace.installPageSpecification(name, specification);
+        build.parseTemplates(specification);
+        build.templateExtensionSeen(templateExtension);
+        build.buildQueue.finished(specification.getTemplateLocations());
     }
 
     /**
@@ -476,10 +540,10 @@ public class NamespaceResolver
      */
     private Map getAllPageFilesForNamespace()
     {
-        ICoreResource location = (ICoreResource) fNamespace.getSpecificationLocation();
+        ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
 
         Map result = new HashMap();
-        ILibrarySpecification spec = fNamespace.getSpecification();
+        ILibrarySpecification spec = namespace.getSpecification();
 
         // pull the ones that are defined in the spec.
         // They are named as defined in the spec.
@@ -492,7 +556,7 @@ public class NamespaceResolver
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_PAGE);
-        Resource[] pages = fNamespace.getResourceLookup().lookup(acceptor);
+        Resource[] pages = namespace.getResourceLookup().lookup(acceptor);
 
         // remaining named by thier filename
         for (int i = 0; i < pages.length; i++)
@@ -504,7 +568,7 @@ public class NamespaceResolver
 
             }
             else if (!result.get(name).equals(pages[i]))
-                fBuild.fInfrastructure.fProblemPersister.recordProblem(
+                build.problemPersister.recordProblem(
                         pages[i],
                         new DefaultProblem(IProblem.ERROR, CoreMessages.format(
                                 "builder-hidden-page-file",
@@ -529,25 +593,25 @@ public class NamespaceResolver
             resolvePageFile(name, location);
         }
     }
-   
+
     /**
      * resolve a single .page file There could be recursive calls to resolveComponent() downstream
      * from this method But this method will never be called recursively.
      */
     protected IComponentSpecification resolvePageFile(String name, ICoreResource location)
     {
-        IComponentSpecification result = fNamespace.getPageSpecification(name);
+        IComponentSpecification result = namespace.getPageSpecification(name);
         if (result != null || location == null)
             return result;
 
         result = null;
 
-        result = fBuild.parseComponentSpecification(fNamespace, location, null);
+        result = build.parseComponentSpecification(namespace, location, null);
 
         if (result != null)
         {
-            fNamespace.installPageSpecification(name, result);
-            fBuild.parseTemplates((PluginComponentSpecification) result);
+            namespace.installPageSpecification(name, result);
+            build.parseTemplates((PluginComponentSpecification) result);
         }
         return result;
     }
@@ -557,7 +621,7 @@ public class NamespaceResolver
 
         public BuilderComponentResolver(INamespace framework)
         {
-            super(framework, fNamespace);
+            super(framework, namespace);
         }
 
         /*
@@ -568,14 +632,14 @@ public class NamespaceResolver
          */
         public IComponentSpecification resolve(String libraryId, String type)
         {
-            if (libraryId != null && !libraryId.equals(fContainerNamespace.getId()))
+            if (libraryId != null && !libraryId.equals(containerNamespace.getId()))
                 return super.resolve(libraryId, type);
 
             IComponentSpecification result = null;
-            result = fContainerNamespace.getComponentSpecification(type);
+            result = containerNamespace.getComponentSpecification(type);
 
-            if (result == null && fJwcFiles.containsKey(type))
-                result = resolveComponent(type, (ICoreResource) fJwcFiles.get(type));
+            if (result == null && jwcFiles.containsKey(type))
+                result = resolveComponent(type, (ICoreResource) jwcFiles.get(type));
 
             if (result == null)
                 result = resolveInFramework(type);

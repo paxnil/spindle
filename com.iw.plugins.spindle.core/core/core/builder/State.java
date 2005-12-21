@@ -36,15 +36,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import core.namespace.ICoreNamespace;
 import core.resources.IResourceRoot;
 
 /**
  * An object intended to store the state of the build between builds. Normally, a builder's output
  * is the result of compiling source files, and the State is merely there to make things like
- * incremental builds possible. This is true for Tapestry but different in that the build state is
- * *the* result of the build! TODO extend design so that States can be persisted!
+ * incremental builds possible.
+ * <p>
+ * This is also true for Tapestry but different in that the build state is *the* result of the build!
+ * <p>
+ * TODO extend design so that States can be persisted!
  * 
  * @author glongman@gmail.com
  */
@@ -125,7 +127,7 @@ public class State
      */
     public State(AbstractBuildInfrastructure infrastructure)
     {
-        fContextRoot = infrastructure.fContextRoot;
+        fContextRoot = infrastructure.contextRoot;
         fBuildNumber = 0;
     }
 

@@ -27,6 +27,7 @@
 package core.namespace;
 
 import org.apache.tapestry.INamespace;
+import org.apache.tapestry.pageload.ComponentClassProvider;
 import org.apache.tapestry.spec.IComponentSpecification;
 
 import core.util.Assert;
@@ -42,15 +43,15 @@ public class ComponentSpecificationResolver
 
     protected INamespace fFrameworkNamespace;
 
-    protected INamespace fContainerNamespace;
-
+    protected INamespace containerNamespace;
+    
     public ComponentSpecificationResolver(INamespace framework, INamespace containerNamespace)
     {
         Assert.isTrue(framework != null ? INamespace.FRAMEWORK_NAMESPACE.equals(framework.getId())
                 : true);
         fFrameworkNamespace = framework;
         Assert.isNotNull(containerNamespace);
-        fContainerNamespace = containerNamespace;
+        containerNamespace = containerNamespace;
     }
 
     /**
@@ -92,10 +93,10 @@ public class ComponentSpecificationResolver
     {
         INamespace namespace = null;
 
-        if (libraryId != null && !libraryId.equals(fContainerNamespace.getId()))
-            namespace = fContainerNamespace.getChildNamespace(libraryId);
+        if (libraryId != null && !libraryId.equals(containerNamespace.getId()))
+            namespace = containerNamespace.getChildNamespace(libraryId);
         else
-            namespace = fContainerNamespace;
+            namespace = containerNamespace;
 
         if (namespace == null)
             return null;

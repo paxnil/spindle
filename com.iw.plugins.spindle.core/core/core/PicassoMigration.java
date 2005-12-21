@@ -93,8 +93,4 @@ public class PicassoMigration
 
        return ASSET_TYPES.indexOf(prefix);
     }
-    
-    public static String provideComponentClassName(ComponentClassProviderContext context) {
-        
-    }
 }

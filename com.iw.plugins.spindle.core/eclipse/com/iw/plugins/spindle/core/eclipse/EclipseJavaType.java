@@ -41,6 +41,13 @@ public class EclipseJavaType implements IJavaType
      */
     public String getFullyQualifiedName()
     {
+        return fType.getFullyQualifiedName();
+    }
+    
+    
+
+    public String getSimpleName()
+    {
         return fType.getElementName();
     }
 

@@ -89,7 +89,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             return null;
 
         // pull the preexisting spec (if it exists) from the last build.
-        result = (PluginApplicationSpecification) fLastState.getSpecificationMap().get(location);
+        result = (PluginApplicationSpecification) lastState.getSpecificationMap().get(location);
 
         IStorage storage = useLocation.getStorage();
         IFile file = null;
@@ -114,7 +114,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         {
             // revalidate the spec.
             IScannerValidator useValidator = new SpecificationValidator(
-                    fInfrastructure.fTapestryProject);
+                    tapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -166,14 +166,14 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
 
         // to avoid double processing of specs that are accessible
         // by multiple means in Tapestry
-        if (fProcessedLocations.containsKey(useLocation))
-            return (ILibrarySpecification) fProcessedLocations.get(useLocation);
+        if (processedLocations.containsKey(useLocation))
+            return (ILibrarySpecification) processedLocations.get(useLocation);
 
         if (!checkResource(useLocation))
             return null;
 
         // pull the preexisting spec (if it exists) from the last build.
-        result = (PluginLibrarySpecification) fLastState.getSpecificationMap().get(useLocation);
+        result = (PluginLibrarySpecification) lastState.getSpecificationMap().get(useLocation);
 
         IStorage storage = useLocation.getStorage();
 
@@ -199,7 +199,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         {
             // revalidate the spec.
             IScannerValidator useValidator = new SpecificationValidator((IJavaTypeFinder) this,
-                    fInfrastructure.fTapestryProject);
+                    tapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -223,7 +223,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             finished(useLocation);
         }
         rememberSpecification(useLocation, result);
-        fProcessedLocations.put(location, result);
+        processedLocations.put(location, result);
 
         return result;
 
@@ -244,14 +244,14 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
 
         // to avoid double processing of specs that are accessible
         // by multiple means in Tapestry
-        if (fProcessedLocations.containsKey(location))
-            return (IComponentSpecification) fProcessedLocations.get(location);
+        if (processedLocations.containsKey(location))
+            return (IComponentSpecification) processedLocations.get(location);
 
         if (!checkResource(location))
             return null;
 
         // pull the preexisting spec (if it exists) from the last build.
-        result = (PluginComponentSpecification) fLastState.getSpecificationMap().get(location);
+        result = (PluginComponentSpecification) lastState.getSpecificationMap().get(location);
 
         IFile file = (IFile) (((IEclipseResource) location).getStorage()).getAdapter(IFile.class);
         if (file != null)
@@ -280,7 +280,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         {
             // revalidate the spec.
             IScannerValidator useValidator = new SpecificationValidator((IJavaTypeFinder) this,
-                    fInfrastructure.fTapestryProject);
+                    tapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -291,7 +291,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             {
                 result.validate(useValidator);
                 List oldTemplates = new ArrayList(result.getTemplateLocations());
-                IPropertySource source = fInfrastructure.createPropertySource(result);
+                IPropertySource source = infrastructure.createPropertySource(result);
 
                 String seek_extension = source
                         .getPropertyValue("org.apache.tapestry.template-extension");
@@ -299,7 +299,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                 result.setTemplateLocations(TemplateFinder.scanForTemplates(
                         result,
                         seek_extension,
-                        fInfrastructure.fTapestryProject,
+                        tapestryProject,
                         fProblemCollector));
 
                 oldTemplates.addAll(result.getTemplateLocations());
@@ -331,7 +331,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             finished(location);
         }
         rememberSpecification(location, result);
-        fProcessedLocations.put(location, result);
+        processedLocations.put(location, result);
 
         return result;
     }
@@ -374,7 +374,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                 .getAdapter(IFile.class);
 
         boolean mustParse = false;
-        boolean cleanLastBuild = fLastState.fCleanTemplates.contains(template);
+        boolean cleanLastBuild = lastState.fCleanTemplates.contains(template);
 
         if (templateFile != null)
         {
@@ -389,7 +389,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         }
 
         if (!mustParse)
-            fCleanTemplates.add(template);
+            cleanTemplates.add(template);
 
         return mustParse;
     }
@@ -400,7 +400,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
      */
     private boolean fileChanged(IFile file)
     {
-        IResourceDelta specDelta = fProjectDelta.findMember(file.getProjectRelativePath());
+        IResourceDelta specDelta = projectDelta.findMember(file.getProjectRelativePath());
 
         if (specDelta != null)
             return specDelta.getKind() != IResourceDelta.NO_CHANGE;
@@ -477,7 +477,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
      */
     protected void recordBuildMiss(int missPriority, Resource resource)
     {
-        fInfrastructure.fProblemPersister.removeTemporaryProblemsForResource(resource);
+        problemPersister.removeTemporaryProblemsForResource(resource);
         super.recordBuildMiss(missPriority, resource);
     }
 
