@@ -9,7 +9,7 @@
    <feature url="features/com.iw.features.spindle.groovy_3.2.6.jar" id="com.iw.features.spindle.groovy" version="3.2.6">
       <category name="add ons"/>
    </feature>
-   <feature url="features/com.iw.features.spindle_3.2.6.jar" id="com.iw.features.spindle" version="3.2.6">
+   <feature url="features/com.iw.features.spindle_3.2.7.jar" id="com.iw.features.spindle" version="3.2.7">
       <category name="spindle_3_2"/>
    </feature>
    <category-def name="spindle_3_1" label="Spindle 3.1 - Eclipse 3.0">
@@ -26,7 +26,6 @@ An example is the groovy feature that adds integration for the Goovestry librari
 Add Ons are always located in the unstable update site.
       </description>
    </category-def>
-   <category-def name="old" label="Older Spindle Stuff"/>
    <category-def name="spindle_3_2" label="Spindle 3.2  - for Eclipse 3.1">
       <description>
          Builds of Spindle targeted for Eclipse 3.1.X
