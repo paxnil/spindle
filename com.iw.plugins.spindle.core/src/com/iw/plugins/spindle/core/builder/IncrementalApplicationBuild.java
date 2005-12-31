@@ -55,7 +55,7 @@ import com.iw.plugins.spindle.core.util.CoreUtils;
 /**
  * Builds a Tapestry Application project incrementally Well, sort of. An incremental build will not
  * reprocess the framework namespace or any libraries found in jar files. Other than that its the
- * same as a full build. TODO Not Used anymore - to be removed
+ * same as a full build.
  * 
  * @see com.iw.plugins.spindle.core.builder.IncrementalProjectBuild
  * @author glongman@gmail.com
@@ -67,17 +67,17 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
     public static int MOVED_OR_SYNCHED_OR_CHANGED_TYPE = IResourceDelta.MOVED_FROM
             | IResourceDelta.MOVED_TO | IResourceDelta.SYNC | IResourceDelta.TYPE;
 
-    protected IResourceDelta fProjectDelta = null;
+    protected IResourceDelta[] fDeltas = null;
 
     /**
      * Constructor for IncrementalBuilder.
      * 
      * @param builder
      */
-    public IncrementalApplicationBuild(TapestryBuilder builder, IResourceDelta projectDelta)
+    public IncrementalApplicationBuild(TapestryBuilder builder, IResourceDelta[] deltas)
     {
         super(builder);
-        fProjectDelta = projectDelta;
+        fDeltas = deltas;
     }
 
     /**
@@ -95,73 +95,90 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
      */
     public boolean needsIncrementalBuild()
     {
-        if (fProjectDelta == null)
-            return false;
-        fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
-        final List knownTapestryExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
-
-        // check for java files that changed, or have been added
+        long start = System.currentTimeMillis();
         try
         {
-            fProjectDelta.accept(new IResourceDeltaVisitor()
-            {
-                public boolean visit(IResourceDelta delta)
-                {
-                    IResource resource = delta.getResource();
+            if (fDeltas == null || fDeltas.length == 0)
+                return false;
 
-                    if (resource instanceof IContainer)
+            fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
+
+            final List knownTapestryExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
+
+            // check for java files that changed, or have been added
+            try
+            {
+                for (int i = 0; i < fDeltas.length; i++)
+                    visitDelta(knownTapestryExtensions, fDeltas[i]);
+            }
+            catch (CoreException e)
+            {
+                TapestryCore.log(e);
+            }
+            catch (NeedsIncrementalBuildException e)
+            {
+                return true;
+            }
+            return false;
+        }
+        finally
+        {
+            System.out.println("needsIncBuild:" + (System.currentTimeMillis() - start));
+        }
+
+    }
+
+    private void visitDelta(final List knownTapestryExtensions, IResourceDelta delta)
+            throws CoreException
+    {
+        delta.accept(new IResourceDeltaVisitor()
+        {
+            public boolean visit(IResourceDelta delta)
+            {
+                IResource resource = delta.getResource();
+
+                if (resource instanceof IContainer)
+                    return true;
+
+                IPath path = resource.getFullPath();
+                String extension = path.getFileExtension();
+
+                if (fLastState.fSeenTemplateExtensions.contains(extension))
+                    throw new NeedsIncrementalBuildException();
+
+                if (fLastState.fJavaDependencies.contains(resource)
+                        || knownTapestryExtensions.contains(extension))
+                {
+                    throw new NeedsIncrementalBuildException();
+                }
+                else
+                {
+
+                    if (!"java".equals(extension))
                         return true;
 
-                    IPath path = resource.getFullPath();
-                    String extension = path.getFileExtension();
-
-                    if (fLastState.fSeenTemplateExtensions.contains(extension))
-                        throw new NeedToBuildException();
-
-                    if (fLastState.fJavaDependencies.contains(resource)
-                            || knownTapestryExtensions.contains(extension))
+                    String name = path.removeFileExtension().lastSegment();
+                    IContainer container = resource.getParent();
+                    IJavaElement element = JavaCore.create((IFolder) container);
+                    if (element == null)
+                        return true;
+                    if (element instanceof IPackageFragmentRoot
+                            && fLastState.fMissingJavaTypes.contains(name))
                     {
-                        throw new NeedToBuildException();
+                        throw new NeedsIncrementalBuildException();
                     }
-                    else
+                    else if (element instanceof IPackageFragment
+                            && fLastState.fMissingJavaTypes.contains(((IPackageFragment) element)
+                                    .getElementName()
+                                    + "." + name))
                     {
-
-                        if (!"java".equals(extension))
-                            return true;
-
-                        String name = path.removeFileExtension().lastSegment();
-                        IContainer container = resource.getParent();
-                        IJavaElement element = JavaCore.create((IFolder) container);
-                        if (element == null)
-                            return true;
-                        if (element instanceof IPackageFragmentRoot
-                                && fLastState.fMissingJavaTypes.contains(name))
-                        {
-                            throw new NeedToBuildException();
-                        }
-                        else if (element instanceof IPackageFragment
-                                && fLastState.fMissingJavaTypes
-                                        .contains(((IPackageFragment) element).getElementName()
-                                                + "." + name))
-                        {
-                            throw new NeedToBuildException();
-                        }
-
+                        throw new NeedsIncrementalBuildException();
                     }
-                    return true;
+
                 }
-            });
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
-        catch (NeedToBuildException e)
-        {
-            return true;
-        }
-        return false;
-
+                return true;
+            }
+        });
     }
 
     /**
@@ -169,9 +186,9 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
      * 
      * @see #needsIncrementalBuild(IResourceDelta)
      */
-    private static class NeedToBuildException extends RuntimeException
+    private static class NeedsIncrementalBuildException extends RuntimeException
     {
-        public NeedToBuildException()
+        public NeedsIncrementalBuildException()
         {
             super();
         }
@@ -184,7 +201,23 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
      */
     public boolean canIncrementalBuild()
     {
-        if (fProjectDelta == null)
+        long start = System.currentTimeMillis();
+        try {
+        // IProject[] interestingProjects = fTapestryBuilder.fInterestingProjects;
+        //
+        // boolean interestingChanged = false;
+        // for (int i = 0; i < interestingProjects.length; i++)
+        // {
+        // IResourceDelta delta = fTapestryBuilder.getDelta(interestingProjects[i]);
+        // if (delta != null)
+        // {
+        // interestingChanged = true;
+        // break;
+        // }
+        // }
+
+        // some project on the classpath changed, we need to do a full build!
+        if (fDeltas.length == 0)
             return false;
 
         fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
@@ -235,8 +268,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
             }
 
             // and it must not have changed
-            IResourceDelta webXMLDelta = fProjectDelta
-                    .findMember(resource.getProjectRelativePath());
+            IResourceDelta webXMLDelta = fDeltas[0].findMember(resource.getProjectRelativePath());
 
             if (webXMLDelta != null)
             {
@@ -261,10 +293,15 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         // contrbuted veto-ers must give thier ok to inc build
         IncrementalBuildVetoController vetoController = new IncrementalBuildVetoController();
 
-        if (vetoController.vetoIncrementalBuild(fProjectDelta))
-            return false;
-
+        for (int i = 0; i < fDeltas.length; i++)
+        {
+            if (vetoController.vetoIncrementalBuild(fDeltas[i]))
+                return false;
+        }
         return true;
+        } finally {
+            System.out.println("canIncBuild:" + (System.currentTimeMillis() - start));
+        }
     }
 
     protected boolean hasClasspathChanged()
@@ -288,8 +325,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
             IResource specResource = CoreUtils.toResource(appSpecLocation);
             if (specResource == null)
                 return false;
-            IResourceDelta specDelta = fProjectDelta.findMember(specResource
-                    .getProjectRelativePath());
+            IResourceDelta specDelta = fDeltas[0].findMember(specResource.getProjectRelativePath());
             if (specDelta != null)
             {
                 // can't incremental build if the application specification
@@ -325,7 +361,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
 
             if (existingSpecFile != null)
             {
-                IResourceDelta specDelta = fProjectDelta.findMember(existingSpecFile
+                IResourceDelta specDelta = fDeltas[0].findMember(existingSpecFile
                         .getProjectRelativePath());
                 if (specDelta != null)
                 {
@@ -358,7 +394,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
                 // now we had a synthetic, check to see if a real one has been added.
                 try
                 {
-                    fProjectDelta.accept(new IResourceDeltaVisitor()
+                    fDeltas[0].accept(new IResourceDeltaVisitor()
                     {
                         public boolean visit(IResourceDelta delta)
                         {

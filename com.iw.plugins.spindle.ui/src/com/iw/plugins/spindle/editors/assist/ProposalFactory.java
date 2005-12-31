@@ -547,6 +547,9 @@ public class ProposalFactory
       computeNewAttributeProposalInfos(dtd, elementName);
 
     result = (List) ProposalInfoCache.get(key);
+    
+    if (result == null)
+        result = Collections.EMPTY_LIST;
 
     return result;
   }

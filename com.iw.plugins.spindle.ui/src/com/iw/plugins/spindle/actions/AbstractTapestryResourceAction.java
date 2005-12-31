@@ -129,7 +129,7 @@ public abstract class AbstractTapestryResourceAction extends Action
           if (project.findMarkers(
               ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER,
               false,
-              IResource.DEPTH_INFINITE).length > 0)
+              IResource.DEPTH_ZERO).length > 0)
             return false;
 
         } catch (CoreException e)

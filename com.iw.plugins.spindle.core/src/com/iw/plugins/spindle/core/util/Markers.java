@@ -26,14 +26,23 @@ package com.iw.plugins.spindle.core.util;
  *
  * ***** END LICENSE BLOCK ***** */
 
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 
@@ -52,6 +61,8 @@ public class Markers
     public static final String TAPESTRY_FATAL = ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER;
 
     public static final String TAPESTRY_SOURCE = ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER;
+
+    public static final String TAPESTRY_INTERESTING = ITapestryMarker.TAPESTRY_INTERESTING_PROJECT_MARKER;
 
     public static final String MARKER_CODE = "code";
 
@@ -140,22 +151,22 @@ public class Markers
 
     }
 
-    //    public static void addTapestryProblemMarkerToResource(
-    //        IResource resource,
-    //        String message,
-    //        int severity,
-    //        ISourceLocation source)
-    //    {
+    // public static void addTapestryProblemMarkerToResource(
+    // IResource resource,
+    // String message,
+    // int severity,
+    // ISourceLocation source)
+    // {
     //
-    //        addTapestryProblemMarkerToResource(
-    //            resource,
-    //            message,
-    //            severity,
-    //            source.getLineNumber(),
-    //            source.getCharStart(),
-    //            source.getCharEnd());
+    // addTapestryProblemMarkerToResource(
+    // resource,
+    // message,
+    // severity,
+    // source.getLineNumber(),
+    // source.getCharStart(),
+    // source.getCharEnd());
     //
-    //    }
+    // }
 
     public static void addTapestryProblemMarkerToResource(IResource resource, String message,
             int severity, int lineNumber, int charStart, int charEnd)
@@ -236,6 +247,130 @@ public class Markers
         return new IMarker[0];
     }
 
+    public static void removeInterestingProjectMarkers(IProject homeProject, IResource resource,
+            int depth)
+    {
+        long start = System.currentTimeMillis();
+        try
+        {
+            String homePath = homeProject.getFullPath().toString();
+            try
+            {
+                IMarker[] interestings = getInterestingProjectMarkers(resource, depth);
+
+                if (interestings == null)
+                    return;
+
+                for (int i = 0; i < interestings.length; i++)
+                {
+                    String iHomePath = interestings[i].getAttribute("HOME", null);
+                    if (iHomePath != null && homePath.equals(iHomePath))
+                        interestings[i].delete();
+                }
+            }
+            catch (CoreException e)
+            {
+                // assume there are no interestings
+            }
+        }
+        finally
+        {
+            System.out.println("removeInteresting:" + (System.currentTimeMillis() - start));
+        }
+    }
+
+    public static IMarker[] getInterestingProjectMarkers(IResource resource, int depth)
+    {
+        IMarker[] interestings = new IMarker[0];
+        try
+        {
+
+            if (resource != null && resource.isAccessible())
+                interestings = resource.findMarkers(TAPESTRY_INTERESTING, false, depth);
+            return interestings;
+        }
+        catch (CoreException e)
+        {
+            // assume no interestings
+        }
+
+        return interestings;
+    }
+
+    public static IProject[] getHomeProjects(IProject interestingProject)
+    {
+        ArrayList result = new ArrayList();
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        if (root != null && root.isAccessible())
+        {
+            IMarker[] markers = getInterestingProjectMarkers(
+                    interestingProject,
+                    IResource.DEPTH_ZERO);
+
+            for (int i = 0; i < markers.length; i++)
+            {
+                String mPath = markers[i].getAttribute("HOME", null);
+                if (mPath == null)
+                    continue;
+                IPath path = new Path(mPath);
+                IProject project = root.getProject(path.lastSegment());
+
+                if (project.exists())
+                    result.add(project);
+            }
+        }
+        return (IProject[]) result.toArray(new IProject[result.size()]);
+    }
+
+    public static boolean hasHomeProject(IProject interestingProject, IProject homeProject)
+    {
+        IMarker[] interestings = getInterestingProjectMarkers(
+                interestingProject,
+                IResource.DEPTH_ZERO);
+        if (interestings == null || interestings.length == 0)
+            return false;
+
+        String homePath = homeProject.getFullPath().toString();
+
+        for (int i = 0; i < interestings.length; i++)
+        {
+            String iHomePath = interestings[i].getAttribute("HOME", null);
+            if (iHomePath != null && homePath.equals(iHomePath))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static void addInterestingProjectMarkers(IProject homeProject,
+            IProject[] interestingProjects)
+    {
+        for (int i = 0; i < interestingProjects.length; i++)
+        {
+            addInterestingProjectMarker(homeProject, interestingProjects[i]);
+        }
+    }
+
+    public static void addInterestingProjectMarker(IProject homeProject, IProject interestingProject)
+    {
+        if (hasHomeProject(interestingProject, homeProject))
+            return;
+
+        String homePath = homeProject.getFullPath().toString();
+        try
+        {
+            IMarker marker = interestingProject.createMarker(TAPESTRY_INTERESTING);
+
+            marker.setAttributes(new String[]
+            { "HOME" }, new Object[]
+            { homePath });
+        }
+        catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+    }
+
     public static IMarker[] getFatalProblemsFor(IResource resource)
     {
         try
@@ -301,10 +436,14 @@ public class Markers
             {
                 removeProblemsForProject(project);
                 project.deleteMarkers(Markers.TAPESTRY_SOURCE, false, IResource.DEPTH_INFINITE);
+
+                IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+
+                removeInterestingProjectMarkers(project, root, IResource.DEPTH_ONE);
             }
             catch (CoreException e)
             {
-                //      assume there were no problems
+                TapestryCore.log(e);
             }
         }
 

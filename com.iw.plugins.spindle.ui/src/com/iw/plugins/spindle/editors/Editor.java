@@ -66,12 +66,14 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 import com.iw.plugins.spindle.editors.actions.JumpToJavaAction;
 import com.iw.plugins.spindle.editors.actions.JumpToNextAttributeAction;
@@ -91,6 +93,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     class PreferenceListener implements IPropertyChangeListener
     {
         Editor editor;
+
         public PreferenceListener(Editor editor)
         {
             Assert.isNotNull(editor);
@@ -112,21 +115,21 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
                         .getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST));
             }
 
-//            String key = editor.fReconcileSwitchKey;
-//            if (key.equals(event.getProperty()))
-//            {
-//                editor.fShouldReconcile = store.getBoolean(key);
-//
-//                IAnnotationModel model = editor.getDocumentProvider().getAnnotationModel(
-//                        editor.getEditorInput());
-//                if (model != null && model instanceof ProblemAnnotationModel) {
-//                    ((ProblemAnnotationModel) model).setIsActive(fShouldReconcile);
-//                    //force a reconcile
-//                   
-//                    
-//                }
-//
-//            }
+            // String key = editor.fReconcileSwitchKey;
+            // if (key.equals(event.getProperty()))
+            // {
+            // editor.fShouldReconcile = store.getBoolean(key);
+            //
+            // IAnnotationModel model = editor.getDocumentProvider().getAnnotationModel(
+            // editor.getEditorInput());
+            // if (model != null && model instanceof ProblemAnnotationModel) {
+            // ((ProblemAnnotationModel) model).setIsActive(fShouldReconcile);
+            // //force a reconcile
+            //                   
+            //                    
+            // }
+            //
+            // }
         }
     }
 
@@ -282,12 +285,12 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         fJumpActions[2] = jumpToTemplate;
     }
 
-//    public void createPartControl(Composite parent)
-//    {
-//        super.createPartControl(parent);
-//        IPreferenceStore preferenceStore = getPreferenceStore();
-//        fSourceViewerDecorationSupport.install(preferenceStore);
-//    }
+    // public void createPartControl(Composite parent)
+    // {
+    // super.createPartControl(parent);
+    // IPreferenceStore preferenceStore = getPreferenceStore();
+    // fSourceViewerDecorationSupport.install(preferenceStore);
+    // }
 
     /*
      * (non-Javadoc)
@@ -325,14 +328,38 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
 
     public Object getSpecification()
     {
+        Object result = null;
         IStorage storage = getStorage();
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
-        if (specs != null)
-            return specs.get(storage);
+        try
+        {
+            if (specs != null) {
+                result = specs.get(storage);
+            } else if (!project.hasNature(TapestryCore.NATURE_ID))
+            {
+                IProject[] potentials = Markers.getHomeProjects(project);
 
-        return null;
+                for (int i = 0; i < potentials.length; i++)
+                {
+                    specs = manager.getSpecMap(potentials[i]);
+                    if (specs != null)
+                    {
+                        result = specs.get(storage);
+                        if (result != null)
+                            break;
+                    }
+                }
+            }
+
+        }
+        catch (CoreException e)
+        {
+            // do nothing.
+        }
+
+        return result;
     }
 
     public IResourceWorkspaceLocation getLocation()

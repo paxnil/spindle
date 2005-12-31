@@ -43,4 +43,6 @@ public interface ITapestryMarker
       + ".fatalproblemmarker";
   static public final String TAPESTRY_BUILDBROKEN_MARKER = TapestryCore.PLUGIN_ID
       + ".buildBroken";
+  static public final String TAPESTRY_INTERESTING_PROJECT_MARKER = TapestryCore.PLUGIN_ID
+  + ".interestingProject";
 }

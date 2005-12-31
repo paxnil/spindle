@@ -72,6 +72,14 @@
       <attribute name="code"/>
    </extension>
    <extension
+         id="interestingProject"
+         name="Interesting Projects"
+         point="org.eclipse.core.resources.markers">      
+      <persistent
+            value="true"/>
+      <attribute name="HOME"/>
+   </extension>
+   <extension
          id="buildBroken"
          name="Tapestry Build Problem"
          point="org.eclipse.core.resources.markers">

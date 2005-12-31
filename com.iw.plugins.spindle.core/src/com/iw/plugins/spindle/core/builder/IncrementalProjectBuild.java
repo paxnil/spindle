@@ -66,9 +66,9 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
 {
     private IProblemCollector fProblemCollector = new ProblemCollector();
 
-    public IncrementalProjectBuild(TapestryBuilder builder, IResourceDelta projectDelta)
+    public IncrementalProjectBuild(TapestryBuilder builder, IResourceDelta [] deltas)
     {
-        super(builder, projectDelta);
+        super(builder, deltas);
     }
 
     protected IApplicationSpecification resolveApplication(Parser parser, IStorage storage,
@@ -394,12 +394,19 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      */
     private boolean fileChanged(IFile file)
     {
-        IResourceDelta specDelta = fProjectDelta.findMember(file.getProjectRelativePath());
+        boolean changed = false;
+        for (int i = 0; i < fDeltas.length; i++)
+        {
+            IResourceDelta specDelta = fDeltas[i].findMember(file.getProjectRelativePath());
 
-        if (specDelta != null)
-            return specDelta.getKind() != IResourceDelta.NO_CHANGE;
+            if (specDelta != null)
+                changed = specDelta.getKind() != IResourceDelta.NO_CHANGE;
 
-        return false;
+            if (changed)
+                break;
+        }
+        return changed;
+        
     }
 
     class ProblemCollector implements IProblemCollector

@@ -28,11 +28,13 @@ package com.iw.plugins.spindle.editors.template;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.action.Action;
@@ -72,6 +74,7 @@ import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.TemplateScanner;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.template.actions.MoveToSpecAction;
@@ -156,10 +159,10 @@ public class TemplateEditor extends Editor
 
         IAction action = new SaveHTMLTemplateAction(
                 "Save this file as the template used by Tapestry Wizards");
-        //TODO I10N
+        // TODO I10N
         action.setActionDefinitionId(SAVE_HTML_TEMPLATE);
         setAction(SAVE_HTML_TEMPLATE, action);
-        action = new RevertTemplateAction("Revert the saved template to the default value"); //TODO
+        action = new RevertTemplateAction("Revert the saved template to the default value"); // TODO
         // I10N
         action.setActionDefinitionId(REVERT_HTML_TEMPLATE);
         setAction(REVERT_HTML_TEMPLATE, action);
@@ -185,7 +188,7 @@ public class TemplateEditor extends Editor
     protected void editorContextMenuAboutToShow(IMenuManager menu)
     {
         super.editorContextMenuAboutToShow(menu);
-         if (!(getStorage() instanceof JarEntryFile))
+        if (!(getStorage() instanceof JarEntryFile))
         {
             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
@@ -198,14 +201,14 @@ public class TemplateEditor extends Editor
         if (!moreNav.isEmpty())
             menu.appendToGroup(NAV_GROUP, moreNav);
 
-        //        menu.insertBefore(ITextEditorActionConstants.GROUP_SAVE, new
+        // menu.insertBefore(ITextEditorActionConstants.GROUP_SAVE, new
         // GroupMarker(HTML_GROUP));
-        //        MenuManager templateMenu = new MenuManager("Template");
-        //        templateMenu.add(getAction(SAVE_HTML_TEMPLATE));
-        //        templateMenu.add(getAction(REVERT_HTML_TEMPLATE));
-        //        menu.appendToGroup(HTML_GROUP, templateMenu);
-        //        addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
-        //        addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
+        // MenuManager templateMenu = new MenuManager("Template");
+        // templateMenu.add(getAction(SAVE_HTML_TEMPLATE));
+        // templateMenu.add(getAction(REVERT_HTML_TEMPLATE));
+        // menu.appendToGroup(HTML_GROUP, templateMenu);
+        // addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
+        // addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
 
         MenuManager sourceMenu = new MenuManager("Refactor");
         MoveToSpecAction moveAction = (MoveToSpecAction) getAction(MoveToSpecAction.ACTION_ID);
@@ -278,14 +281,40 @@ public class TemplateEditor extends Editor
      */
     public Object getSpecification()
     {
+        Object result = null;
         IStorage storage = getStorage();
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map templates = manager.getTemplateMap(project);
-        if (templates != null)
-            return (IComponentSpecification) templates.get(storage);
+        try
+        {
+            if (templates != null)
+            {
+                result = templates.get(storage);
+            }
+            else if (!project.hasNature(TapestryCore.NATURE_ID))
+            {
+                IProject[] potentials = Markers.getHomeProjects(project);
 
-        return null;
+                for (int i = 0; i < potentials.length; i++)
+                {
+                    templates = manager.getTemplateMap(potentials[i]);
+                    if (templates != null)
+                    {
+                        result = templates.get(storage);
+                        if (result != null)
+                            break;
+                    }
+                }
+            }
+
+        }
+        catch (CoreException e)
+        {
+            // do nothing.
+        }
+
+        return result;
     }
 
     public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor)
@@ -377,7 +406,7 @@ public class TemplateEditor extends Editor
         {
             if (MessageDialog
                     .openConfirm(getEditorSite().getShell(), "Confirm revert to Default",
-                    //TODO I10N
+                    // TODO I10N
                             "All new components or pages created with the wizard will use the default template.\n\nProceed?"))
             {
                 IEditorInput input = getEditorInput();
@@ -453,7 +482,7 @@ public class TemplateEditor extends Editor
 
         private int fOffset;
 
-        //        private XMLDocumentPartitioner fHighlightPartitioner;
+        // private XMLDocumentPartitioner fHighlightPartitioner;
 
         public HighlightUpdater()
         {
@@ -464,17 +493,17 @@ public class TemplateEditor extends Editor
          */
         public void run()
         {
-            //            if (fHighlightPartitioner == null)
-            //                fHighlightPartitioner =
-            //                    new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+            // if (fHighlightPartitioner == null)
+            // fHighlightPartitioner =
+            // new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
             // XMLDocumentPartitioner.TYPES);
 
             IDocument document = getDocumentProvider().getDocument(getEditorInput());
 
             try
             {
-                //                fHighlightPartitioner.connect(document);
-                //                XMLNode.createTree(document, -1);
+                // fHighlightPartitioner.connect(document);
+                // XMLNode.createTree(document, -1);
                 XMLNode artifact = XMLNode.getArtifactAt(document, fOffset);
                 if (artifact == null)
                     return;
@@ -512,13 +541,13 @@ public class TemplateEditor extends Editor
             finally
             {
                 fPosted = false;
-                //                try
-                //                {
-                //                    fHighlightPartitioner.disconnect();
-                //                } catch (Exception e)
-                //                {
-                //                    UIPlugin.log(e);
-                //                }
+                // try
+                // {
+                // fHighlightPartitioner.disconnect();
+                // } catch (Exception e)
+                // {
+                // UIPlugin.log(e);
+                // }
             }
 
         }
@@ -541,13 +570,14 @@ public class TemplateEditor extends Editor
             }
         }
     };
-    
-    protected String[] collectContextMenuPreferencePages() {
-        String[] ids= super.collectContextMenuPreferencePages();
-        String[] more= new String[ids.length + 3];
-        more[0]= "com.iw.plugins.spindle.ui.SpindlePreferences"; //$NON-NLS-1$
-        more[1]= "com.iw.plugins.spindle.ui.SpindleEditorPreferences"; //$NON-NLS-1$       
-        more[2]= "com.iw.plugins.spindle.ui.SpindleTemplatePreferences"; //$NON-NLS-1$       
+
+    protected String[] collectContextMenuPreferencePages()
+    {
+        String[] ids = super.collectContextMenuPreferencePages();
+        String[] more = new String[ids.length + 3];
+        more[0] = "com.iw.plugins.spindle.ui.SpindlePreferences"; //$NON-NLS-1$
+        more[1] = "com.iw.plugins.spindle.ui.SpindleEditorPreferences"; //$NON-NLS-1$       
+        more[2] = "com.iw.plugins.spindle.ui.SpindleTemplatePreferences"; //$NON-NLS-1$       
         System.arraycopy(ids, 0, more, 3, ids.length);
         return more;
     }

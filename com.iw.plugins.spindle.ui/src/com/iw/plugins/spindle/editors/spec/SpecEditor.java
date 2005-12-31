@@ -107,6 +107,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
@@ -194,7 +195,7 @@ public class SpecEditor extends Editor
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         if (!storage.isReadOnly())
-        	manager.pingProjectState(project);
+            manager.pingProjectState(project);
 
         Control[] children = parent.getChildren();
         fControl = children[children.length - 1];
@@ -318,21 +319,51 @@ public class SpecEditor extends Editor
      */
     public ICoreNamespace getNamespace()
     {
+        ICoreNamespace result = null;
 
         IStorage storage = getStorage();
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
-        if (specs != null)
+        try
         {
-            BaseSpecLocatable bspec = (BaseSpecLocatable) specs.get(storage);
-            if (bspec != null)
-                return (ICoreNamespace) bspec.getNamespace();
+            if (specs != null)
+            {
+                BaseSpecLocatable bspec = (BaseSpecLocatable) specs.get(storage);
+                if (bspec != null)
+                    result = (ICoreNamespace) bspec.getNamespace();
+            }
+            else if (!project.hasNature(TapestryCore.NATURE_ID))
+            {
+                IProject[] potentials = Markers.getHomeProjects(project);
+
+                for (int i = 0; i < potentials.length; i++)
+                {
+                    specs = manager.getSpecMap(potentials[i]);
+                    if (specs != null)
+                    {
+                        BaseSpecLocatable bspec = (BaseSpecLocatable) specs.get(storage);
+                        if (bspec != null)
+                        {
+                            result = (ICoreNamespace) bspec.getNamespace();
+                            if (result != null)
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        catch (CoreException e)
+        {
+            // do nothing.
         }
 
         return null;
     }
 
+    /**
+     * @deprecated
+     */
     public IComponentSpecification getComponent()
     {
         IStorage storage = getStorage();
@@ -681,7 +712,8 @@ public class SpecEditor extends Editor
                     IFile file = ((IFileEditorInput) input).getFile();
                     ITapestryProject project = (ITapestryProject) file
                             .getAdapter(ITapestryProject.class);
-                    Object spec = getSpecification();
+                                        
+                    Object spec = getSpecification();                   
                     if (project != null && spec != null)
                     {
 
@@ -1093,15 +1125,16 @@ public class SpecEditor extends Editor
 
         }
     }
-    
-    protected String[] collectContextMenuPreferencePages() {
-        String[] ids= super.collectContextMenuPreferencePages();
-        String[] more= new String[ids.length + 5];
-        more[0]= "com.iw.plugins.spindle.ui.SpindlePreferences"; //$NON-NLS-1$
-        more[1]= "com.iw.plugins.spindle.ui.SpindleEditorPreferences"; //$NON-NLS-1$
-        more[2]= "com.iw.plugins.spindle.ui.SpindleFoldingPreferences"; //$NON-NLS-1$
-        more[3]= "com.iw.plugins.spindle.ui.SpindleFormatterPreferences"; //$NON-NLS-1$
-        more[4]= "com.iw.plugins.spindle.ui.SpindleTemplatePreferences"; //$NON-NLS-1$       
+
+    protected String[] collectContextMenuPreferencePages()
+    {
+        String[] ids = super.collectContextMenuPreferencePages();
+        String[] more = new String[ids.length + 5];
+        more[0] = "com.iw.plugins.spindle.ui.SpindlePreferences"; //$NON-NLS-1$
+        more[1] = "com.iw.plugins.spindle.ui.SpindleEditorPreferences"; //$NON-NLS-1$
+        more[2] = "com.iw.plugins.spindle.ui.SpindleFoldingPreferences"; //$NON-NLS-1$
+        more[3] = "com.iw.plugins.spindle.ui.SpindleFormatterPreferences"; //$NON-NLS-1$
+        more[4] = "com.iw.plugins.spindle.ui.SpindleTemplatePreferences"; //$NON-NLS-1$       
         System.arraycopy(ids, 0, more, 5, ids.length);
         return more;
     }

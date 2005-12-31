@@ -37,6 +37,7 @@ import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.ui.IFileEditorInput;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.editors.ProblemAnnotation;
@@ -319,6 +320,10 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
     IFile file = fInput.getFile();
 
     IProject project = file.getProject();
+    ITapestryProject tproject = (ITapestryProject)project.getAdapter(ITapestryProject.class);
+    if (tproject != null)
+        project = tproject.getProject();
+    
     TapestryArtifactManager manager = TapestryArtifactManager
         .getTapestryArtifactManager();
     Map specs = manager.getSpecMap(project);

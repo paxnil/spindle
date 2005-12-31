@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IFileEditorInput;
 
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
 
@@ -65,6 +66,9 @@ public class TemplateAnnotationModel extends ProblemAnnotationModel
     IFile file = fInput.getFile();
 
     IProject project = file.getProject();
+    ITapestryProject tproject = (ITapestryProject)project.getAdapter(ITapestryProject.class);
+    if (tproject != null)
+        project = tproject.getProject();
     TapestryArtifactManager manager = TapestryArtifactManager
         .getTapestryArtifactManager();
     Map templates = manager.getTemplateMap(project);

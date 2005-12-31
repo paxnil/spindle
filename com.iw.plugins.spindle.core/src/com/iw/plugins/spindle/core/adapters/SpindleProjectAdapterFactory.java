@@ -23,6 +23,7 @@ import org.eclipse.ui.IFileEditorInput;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.ClasspathSearch;
+import com.iw.plugins.spindle.core.util.Markers;
 
 /**
  * @author Administrator TODO To change the template for this generated type comment go to Window -
@@ -55,13 +56,29 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
 
         if (adapterType == ITapestryProject.class)
         {
+            ITapestryProject result = null;
+            
             IProject project = (IProject) adaptToProject(obj);
-            return project == null ? null : TapestryProject.create(project);
+            
+            if (project != null)
+            {
+                result = TapestryProject.create(project);
+                if (result == null)
+                {
+                    IProject[] potentials = Markers.getHomeProjects(project);
+                    for (int i = 0; i < potentials.length; i++)
+                    {
+                        result = TapestryProject.create(potentials[i]);
+                        if (result != null)
+                            break;
+                    }
+                }
+                return result;
+            }
         }
 
         return null;
     }
-  
 
     private Object adaptToProject(Object obj)
     {
@@ -106,7 +123,7 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
             IProject project = (IProject) adaptToProject(obj);
             jproject = project == null ? null : JavaCore.create(project);
         }
-        
+
         if (jproject == null || !jproject.exists())
             return null;
 
