@@ -358,7 +358,7 @@ public class SpecEditor extends Editor
             // do nothing.
         }
 
-        return null;
+        return result;
     }
 
     /**

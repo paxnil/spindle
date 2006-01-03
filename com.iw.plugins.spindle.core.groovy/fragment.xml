@@ -3,10 +3,10 @@
 <fragment
    id="com.iw.plugins.spindle.core.groovy"
    name="Groovy Support Fragment"
-   version="3.2.7"
+   version="3.2.8"
    provider-name="Intellgent Works Incorporated"
    plugin-id="com.iw.plugins.spindle.core"
-   plugin-version="3.2.7"
+   plugin-version="3.2.8"
    match="perfect">
 
    <runtime>
