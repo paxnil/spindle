@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spindle UI plugin
 Bundle-SymbolicName: com.iw.plugins.spindle.ui; singleton:=true
-Bundle-Version: 3.2.8
+Bundle-Version: 3.2.9
 Bundle-ClassPath: spindle_ui.jar,
  xmen.jar,
  lib/jdom.jar

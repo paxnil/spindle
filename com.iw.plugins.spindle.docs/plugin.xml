@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.docs"
    name="Spindle 3 Documentation"
-   version="3.2.8"
+   version="3.2.9"
    provider-name="Geoffrey Longman">
 
    <runtime>
