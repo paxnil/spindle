@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site
+      url="http://osdn.dl.sourceforge.net/sourceforge/spindle/"
+      mirrorsURL="http://spindle.sf.net/updates/mirror.xml">
+   <description>
+      Eclipse update site for Spindle builds
+   </description>
+   <feature url="com.iw.features.spindle_@version@.jar" id="com.iw.features.spindle" version="@version@">
+      <category name="spindle_latest"/>
+   </feature>
+   <feature url="com.iw.features.spindle.groovy_@version@.jar" id="com.iw.features.spindle.groovy" version="@version@">
+      <category name="add_ons"/>
+   </feature>
+   
+   <archive path="plugins/com.iw.plugins.spindle.core_@version@.jar" url="com.iw.plugins.spindle.core_@version@.jar"/>
+   <archive path="plugins/com.iw.plugins.spindle.core.groovy_@version@.jar" url="com.iw.plugins.spindle.core.groovy_@version@.jar"/>
+   <archive path="plugins/com.iw.plugins.spindle.docs_@version@.jar" url="com.iw.plugins.spindle.docs_@version@.jar"/>
+   <archive path="plugins/com.iw.plugins.spindle.ui.contrib_@version@.jar" url="com.iw.plugins.spindle.ui.contrib_@version@.jar"/>
+   <archive path="plugins/com.iw.plugins.spindle.ui_@version@.jar" url="com.iw.plugins.spindle.ui_@version@.jar"/>
+   
+   <archive path="plugins/net.sf.solareclipse.ui_0.4.0.spindle-dep-6.jar" url="net.sf.solareclipse.ui_0.4.0.spindle-dep-6.jar"/>
+   <archive path="plugins/net.sf.solareclipse.xml.ui_0.4.0.spindle-dep-6.jar" url="net.sf.solareclipse.xml.ui_0.4.0.spindle-dep-6.jar"/>
+   <archive path="plugins/org.apache.xerces.spindle_4.0.13.jar" url="org.apache.xerces.spindle_4.0.13.jar"/>
+   
+   <category-def name="spindle_latest" label="Spindle">
+      <description>
+         Spindle
+      </description>
+   </category-def>
+   <category-def name="add_ons" label="Add On features for Spindle">
+      <description>
+         Spindle Add Ons.
+      </description>
+   </category-def>
+   
+</site>

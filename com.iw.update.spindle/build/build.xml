@@ -47,7 +47,7 @@
          publish the results
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    -->
-  <target name="deploy" depends="all">
+  <target name="deploy" depends="all, pushsite">
     <exec dir="${target.dir}"
           executable="pscp"
           outputproperty="results"
@@ -55,7 +55,37 @@
       <arg line="-l ${user} -pw ${password}  spindle.update.site.archive_${version}.zip glongman@spindle.sourceforge.net:/home/users/g/gl/glongman" />
     </exec>
     <echo message="${results}" />
+  	
   </target>
+	
+	
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: push site                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="pushsite" depends="all">
+    	<exec dir="${target.dir}"
+    	  	          executable="pscp"
+    	  	          outputproperty="siteresults"
+    	  	          timeout="500000">
+    	  	      <arg line="-l ${user} -pw ${password}  site.xml.${version} glongman@spindle.sourceforge.net:/home/users/g/gl/glongman" />
+    	  	    </exec>
+    	  	    <echo message="${siteresults}" />
+    </target>
+	
+	<target name="pushweb" depends="all">
+		<mkdir dir="${target.dir}/web"/>
+		<copy file="${target.dir}/siteWeb.xml.${version}"
+		  	  	  	          tofile="${target.dir}/web/site.xml" />
+	    	<exec dir="${target.dir}/web"
+	    	  	          executable="pscp"
+	    	  	          outputproperty="webresults"
+	    	  	          timeout="500000">
+	    	  	      <arg line="-l ${user} -pw ${password}  site.xml glongman@spindle.sourceforge.net:/home/users/g/gl/glongman/update" />
+	    	  	    </exec>
+	    	  	    <echo message="${webresults}" />
+	    </target>
+
+
   <!-- 
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        feature export - note this does not block!
@@ -95,7 +125,7 @@
           tofile="${site.dir}/site.xml" />
     <copy file="${templates.dir}/index.html.template"
           tofile="${site.dir}/index.html" />
-    <copy file="SpindleMasthead.jpg" tofile="${site.dir}/SpindleMasthead.jpg" />
+    <copy file="SpindleMasthead.jpg" tofile="${site.dir}/SpindleMasthead.jpg" />  	
     <replace file="${site.dir}/site.xml" token="@version@" value="${version}" />
     <replace file="${site.dir}/site.xml"
              token="@groovy.version@"
@@ -111,7 +141,15 @@
         <include name="**/*.jar" />
       </zipfileset>
     </zip>
+  	 <copy file="${templates.dir}/siteSF.xml.template"
+  	  	          tofile="${target.dir}/site.xml.${version}" />
+  	 <replace file="${target.dir}/site.xml.${version}" token="@version@" value="${version}" />
+  	
+  	<copy file="${templates.dir}/siteWeb.xml.template"
+  	  	  	          tofile="${target.dir}/siteWeb.xml.${version}" />
+  	  	 <replace file="${target.dir}/siteWeb.xml.${version}" token="@version@" value="${version}" />
   </target>
+	
   <target name="site-dir" depends="init">
     <mkdir dir="${site.dir}" />
   </target>
