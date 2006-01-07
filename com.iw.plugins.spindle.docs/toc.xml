@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?> 
 <toc label="Spindle 3 Users' Guide" topic="docs/index.html"> 
+    <topic label="Installing Spindle" href="docs/installing.html">Installing from a downloaded archive
+	    <topic label="Help with the Eclipse update manager" href="docs/installing.html"/>
+	    <topic label="Installing online" href="docs/installing.html#online"/>
+		<topic label="Installing from a downloaded archive" href="docs/installing.html#download"/>
+	</topic>
 	<topic label="Quick Start">
 		<topic label="Overview" href="docs/quickstart.html"></topic>
-		<topic label="Installing Spindle" href="docs/installing.html"></topic>
+		<topic label="Installing Spindle" href="docs/installing.html">Installing from a downloaded archive</topic>
 		<topic label="Installing Jetty" href="docs/installing_jetty.html"></topic>
 		<topic label="Installing Jetty Launcher" href="docs/installing_jettylauncher.html"></topic>
 		<topic label="Creating a Project" href="docs/create.html"></topic>
@@ -15,15 +20,36 @@
 		<topic label="Work with Tapestry Framework Library" href="docs/tapestry_frmwk_lib_wrk.html"></topic>		
 		<topic label="Creating Pages and Components" href="docs/component_wizard.html"></topic>			
 		<topic label="Adding Images and Other Assets" href="docs/addingassets.html"></topic>
-		<topic label="Configuring Spindle" href="docs/preferences.html"></topic>		
+		<topic label="Configuring Spindle" href="docs/preferences.html">
+		    <topic label="General" href="docs/preferences.html#main"></topic>
+		    <topic label="Editors" href="docs/preferences.html#editors"></topic>
+		    <topic label="Folding" href="docs/preferences.html#folding"></topic>
+		    <topic label="Formatter" href="docs/preferences.html#formatter"></topic>
+		    <topic label="Templates" href="docs/preferences.html#templates"></topic>
+		</topic>		
 	</topic>
 	<topic label="Concepts">
 		<topic label="Tapestry Project Nature" href="docs/tap_nature.html"></topic>		
 		<topic label="Spindle Builder" href="docs/spindle_builder.html"></topic>
 		<topic label="Tapestry Framework Library" href="docs/tapestry_frmwk_lib.html"></topic>	
 		<topic label="Spindle Editors" href="docs/editors.html">
-			<topic label="Tapestry Template Editor" href="docs/template_editor.html"></topic>
-			<topic label="Specification Editor" href="docs/spec_editor.html"></topic>
+			<topic label="Tapestry Template Editor" href="docs/template_editor.html">
+				<topic label="HTML specific" href="docs/template_editor.html#html"></topic>
+				<topic label="ON-The-Fly Parsing and Problem Annotations" href="docs/template_editor.html#asyoutype"></topic>
+				<topic label="Syntax Completion" href="docs/template_editor.html#completion">
+				   <topic label="Within 'jwcid' attribute" href="docs/template_editor.html#jwcid"></topic>
+				   <topic label="Syntax completion for component attributes" href="docs/template_editor.html#components"></topic>
+				</topic>
+				<topic label="Hover Information" href="docs/template_editor.html#hover"></topic>
+				<topic label="Keybindings" href="docs/template_editor.html#keys"></topic>
+			</topic>
+			<topic label="Specification Editor" href="docs/spec_editor.html">
+			    <topic label="ON-The-Fly Parsing and Problem Annotations" href="docs/spec_editor.html#asyoutype"></topic>
+				<topic label="XML Syntax Completion" href="docs/spec_editor.html#completion"></topic>
+				<topic label="Syntax completion in attribute values" href="docs/spec_editor.html#components"></topic>
+				<topic label="Special Completions" href="docs/spec_editor.html#special"></topic>
+				<topic label="Keybindings" href="docs/spec_editor.html#keys"></topic>
+			</topic>
 		</topic>
 		<topic label="Code Templates">
 			<topic label="Kinds of Templates" href="docs/template_kinds.html"></topic>

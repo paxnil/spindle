@@ -5,6 +5,8 @@
  http-equiv="content-type">
   <title>Installing Spindle</title>
    <link rel="stylesheet" href="style/book.css" type="text/css">
+   <script language="JavaScript" type="text/javascript" src="scripts/NewWindow.js"></script>
+
 </head>
 <body>
 <img src="images/headerBkgII.jpg">
@@ -17,10 +19,19 @@ continue with the next page.</p>
 <p>If you are browsing this documentation on the web, then we&#8217;ll take
 you
 through the steps on installing Spindle. It&#8217;ll only take a minute (plus
-download time).
-</p>
-<p>Spindle is installed using the Eclipse plug-in update mechanism from:</p>
-<p class="code">http://spindle.sourceforge.net/unstable/ </p><span
+download time).</p>
+<p>There are two ways to install Spindle, <a href="#online">online</a> and using <a href="#download">an archived update site</a> that you download from SourceForge. </p>
+<p>Either way, Spindle is installed using the Eclipse plug-in update mechanism. For more information about the update mechanism check out its documentation.</p>
+<div style="border: #0000FF 1px solid; width: 650px; padding: 4 4 4 4;">
+  <p><a name="help"></a>If you are viewing this document in Eclipse, the detailed help for update is available in the tree of topics on the left.</p>
+  <p class="Code">Workbench User Guide &gt; Tasks &gt; Updating Features with the update manager </p>
+  <p>The same topic is <a href="javascript:newWindow('http://help.eclipse.org/help30/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/tasks-36.htm');" name="Online Update Manager Help">available online</a>.</p>
+</div>
+
+<h3><strong><a name="online"></a>Online Installing</strong></h3>
+<p>The update URL for spindle is: </p>
+<p class="Code">http://spindle.sourceforge.net/updates</p>
+<span
  style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;"></span><br>
 
 <span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Step-by-Step</span>
@@ -35,27 +46,60 @@ Intallation Instructions<span
   <li>Check <span style="font-style: italic;">Search for New Features
 to Install</span></li>
   <li>Click <span style="font-style: italic;">Next &gt;</span></li>
-  <li>Click New Remote Site</li>
-  <li>Name it Spindle Unstable</li>
-  <li>URL is http://spindle.sourceforge.net/unstable/</li>
+  <li>Click <em>New Remote Site</em></li>
+  <li>Name it Spindle</li>
+  <li>URL is http://spindle.sourceforge.net/updates/</li>
   <li>Click <span style="font-style: italic;">OK</span></li>
-  <li>Check <span style="font-style: italic;">Spindle Unstable</span></li>
+</ul>
+  <p>Things will occur in the background. In short order a new dialog titled "Updates" will appear</p>
+  <ul>
+  <li>Check <span style="font-style: italic;">Spindle</span></li>
   <li>Click <span style="font-style: italic;">Next &gt;</span></li>
   <li>Put a check by the latest version of Spindle</li>
   <li>Click <span style="font-style: italic;">Next &gt;</span></li>
   <li>Accept the license agreement</li>
   <li>Click <span style="font-style: italic;">Next &gt;</span></li>
   <li>Click <span style="font-style: italic;">Finish</span></li>
-  <li>Click <span style="font-style: italic;">Install</span>,
-(ignoring the warning about &#8220;unsigned feature&#8221;)</li>
+  <li>Click <span style="font-style: italic;">Install</span>.</li>
+  <p class="Note">(Spindle is unsigned so it is your choice to ignore the warning about &#8220;unsigned feature&#8221;. Be aware that if you do not accept, Spindle will not be installed.)</p>
 </ul>
-<h2>Stable vs. Unstable Versions<br>
-</h2>
-<p>
-Note that there are two update sites for Spindle, the 'stable', and
-'unstable' versions. You can get the latest stable version from <a
- href="http://spindle.sourceforge.net/updates">http://spindle.sourceforge.net/updates</a>.
-I prefer the unstable, since they have been quite stable, and the
-stable version is quite old.</p>
+<h3>
+<strong><a name="download"></a>Installing from a downloaded archive</strong></h3>
+
+<p>Often it is convenient to download an archived version of the Spindle update site and install from that. Archives are available from the<a href="javascript:newWindow('http://sourceforge.net/project/showfiles.php?group_id=50321&package_id=43866');"> SourceForge file release system</a>.  </p>
+<p class="Note"><strong>zip files downloaded from SourceForge are acutally Eclipse Update sites themselves and not zipped plugins. You can't unzip these files into an Eclipse installation!</strong> </p>
+<span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Step-by-Step</span>
+Intallation Instructions<span
+ style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">:<br>
+</span></p>
+<ul>
+  <li>Download the archived site of you choice from <a href="javascript:newWindow('http://sourceforge.net/project/showfiles.php?group_id=50321&package_id=43866');">SourceForge</a>. </li>
+  <li>Start Eclipse </li>
+  <li>Select <span style="font-style: italic;">Help</span> menu</li>
+  <li>Select <span style="font-style: italic;">Software Updates</span></li>
+  <li>Select <span style="font-style: italic;">Find and Install</span></li>
+  <li>Check <span style="font-style: italic;">Search for New Features
+to Install</span></li>
+  <li>Click <span style="font-style: italic;">Next &gt;</span></li>
+  <li>Click<em> New Archived Site</em></li>
+  <li>Choose the archive you downloaded using the choose dialog that opened. </li>
+  <li>Name it Spindle</li>
+  <li>Click <span style="font-style: italic;">OK</span></li>
+</ul>
+  <p>Things will occur in the background. In short order a new dialog titled "Updates" will appear</p>
+  <ul>
+  <li>Check <span style="font-style: italic;">Spindle</span></li>
+  <li>Click <span style="font-style: italic;">Next &gt;</span></li>
+  <li>Put a check by the  version of Spindle that appears in the tree. </li>
+  <li>Click <span style="font-style: italic;">Next &gt;</span></li>
+  <li>Accept the license agreement</li>
+  <li>Click <span style="font-style: italic;">Next &gt;</span></li>
+  <li>Click <span style="font-style: italic;">Finish</span></li>
+  <li>Click <span style="font-style: italic;">Install</span>.</li>
+  <p class="Note">(Again, Spindle is unsigned so it is your choice to ignore the warning about &#8220;unsigned feature&#8221;. Be aware that if you do not accept, Spindle will not be installed.)</p>
+</ul>
+<h4>Links</h4>
+<a href="javascript:newWindow('http://help.eclipse.org/help30/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/tasks-36.htm');" name="Online Update Manager Help">Update Manager Help - Online</a><br>
+<a href="javascript:newWindow('http://sourceforge.net/project/showfiles.php?group_id=50321&package_id=43866');">SourceForge - Archived Spindle update sites</a><br> 
 </body>
 </html>

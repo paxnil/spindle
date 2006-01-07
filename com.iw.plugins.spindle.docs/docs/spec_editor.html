@@ -9,7 +9,99 @@
 <body>
 <img src="images/headerBkgII.jpg">
 <h1>Specification Editor</h1>
-<p><strong>TODO</strong> This needs a lot of work!</p>
-<p>For common Spindle editor features see <a href="editors.html">Spindle Editors</a></p>
+<p>For common Spindle editor features see <a href="editors.html">Spindle Editors</a></p><hr>
+<p>The Specification Editor is not a truely a generic XML  editor, but
+rather a text editor that is tailored to working with Tapestry specification
+files that use the Tapestry DTDs.</p>
+<p>That said, there are some neat features to this editor.</p>
+<ul>
+<li>Files are reparsed and revalidated on the fly.</li>
+<li>problems with the file (as found by the parser) are noted as annotations (colored squiggles).</li>
+<li>Rich XML and Tapestry context specific syntax completion.</li>
+<li>Hover information on Tapestry context specific tag attributes.</li>
+<li>Navigation features (jump to specification, jump to java class, jump to other templates).</li>
+</ul><h2><a name="asyoutype"></a>ON-The-Fly Parsing and Problem Annotations</h2>
+<p>Whenever you type and then pause for a short period,  Spindle  attempts to reconcile all of the Tapestry like
+stuff in the file. So, if you introduce an error it will appear as
+annotation and when you fix a problem the annotation will disappear. XML (well formedness and validity) violations are also noted. </p>
+<p><img src="images/spec_editor/reconcile.jpg" alt=""  ></p>
+<p class="Note"><strong>TIP</strong> - Reconciling a specification depends on the file having
+been successfully visited by the Spindle builder. If no annotations appear, this is a clue that that Tapestry would not &quot;see&quot; the file at runtime and throw an exception. It may also be the case that  the file is in a project that is not a Tapestry project.</p>
+<div>
+<h2><a name="completion"></a>XML Syntax Completion</h2>
+<p>The Specification editor is an XML editor with full tag and attribute completions. </p>
+<p>start a tag and hit Ctrl+Space to invoke syntax completion:</p>
+<p><img src="images/spec_editor/complete1.jpg" alt="" width="661" height="284" ></p>
+<p>Choosing a suggestion inserts it into the text as a smart template: </p>
+<p><img src="images/spec_editor/complete2.jpg" alt="" width="254" height="72" ></p>
+<p>The error annotation is there because 'property' requires a 'value' attribute. Let's type 'foo', press tab then Ctrl-Space: </p>
+<p><img src="images/spec_editor/complete3.jpg" alt="" width="524" height="188" ></p>
+<p>Which demonstrates that XML attribute completions are also available. </p>
+<h2><a name="components"></a>Syntax completion in attribute values </h2>
+<p>The Specification editor is able to provide completions in the values of your attributes by accessing the context of your application as it was gathered by the Spindle builder. </p>
+<p>An example would be components types and thier attributes.</p>
+<p><img src="images/spec_editor/complete4.jpg" alt="" width="384" height="97" ></p>
+<p>Any component, either provided by the Tapestry distro, or by you is available in the suggestion drop down list (as long a the Spindle builder picked up the file).</p>
+<p>The Specification editor will also provide suggestions for the parameter bindings of an component declared in the file:</p>
+<p><img src="images/spec_editor/complete5.jpg" alt="" width="728" height="124" ></p>
+<p>Here is a good place to note that the suggestion also shows the description of the binding and a summary of it's declaration. The information presented is dependant on it's availability in the parameters' declaration in the component .jwc file. </p>
+<h2><a name="special"></a>Special Syntax completions</h2>
+<h3>Path Attributes</h3>
+<p>Some attribute values contain paths to resources in the workspace, The specification editor will provide a lookup helper window to choose the desired path.</p>
+<p><img src="images/spec_editor/complete6.jpg" alt="" width="516" height="284" ></p>
+<p>Start typeing the name of your resource and the list is narrowed. Use the arrow keys to highlight a resource. Press enter to choos the highlighted resource. Choosing a resource causes the Specification editor to insert the correct path (according to Tapestry) as the attribute value.</p>
+<h3>Class Atrributes </h3>
+<p>Attribute values that require fully qualified class names will open the Eclipse class chooser dialog. The fully qualified name of the chosen class is inserted.</p>
+<div>
+<h2><a name="keys"></a>Keybindings</h2>
+<p>&nbsp;</p>
+<TABLE cellSpacing="1" cellPadding="1" border="1">
+  <TBODY>
+    <TR>
+      <TD width="168" align="left">&nbsp;<STRONG>Keybinding</STRONG>&nbsp;</TD>
+      <TD width="187" align="left">&nbsp;<STRONG>Description</STRONG>&nbsp;</TD>
+      <TD width="472" align="left">&nbsp;<STRONG>Notes</STRONG>&nbsp;</TD>
+    </TR>
+    
+    <TR>
+      <TD align="left">&nbsp;<EM>F3</EM>&nbsp;</TD>
+      <TD align="left">&nbsp;Open Declaration </TD>
+      <TD align="left">&nbsp; Open an editor on the element the cursor is on. Includes class names, <br>
+      &nbsp;components and component parameters. </TD>
+    </TR>
+    <TR>
+      <TD align="left"><EM>&nbsp;(Ctrl-O)</EM>&nbsp;</TD>
+      <TD align="left">&nbsp;XML based Quick Search&nbsp;</TD>
+      <TD align="left">&nbsp;find things fast in large documents&nbsp;</TD>
+    </TR>
+    <TR>
+      <TD align="left">&nbsp;<EM>(Ctrl-F3)</EM>&nbsp;</TD>
+      <TD align="left">&nbsp;Tapestry based Quick Search&nbsp;</TD>
+      <TD align="left">&nbsp;a more compact search that doesn't show all the XML markup&nbsp;</TD>
+    </TR>
+    <TR>
+      <TD align="left">&nbsp;<EM>(Ctrl-Shift-F)</EM>&nbsp;</TD>
+      <TD align="left">&nbsp;Markup Formatting&nbsp;</TD>
+      <TD align="left">&nbsp;</TD>
+    </TR>
+    <TR>
+      <TD align="left">&nbsp;<EM>Alt+F6</EM></TD>
+      <TD align="left">&nbsp;Jump to Template </TD>
+	  <TD align="left" rowSpan="2">&nbsp;<STRONG>Important notes about jumping in   general**</STRONG>&nbsp;</TD>
+    </TR>
+    <TR>
+      <TD align="left">&nbsp;<EM>Alt+F8</EM></TD>
+      <TD align="left">&nbsp;Jump to Java class&nbsp;</TD>
+    </TR>
+    <TR>
+      <TD align="left">&nbsp;<EM>Ctrl+Alt+Arrow Keys</EM></TD>
+      <TD align="left">&nbsp;Navigate between XML attributes&nbsp;</TD>
+	  <TD align="left"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<p class="Note">** Jumping (Alt+F6 and Alt+F7) are also available in the Java   Editor. Note that jumping from a binary file or binary class to another binary   file (binary means located in a jar file) is not possible. This is not a   limitation of Spindle. Rather it is a limitation of Eclipse. Lastly, jumping   depends on the project having been built without fatal errors and the current   file being edited has been seen by the Spindle project builder.</p>
+</div>
+</div>
 </body>
 </html>

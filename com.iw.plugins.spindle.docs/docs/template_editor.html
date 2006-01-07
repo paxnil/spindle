@@ -9,12 +9,12 @@
 <body>
 <img src="images/headerBkgII.jpg"> 
 <h1>Tapestry Template Editor</h1>
-<p><strong>TODO</strong> This needs a lot of editing</p>
 <p>For common Spindle editor features see <a href="editors.html">Spindle Editors</a></p>
-<hr><p>The template editor is not a truely XML/HTML aware editor, but
+<hr>
+<p>The template editor is not a truely a genric XML/HTML  editor, but
 rather a text editor that is tailored to working with Tapestry template
 files.</p>
-<p>As such the DTD based syntax completion found in the Specification XML Editor is not found in this editor.</p>
+<p>As such the generic DTD based syntax completion available in the Specification XML Editor is not found in this editor.</p>
 <p>That said, there are some neat features to this editor.</p>
 <ul>
 <li>templates in the editor are parsed on the fly using the same parser Tapestry uses at runtime.</li>
@@ -23,7 +23,7 @@ files.</p>
 <li>Hover information on Tapestry specific tag attributes.</li>
 <li>Navigation features (jump to specification, jump to java class, jump to other templates).</li>
 </ul>
-<h4>New HTML syntax completion (as of build 3.0.27)</h4>
+<h2><a name="html"></a>New HTML syntax completion (as of build 3.0.27)</h2>
 <p>An optional feature (see the Spindle &quot;Editors&quot; preference page to turn it on) now to offer 
   attribute and tag completions from the XHTML 1.0 DTDs <strong>in files with the .html extension</strong>.</p>
 <p class="Note"><strong>Note:</strong> that the rules for inserting new html tags are loose. Unlike the 
@@ -38,7 +38,7 @@ files.</p>
 <p><img src="images/template_editor/template13.jpg" alt="" width="374" height="106" ></p>
 <p>HTML attributes</p>
 <p><img src="images/template_editor/template14.jpg" alt="" width="381" height="67" ></p>
-<h4>ON-The-Fly Parsing and Problem Annotations.</h4>
+<h2><a name="asyoutype"></a>ON-The-Fly Parsing and Problem Annotations</h2>
 <p>Whenever you type and then pause for a short period, the Tapestry
 template parser runs an attempts to reconcile all of the Tapestry like
 stuff in the file. So, if you introduce an error it will appear as
@@ -56,17 +56,18 @@ stops at the first error it finds. So it will be the case that the
 template editor will show only one error even if there are multiple
 errors in the file. Fixing an error will trigger a parse and the next
 error in the file will be annotated.</p>
-<h4>Syntax Completion</h4>
+<div>
+<h2><a name="completion"></a>Syntax Completion</h2>
 <p>Tapestry templates need not be HTML at all. The only requirement is that they are tag based and that 
   tags with 'jwcid' attributes are properly nested (well formed). The Tapestry parser ignores (for syntax 
   checking purposes) any content in the file that is not a tag containing the 'jwcid' attribute. Hence 
   the syntax completion works only in tags containing the 'jwcid' attribute.</p>
   <p>There is one exception show below:</p>
-<p>start a tag and hit Ctrl+Shift to invoke syntax completion</p>
+<p>start a tag and hit Ctrl+Space to invoke syntax completion</p>
 <p><img src="images/template_editor/template2.jpg" alt="" width="637" height="136" ></p>
 <p>You get the option to make this tag a Tapestry one. Here we chose 'jwcid'</p>
-<p><img src="images/template_editor/template3.jpg" alt="" width="639" height="97" ></p>
-<h3>Syntax Completion Within 'jwcid' attribute</h3>
+<p><img src="images/template_editor/template3.jpg" alt="" width="639" height="97" ></p></div>
+<h2><a name="jwcid"></a>Syntax Completion Within 'jwcid' attribute</h2>
 <p>'jwcid' attribute may take two forms. First a simple Id string that
 referes to a &lt;component&gt; declaration in this template's spec.
 Spindle syntax completion can handle looking up these ids.</p>
@@ -79,7 +80,7 @@ followed by a valid component name. Spindle syntax completion can help
 lookup component names:</p>
 <p><img src="images/template_editor/template6.jpg" alt="" width="820" height="195" ></p>
 <p>Note that moving up and down in the list of options will display a summary of the currently selected component.</p>
-<h3>Syntax completion for component attributes</h3>
+<h2><a name="components"></a>Syntax completion for component attributes</h2>
 <p>There are some syntax completion features that make it easier to
 bind values to the parameters of components in your templates. These
 depend on the template's specification having been picked up and
@@ -91,11 +92,45 @@ word 'class':</p>
 <p><img src="images/template_editor/template8.jpg" alt="" width="577" height="83" ></p>
 <p>we chose to change 'class' into 'format'</p>
 <p><img src="images/template_editor/template9.jpg" alt="" width="514" height="61" ></p>
-<h4>Hover Information</h4>
+<h2><a name="hover"></a>Hover Information</h2>
 <p>When you hover over things like component names or attributes that
 are component parameters, an infomation window will pop up giving some
 info about that item. (This also depends on the template's spec being
 picked up successfuly by the builder).</p>
 <p><img src="images/template_editor/template10.jpg" alt="" width="629" height="310" ></p>
+<div>
+<h2><a name="keys"></a>Keybindings</h2>
+<p>&nbsp;</p>
+<TABLE cellSpacing="1" cellPadding="1" border="1">
+  <TBODY>
+    <TR>
+      <TD width="168" align="left">&nbsp;<STRONG>Keybinding</STRONG>&nbsp;</TD>
+      <TD width="187" align="left">&nbsp;<STRONG>Description</STRONG>&nbsp;</TD>
+      <TD width="472" align="left">&nbsp;<STRONG>Notes</STRONG>&nbsp;</TD>
+    </TR>
+    
+    <TR>
+      <TD align="left">&nbsp;<EM>F3</EM>&nbsp;</TD>
+      <TD align="left">&nbsp;Open Declaration </TD>
+      <TD align="left">&nbsp; Open an editor on the element the cursor is on. Includes class names, <br>
+      &nbsp;components and component parameters. </TD>
+    </TR>
+    <TR>
+      <TD align="left">&nbsp;<EM>Alt+F7</EM></TD>
+      <TD align="left">&nbsp;Jump to spec&nbsp;</TD>
+	  <TD align="left" rowSpan="3">&nbsp;<STRONG>Important notes about jumping in   general**</STRONG>&nbsp;</TD>
+    </TR>
+    <TR>
+      <TD align="left">&nbsp;<EM>Alt+F8</EM></TD>
+      <TD align="left">&nbsp;Jump to Java class&nbsp;</TD>
+    </TR>
+    <TR>
+      <TD align="left">&nbsp;<EM>Ctrl+Alt+Arrow Keys</EM></TD>
+      <TD align="left">&nbsp;Navigate between XML attributes&nbsp;</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<p class="Note">** Jumping (Alt+F6 and Alt+F7) are also available in the Java   Editor. Note that jumping from a binary file or binary class to another binary   file (binary means located in a jar file) is not possible. This is not a   limitation of Spindle. Rather it is a limitation of Eclipse. Lastly, jumping   depends on the project having been built without fatal errors and the current   file being edited has been seen by the Spindle project builder.</p>
+</div>
 </body>
 </html>
