@@ -9,6 +9,10 @@
    <feature url="com.iw.features.spindle.groovy_@version@.jar" id="com.iw.features.spindle.groovy" version="@version@">
       <category name="add_ons"/>
    </feature>
+   
+    <feature url="http://spindle.sf.net/updates/features/com.iw.features.spindle_3.1.27.jar" id="com.iw.features.spindle" version="3.1.27">
+      <category name="spindle_3_1"/>
+   </feature>
     
    <archive path="plugins/com.iw.plugins.spindle.core_@version@.jar" url="com.iw.plugins.spindle.core_@version@.jar"/> 
    <archive path="plugins/com.iw.plugins.spindle.core.groovy_@version@.jar" url="com.iw.plugins.spindle.core.groovy_@version@.jar"/> 
@@ -18,14 +22,26 @@
    <archive path="plugins/net.sf.solareclipse.ui_0.4.0.spindle-dep-6.jar" url="net.sf.solareclipse.ui_0.4.0.spindle-dep-6.jar"/>    
    <archive path="plugins/net.sf.solareclipse.xml.ui_0.4.0.spindle-dep-6.jar" url="net.sf.solareclipse.xml.ui_0.4.0.spindle-dep-6.jar"/>    
    <archive path="plugins/org.apache.xerces.spindle_4.0.13.jar" url="org.apache.xerces.spindle_4.0.13.jar"/>    
-   <category-def name="spindle_latest" label="Spindle">
+   
+   <archive path="plugins/com.iw.plugins.spindle.core_3.1.27.jar" url="http://spindle.sf.net/updates/plugins/com.iw.plugins.spindle.core_3.1.27.jar"/>
+   <archive path="plugins/com.iw.plugins.spindle.core.groovy_3.1.27.jar" url="http://spindle.sf.net/updates/plugins/com.iw.plugins.spindle.core.groovy_3.1.27.jar"/>
+   <archive path="plugins/com.iw.plugins.spindle.docs_3.1.27.jar" url="http://spindle.sf.net/updates/plugins/com.iw.plugins.spindle.docs_3.1.27.jar"/>
+   <archive path="plugins/com.iw.plugins.spindle.ui.contrib_3.1.27.jar" url="http://spindle.sf.net/updates/plugins/com.iw.plugins.spindle.ui.contrib_3.1.27.jar"/>
+   <archive path="plugins/com.iw.plugins.spindle.ui_3.1.27.jar" url="http://spindle.sf.net/updates/plugins/com.iw.plugins.spindle.ui_3.1.27.jar"/>
+   
+   <category-def name="spindle_latest" label="Spindle 3.2 - Eclipse 3.1">
       <description>
-          Spindle
+        Here is the latest Spindle 3.2 build. It is built for Eclipse 3.1.X
       </description>
    </category-def>
    <category-def name="add_ons" label="Add On features for Spindle">
       <description>
-          Spindle Add Ons.
+         Spindle Add Ons.
+      </description>
+   </category-def>
+   <category-def name="spindle_3_1" label="Spindle 3.1 - Eclipse 3.0">
+      <description>
+         Here is the last Spindle 3.1 build. It is targeted towards Eclipse 3.0.X
       </description>
    </category-def>
 </site>
