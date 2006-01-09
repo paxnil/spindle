@@ -65,6 +65,9 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
     public CUEditorJumpToSpecDelegate()
     {
     }
+    
+    
+    
 
     /**
      * @see IEditorActionDelegate#run

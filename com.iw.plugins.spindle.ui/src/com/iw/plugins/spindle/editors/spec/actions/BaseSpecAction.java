@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.editors.spec.actions;
 
 import org.apache.tapestry.INamespace;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
@@ -36,6 +37,7 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.wutka.dtd.DTD;
@@ -44,80 +46,78 @@ import com.wutka.dtd.DTD;
  * Base class for spec actions that need the xml partitioning.
  * 
  * @author glongman@gmail.com
- *  
  */
 public abstract class BaseSpecAction extends BaseEditorAction
 {
 
-  protected String fDeclaredRootElementName;
-  protected String fPublicId;
-  protected DTD fDTD;
-  protected INamespace fNamespace;
+    protected String fDeclaredRootElementName;
 
-  protected IDocument fDocument;
+    protected String fPublicId;
 
-  public BaseSpecAction()
-  {
-    super();
-  }
+    protected DTD fDTD;
 
-  public BaseSpecAction(String text)
-  {
-    super(text);
-  }
+    protected INamespace fNamespace;
 
-  public BaseSpecAction(String text, ImageDescriptor image)
-  {
-    super(text, image);
-  }
+    protected IDocument fDocument;
 
-  public BaseSpecAction(String text, int style)
-  {
-    super(text, style);
-  }
-
-  public final void run()
-  {
-    super.run();
-
-    if (fDocumentOffset < 0)
-      return;
-
-    fDeclaredRootElementName = null;
-    fPublicId = null;
-    fDTD = null;
-
-    try
+    public BaseSpecAction()
     {
-
-      IEditorInput editorInput = fEditor.getEditorInput();
-      IDocumentProvider documentProvider = fEditor.getDocumentProvider();
-      fDocument = documentProvider.getDocument(editorInput);
-      if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
-        return;
-
-      IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
-
-      XMLReconciler model = (modelProvider).getModel(fDocument);
-      if (model == null)
-        return;
-
-      XMLNode root = model.getRoot();
-      fPublicId = model.getPublicId();
-      fDeclaredRootElementName = model.getRootNodeId();
-      fDTD = DOMValidator.getDTD(fPublicId);
-
-      if (fDTD == null || fDeclaredRootElementName == null)
-        return;
-
-      doRun();
-    } catch (RuntimeException e)
-    {
-      UIPlugin.log(e);
-      throw e;
+        super();
     }
-  }
 
-  protected abstract void doRun();
+    public BaseSpecAction(String text)
+    {
+        super(text);
+    }
 
+    public BaseSpecAction(String text, ImageDescriptor image)
+    {
+        super(text, image);
+    }
+
+    public BaseSpecAction(String text, int style)
+    {
+        super(text, style);
+    }
+
+    protected IStatus getStatus()
+    {
+        SpindleStatus status = null;
+        if (getDocumentOffset() >= 0)
+        {
+            fDeclaredRootElementName = null;
+            fPublicId = null;
+            fDTD = null;
+
+            try
+            {
+
+                IEditorInput editorInput = fEditor.getEditorInput();
+                IDocumentProvider documentProvider = fEditor.getDocumentProvider();
+                fDocument = documentProvider.getDocument(editorInput);
+                if (fDocument.getLength() > 0 && fDocument.get().trim().length() == 0)
+                {
+                    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+
+                    XMLReconciler model = (modelProvider).getModel(fDocument);
+                    if (model != null)
+                    {
+                        XMLNode root = model.getRoot();
+                        fPublicId = model.getPublicId();
+                        fDeclaredRootElementName = model.getRootNodeId();
+                        fDTD = DOMValidator.getDTD(fPublicId);
+
+                        if (fDTD != null && fDeclaredRootElementName != null)
+                            status = new SpindleStatus();
+                    }
+                }
+            }
+            catch (RuntimeException e)
+            {
+                UIPlugin.log(e);
+                throw e;
+            }
+        }
+        return status;
+    }
 }

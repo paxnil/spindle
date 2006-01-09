@@ -29,8 +29,10 @@ package com.iw.plugins.spindle.editors.actions;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,6 +43,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelection;
@@ -80,10 +84,11 @@ import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
  */
 public abstract class BaseEditorAction extends Action implements IEditorActionDelegate
 {
+    protected Editor fEditor;    
 
-    protected Editor fEditor;
-
-    protected int fDocumentOffset;
+    protected Object[] fInterestingObjects;
+    
+    protected IStatus fStatus;
 
     /**
      *  
@@ -124,10 +129,29 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         fEditor = (Editor) editor;
     }
 
-    public void run()
+    public final void run()
     {
-        fDocumentOffset = fEditor.getCaretOffset();
+        if (isEnabled())
+            reveal(fInterestingObjects);
+        else if (fStatus != null && fStatus.getSeverity() == IStatus.ERROR) {
+            ErrorDialog.openError(UIPlugin.getDefault().getActiveWorkbenchShell(), "Spindle Error", "Unable to complete the request", fStatus);
+        }
     }
+
+    public final boolean isEnabled()
+    {     
+        fInterestingObjects = null;
+        fStatus = null;
+        
+        IStatus status = getStatus();
+        return status != null && status.isOK();
+    }
+    
+    protected int getDocumentOffset() {
+        return fEditor.getCaretOffset();
+    }
+
+    protected abstract IStatus getStatus();
 
     /*
      * (non-Javadoc)
@@ -163,7 +187,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         catch (JavaModelException e)
         {
-            //do nothing
+            // do nothing
         }
         return null;
     }
@@ -195,22 +219,6 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
             UIPlugin.log(e);
         }
         return null;
-    }
-
-    protected void reveal(IType resolvedType)
-    {
-        try
-        {
-            JavaUI.openInEditor(resolvedType);
-        }
-        catch (PartInitException e)
-        {
-            UIPlugin.log(e);
-        }
-        catch (JavaModelException e)
-        {
-            UIPlugin.log(e);
-        }
     }
 
     /**
@@ -340,15 +348,15 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
             Rectangle displayBounds = display.getClientArea();
             Rectangle parentBounds = dialog.getParent().getBounds();
 
-            //Place it in the center of its parent;
+            // Place it in the center of its parent;
             dialogBounds.x = parentBounds.x + ((parentBounds.width - dialogBounds.width) / 2);
             dialogBounds.y = parentBounds.y + ((parentBounds.height - dialogBounds.height) / 2);
             if (!displayBounds.contains(dialogBounds.x, dialogBounds.y)
                     || !displayBounds.contains(dialogBounds.x + dialogBounds.width, dialogBounds.y
                             + dialogBounds.height))
             {
-                //Place it in the center of the display if it is not visible
-                //when placed in the center of its parent;
+                // Place it in the center of the display if it is not visible
+                // when placed in the center of its parent;
                 dialogBounds.x = (displayBounds.width - dialogBounds.width) / 2;
                 dialogBounds.y = (displayBounds.height - dialogBounds.height) / 2;
             }
@@ -423,70 +431,70 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     int accelerator = stateMask
                             | (keyCode != 0 ? keyCode : convertCharacter(character));
 
-                    //                    System.out.println("\nPRESSED");
-                    //                    printKeyEvent(e);
-                    //                    System.out.println(
-                    //                        "accelerat:\t"
-                    //                            + accelerator
-                    //                            + "\t ("
-                    //                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
-                    //                            + ")");
+                    // System.out.println("\nPRESSED");
+                    // printKeyEvent(e);
+                    // System.out.println(
+                    // "accelerat:\t"
+                    // + accelerator
+                    // + "\t ("
+                    // + KeySupport.formatStroke(Stroke.create(accelerator), true)
+                    // + ")");
 
                     boolean acceleratorForward = false;
                     boolean acceleratorBackward = false;
-                    //TODO revisit
-                    //                    if (commandForward != null)
-                    //                    {
-                    //                        Map commandMap =
+                    // TODO revisit
+                    // if (commandForward != null)
+                    // {
+                    // Map commandMap =
                     // Manager.getInstance().getKeyMachine().getCommandMap();
-                    //                        SortedSet sequenceSet = (SortedSet) commandMap.get(commandForward);
+                    // SortedSet sequenceSet = (SortedSet) commandMap.get(commandForward);
                     //
-                    //                        if (sequenceSet != null)
-                    //                        {
-                    //                            Iterator iterator = sequenceSet.iterator();
+                    // if (sequenceSet != null)
+                    // {
+                    // Iterator iterator = sequenceSet.iterator();
                     //
-                    //                            while (iterator.hasNext())
-                    //                            {
-                    //                                Sequence sequence = (Sequence) iterator.next();
-                    //                                List strokes = sequence.getStrokes();
-                    //                                int size = strokes.size();
+                    // while (iterator.hasNext())
+                    // {
+                    // Sequence sequence = (Sequence) iterator.next();
+                    // List strokes = sequence.getStrokes();
+                    // int size = strokes.size();
                     //
-                    //                                if (size > 0 && accelerator == ((Stroke) strokes.get(size -
+                    // if (size > 0 && accelerator == ((Stroke) strokes.get(size -
                     // 1)).getValue())
-                    //                                {
-                    //                                    acceleratorForward = true;
-                    //                                    break;
-                    //                                }
-                    //                            }
-                    //                        }
-                    //                    }
+                    // {
+                    // acceleratorForward = true;
+                    // break;
+                    // }
+                    // }
+                    // }
+                    // }
                     //
-                    //                    if (commandBackward != null)
-                    //                    {
-                    //                        Map commandMap =
+                    // if (commandBackward != null)
+                    // {
+                    // Map commandMap =
                     // Manager.getInstance().getKeyMachine().getCommandMap();
-                    //                        SortedSet sequenceSet = (SortedSet)
+                    // SortedSet sequenceSet = (SortedSet)
                     // commandMap.get(commandBackward);
                     //
-                    //                        if (sequenceSet != null)
-                    //                        {
-                    //                            Iterator iterator = sequenceSet.iterator();
+                    // if (sequenceSet != null)
+                    // {
+                    // Iterator iterator = sequenceSet.iterator();
                     //
-                    //                            while (iterator.hasNext())
-                    //                            {
-                    //                                Sequence sequence = (Sequence) iterator.next();
-                    //                                List strokes = sequence.getStrokes();
-                    //                                int size = strokes.size();
+                    // while (iterator.hasNext())
+                    // {
+                    // Sequence sequence = (Sequence) iterator.next();
+                    // List strokes = sequence.getStrokes();
+                    // int size = strokes.size();
                     //
-                    //                                if (size > 0 && accelerator == ((Stroke) strokes.get(size -
+                    // if (size > 0 && accelerator == ((Stroke) strokes.get(size -
                     // 1)).getValue())
-                    //                                {
-                    //                                    acceleratorBackward = true;
-                    //                                    break;
-                    //                                }
-                    //                            }
-                    //                        }
-                    //                    }
+                    // {
+                    // acceleratorBackward = true;
+                    // break;
+                    // }
+                    // }
+                    // }
+                    // }
 
                     if (character == SWT.CR || character == SWT.LF)
                         ok(dialog, table);
@@ -523,14 +531,14 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     int accelerator = stateMask
                             | (keyCode != 0 ? keyCode : convertCharacter(character));
 
-                    //                    System.out.println("\nRELEASED");
-                    //                    printKeyEvent(e);
-                    //                    System.out.println(
-                    //                        "accelerat:\t"
-                    //                            + accelerator
-                    //                            + "\t ("
-                    //                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
-                    //                            + ")");
+                    // System.out.println("\nRELEASED");
+                    // printKeyEvent(e);
+                    // System.out.println(
+                    // "accelerat:\t"
+                    // + accelerator
+                    // + "\t ("
+                    // + KeySupport.formatStroke(Stroke.create(accelerator), true)
+                    // + ")");
 
                     if ((firstKey || quickReleaseMode) && keyCode == stateMask
                             && keyCode != SWT.ALT)
@@ -545,23 +553,23 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
 
         //    
-        //        private void printKeyEvent(KeyEvent keyEvent)
-        //        {
-        //            System.out.println(
-        //                "keyCode:\t"
-        //                    + keyEvent.keyCode
-        //                    + "\t ("
-        //                    + KeySupport.formatStroke(Stroke.create(keyEvent.keyCode), true)
-        //                    + ")");
-        //            System.out.println(
-        //                "stateMask:\t"
-        //                    + keyEvent.stateMask
-        //                    + "\t ("
-        //                    + KeySupport.formatStroke(Stroke.create(keyEvent.stateMask), true)
-        //                    + ")");
-        //            System.out.println("character:\t" + (int) keyEvent.character + "\t (" +
+        // private void printKeyEvent(KeyEvent keyEvent)
+        // {
+        // System.out.println(
+        // "keyCode:\t"
+        // + keyEvent.keyCode
+        // + "\t ("
+        // + KeySupport.formatStroke(Stroke.create(keyEvent.keyCode), true)
+        // + ")");
+        // System.out.println(
+        // "stateMask:\t"
+        // + keyEvent.stateMask
+        // + "\t ("
+        // + KeySupport.formatStroke(Stroke.create(keyEvent.stateMask), true)
+        // + ")");
+        // System.out.println("character:\t" + (int) keyEvent.character + "\t (" +
         // keyEvent.character + ")");
-        //        }
+        // }
 
         /*
          * Close the dialog saving the selection
@@ -613,9 +621,30 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
 
     }
 
-    /**
-     * @param location
-     */
+    protected abstract ChooseLocationPopup getChooseLocationPopup(Object[] interesting);
+
+    protected abstract void postReveal(Object revealed);
+
+    protected void reveal(Object[] objects)
+    {
+        if (objects == null || objects.length == 0)
+            return;
+        if (objects.length == 1)
+        {
+            Object obj = objects[0];
+            if (obj instanceof IResourceLocation)
+                reveal((IResourceWorkspaceLocation) obj);
+            else if (obj instanceof IStorage)
+                reveal((IStorage) obj);
+            else if (obj instanceof IType)
+                reveal((IType) obj);
+        }
+        else
+        {
+            getChooseLocationPopup(objects).run();
+        }
+    }
+
     protected void reveal(IResourceWorkspaceLocation location)
     {
         if (location == null)
@@ -626,7 +655,26 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
     protected void reveal(IStorage storage)
     {
         if (storage != null)
+        {
             UIPlugin.openTapestryEditor((IStorage) storage);
-    }   
+            postReveal(storage);
+        }
+    }
 
+    protected void reveal(IType resolvedType)
+    {
+        try
+        {
+            JavaUI.openInEditor(resolvedType);
+            postReveal(resolvedType);
+        }
+        catch (PartInitException e)
+        {
+            UIPlugin.log(e);
+        }
+        catch (JavaModelException e)
+        {
+            UIPlugin.log(e);
+        }
+    }
 }

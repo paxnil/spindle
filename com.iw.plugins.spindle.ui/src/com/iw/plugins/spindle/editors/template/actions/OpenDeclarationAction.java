@@ -39,7 +39,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
@@ -63,6 +65,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
             + ".editor.commands.navigate.openDeclaration";
 
     private TemplateTapestryAccess fAccess;
+    private XMLNode fJwcidAttribute;
 
     public OpenDeclarationAction()
     {
@@ -70,10 +73,20 @@ public class OpenDeclarationAction extends BaseTemplateAction
         setText(UIPlugin.getString(ACTION_ID));
         setId(ACTION_ID);
     }
+    
+    public IRegion getRegion() {
+        
+        fJwcidAttribute = null;
+        Region region = new Region();
+        
+        return region;
+    }
+    
+    
 
     protected void doRun()
     {
-
+       
         INamespace namespace = fEditor.getNamespace();
         if (namespace == null)
         {

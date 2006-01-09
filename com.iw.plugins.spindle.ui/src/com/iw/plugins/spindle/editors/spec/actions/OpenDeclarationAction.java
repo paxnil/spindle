@@ -54,6 +54,8 @@ import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
@@ -64,6 +66,7 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  */
 public class OpenDeclarationAction extends BaseSpecAction
 {
+    private Handler fHandler
 
     public static final String ACTION_ID = UIPlugin.PLUGIN_ID
             + ".editor.commands.navigate.openDeclaration";
@@ -77,57 +80,74 @@ public class OpenDeclarationAction extends BaseSpecAction
         setId(ACTION_ID);
         init();
     }
+    
+    
 
-    protected void doRun()
+    protected void postReveal(Object revealed)
     {
+        if (fInterestingObjects.length > 0 || !revealed.equals(fInterestingObjects[0]))
+            return;
+        
+        
+        
+    }
+
+
+
+    protected IStatus getStatus()
+    {
+        SpindleStatus status = (SpindleStatus) super.getStatus();
+        if (status == null)
+            return status;
+
         try
         {
-            XMLNode artifact = XMLNode.getArtifactAt(fDocument, fDocumentOffset);
+            XMLNode artifact = XMLNode.getArtifactAt(fDocument, getDocumentOffset());
             String type = artifact.getType();
             if (type == ITypeConstants.TEXT || type == ITypeConstants.COMMENT
                     || type == ITypeConstants.PI || type == ITypeConstants.DECL)
-                throw new IllegalArgumentException(
-                        "no applicable data  found at the cursor postion");
+            {
+                status.setError("no applicable data  found at the cursor postion");
+                return status;
+            }
 
             if (type == ITypeConstants.ENDTAG)
                 artifact = artifact.getCorrespondingNode();
 
             if (artifact == null)
-                throw new IllegalArgumentException(
-                        "no applicable data  found at the cursor postion");
+            {
+                status.setError("no applicable data found at the cursor postion");
+                return status;
+            }
 
             String name = artifact.getName();
 
-            if (name == null)
-                throw new IllegalArgumentException(
-                        "no applicable data  found at the cursor postion (missing element name)");
+            if (name == null) {
+                status.setError("no applicable data found at the cursor postion (missing element name)");
+                return status;
+            }
+                
 
             name = name.toLowerCase();
 
             Handler handler = (Handler) fHandlers.get(name);
 
-            if (handler != null)
-                handler.handle(artifact);
+            if (handler == null) {
+                status.setError("This file is not well formed or can not be seen by the Tapestry builder");
+                return status;
+            }
+               
+            status = handler.handle(artifact);           
 
-            else
-                throw new IllegalArgumentException(
-                        "This file is not well formed or can not be seen by the Tapestry builder");
-
-        }
-        catch (IllegalArgumentException e)
-        {
-            canNotContinue(e.getMessage());
         }
         catch (CoreException e)
-        {
-            UIPlugin.log(e);
-            ErrorDialog.openError(
-                    UIPlugin.getDefault().getActiveWorkbenchShell(),
-                    "Operation Aborted",
-                    null,
-                    e.getStatus());
+        {           
+           SpindleMultiStatus result = new SpindleMultiStatus(IStatus.ERROR, "Operation Aborted");
+           result.addStatus(e.getStatus());
+           status = result;       
         }
-    }
+        return status;
+    }    
 
     private void handleLibraryLookup(XMLNode artifact) throws IllegalArgumentException,
             CoreException
@@ -143,12 +163,13 @@ public class OpenDeclarationAction extends BaseSpecAction
             throw new IllegalArgumentException(
                     "could not location the 'specification-path' attribute value");
 
-        //here we are doing a classpath lookup,
-        //need to get access to the ClasspathRoot
+        // here we are doing a classpath lookup,
+        // need to get access to the ClasspathRoot
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
+            ITapestryProject project = (ITapestryProject) storage
+                    .getAdapter(ITapestryProject.class);
             if (project == null)
                 return;
 
@@ -168,30 +189,35 @@ public class OpenDeclarationAction extends BaseSpecAction
     /**
      * @param artifact
      */
-    private void handlePrivateAsset(XMLNode artifact) throws CoreException
+    private IStatus handlePrivateAsset(XMLNode artifact) throws CoreException
     {
-
-        XMLNode attribute = getAttribute(artifact, fDocumentOffset, "resource-path");
-        if (attribute == null)
-            throw new IllegalArgumentException("could not location the 'resource-path' attribute");
-
+        SpindleStatus status = new SpindleStatus();
+        
+        XMLNode attribute = getAttribute(artifact, getDocumentOffset(), "resource-path");
+        if (attribute == null) {
+            status.setError("could not location the 'resource-path' attribute");
+            return status;
+        }
+                    
         String path = attribute.getAttributeValue();
-        if (path == null)
-            throw new IllegalArgumentException(
-                    "could not location the 'resource-path' attribute value");
-
-        //here we are doing a classpath lookup,
-        //need to get access to the ClasspathRoot
+        if (path == null) {
+            status.setError("could not locate the 'resource-path' attribute value");
+            return status;
+        }
+            
+        // here we are doing a classpath lookup,
+        // need to get access to the ClasspathRoot
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
-            if (project == null)
-                return;
+            ITapestryProject project = (ITapestryProject) storage
+                    .getAdapter(ITapestryProject.class);
+            if (project == null) 
+                return null;                
 
             ClasspathRootLocation root = project.getClasspathRoot();
             if (root == null)
-                return;
+                return null;
 
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
                     .getRelativeLocation(path);
@@ -216,12 +242,13 @@ public class OpenDeclarationAction extends BaseSpecAction
         if (path == null)
             throw new IllegalArgumentException("could not location the 'path' attribute value");
 
-        //here we are doing a context lookup,
-        //need to get access to the ContextRoot
+        // here we are doing a context lookup,
+        // need to get access to the ContextRoot
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
+            ITapestryProject project = (ITapestryProject) storage
+                    .getAdapter(ITapestryProject.class);
             if (project == null)
                 return;
 
@@ -255,9 +282,9 @@ public class OpenDeclarationAction extends BaseSpecAction
         if (path == null)
             return;
 
-        //here we are doing a relative lookup
-        //need to get the location object for the Spec we are editing
-        //That means it can have no error markers (parsed without error in the last
+        // here we are doing a relative lookup
+        // need to get the location object for the Spec we are editing
+        // That means it can have no error markers (parsed without error in the last
         // build)
         BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
         if (spec != null)
@@ -277,8 +304,9 @@ public class OpenDeclarationAction extends BaseSpecAction
 
     /**
      * @param artifact
+     * @return TODO
      */
-    private void handleComponentLookup(XMLNode artifact) throws IllegalArgumentException
+    private IStorage handleComponentLookup(XMLNode artifact) throws IllegalArgumentException
     {
 
         SpecTapestryAccess access = new SpecTapestryAccess(fEditor);
@@ -300,10 +328,12 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec
                 .getSpecificationLocation();
-        if (location == null || location.getStorage() == null)
-            return;
+        if (location != null)
+            return location.getStorage();
 
-        foundResult(location.getStorage(), null, null);
+        return null;
+
+        // foundResult(location.getStorage(), null, null);
 
     }
 
@@ -344,7 +374,7 @@ public class OpenDeclarationAction extends BaseSpecAction
                 message);
     }
 
-    private void handleComponentBinding(XMLNode parent, XMLNode binding)
+    private IStorage handleComponentBinding(XMLNode parent, XMLNode binding)
             throws IllegalArgumentException
     {
 
@@ -380,8 +410,8 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec
                 .getSpecificationLocation();
-        if (location == null || location.getStorage() == null)
-            return;
+        if (location != null)
+            return location.getStorage();
 
         foundResult(location.getStorage(), parameterName, parameterSpec);
     }

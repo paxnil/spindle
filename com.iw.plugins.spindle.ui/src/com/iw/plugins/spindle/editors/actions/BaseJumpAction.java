@@ -168,5 +168,7 @@ public abstract class BaseJumpAction extends BaseEditorAction
       return null;
     return new WrappedImageDescriptor(image);
   }
+  
+  
 
 }
