@@ -1,0 +1,29 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;6.&nbsp;Understanding the Request Cycle</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="previous" href="engine.private-assets.html" title="Private Assets"><link rel="next" href="cycle.URLs.html" title="Service URLs and query parameters"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;6.&nbsp;Understanding the Request Cycle</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="engine.private-assets.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="cycle.URLs.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="cycle"></a>Chapter&nbsp;6.&nbsp;Understanding the Request Cycle</h2></div></div><div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="cycle.URLs.html">Service URLs and query parameters</a></span></dt><dt><span class="section"><a href="cycle.page.html">Page service</a></span></dt><dt><span class="section"><a href="cycle.listeners.html">Action and Direct listeners</a></span></dt><dt><span class="section"><a href="cycle.direct.html">Direct service</a></span></dt><dt><span class="section"><a href="cycle.action.html">Action service</a></span></dt><dt><span class="section"><a href="cycle.forms.html">Services and forms</a></span></dt></dl></div><p>
+Web applications are significantly different in structure from other types of interactive applications.  
+Because of the stateless nature of HTTP (the underlying communication protocol between web browsers 
+and web servers), the server is constantly "picking up the pieces" of a conversation with the client.
+</p><p>
+This is complicated further in a high-volumes systems that utilizes load balancing and fail over.  
+In these cases, the server is expected to pick up a conversation started by some other server.
+</p><p>
+The Java Servlet API provides a base for managing the client - server interactions, 
+by providing the <tt class="classname">HttpSession</tt> object, which is used to store 
+server-side state information for a particular client.
+</p><p>
+Tapestry picks up from there, allowing the application engine, pages and components 
+to believe (with just a little bit of work) that they are in continuous contact 
+with the client web browser.
+</p><p>
+At the center of this is the request cycle.  This request cycle is so fundamental under Tapestry 
+that a particular object represents it, and it is used throughout 
+the process of responding to a client request and creating an HTML response.
+</p><p>
+Each application service makes use of the request cycle in its own way.  
+We'll describe the three common application services (page, action and direct), 
+in detail.
+</p><p>
+In most cases, it is necessary to think in terms of two consecutive request cycles.  
+In the first request cycle, a particular page is rendered and, along the way, any number 
+of URLs are generated and included in the HTML.  The second request cycle 
+is triggered by one of those service URLs.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="engine.private-assets.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="DevelopersGuide.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="cycle.URLs.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Private Assets&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Service URLs and query parameters</td></tr></table></div></body></html>

@@ -1,0 +1,186 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Components in templates</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="template.html" title="Chapter&nbsp;2.&nbsp;Page and component templates"><link rel="previous" href="template.contents.html" title="Template Contents"><link rel="next" href="template.directives.html" title="Template directives"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Components in templates</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="template.contents.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;2.&nbsp;Page and component templates</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="template.directives.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="template.components"></a>Components in templates</h2></div></div><div></div></div><p>
+Components can be placed anywhere inside a template, simply  by adding the <tt class="literal">jwcid</tt> attribute to 
+any existing tag.  For example:
+
+<div class="example"><a name="N10185"></a><p class="title"><b>Example&nbsp;2.1.&nbsp;Example HTML template containing components</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Example HTML Template&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;span jwcid="border"&gt;  <a name="template.components.border"></a><img border="0" alt="1" src="standard-images/callouts/1.png">
+    
+      Hello,
+      &lt;span jwcid="@<a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a>" value="ognl:user.name"&gt;Joe User&lt;/span&gt; <a name="template.components.insert"></a><img border="0" alt="2" src="standard-images/callouts/2.png">
+    
+    &lt;/span&gt;
+  &lt;/body&gt;
+&lt;/html&gt;	
+</pre></td></tr></table></div>
+
+<div class="calloutlist"><table summary="Callout list" border="0"><tr><td align="left" valign="top" width="5%"><a href="#template.components.border"><img border="0" alt="1" src="standard-images/callouts/1.png"></a> </td><td align="left" valign="top"><p>
+This is a reference to a <span class="emphasis"><em>declared component</em></span>; the type and parameters
+of the component are in the page's specification.
+</p></td></tr><tr><td align="left" valign="top" width="5%"><a href="#template.components.insert"><img border="0" alt="2" src="standard-images/callouts/2.png"></a> </td><td align="left" valign="top">
+This is a <span class="emphasis"><em>implicit component</em></span>; the type of the component is <a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a>. The
+value parameter is bound to the <a href="http://www.ognl.org" target="_self">OGNL</a> expression <tt class="literal">user.name</tt>.
+</td></tr></table></div>
+</p><p>
+The point of all this is that the HTML template should preview properly in a WYSIWYG HTML editor. Unlike
+<a href="http://jakarta.apache.org/velocity/" target="_self">Velocity</a> or JSPs, there are no strange directives to get in the way of a preview (or necessitate
+a special editting tool), Tapestry hides what's needed inside existing tags; at worst, it adds
+a few non-standard attributes (such as <tt class="literal">jwcid</tt>) to tags. This rarely causes a problem with most HTML editors.
+</p><p>
+Templates may contain components using two different styles.  <span class="emphasis"><em>Declared components</em></span>	 are
+little more than a placeholder; the type of the component is defined elsewhere, in the page (or component) 
+specification.
+</p><p>
+Alternately, an <span class="emphasis"><em>implicit component</em></span> can be defined in place, by preceding
+the component type with an "@" symbol.  Tapestry includes over forty components with the framework, additional components
+may be created as part of your application, or may be provided inside a component library.
+</p><p>
+In the above example, a <tt class="sgmltag-starttag">&lt;span&gt;</tt>	 was used for both components. Tapestry
+doesn't care what tag is used for a component, as long as the start and end tags for components balance (it doesn't
+even care if the case of the start tag matches the case of the end tag). The example could just
+as easily use <tt class="sgmltag-starttag">&lt;div&gt;</tt> or <tt class="sgmltag-starttag">&lt;fred&gt;</tt>, the
+rendered page sent back to the client web browser will be the same.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="templates.components.body"></a>Component bodies</h3></div></div><div></div></div><p>
+In Tapestry, each component is responsible for rendering itself and its <span class="emphasis"><em>body</em></span>. 
+A component's body is the portion of its page's template
+<sup>[<a href="#ftn.N101DE" name="N101DE">2</a>]</sup>
+  that its tags encloses. The Tapestry HTML template parser is responsible for dividing up the  template
+  into chunks: blocks of static HTML, component start tags (recognized by the <tt class="literal">jwcid</tt> attribute) and matching
+  component end tags. It is quite forgiving about case, quotes (which may be single quotes, double quotes, or even
+  omitted), and missing close tags (except for components, which must be balanced).
+</p><div class="figure"><a name="N101E6"></a><p class="title"><b>Figure&nbsp;2.1.&nbsp;Component templates and bodies</b></p><div class="mediaobject"><img src="images/component-body.png" alt="Component templates and bodies"><div class="caption"><p>
+The template is broken into small chunks that are each slotted into a particular
+component's body.
+     </p></div></div></div><p>
+In most cases, a component will make use of its body; it simply controls if, when and how often its body
+is rendered (when rendering the HTML response sent to the client). Other components, such as <a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a>,
+have no use for their bodies, which they discard.  Each component declares in its own specification (the
+<tt class="literal">allow-body</tt>	 attribute of the <a href="spec.component-specification.html" title="component-specification element"><tt class="sgmltag-starttag">&lt;component-specification&gt;</tt></a>) whether is allows or
+discards its body.
+</p><p>
+In the previous example, the <a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a> component had a body, the text "Joe User". This supports WYSIWYG preview; the text
+will be displayed when previewing. Since the <a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a> component discards its body,
+this text will not be used at runtime, instead the OGNL expression <tt class="literal">user.name</tt>	 will be evaluated
+and the result inserted into the response.
+</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Warning: No components in discarded blocks"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Warning]" src="common-images/warning.png"></td><th align="left">No components in discarded blocks</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+	If you put a component inside the body of an <a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a> (or any other component that discards
+	its body), then Tapestry will throw an exception. You aren't allowed to create a component
+	simply to discard it.	
+	</p></td></tr></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="templates.components.ids"></a>Component ids</h3></div></div><div></div></div><p>
+Every component in Tapestry has its own id.  In the above example, the first component has the id "border".  The second component
+is anonymous; the framework provides a unique id for the component since one was not supplied in the HTML template. The 
+framework provided id is built from the component's type; this component would have an id of
+<tt class="literal">$Insert</tt>; other <a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a> components
+would have ids <tt class="literal">$Insert$0</tt>, <tt class="literal">$Insert$1</tt>, etc.
+</p><p>
+A component's id must only be unique within its immediate container.  Pages are top-level containers, but
+components can also contain other components. 
+</p><p>
+Implicit components can also have a specific id, by placing the id in front of the "@" symbol:
+
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+  &lt;span jwcid="insert@<a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a>" value="ognl:user.name"&gt;Joe User&lt;/span&gt;
+</pre></td></tr></table></div>	
+</p><p>
+The component is still implicit; nothing about the component would go in the specification, but the id
+of the component would be "insert".	
+</p><p>
+Providing explicit ids for your components is rarely required, but often beneficial. It is especially
+useful for form control components, 	
+</p><p>
+Each component may only appear <span class="emphasis"><em>once</em></span>	 in the template. You simply can't 
+use the same component
+repatedly ... but you can duplicate a component fairly easily; make the component a declared component,
+then use the <tt class="literal">copy-of</tt> attribute of the <a href="spec.component.html" title="component element"><tt class="sgmltag-starttag">&lt;component&gt;</tt></a> element to create clones of
+the component with new ids.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="templates.components.parameters"></a>Specifying parameters</h3></div></div><div></div></div><p>
+Component parameters may always be specified in the page or component 
+specification, using the
+<a href="spec.binding.html" title="binding element"><tt class="sgmltag-starttag">&lt;binding&gt;</tt></a>, <a href="spec.static-binding.html" title="static-binding element"><tt class="sgmltag-starttag">&lt;static-binding&gt;</tt></a> and <a href="spec.message-binding.html" title="message-binding element"><tt class="sgmltag-starttag">&lt;message-binding&gt;</tt></a> elements. Prior to Tapestry 3.0, that
+was the only way ... but with 3.0, it is possible to specify parameters directly within the
+HTML template.
+</p><p>
+Using either style of component (declared or implicit), parameters of the component may be <span class="emphasis"><em>bound</em></span>
+by adding attributes to the tag.
+Most attributes bind parameters to a static (unchanging) value, equivalent to using
+the <a href="spec.static-binding.html" title="static-binding element"><tt class="sgmltag-starttag">&lt;static-binding&gt;</tt></a> element in the specification. Static bindings are just the
+literal text, the attribute value from the HTML template.
+</p><p>
+Prefixing an attribute value with <tt class="literal">ognl:</tt>	 indicates that the value
+is really an <a href="http://www.ognl.org" target="_self">OGNL</a> expression, equivalent to using the <a href="spec.binding.html" title="binding element"><tt class="sgmltag-starttag">&lt;binding&gt;</tt></a> element in the specification.
+</p><p>
+Finally, prefixing an attribute value with <tt class="literal">message:</tt> indicates that the value
+is really a key used to get a localized message, equivalent to the <a href="spec.message-binding.html" title="message-binding element"><tt class="sgmltag-starttag">&lt;message-binding&gt;</tt></a> element
+in the specification. Every page, and every component, is allowed to have its own set of messages (stored
+in a set of <tt class="literal">.properties</tt> files), and the <tt class="literal">message:</tt> prefix allows access
+to the localized messages stored in the files.
+</p><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Tip: Seperation of Concerns"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Tip]" src="common-images/tip.png"></td><th align="left">Seperation of Concerns</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+Before Tapestry 3.0, there was a more clear separation of concerns. The template could only have declared
+components (not implicit), and any informal attributes in the template were always static values. The type
+of the component and all its formal parameters were always expressed in the specification. The template was very much
+focused on presentation, and the specification was very much focused on business logic. There were
+always minor exceptions to the rules, but in general, seperation of concerns was very good.
+</p><p>
+With Tapestry 3.0, you can do more in the HTML template, and the specification file is much less
+important ... but the seperation of concerns is much more blurred together. It is very much acceptible to
+mix and match these approaches, even within a single page. In general, when learning Tapestry, or when prototyping, it
+is completely appopriate to do as much as possible in the HTML template. For large and complex
+applications, there are benefits to moving as much of the dynamic logic as possible out
+of the template and into the specification.
+</p></td></tr></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="template.components.formal"></a>Formal and informal parameters</h3></div></div><div></div></div><p>
+Components may accept two types of parameters: <span class="emphasis"><em>formal</em></span>
+and <span class="emphasis"><em>informal</em></span>.  Formal parameters are those defined in the
+component's specification, using the <a href="spec.parameter.html" title="parameter element"><tt class="sgmltag-starttag">&lt;parameter&gt;</tt></a> element.
+Informal parameters are <span class="emphasis"><em>additional</em></span> parameters, beyond those
+known when the component was created.
+</p><p>
+The majority of components that accept informal parameters simply emit the informal
+parameters as additional attributes.  Why is that useful?  Because it allows you to
+specify common HTML attributes such as <tt class="literal">class</tt>	or <tt class="literal">id</tt>,
+or JavaScript event handlers, without requiring that each component define each possible 
+HTML attribute (the list of which expands all the time).
+</p><div class="sidebar"><p>
+If you are used to developing with JSPs and JSP tags, this will be quite a difference. JSP tags have
+the equivalent of	formal parameters (they are called "tag attributes"), but nothing like informal parameters. Often a relatively
+simply JSP tag must be bloated  with dozens of extra attributes, to support arbitrary
+HTML attributes.
+</p></div><p>
+Informal and formal parameters can be specified in either the specification or in the template.
+Informal parameters <span class="emphasis"><em>are not</em></span>	 limited to literal strings, you may use
+the <tt class="literal">ognl:</tt> and <tt class="literal">message:</tt> prefixes with them as well.
+</p><p>
+Not all components allow informal parameters; this is controlled by the
+<tt class="literal">allow-informal-parameters</tt>	 attribute of the
+<a href="spec.component-specification.html" title="component-specification element"><tt class="sgmltag-starttag">&lt;component-specification&gt;</tt></a> element. Many components do not map directly to an HTML element,
+those are the ones that do not allow informal parameters. If a component forbids informal parameters,
+then any informal parameters in the specification or the template will result in errors, with one exception:
+static strings in the HTML template are simply ignored when informal parameters are forbidden; they
+are presumed to be there only to support WYSIWYG preview.
+</p><p>
+Another conflict can occur when the HTML template specified an attribute that the component needs
+to render itself. For example, the <a href="../ComponentReference/DirectLink.html" target="_self"><tt class="classname">DirectLink</tt></a> component generates a <tt class="literal">&lt;a&gt;</tt> tag,
+and needs to control the <tt class="literal">href</tt> attribute. However, for preview purposes, it often will 
+be written into the HTML template as:
+
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+&lt;a jwcid="@DirectLink" listener=". . ." href="#"&gt; . . . &lt;/a&gt;
+</pre></td></tr></table></div>
+
+</p><p>
+This creates a conflict: will the template <tt class="literal">href</tt>	 be used,
+or the dynamically generated value produced by the <a href="../ComponentReference/DirectLink.html" target="_self"><tt class="classname">DirectLink</tt></a> component, or both? The answer is: 
+the component wins. The <tt class="literal">href</tt> attribute in the template is ignored.
+</p><p>
+Each component declares a list of reserved names using the <a href="spec.reserved-parameter.html" title="reserved-parameter element"><tt class="sgmltag-starttag">&lt;reserved-parameter&gt;</tt></a> element; these
+are  names which are not allowed as informal parameters, because the component generates 
+the named attribute itself, and doesn't want the value it writes to be overriden by an informal
+parameter.   Case is ignored when comparing attribute names to reserved names.
+</p></div><div class="footnotes"><br><hr align="left" width="100"><div class="footnote"><p><sup>[<a href="#N101DE" name="ftn.N101DE">2</a>] </sup>
+More correct would be to say "its container's template" as a component may be contained within
+another component. For simplicities sake, we'll describe this as if it was always a simple two-level
+heirarchy even though practical Tapestry applications can be many levels deep.
+</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="template.contents.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="template.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="template.directives.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Template Contents&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Template directives</td></tr></table></div></body></html>

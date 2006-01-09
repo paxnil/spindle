@@ -1,0 +1,71 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Required Pages</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="engine.html" title="Chapter&nbsp;5.&nbsp;Application Engines and Services"><link rel="previous" href="engine.servlet.html" title="Application Servlet"><link rel="next" href="engine.state.html" title="Server-Side State"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Required Pages</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="engine.servlet.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;Application Engines and Services</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="engine.state.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="engine.req-pages"></a>Required Pages</h2></div></div><div></div></div><p>
+Each application is required to have a minimum of five pages with specific names.  Tapestry 
+provides default implementations for four of the five, but a full-featured Tapestry application may 
+override any of the others to provide a consistent look-and-feel.
+</p><div class="table"><a name="N10A07"></a><p class="title"><b>Table&nbsp;5.1.&nbsp;Tapestry Pages</b></p><table summary="Tapestry Pages" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Page Name</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td>Exception</td><td>Default provided, may be overridden.</td><td>
+				Page used to present uncaught 
+			 	exceptions to the user.</td></tr><tr><td>Home</td><td>Must be provided by developer.</td><td>The initial page displayed when the 
+			 application is started.</td></tr><tr><td>Inspector</td><td>Provided, never overriden.</td><td>Inspector that allows the Tapestry 
+			 application to be interrogated on its 
+			 structure.</td></tr><tr><td>StaleLink</td><td>Provided</td><td>Page displayed when a StaleLinkException is thrown during
+			the processing of a request.</td></tr><tr><td>StaleSession</td><td>Provided</td><td>Page displayed when a StaleSessionException is thrown
+			during the processing of a request.</td></tr></tbody></table></div><p>
+Tapestry only mandates the logical name of these four pages; the actual page component used is 
+defined in the application specification.
+</p><p>
+The <tt class="classname">Home</tt> page is the first page viewed by a client connecting to the application.  
+Other than that, 
+there is nothing special about the page.
+</p><p>
+The initial connection to the application, where nothing is specified in the URL but the path to 
+the servlet, causes the home service to be invoked, which makes use of the home page.
+The restart service will also redirect the user to the home page.
+</p><p>
+No default is provided for the <tt class="classname">Home</tt> page; every Tapestry application must define its
+own <tt class="classname">Home</tt> page.
+</p><p>
+The Exception page is invoked whenever an uncaught exception is thrown when processing a service.
+</p><p>
+The Tapestry framework catches the exception and discards any HTML output (this is why 
+output is buffered in memory).
+</p><p>
+The <tt class="classname">Exception</tt> page must implement a writable JavaBeans property of type 
+<tt class="classname">java.lang.Throwable</tt> named <tt class="varname">exception</tt>. 
+The framework will invoke the accessor method 
+before the page is rendered.
+</p><p>
+The class <a href="../api/org/apache/tapestry/util/exception/ExceptionAnalyzer.html" target="_self"><tt class="classname">ExceptionAnalyzer</tt></a> and the 
+<a href="../ComponentReference/ExceptionDisplay.html" target="_self"><tt class="classname">ExceptionDisplay</tt></a> component are typically used to present this information.
+</p><p>
+The <tt class="classname">StaleLink</tt> page is displayed when a <a href="../api/org/apache/tapestry/StaleLinkException.html" target="_self"><tt class="classname">StaleLinkException</tt></a>
+is  thrown, which may occur during the processing of the request.  The exception is thrown when 
+Tapestry determines that the state of the page (on the server) is out of synch with the client's view 
+of the page ... this most often happens when the user makes use of the browser's back button.
+<sup>[<a href="#ftn.N10A6E" name="N10A6E">3</a>]</sup>
+      </p><p>
+The default implementation informs the user of the problem ("you really shouldn't use the back 
+button on your browser") and uses the home service to create a link back to the 
+<tt class="classname">Home</tt> page.
+</p><p>
+The <tt class="classname">StaleSession</tt> page is displayed when a
+<tt class="classname">org.apache.tapestry.StaleSessionException</tt>
+is thrown.  This exception is thrown when the component
+is configured to be stateful (which is the default)
+and the <tt class="classname">HttpSession</tt> doesn't exist, or is 
+newly created - this indicates a fresh connection to the servlet container after the old session 
+timed out and was discarded.
+<sup>[<a href="#ftn.N10A8C" name="N10A8C">4</a>]</sup>
+      </p><p>
+The <tt class="classname">Inspector</tt> page is provided by the framework; 
+it allows a developer to interrogate a running 
+Tapestry application to determine its structure.
+</p><div class="footnotes"><br><hr align="left" width="100"><div class="footnote"><p><sup>[<a href="#N10A6E" name="ftn.N10A6E">3</a>] </sup>
+If desired, the application engine can override the method
+<tt class="function">handleStaleLinkException()</tt>.  The default implementation of
+this method redirects to the <tt class="classname">StaleLink</tt> page, but a custom implementation
+could set up an error message on the application's <tt class="classname">Home</tt> page and
+redirect there instead.
+</p></div><div class="footnote"><p><sup>[<a href="#N10A8C" name="ftn.N10A8C">4</a>] </sup>
+Likewise, the default behavior can be changed by overriding the method
+<tt class="function">handleStaleSessionException()</tt>.
+</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="engine.servlet.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="engine.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="engine.state.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Application Servlet&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Server-Side State</td></tr></table></div></body></html>

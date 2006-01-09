@@ -1,0 +1,23 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Template locations</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="template.html" title="Chapter&nbsp;2.&nbsp;Page and component templates"><link rel="previous" href="template.html" title="Chapter&nbsp;2.&nbsp;Page and component templates"><link rel="next" href="template.contents.html" title="Template Contents"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Template locations</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="template.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;2.&nbsp;Page and component templates</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="template.contents.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="template.locations"></a>Template locations</h2></div></div><div></div></div><p>
+The general rule of thumb is that a page's HTML template is simply an HTML file, stored in the context root directory. 
+That is, you'll have a <tt class="filename"><i class="replaceable"><tt>MyPage</tt></i>.html</tt> HTML template,
+a <tt class="filename">WEB-INF/<i class="replaceable"><tt>MyPage</tt></i>.page</tt> page specification,
+and a <tt class="classname">MyPage</tt> class, in some Java package.
+</p><p>
+Tapestry always starts knowing the name of the page and the location of the page's specification when it
+searches for the page's HTML template.  Starting with this, it performs the following search:
+</p><div class="itemizedlist"><ul type="disc"><li><p>
+			In the same location as the specification
+		</p></li><li><p>
+		In the web application's context root directory (if the page is an application page, not a page from a component
+		library)	
+		</p></li></ul></div><p>
+In addition, any HTML template in the web application context is considered a page, even if there is no matching
+page specification. For simple pages that don't need to have any page-specific logic or properties, there's no need
+for a page specification.  Such a page may still use the special Tapestry attributes 
+(described in the following sections).	
+</p><p>
+Finally, with some <a href="configuration.search-path.html" title="Configuration Search Path">minor configuration</a>	
+it is possible to change the extension used for templates. For example, if you are developing a WML
+application, you may wish to name your files with the extension <tt class="filename">.wml</tt>.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="template.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="template.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="template.contents.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;2.&nbsp;Page and component templates&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Template Contents</td></tr></table></div></body></html>

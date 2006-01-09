@@ -1,0 +1,27 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Identify Pages and Page Flow</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="apps.html" title="Chapter&nbsp;7.&nbsp;Designing Tapestry Applications"><link rel="previous" href="apps.storage.html" title="Persistent Storage Strategy"><link rel="next" href="apps.commmon-logic.html" title="Identify Common Logic"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Identify Pages and Page Flow</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="apps.storage.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;7.&nbsp;Designing Tapestry Applications</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="apps.commmon-logic.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="apps.pages"></a>Identify Pages and Page Flow</h2></div></div><div></div></div><p>
+Early in the design process, the page flow of the application should 
+be identified.  Each page should be identified and 
+given a specific name.
+</p><p>
+Page names are less structured than other identifiers in Tapestry.  
+They may contain letters, numbers, underscores, dashes and periods.  Tapestry makes 
+absolutely no interpretation on the page names.
+</p><p>
+In many applications, certain parts of the functionality are 
+implemented as "wizards", several related pages that are used in 
+sequence as part of a business process.  A common example of this is 
+initial user registration, or when submitting an order to an 
+e-commerce system.
+</p><p>
+A good page naming convention for this case is
+"<i class="replaceable"><tt>wizard name</tt></i>.<i class="replaceable"><tt>page name</tt></i>" 
+(a period separates the two names).  This visually identifies that several pages are related.  
+In addition, a Java package for the wizard 
+should be created to contain the Java classes, component specifications, 
+HTML templates and other assets related to the wizard.  Having the wizard name match the package name
+is also helpful.
+</p><p>
+The designer must also account for additional entry points to the application 
+beyond the standard home page.  These may require 
+additional application services (see below).
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="apps.storage.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="apps.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="apps.commmon-logic.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Persistent Storage Strategy&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Identify Common Logic</td></tr></table></div></body></html>

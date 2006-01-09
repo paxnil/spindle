@@ -1,0 +1,116 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Component Libraries</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="components.html" title="Chapter&nbsp;3.&nbsp;Creating Tapestry components"><link rel="previous" href="components.parameters.html" title="Component Parameters"><link rel="next" href="state.html" title="Chapter&nbsp;4.&nbsp;Managing server-side state"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Component Libraries</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.parameters.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Creating Tapestry components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="state.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.libraries"></a>Component Libraries</h2></div></div><div></div></div><p>
+Tapestry has a very advanced concept of a <span class="emphasis"><em>component library</em></span>. A component library contains both Tapestry components and Tapestry pages
+(not to mention engine services).
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.libraries.ref"></a>Referencing Library Components</h3></div></div><div></div></div><p>
+Before a component library may be used, it must be listed in the application specification. Often, an application specification is <span class="emphasis"><em>only</em></span>	
+needed so that it may list the libraries used by the application. Libraries are identified using the <a href="spec.library.html" title="library element"><tt class="sgmltag-starttag">&lt;library&gt;</tt></a> element.
+</p><p>
+The <a href="spec.library.html" title="library element"><tt class="sgmltag-starttag">&lt;library&gt;</tt></a> element provides an <span class="emphasis"><em>id</em></span> for the library, which is used to reference components (and pages) within the library. It also 
+provides a path to the library's specification. This is a complete path for a <tt class="filename">.library</tt> file on the classpath. For example:
+
+<div class="example"><a name="N107F5"></a><p class="title"><b>Example&nbsp;3.1.&nbsp;Referencing a Component Library</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+&lt;application name="Example Application"&gt;
+      
+  &lt;library id="contrib" specification-path="/org/apache/tapestry/contrib/Contrib.library"/&gt;
+  	
+&lt;/application&gt;</pre></td></tr></table></div>
+</p><p>
+In this example, <tt class="filename">Contrib.library</tt> defines a set of components, and those component can be accessed using
+<tt class="literal">contrib:</tt> as a prefix. In an HTML template, this might appear as:
+
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">	
+&lt;span jwcid="palette@contrib:Palette" . . . /&gt;
+</pre></td></tr></table></div>
+</p><p>
+This example defines a component with id <tt class="literal">palette</tt>. The component will be an instance of the Palette component, supplied within
+the <tt class="literal">contrib</tt> component library. If an application uses multiple libraries, they will each have their own prefix. 
+Unlike JSPs and JSP tag libraries, the prefix is set once, in the application specification, and is used consistently in all HTML templates and
+ specifications within the application.
+</p><p>
+The same syntax may be used in page and component specifications:
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+&lt;component id="palette" type="contrib:Palette"&gt;
+  . . .
+&lt;/component&gt;
+</pre></td></tr></table></div>	
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.libraries.search"></a>Library component search path</h3></div></div><div></div></div><p>
+<a href="components.spec.html" title="Component Specifications">Previously</a>, we described the search path for components and pages within the application. The rules are somewhat different
+for components and pages within a library.
+</p><p>
+Tapestry searches for library component specifications in the following places:
+<div class="itemizedlist"><ul type="disc"><li><p>As specified in a <a href="spec.component-type.html" title="component-type element"><tt class="sgmltag-starttag">&lt;component-type&gt;</tt></a> element (with the library specification)</p></li><li><p>In the same package folder as the 
+			library specification</p></li></ul></div>	
+</p><p>
+The search for page specifications is identical: as defined in the library specification, or in the same package folder. 	
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.libraries.private-assets"></a>Using Private Assets</h3></div></div><div></div></div><p>
+Often, a component must be packaged up with images, stylesheets or other resources (collectively termed "assets")
+that are needed at runtime. A reference to such an asset can be created using the <a href="spec.private-asset.html" title="private-asset element"><tt class="sgmltag-starttag">&lt;private-asset&gt;</tt></a> element of
+the page or component specification.	For example:
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+	
+  &lt;private-asset name="logo" resource-path="images/logo_200.png"/&gt;
+  
+  &lt;component id="image" type="Image"&gt;
+    &lt;binding name="image" expression="assets.logo"/&gt;
+  &lt;/component&gt;
+</pre></td></tr></table></div>
+</p><p>
+All assets (private, context or external) are converted into instances of <a href="../api/org/apache/tapestry/IAsset.html" target="_self"><tt class="classname">IAsset</tt></a> and treated identically by
+components (such as <a href="../ComponentReference/Image.html" target="_self"><tt class="classname">Image</tt></a>). As in this example, relative paths are allowed: they are interpreted relative
+to the specification (page or component) they appear in.	
+</p><p>
+The Tapestry framework will ensure that an asset will be converted to a valid URL that may be referenced from a client
+web browser ... even though the actual service is inside a JAR or otherwise on the classpath, not normally
+referenceable from the client browser.
+</p><p>
+The <span class="emphasis"><em>default</em></span>	behavior is to serve up the <span class="emphasis"><em>localized</em></span> resource
+using the asset service. In effect, the framework will read the contents of the asset and pipe that binary content
+down to the client web browser. 
+</p><p>
+An alternate behavior is to have the framework copy the asset to a fixed directory. This directory should be mapped
+to a know web folder; that is, have a URL that can be referenced from a client web browser. In this way, the web server
+can more efficiently serve up the asset, as a static resource (that just happens to be copied into place in a just-in-time manner).
+
+</p><p>
+This behavior is controlled by a pair of <a href="configuration.search-path.html" title="Configuration Search Path">configuration properties</a>:
+<tt class="literal">org.apache.tapestry.asset.dir</tt> and <tt class="literal">org.apache.tapestry.asset.URL</tt>.
+
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.libraries.spec"></a>Library Specifications</h3></div></div><div></div></div><p>
+A library specification is a file with a <tt class="filename">.library</tt>	 extension. Library specifications
+use a root element of <a href="spec.library-specification.html" title="library-specification element"><tt class="sgmltag-starttag">&lt;library-specification&gt;</tt></a>, which supports a subset of the attributes
+allowed within an <a href="spec.application.html" title="application element"><tt class="sgmltag-starttag">&lt;application&gt;</tt></a> element (but allowing the <span class="emphasis"><em>same</em></span> nested elements). Often, the library specification is an empty placeholder, used
+to an establish a search location for page and component specifications:
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+&lt;!DOCTYPE library-specification PUBLIC 
+  "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+  "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+	
+&lt;library-specification/&gt;
+</pre></td></tr></table></div>
+</p><p>
+It is allowed that components in one library be constructed using components provided by another library. 
+The referencing library's specification may contain
+<a href="spec.library.html" title="library element"><tt class="sgmltag-starttag">&lt;library&gt;</tt></a> elements that identify some other library.	
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.libraries.namespace"></a>Libraries and Namespaces</h3></div></div><div></div></div><p>
+Tapestry organizes components and pages (but <span class="emphasis"><em>not</em></span>	 engine services) into
+<span class="emphasis"><em>namespaces</em></span>. Namespaces are closely related to, but not exactly the same as,
+the library prefix established using the <a href="spec.library.html" title="library element"><tt class="sgmltag-starttag">&lt;library&gt;</tt></a> element in an application or library specification.
+</p><p>
+Every Tapestry application consists of a default namespace, the application namespace. This is the namespace used 
+when referencing a page or component without a prefix. When a page or component can't be resolved within the application namespace,
+the framework namespaceis searched. Only if the component (or page) is not part of the framework namespace does an error result.	
+</p><p>
+In fact, it is possible to override both pages and components provided by the framework. This is frequently used to change the
+look and feel of the default StateSession or Exception page.  In theory, it is even possible to override fundamental components such as
+<a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a> or <a href="../ComponentReference/Foreach.html" target="_self"><tt class="classname">Foreach</tt></a>!
+</p><p>
+Every component provides a <tt class="varname">namespace</tt>	 property that defines the namespace (an instance
+of <a href="../api/org/apache/tapestry/INamespace.html" target="_self"><tt class="classname">INamespace</tt></a>) that the component belongs to.
+</p><p>
+You rarely need to be concerned with namespaces, however. The rare exception is when a page from a library wishes to
+make use of the <a href="../ComponentReference/PageLink.html" target="_self"><tt class="classname">PageLink</tt></a> or <a href="../ComponentReference/ExternalLink.html" target="_self"><tt class="classname">ExternalLink</tt></a> components to create a link to <span class="emphasis"><em>another page</em></span>	 within
+the same namespace. This is accomplished (in the source page's HTML template) as:
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+  &lt;a href="#" jwcid="@PageLink" page="OtherPage" namespace="ognl:namespace"&gt; ... &lt;/a&gt;	
+</pre></td></tr></table></div>
+</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.parameters.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="state.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Component Parameters&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;4.&nbsp;Managing server-side state</td></tr></table></div></body></html>

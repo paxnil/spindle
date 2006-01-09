@@ -1,0 +1,136 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Component Parameters</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="components.html" title="Chapter&nbsp;3.&nbsp;Creating Tapestry components"><link rel="previous" href="components.coding.html" title="Coding components"><link rel="next" href="components.libraries.html" title="Component Libraries"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Component Parameters</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.coding.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Creating Tapestry components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.libraries.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.parameters"></a>Component Parameters</h2></div></div><div></div></div><p>
+A Tapestry page consists of a number of components. These components communicate with, and coordinate with,
+the page (and each other) via <span class="emphasis"><em>parameters</em></span>.
+</p><p>
+A component parameter has a unique name and a type (a Java class, interface, or primitive type name).	
+The <a href="spec.parameter.html" title="parameter element"><tt class="sgmltag-starttag">&lt;parameter&gt;</tt></a> component specification element is used to define formal component parameters.
+</p><p>
+In a traditional desktop application, components have <span class="emphasis"><em>properties</em></span>. A controller may
+set the properties of a component, but that's it: properties are write-and-forget.
+</p><p>
+The Tapestry model is a little more complex. A component's parameters are <span class="emphasis"><em>bound</em></span>	
+to properties of the enclosing page. The component is allowed to read its parameter, to access
+the page property the parameter is bound to.  A component may also <span class="emphasis"><em>update</em></span> its
+parameter, to force a change to the bound page property.
+</p><p>
+The vast majority of components simply read their parameters. Updating parameters is more rare; the most
+common components that update their parameters are form control components such as <a href="../ComponentReference/TextField.html" target="_self"><tt class="classname">TextField</tt></a> or <a href="../ComponentReference/Checkbox.html" target="_self"><tt class="classname">Checkbox</tt></a>.	
+</p><p>
+Because bindings are in the form of <a href="http://www.ognl.org" target="_self">OGNL</a> expressions, the property bound to a component parameter
+may not directly be a property of the page ... using a property sequence allows great flexibility.	
+</p><div class="figure"><a name="N10602"></a><p class="title"><b>Figure&nbsp;3.2.&nbsp;Parameter Bindings</b></p><div class="mediaobject"><img src="images/parameter-bindings.png" alt="Parameter Bindings"><div class="caption"><p>
+Using <a href="http://www.ognl.org" target="_self">OGNL</a>, the <a href="../ComponentReference/TextField.html" target="_self"><tt class="classname">TextField</tt></a> component's <tt class="varname">value</tt> parameter is bound
+to the <tt class="classname">LineItem</tt>'s <tt class="varname">quantity</tt> property, using
+the OGNL expression <tt class="literal">lineItem.quantity</tt>, and the <a href="../ComponentReference/Insert.html" target="_self"><tt class="classname">Insert</tt></a> component's
+<tt class="varname">value</tt> parameter is bound to the <tt class="classname">Product</tt>'s 
+<tt class="varname">name</tt> property using the OGNL expression <tt class="literal">lineItem.product.name</tt>.
+
+     </p></div></div></div><p>
+Not all parameter bindings are writable. So far, the examples have been for parameters bound using
+the <a href="spec.binding.html" title="binding element"><tt class="sgmltag-starttag">&lt;binding&gt;</tt></a> specification element (or the equivalent use of the <tt class="literal">ognl:</tt>	prefix
+in an HTML template).  <span class="emphasis"><em>Invariant bindings</em></span> are also possible--these are bindings directly to fixed
+values that never change and can't be updated.  The <a href="spec.static-binding.html" title="static-binding element"><tt class="sgmltag-starttag">&lt;static-binding&gt;</tt></a> element is invariant; it's
+HTML template equivalent is a attribute with no prefix. Likewise, the
+<a href="spec.message-binding.html" title="message-binding element"><tt class="sgmltag-starttag">&lt;message-binding&gt;</tt></a> element, and the <tt class="literal">message:</tt> prefix on an attribute, are invariant.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.parameters.bindings"></a>Using Bindings</h3></div></div><div></div></div><p>
+To understand how Tapestry parameters work, you must understand how the binding objects work (even
+though, as we'll see, the binding objects are typically hidden). When a component needs access to
+a bound parameter value, it will invoke the method <tt class="code">getObject()</tt>	 on <a href="../api/org/apache/tapestry/IBinding.html" target="_self"><tt class="classname">IBinding</tt></a>
+</p><div class="figure"><a name="N10663"></a><p class="title"><b>Figure&nbsp;3.3.&nbsp;Reading a Parameter</b></p><div class="mediaobject"><img src="images/read-binding.png" alt="Reading a Parameter"><div class="caption"><p>
+The <tt class="function">getObject()</tt> method on <a href="../api/org/apache/tapestry/IBinding.html" target="_self"><tt class="classname">IBinding</tt></a> will (if the binding is dynamic) evaluate the
+OGNL expression (provided in the <a href="spec.binding.html" title="binding element"><tt class="sgmltag-starttag">&lt;binding&gt;</tt></a> specification element) to access a property of the
+page. The result is that cast or otherwise coerced to a type useful to the component.
+     </p></div></div></div><p>
+Updating a parameter is the same way, except that the method is
+<tt class="function">setObject()</tt>. Most of the implementations of <a href="../api/org/apache/tapestry/IBinding.html" target="_self"><tt class="classname">IBinding</tt></a> (those for literal strings
+and localize messages), will throw an exception immediately, since they are invariant.
+</p><div class="figure"><a name="N10689"></a><p class="title"><b>Figure&nbsp;3.4.&nbsp;Writing a Parameter</b></p><div class="mediaobject"><img src="images/write-binding.png" alt="Writing a Parameter"><div class="caption"><p>
+The <tt class="function">setObject()</tt> method will use OGNL to update a page property.
+     </p></div></div></div><p>
+These flows are complicated by the fact that parameters may be optional; so not only do you need to acquire the
+correct binding object (method <tt class="function">getBinding()</tt> defined in <a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a>), 
+but your code must be prepared for that object to be null (if the parameter
+is optional). 	
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="components.parameters.connected"></a>Connected Parameter Properties</h3></div></div><div></div></div><p>
+Accessing and manipulating the <a href="../api/org/apache/tapestry/IBinding.html" target="_self"><tt class="classname">IBinding</tt></a> objects is tedious, so Tapestry has an alternate approach. Parameters may
+be represented as <span class="emphasis"><em>connected parameter properties</em></span>	 that hide the existence of
+the binding objects entirely. If you component needs to know the value bound to a parameter, it can
+read the connected parameter property. If it wants to update the property bound to the parameter, the component
+will update the connected parameter. This is a much more natural approach, but requires a little bit of setup.
+</p><p>
+As with <a href="state.page-properties.html" title="Persistent page properties">specified properties</a>, Tapestry will fabricate an enhanced subclass with
+the necessary instance variables, accessor methods, and cleanup code.
+</p><p>
+Connected parameters are controlled by the <tt class="varname">direction</tt>	
+attribute of the <a href="spec.parameter.html" title="parameter element"><tt class="sgmltag-starttag">&lt;parameter&gt;</tt></a> element.
+<sup>[<a href="#ftn.N106C4" name="N106C4">4</a>]</sup>
+There are four values:
+<tt class="literal">in</tt>, <tt class="literal">form</tt>, <tt class="literal">auto</tt>
+and <tt class="literal">custom</tt>.  The default is <tt class="literal">custom</tt>, which
+<span class="emphasis"><em>does not</em></span> create a connected parameter property at all.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="components.parameters.connected.in"></a>Direction: in</h4></div></div><div></div></div><p>
+The majority of component parameters are read-only, and are only actually used
+within the component's <tt class="function">renderComponent()</tt>	 method ... the method that
+actually produces HTML output. For such components, direction <tt class="literal">in</tt>
+is the standard, efficient choice.
+</p><p>
+The connected parameter for each component is set just before <tt class="function">renderComponent()</tt>	
+is invoked.  The parameter is reset to its initial value just after 
+<tt class="function">renderComponent()</tt> is invoked.
+</p><p>
+Each component has a <a href="" target="_self"><tt class="classname">ParameterManager</tt></a>, whose responsibility is to set and reset connected
+parameter properties.	
+</p><div class="figure"><a name="N106FE"></a><p class="title"><b>Figure&nbsp;3.5.&nbsp;ParameterManager and <tt class="function">renderComponent()</tt></b></p><div class="mediaobject"><img src="images/parameter-manager.png" alt="ParameterManager and renderComponent()"><div class="caption"><p>
+The <a href="" target="_self"><tt class="classname">ParameterManager</tt></a> will read the values bound to each parameter, and update the
+connected parameter property before the component's <tt class="function">renderComponent()</tt>
+method is invoked. The <a href="" target="_self"><tt class="classname">ParameterManager</tt></a> cleans up after <tt class="function">renderComponent()</tt>
+is invoked.
+     </p></div></div></div><p>
+For invariant bindings (literal strings and such), the ParameterManager will only set the connected parameter property once,
+and does not reset the property after <tt class="function">renderComponent()</tt>.
+</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Warning"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Warning]" src="common-images/warning.png"></td><th align="left">Warning</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+		If your component has any listener methods that need to access a parameter value, then you
+		can't use direction <tt class="literal">in</tt> (or direction <tt class="literal">form</tt>).  Listener methods are
+		invoked outside of the page rendering process, when value stored in the
+		connected parameter property is not set. You must use direction <tt class="literal">auto</tt> or 
+		<tt class="literal">custom</tt> in such cases.
+		</p></td></tr></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="components.parameters.connected.form"></a>Direction: form</h4></div></div><div></div></div><p>
+Components, such as <a href="../ComponentReference/TextField.html" target="_self"><tt class="classname">TextField</tt></a> or <a href="../ComponentReference/Checkbox.html" target="_self"><tt class="classname">Checkbox</tt></a>, that produce form control elements are the
+most likely candidates for updating their parameters. The read a parameter (usually named
+<tt class="varname">value</tt>) when they render. When the form is submitted, the same components
+read a query parameter and update their <tt class="varname">value</tt> parameter.
+</p><p>
+The <tt class="literal">form</tt>	 direction simplifies this. For the most part, <tt class="literal">form</tt>
+is the same as <tt class="literal">in</tt>.  The diffference is, when the form is submitted, after the
+component's <tt class="function">renderComponent()</tt> method has been invoked, the connected parameter property
+is read and used to update the binding (that is, invoke the binding object's <tt class="function">setObject()</tt> 
+method).
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="components.parameters.connected.auto"></a>Direction: auto</h4></div></div><div></div></div><p>
+The previous direction values, <tt class="literal">in</tt> and <tt class="literal">form</tt>, have limitations. The value may only be
+accessed from within the component's <tt class="function">renderComponent()</tt> method. That's often insufficient,
+especially when the component has a listener method that needs access to a parameter.
+</p><p>
+Direction <tt class="literal">auto</tt>	doesn't use the <a href="" target="_self"><tt class="classname">ParameterManager</tt></a>. Instead, the connected parameter property
+is <span class="emphasis"><em>synthetic</em></span>.  Reading the property immediately turns around and invokes
+<a href="../api/org/apache/tapestry/IBinding.html" target="_self"><tt class="classname">IBinding</tt></a>'s <tt class="function">getObject()</tt> method.  Updating the property invokes
+the <a href="../api/org/apache/tapestry/IBinding.html" target="_self"><tt class="classname">IBinding</tt></a>'s <tt class="function">setObject()</tt> function.
+</p><p>
+This can be a bit less efficient than direction <tt class="literal">in</tt>, as the <a href="http://www.ognl.org" target="_self">OGNL</a> expression may be
+evaluated multiple times. In Tapestry 3.0, the parameter must also be required. Future releases
+of Tapestry will relax these limitations.
+</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note: Removing parameter directions"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="common-images/note.png"></td><th align="left">Removing parameter directions</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+Parameter directions are a bit of a sore spot: you must make too many decisions about how to use them, especially
+in terms of render-time-only vs. listener method. Direction <tt class="literal">auto</tt>	 is too limited and
+possibly too inefficient. Tapestry 3.1 should address these limitations by improving direction
+<tt class="literal">auto</tt>. Instead of specifying a direction, you'll specify how long the component can cache the
+value obtained from the binding object (no caching, or only while the component is rendering, or until
+the page finishes rendering).
+	</p></td></tr></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="components.parameters.connected.custom"></a>Direction: custom</h4></div></div><div></div></div><p>
+The <tt class="literal">custom</tt>	 direction, which is the default, <span class="emphasis"><em>does not</em></span>
+create a connected parameter property. Your code is still responsible for
+accessing the <a href="../api/org/apache/tapestry/IBinding.html" target="_self"><tt class="classname">IBinding</tt></a> object (via the <tt class="function">getBinding()</tt> method of
+<a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a>) and for invoking methods on the binding object.
+</p></div></div><div class="footnotes"><br><hr align="left" width="100"><div class="footnote"><p><sup>[<a href="#N106C4" name="ftn.N106C4">4</a>] </sup>
+	The name, "direction", made sense initially, but is now a bit confusing. It probably
+	should have been called "processing" or "connection-type".
+</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.coding.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.libraries.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Coding components&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Component Libraries</td></tr></table></div></body></html>

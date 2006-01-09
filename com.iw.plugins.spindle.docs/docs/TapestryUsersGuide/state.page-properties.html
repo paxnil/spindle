@@ -1,0 +1,134 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Persistent page properties</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="state.html" title="Chapter&nbsp;4.&nbsp;Managing server-side state"><link rel="previous" href="state.global.html" title="Global object"><link rel="next" href="state.manual-page-properties.html" title="Implementing persistent page properties manually"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Persistent page properties</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="state.global.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Managing server-side state</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="state.manual-page-properties.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="state.page-properties"></a>Persistent page properties</h2></div></div><div></div></div><p>
+Servlets, and by extension, JavaServer Pages, are inherently stateless.  That is, they will be used
+simultaneously by many threads and clients.  Because of this, they must not store (in instance variables)
+any properties or values that are specified to any single client.
+</p><p>
+This creates a frustration for developers, because ordinary programming techniques must be avoided.
+Instead, client-specific state and data must be stored in the <tt class="classname">HttpSession</tt> or as <tt class="classname">HttpServletRequest</tt> attributes.
+This is an awkward and limiting way to handle both <span class="emphasis"><em>transient</em></span> state (state that is only needed
+during the actual processing of the request) and
+<span class="emphasis"><em>persistent</em></span> state (state that should be available during the processing of this
+and subsequent requests).
+</p><p>
+Tapestry bypasses most of these issues by <span class="emphasis"><em>not</em></span> sharing objects between threads and clients.
+Tapestry uses an object pool to store constructed page instances. As a page is needed, it is removed from the page pool.
+If there are no available pages in the pool, a fresh page instance is constructed.
+</p><p>
+For the duration of a request, a page and all components within the page are reserved to the single request.
+There is no chance of conflicts because only the single thread processing the request will have access
+to the page.  At the end of the request cycle, the page is reset back to a pristine state and 
+returned to the shared pool,
+ready for reuse by the same client, or by a different client.
+</p><p>
+In fact, even in a high-volume Tapestry application, there will rarely be more than a few instances of any
+particular page in the page pool.
+</p><p>
+For this scheme to work it is important that at the end of the request cycle, the page must return
+to its pristine state.  The prisitine state is equivalent to a freshly created instance of the page.  In other words, any
+properties of the page that changed during the processing of the request must be returned to their initial values.
+</p><p>
+The page is then returned to the page pool, where it will wait to be used in a future request. That request may be for 
+the same end user, or for another user entirely.	
+</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note: Importance of resetting properties"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="common-images/note.png"></td><th align="left">Importance of resetting properties</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+	Imagine a page containing a form in which a user enters their address and credit card information. When
+	the form is submitted, properties of the page will be updated with the values supplied by the user.
+	Those values must be cleared out before the page is stored into the page pool ... if not, then the <span class="emphasis"><em>next</em></span>
+	user who accesses the page will see the previous user's address and credit card information as default
+	values for the form fields!
+	</p></td></tr></table></div><p>
+Tapestry separates the persistent state of a page from any instance of the page. 
+This is very important, because
+from one request cycle to another, a different instance of the page may be used ... even when clustering is
+not used.  Tapestry has many copies of any page in a pool, and pulls an arbitrary instance out of the pool
+for each request.
+</p><p>
+In Tapestry, a page may have many properties
+and may have many components, each with many properties, but only a tiny number of all those
+properties needs to persist between request cycles.
+On a later request, the same or different page instance may be used.  With a little
+assistance from the developer, 
+the Tapestry framework can create the illusion that the same page instance is being used in
+a later request, even though the request may use a different page instance (from the page pool) ... or
+(in a clustering environment) may be handled by a completely different server.
+</p><p>
+Each persistent page property is stored individually as an <tt class="classname">HttpSession</tt> attribute.  A call
+to the static method <tt class="function">Tapestry.fireObservedChange()</tt> must be added
+to the setter method for the property (as we'll see shortly, Tapestry can
+write this method for you, which is the best approach). When the property is changed, its value is stored
+as a session attribute.
+Like the Servlet API, persistent properties work best with immutable objects
+such as <tt class="classname">String</tt> and Integer;.  For mutable objects (including <tt class="classname">List</tt> and <tt class="classname">Map</tt>), you must
+be careful <span class="emphasis"><em>not</em></span> to change the internal state of a persistent property value after invoking the
+setter method.
+</p><p>
+Persistent properties make use of a <a href="spec.property-specification.html" title="property-specification element"><tt class="sgmltag-starttag">&lt;property-specification&gt;</tt></a> element in the
+page or component specification.  Tapestry does something special when a component
+contains any such elements; it dynamically fabricates a subclass that provides the desired fields,
+methods and whatever extra initialization or cleanup is required.
+</p><p>
+You may also, optionally, make your class abstract, and define abstract accessor methods that will
+be filled in by Tapestry in the fabricated subclass.  This allows you to read and update properties inside
+your class, inside listener methods.
+</p><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Tip: Define only what you need"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Tip]" src="common-images/tip.png"></td><th align="left">Define only what you need</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+	You only need to define abstract accessor methods if you are going to invoke those accesor methods
+	in your code, such as in a listener method. Tapestry will create an enhanced subclass that contains
+	the new field, a getter method and a setter method, plus any necessary initialization methods.
+	If you are only going to access the property using OGNL expressions, then there's no need to define either
+	accessor 
+	method.
+	</p></td></tr></table></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note: Transient or persistent?"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="common-images/note.png"></td><th align="left">Transient or persistent?</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+Properties defined this way may be either transient or persistent.  It is useful to define
+even transient
+properties using the <a href="spec.property-specification.html" title="property-specification element"><tt class="sgmltag-starttag">&lt;property-specification&gt;</tt></a> element because doing so ensures that
+the property will be properly reset at the end of the request (before the page
+is returned to the pool for later reuse).
+</p></td></tr></table></div><div class="example"><a name="N10A6A"></a><p class="title"><b>Example&nbsp;4.3.&nbsp;Persistent page property: Java class</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+package mypackage;
+
+import org.apache.tapestry.html.BasePage;
+	
+public abstract class MyPage extends <a href="../api/org/apache/tapestry/html/BasePage.html" target="_self"><tt class="classname">BasePage</tt></a>
+{
+    abstract public int getItemsPerPage();
+	
+    abstract public void setItemsPerPage(int itemsPerPage);
+}
+</pre></td></tr></table></div><div class="example"><a name="N10A75"></a><p class="title"><b>Example&nbsp;4.4.&nbsp;Persistent page property: page specification</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE page-specification PUBLIC 
+  "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+  "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+	
+&lt;page-specification class="mypackage.MyPage"&gt;
+
+  &lt;property-specification
+    name="itemsPerPage"
+    persistent="yes"
+    type="int" initial-value="10"/&gt;
+
+&lt;/page-specification&gt;
+
+</pre></td></tr></table></div><p>
+Again, making the class abstract, and defining abstract accessors is <span class="emphasis"><em>optional</em></span>.
+It is only useful when a method within the class will need to read or update the property.  It
+is also valid to just implement one of the two accessors.  The enhanced subclass will
+always include both a getter and a setter.
+</p><p>
+This exact same technique can be used with components as well as pages.
+</p><p>
+A last note about initialization.  After Tapestry invokes the <tt class="function">finishLoad()</tt>
+method, it processes the initial value provided in the specification.  If 
+the <tt class="literal">initial-value</tt> attribute is ommitted or blank, no change takes place.
+Tapestry then takes a snapshot of the property value, which it retains 
+and uses at the end of each request cycle
+to reset the property back to its "pristine" state.
+</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Warning"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Warning]" src="common-images/warning.png"></td><th align="left">Warning</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+The previous paragraph may not be accurate; I believe Mindbridge may have changed this behavior
+recently.	
+</p></td></tr></table></div><p>
+This means that you may perform initialization for the property inside
+<tt class="function">finishLoad()</tt> (instead of providing an <tt class="literal">initial-value</tt>).  However,
+don't attempt to update the property from <tt class="function">initialize()</tt> ... the order of operations
+when the page detaches is not defined and is subject to change.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="state.global.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="state.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="state.manual-page-properties.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Global object&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Implementing persistent page properties manually</td></tr></table></div></body></html>

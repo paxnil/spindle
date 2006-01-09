@@ -1,0 +1,50 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Services and forms</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="cycle.html" title="Chapter&nbsp;6.&nbsp;Understanding the Request Cycle"><link rel="previous" href="cycle.action.html" title="Action service"><link rel="next" href="apps.html" title="Chapter&nbsp;7.&nbsp;Designing Tapestry Applications"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Services and forms</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="cycle.action.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Understanding the Request Cycle</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="apps.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="cycle.forms"></a>Services and forms</h2></div></div><div></div></div><p>
+Processing of requests for <a href="../ComponentReference/Form.html" target="_self"><tt class="classname">Form</tt></a> components is a little more complicated than 
+for ordinary <a href="../ComponentReference/ActionLink.html" target="_self"><tt class="classname">ActionLink</tt></a> components.  
+This is because a <a href="../ComponentReference/Form.html" target="_self"><tt class="classname">Form</tt></a> will wrap a number of form-related components, such as 
+<a href="../ComponentReference/TextField.html" target="_self"><tt class="classname">TextField</tt></a>, <a href="../ComponentReference/Checkbox.html" target="_self"><tt class="classname">Checkbox</tt></a>, <a href="../ComponentReference/PropertySelection.html" target="_self"><tt class="classname">PropertySelection</tt></a> and others.
+</p><p>
+In order to accept the results posted in the HTML form, each of 
+these components must be given a chance to respond to the request.  A component responds to the 
+request by extracting a request parameter from the <tt class="classname">HttpServletRequest</tt>, 
+interpreting it, and assigning a value through a parameter.  
+</p><p>
+As with an <a href="../ComponentReference/ActionLink.html" target="_self"><tt class="classname">ActionLink</tt></a> component, a full rewind must be done, 
+to account for conditional portions of the page and any <a href="../ComponentReference/Foreach.html" target="_self"><tt class="classname">Foreach</tt></a> components.
+</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="common-images/note.png"></td><th align="left">Note</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+Starting with Tapestry release 1.0.2, <a href="../ComponentReference/Form.html" target="_self"><tt class="classname">Form</tt></a>s may now use the 
+<a href="cycle.direct.html" title="Direct service">direct service</a> instead
+of the 
+<a href="cycle.action.html" title="Action service">action service</a>; this is configurable.  Using the direct service is the
+default behavior unless specified.  A rewind still occurs, it simply starts directly
+with the <a href="../ComponentReference/Form.html" target="_self"><tt class="classname">Form</tt></a> component, rather than having to "work down" to it.  This can be
+a performance gain if a page contains many forms.
+</p></td></tr></table></div><p>
+The <a href="../ComponentReference/Form.html" target="_self"><tt class="classname">Form</tt></a> component doesn't terminate the rewind cycle until <span class="emphasis"><em>after</em></span> all of 
+its wrapped components have had a chance to render.  It then notifies its own listener.
+</p><p>
+The basic components, <a href="../ComponentReference/TextArea.html" target="_self"><tt class="classname">TextArea</tt></a>  and <a href="../ComponentReference/TextField.html" target="_self"><tt class="classname">TextField</tt></a>, 
+are quite simple.  They simply move text between the 
+application, the HTML and the submitted request. 
+</p><p>
+Individual <a href="../ComponentReference/Checkbox.html" target="_self"><tt class="classname">Checkbox</tt></a> components are also simple: they 
+set a boolean property.  
+A <a href="../ComponentReference/RadioGroup.html" target="_self"><tt class="classname">RadioGroup</tt></a> and some <a href="../ComponentReference/Radio.html" target="_self"><tt class="classname">Radio</tt></a> components 
+allow a property to be set to a value 
+(dependent on which radio button is selected by the user).
+
+The <a href="../ComponentReference/PropertySelection.html" target="_self"><tt class="classname">PropertySelection</tt></a> component is designed to more 
+efficiently handle this and can produce HTML for either 
+a popup list or a collection of radio buttons.
+</p><p>
+Tapestry also includes the more involved component, 
+ <a href="../ComponentReference/ValidField.html" target="_self"><tt class="classname">ValidField</tt></a>,
+ which is similar to the simple <a href="../ComponentReference/TextField.html" target="_self"><tt class="classname">TextField</tt></a> component, 
+but provide greater validation and checking of input, and 
+provides the ability to visually mark fields that are required or in error.
+</p><p>
+Regardless of which service the <a href="../ComponentReference/Form.html" target="_self"><tt class="classname">Form</tt></a> uses, it encodes the query parameters
+(which identify the service and context)
+as hidden field elements, rather than encoding them into the URL.  This is necessary because some
+servlet containers ignore URL query parameters when using the HTTP POST request; therefore, it is necessary that all query parameters (including the ones related to the engine service), be part of the form posting ... and that means the use of hidden fields in the form.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="cycle.action.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="cycle.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="apps.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Action service&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;7.&nbsp;Designing Tapestry Applications</td></tr></table></div></body></html>

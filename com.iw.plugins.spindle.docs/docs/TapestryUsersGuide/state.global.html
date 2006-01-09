@@ -1,0 +1,22 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Global object</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="state.html" title="Chapter&nbsp;4.&nbsp;Managing server-side state"><link rel="previous" href="state.visit.html" title="Visit object"><link rel="next" href="state.page-properties.html" title="Persistent page properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Global object</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="state.visit.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Managing server-side state</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="state.page-properties.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="state.global"></a>Global object</h2></div></div><div></div></div><p>
+The  Global object is very similar to the  Visit object with some key differences.
+The Global object is shared by all instances of the application engine; ultimately, it is stored
+as a <tt class="classname">ServletContext</tt> attribute.  The Global object is therefore not persistent in any way.
+The Global object is specific to an individual server within a cluster; each server will have its own instance
+of the Global object.
+  In a failover, 
+the engine will connect to a new instance of the Global object within the new server.
+</p><p>
+The Global object may be accessed using the <tt class="varname">global</tt> property of either the
+page or the engine (unlike the <tt class="varname">visit</tt> property, they are completely equivalent).
+</p><p>
+Care should be taken that the Global object is threadsafe; since many engines (from many sessions,
+in many threads) will access it simultanenously.  The default Global object is a synchronized
+<tt class="classname">HashMap</tt>.  This can be overriden with
+<a href="configuration.search-path.html" title="Configuration Search Path">configuration property</a>
+<tt class="literal">org.apache.tapestry.global-class</tt>.
+</p><p>
+The most typical use of the Global object is to interface to J2EE resources such as EJB home and remote
+interfaces or JDBC data sources.  The shared Global object can cache home and remote interfaces that 
+are efficiently shared by all engine instances.	
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="state.visit.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="state.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="state.page-properties.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Visit object&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Persistent page properties</td></tr></table></div></body></html>

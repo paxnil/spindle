@@ -1,0 +1,42 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Identify Engine Services</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="apps.html" title="Chapter&nbsp;7.&nbsp;Designing Tapestry Applications"><link rel="previous" href="apps.commmon-logic.html" title="Identify Common Logic"><link rel="next" href="apps.common-components.html" title="Identify Common Components"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Identify Engine Services</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="apps.commmon-logic.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;7.&nbsp;Designing Tapestry Applications</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="apps.common-components.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="apps.services"></a>Identify Engine Services</h2></div></div><div></div></div><p>
+Tapestry applications will need to define new engine services when a page 
+must be referenced from outside the Tapestry application
+</p><p>
+This is best explained by example.  It is 
+reasonable in an e-commerce system that there is a particular page that shows 
+product information for a particular product.  This information includes 
+description, price, availability, user 
+reviews, etc.  A user may want to bookmark that 
+page and return to it on a later session.
+</p><p>
+Tapestry doesn't normally allow this; the page may be bookmarked, but 
+when the bookmark is triggered, the page may not render correctly, because it 
+will not know which product to display.  The URLs normally generated in a 
+Tapestry application are very context sensitive; they are only meaningful in 
+terms of the user's navigation throughout the application, starting with the Home page.  
+When bookmarked, that context is lost.
+</p><p>
+By defining a new engine service, the necessary context can be encoded directly 
+into the URL, in a way similar to how the direct action works.  This is
+partially a step backwards towards typical servlet or JSP development, but 
+even here Tapestry offers superior services.  In the e-commerce example, 
+the service URL could encode some form of product identifier.
+</p><p>
+An example of this is in the Virtual Library application.  In 
+order to make certain pages bookmarkable, a new service named 
+"external" was created.
+</p><p>
+The external service includes the name of a page and the primary key 
+of an object that page displays (this was simplified by the 
+design of the Vlib entity beans, which always use  an <tt class="classname">Integer</tt> 
+as the primary key).
+</p><p>
+The external service works much the same was as the page service, except 
+that it invokes an additional method on the page, <tt class="function">setup()</tt>, 
+which is passed the primary key extracted from the URL.
+</p><p>
+The end result is that when a user arrives at such a page, 
+the URL used identifies the page and the primary key.  Bookmarking the page stores the URL so 
+that when the bookmark is later opened, the correct data 
+is read and displayed.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="apps.commmon-logic.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="apps.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="apps.common-components.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Identify Common Logic&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Identify Common Components</td></tr></table></div></body></html>

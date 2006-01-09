@@ -1,0 +1,19 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Logging</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="engine.html" title="Chapter&nbsp;5.&nbsp;Application Engines and Services"><link rel="previous" href="engine.services.html" title="Engine Services"><link rel="next" href="engine.private-assets.html" title="Private Assets"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Logging</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="engine.services.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;Application Engines and Services</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="engine.private-assets.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="engine.logging"></a>Logging</h2></div></div><div></div></div><p>
+Tapestry makes use of the Apache group's 
+<a href="http://jakarta.apache.org/log4j/" target="_self">Log4J</a> package to perform logging.  This is an easy, fast, 
+powerful framework for adding logging to any Java application.  Using <a href="http://jakarta.apache.org/log4j/" target="_self">Log4J</a>, any number of 
+<span class="emphasis"><em>loggers</em></span> can be created, and a logging level for each logger assigned.  
+Tapestry uses the complete class name as the logger for each class.
+</p><p>
+The <a href="../api/org/apache/tapestry/ApplicationServlet.html" target="_self"><tt class="classname">ApplicationServlet</tt></a> class includes a method, <tt class="function">setupLogging()</tt>, 
+to help initialize <a href="http://jakarta.apache.org/log4j/" target="_self">Log4J</a>, allowing the default configuration to be overridden using command line
+parameters.
+</p><p>
+The <a href="inspector.html" title="Chapter&nbsp;11.&nbsp;The Tapestry Inspector">Tapestry Inspector</a> includes a Logging tab that allows the logging configuration to be 
+dynamically changed.  The logging level for any logger can be assigned, and new loggers 
+can be created.
+</p><p>
+What this means is that, using the Inspector, it is possible to control exactly what logging output is 
+produced, dynamically, while the application is still running.  The Tapestry Inspector is easily 
+added to any Tapestry application.  
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="engine.services.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="engine.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="engine.private-assets.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Engine Services&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Private Assets</td></tr></table></div></body></html>

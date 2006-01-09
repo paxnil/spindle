@@ -1,0 +1,20 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>EJB Page Properties</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="pages.html" title="Chapter&nbsp;4.&nbsp;Tapestry Pages"><link rel="previous" href="pages.persistent-state.html" title="Persistent Page State"><link rel="next" href="pages.dynamic-state.html" title="Dynamic Page State"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">EJB Page Properties</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="pages.persistent-state.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Tapestry Pages</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="pages.dynamic-state.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="pages.ejb-props"></a>EJB Page Properties</h2></div></div><div></div></div><p>
+Tapestry make a single, special case for one particular type of persistent page property:  references 
+to Enterprise JavaBeans.
+</p><p>
+The page recorders check to see if a page property is type 
+<tt class="classname">javax.ejb.EJBObject</tt>.  If so, they don't 
+store the object itself (<tt class="classname">EJBObjects</tt> are not directly serializable), 
+instead they get the <tt class="classname">Handle</tt> for the object 
+and store that instead (<tt class="classname">Handle</tt>s are serializable).
+</p><p>
+When the page is next accessed, the <tt class="classname">Handle</tt> is converted back into an 
+<tt class="classname">EJBObject</tt> before assigning 
+it to the page property.
+</p><p>
+A side effect of this is that you may not have a <tt class="classname">Handle</tt> as a 
+persistant page property; the page 
+recorders don't have a way to differentiate a <tt class="classname">Handle</tt> from an 
+<tt class="classname">EJBObject</tt> converted to a <tt class="classname">Handle</tt>
+and always assume the latter.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="pages.persistent-state.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="pages.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="pages.dynamic-state.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Persistent Page State&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Dynamic Page State</td></tr></table></div></body></html>

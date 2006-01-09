@@ -1,0 +1,53 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;1.&nbsp;Introduction</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="previous" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="next" href="intro.overview.html" title="An overview of Tapestry"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;1.&nbsp;Introduction</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="TapestryUsersGuide.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="intro.overview.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="intro"></a>Chapter&nbsp;1.&nbsp;Introduction</h2></div></div><div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="intro.overview.html">An overview of Tapestry</a></span></dt><dt><span class="section"><a href="intro.pages-and-components.html">Pages and components</a></span></dt><dt><span class="section"><a href="intro.engine-service-visit.html">Engines, services and friends</a></span></dt><dt><span class="section"><a href="intro.ognl.html">Object Graph Navigation Language</a></span></dt></dl></div><p>
+Tapestry is a component-based web application framework, written in Java.  Tapestry
+is more than a simple templating system; Tapestry builds on the Java Servlet API to
+build a platform for creating dynamic, interactive web sites.  More than
+just another templating language, Tapestry is a real framework for building
+complex applications from simple, reusable components.  Tapestry offloads
+much of the error-prone work in creating web applications into the framework itself,
+taking over mundane tasks such as dispatching incoming requests, constructing and
+interpretting URLs encoded with information, handling localization and internationalization
+and much  more besides.
+</p><p>
+The "mantra" of Tapestry is "objects, methods and properties".  That is, rather than have developers concerned
+about the paraphanlia of the Servlet API: requests, responses, sessions, attributes, parameters, URLs and so on,
+Tapestry focuses the developer on objects (including Tapestry pages and components, but
+also including the domain objects  of the application), methods on those objects,
+and JavaBeans properties of those objects.  That is, in a Tapestry application, the
+actions of the user (clicking links and submitting forms) results in changes to object properties
+combined with the invocation of user-supplied methods (containing application logic).  Tapestry
+takes care of the plumbing necessary to connect these user actions 
+with the objects.
+</p><p>
+This can take some getting used to. You don't write servlets in Tapestry, you write
+<span class="emphasis"><em>listener methods</em></span>.  You don't build URLs to servlets either -- you
+use an existing component (such as <a href="../ComponentReference/DirectLink.html" target="_self"><tt class="classname">DirectLink</tt></a>) and configure its <tt class="varname">listener</tt> parameter
+to invoke your listener method.  What does a listener method do? It interacts with backend systems (often,
+stateless session EJBs) or does other bookkeeping related to the request and selects a new page to provide
+a response to the user ... basically, the core code at the center of a servlet. In Tapestry, you write much less code
+because all the boring, mechanical plumbing (creating URLs, dispatching incoming requests, managing
+server-side state, and so forth) is the responsibility of the framework.
+</p><p>
+This is not to say the Servlet API is inaccessible; it is simply not
+<span class="emphasis"><em>relevant</em></span> to a typical Tapestry user.
+</p><p>
+This document describes many of the internals of Tapestry.  It is not a tutorial,
+that is available as a separate document.  Instead, this is a guide to
+some of the internals of Tapestry, and is intended for experienced developers
+who wish to leverage Tapestry fully.
+</p><p>
+Tapestry is currently in release 3.0, and has come a long way in the last couple
+of years.  Tapestry's focus is still on generating dynamic HTML pages, although there's plenty
+of support for XHTML, WML and other types of markup as well.
+</p><p>
+Nearly all of Tapestry's API is described in terms of interfaces, with
+default implementations supplied.
+By substituting new objects with the correct interfaces, the behavior of the framework
+can be changed significantly. A common
+example  is to override where page and component specifications are stored
+(perhaps in a database).
+</p><p>
+Finally, Tapestry boasts extremely complete JavaDoc API documentation.  This document
+exists to supplement that documentation, to fill in gaps that may not be obvious.  The JavaDoc
+is often the best reference.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="TapestryUsersGuide.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="TapestryUsersGuide.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="intro.overview.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Tapestry User's Guide&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;An overview of Tapestry</td></tr></table></div></body></html>

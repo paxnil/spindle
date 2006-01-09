@@ -1,0 +1,81 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>JavaBeans Properties</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="beans.html" title="Chapter&nbsp;2.&nbsp;JavaBeans and Properties"><link rel="previous" href="beans.beans.html" title="JavaBeans"><link rel="next" href="beans.property-path.html" title="Property Paths"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">JavaBeans Properties</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="beans.beans.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;2.&nbsp;JavaBeans and Properties</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="beans.property-path.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="beans.properties"></a>JavaBeans Properties</h2></div></div><div></div></div><p>
+For Tapestry, the central concept for JavaBeans are properties.  The JavaBeans framework allows Tapestry to
+treat any object as a collection of named properties.  Tapestry frequently reads, and occasionally writes, values
+from or to these named properties.
+</p><p>
+A property is <span class="emphasis"><em>not</em></span> the same as an <span class="emphasis"><em>attribute</em></span> ... though, most often, each property is backed up by an attribute. 
+ To Tapestry, and the Reflection API, a property is a set of public methods on the object.  
+ Accessing a property involves invoking one of these methods.
+</p><div class="example"><a name="N10225"></a><p class="title"><b>Example&nbsp;2.1.&nbsp;JavaBeans getter method</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+public <i class="replaceable"><tt>type</tt></i> get<i class="replaceable"><tt>Name</tt></i>()
+{
+  ...
+}
+</pre></td></tr></table></div><div class="example"><a name="N10231"></a><p class="title"><b>Example&nbsp;2.2.&nbsp;JavaBeans setter method</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+public void set<i class="replaceable"><tt>Name</tt></i>(<i class="replaceable"><tt>type</tt></i> value)
+{
+  ...
+}
+</pre></td></tr></table></div><p>
+A property may be read-only or write-only (that is, it may implement just one of the
+two methods).  The <i class="replaceable"><tt>type</tt></i> may be a scalar type (boolean, int, etc.)
+or any Java class.
+</p><p>
+Note the naming; the first letter of the property name is capitalized after <tt class="literal">get</tt>
+or <tt class="literal">set</tt>.  JavaBeans properties are case sensitive with respect to the method names
+and the property names.  A special case exists when the name is an acronyn; this is recognized
+by two or more upper-case letters in a row (after get or set); in this case, the property name
+does <span class="emphasis"><em>not</em></span> have the first letter convert to lower-case.
+</p><p>
+As a special case, a boolean property may use an alternate name for the getter method:
+</p><div class="example"><a name="N10251"></a><p class="title"><b>Example&nbsp;2.3.&nbsp;JavaBeans getter method (boolean)</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+public boolean is<i class="replaceable"><tt>Name</tt></i>()
+{
+  ...
+}
+</pre></td></tr></table></div><p>
+Although the normal implementation is to get or set an instance variable, more complicated options are
+possible.  One pattern is <span class="emphasis"><em>lazy evaluation</em></span>, where an expensive calculation is
+put off until the actual value is needed, for example:
+</p><div class="example"><a name="N1025F"></a><p class="title"><b>Example&nbsp;2.4.&nbsp;Lazy evaulation of JavaBeans property</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+
+public List userNames = null;
+
+/**
+ *  Returns a List of user names obtained from the database.
+ *
+ **/
+
+public List getUserNames()
+{
+  if (userNames == null)
+    userNames = fetchUserNamesFromDatabase();
+
+  return userNames;
+}
+</pre></td></tr></table></div><p>
+Here, the first time the method is invoked, the expensive database fetch occurs.  The value
+returned from the database is then cached for later invocations.
+</p><p><a name="beans.properties.synthesized"></a>
+Another common pattern is a <span class="emphasis"><em>synthesized property</em></span>.  Here, there is no
+real attribute at all, the value is always computed on the fly.  A frequent use of this is to
+avoid tripping over null pointers.
+</p><div class="example"><a name="N1026D"></a><p class="title"><b>Example&nbsp;2.5.&nbsp;Synthesized JavaBeans Property</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+/**
+ *  Returns the name of the company's account representative, if
+ *  if the company has one, or null otherwise.
+ *
+ **/
+
+public String getAccountRepName()
+{
+  AccountRep rep = company.getAccountRep();
+
+  if (rep == null)
+    return null;
+  
+  return rep.getName();
+}
+</pre></td></tr></table></div><p>
+This example creates a synthetic property, <tt class="varname">accountRepName</tt>.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="beans.beans.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="beans.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="beans.property-path.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">JavaBeans&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Property Paths</td></tr></table></div></body></html>

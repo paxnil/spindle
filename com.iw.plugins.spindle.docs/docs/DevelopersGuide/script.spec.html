@@ -1,0 +1,24 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Script Specifications and Script Components</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="script.html" title="Chapter&nbsp;10.&nbsp;Tapestry and JavaScript"><link rel="previous" href="script.body.html" title="The Body component"><link rel="next" href="inspector.html" title="Chapter&nbsp;11.&nbsp;The Tapestry Inspector"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Script Specifications and Script Components</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="script.body.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;10.&nbsp;Tapestry and JavaScript</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="inspector.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="script.spec"></a>Script Specifications and Script Components</h2></div></div><div></div></div><p>
+The <a href="../ComponentReference/Body.html" target="_self"><tt class="classname">Body</tt></a> component only lays the foundation for client-side JavaScript support in Tapestry.
+Tapestry includes its own, XML-based language for
+create dynamic JavaScript.
+</p><p>
+A Tapestry Script Specification takes as input a number of 
+<span class="emphasis"><em>symbols</em></span>, each of which is a named object.  These
+input symbols are combined to form additional symbols. Additional XML tags
+allow a script to place JavaScript into the main script body, or into the
+initialization.
+</p><p>
+The most common use for script specifications is to add client-side behavior to
+form elements.  The input symbol is a form component,
+from this, the name of the element and containing form are determined.  Next,
+the name of one or more event handler functions are defined.
+</p><p>
+In the body, the functions are actually created.  In the initialization,
+the event handlers are wired to the form and form elements.
+</p><p>
+In some cases, a script specification may produce usable output symbols (commonly, the
+names of a JavaScript function that should be tied to some component's event
+handler).
+</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="common-images/note.png"></td><th align="left">Note</th></tr><tr><td valign="top" align="left" colspan="2"><p>A detailed example is coming.
+</p></td></tr></table></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="script.body.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="script.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="inspector.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">The Body component&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;11.&nbsp;The Tapestry Inspector</td></tr></table></div></body></html>

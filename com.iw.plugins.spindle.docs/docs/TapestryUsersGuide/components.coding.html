@@ -1,0 +1,54 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Coding components</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="components.html" title="Chapter&nbsp;3.&nbsp;Creating Tapestry components"><link rel="previous" href="components.spec.html" title="Component Specifications"><link rel="next" href="components.parameters.html" title="Component Parameters"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Coding components</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.spec.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Creating Tapestry components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.parameters.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.coding"></a>Coding components</h2></div></div><div></div></div><p>
+When creating a new component by subclassing <a href="../api/org/apache/tapestry/AbstractComponent.html" target="_self"><tt class="classname">AbstractComponent</tt></a>, you must write the
+<tt class="function">renderComponent()</tt>	 method. This method is invoked when the components container (typically, but not always,
+a page) invokes its own <tt class="function">renderBody()</tt> method.
+</p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+protected void renderComponent(<a href="../api/org/apache/tapestry/IMarkupWriter.html" target="_self"><tt class="classname">IMarkupWriter</tt></a> writer, <a href="../api/org/apache/tapestry/IRequestCycle.html" target="_self"><tt class="classname">IRequestCycle</tt></a> cycle)
+{
+  . . .
+}	
+</pre></td></tr></table><p>
+The <a href="../api/org/apache/tapestry/IMarkupWriter.html" target="_self"><tt class="classname">IMarkupWriter</tt></a> object is used to produce output. It contains a number of <tt class="function">print()</tt>	 methods
+that output text (the method is overloaded for different types).  It also contains <tt class="function">printRaw()</tt>
+methods -- the difference being that <tt class="function">print()</tt> uses a filter to convert certain characters
+into HTML entities.  
+</p><p>
+<a href="../api/org/apache/tapestry/IMarkupWriter.html" target="_self"><tt class="classname">IMarkupWriter</tt></a> also includes methods to simplify creating markup style output: that is, elements with attributes.	
+</p><p>
+For example, to create a <tt class="sgmltag-starttag">&lt;a&gt;</tt> link:
+
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+writer.begin("a");
+writer.attribute("url", url);
+writer.attribute("class", styleClass);
+
+renderBody(writer, cycle);
+
+writer.end(); // close the &lt;a&gt;	
+</pre></td></tr></table></div>
+	</p><p>
+The <tt class="function">begin()</tt>	 method renders an open tag (the <tt class="sgmltag-starttag">&lt;a&gt;</tt>, in
+this case). The <tt class="function">end()</tt> method renders
+the corresponding <tt class="sgmltag-closetag">a</tt>. As you can see, writing attributes into the tag
+is very simple.
+</p><p>
+The call to <tt class="function">renderBody()</tt> is used to render <span class="emphasis"><em>this</em></span> component's
+body. A component doesn't have to render its body; the standard <a href="../ComponentReference/Image.html" target="_self"><tt class="classname">Image</tt></a> component doesn't render its
+body (and its component specification indicates that it discards its body). The <a href="../ComponentReference/Conditional.html" target="_self"><tt class="classname">Conditional</tt></a> component
+decides whether or not to render its body, and the
+<a href="../ComponentReference/Foreach.html" target="_self"><tt class="classname">Foreach</tt></a> component may render its body multiple times.
+</p><p>
+A component that allows informal parameters can render those as well:
+
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+writer.beginEmpty("img");
+writer.attribute("src", imageURL);
+renderInformalParameters(writer, cycle);
+</pre></td></tr></table></div>	
+</p><p>
+This example will add any informal parameters for the component
+as additional attributes within the <tt class="sgmltag-starttag">&lt;img&gt;</tt>	 element. These informal parameters
+can be specified in the page's HTML template, or within the <a href="spec.component.html" title="component element"><tt class="sgmltag-starttag">&lt;component&gt;</tt></a> tag of the page's specification. Note the use
+of the <tt class="function">beginEmpty()</tt> method, for creating a start tag that is not balanced with an end tag (or
+a call to the <tt class="function">end()</tt> method).
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.spec.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.parameters.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Component Specifications&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Component Parameters</td></tr></table></div></body></html>

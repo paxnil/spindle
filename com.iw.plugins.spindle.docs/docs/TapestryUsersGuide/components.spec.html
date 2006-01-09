@@ -1,0 +1,45 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Component Specifications</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="components.html" title="Chapter&nbsp;3.&nbsp;Creating Tapestry components"><link rel="previous" href="components.intro.html" title="Introduction"><link rel="next" href="components.coding.html" title="Coding components"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Component Specifications</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.intro.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Creating Tapestry components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.coding.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.spec"></a>Component Specifications</h2></div></div><div></div></div><p>
+Every component has a component specification, a file ending in <tt class="filename">.jwc</tt>	whose
+root element is <a href="spec.component-specification.html" title="component-specification element"><tt class="sgmltag-starttag">&lt;component-specification&gt;</tt></a>.
+</p><p>
+Each component's specification defines the basic characteristics of the component:
+<div class="itemizedlist"><ul type="disc"><li><p>The Java class for the component (which defaults to <a href="../api/org/apache/tapestry/BaseComponent.html" target="_self"><tt class="classname">BaseComponent</tt></a>)</p></li><li><p>Whether the component uses its body, or discards it (the <tt class="literal">allow-body</tt> attribute,
+			which defaults to <tt class="literal">yes</tt>)</p></li><li><p>
+			The name, type and other information for each <span class="emphasis"><em>formal</em></span>
+			parameter.
+		</p></li><li><p>
+			Whether the component allows informal parameters or discards them
+			(the <tt class="literal">allow-informal-parameters</tt> attribute, which defaults to 
+			<tt class="literal">yes</tt>)
+		</p></li><li><p>
+		The names of any <span class="emphasis"><em>reserved parameters</em></span> which may <span class="emphasis"><em>not</em></span>
+		be used as informal parameters.
+		</p></li></ul></div>	
+</p><p>
+Beyond those additions, a component specification is otherwise the same as a <a href="spec.page-specification.html" title="page-specification element"><tt class="sgmltag-starttag">&lt;page-specification&gt;</tt></a>.
+</p><p>
+When a component is referenced in an HTML template (using the <tt class="literal">@<i class="replaceable"><tt>Type</tt></i></tt>
+syntax), or in a specification (as the <tt class="literal">type</tt> attribute of
+a <a href="spec.component.html" title="component element"><tt class="sgmltag-starttag">&lt;component&gt;</tt></a> element), Tapestry must locate and parse the component's specification (this is only done once, with the
+result cached for later).
+</p><p>
+Tapestry searches for components in the following places:
+<div class="itemizedlist"><ul type="disc"><li><p>As specified in a <a href="spec.component-type.html" title="component-type element"><tt class="sgmltag-starttag">&lt;component-type&gt;</tt></a> element (with the application specification)</p></li><li><p>In the same folder (typically, <tt class="filename">WEB-INF</tt>	) as the 
+			application specification</p></li><li><p>
+		In the <tt class="filename">WEB-INF/<i class="replaceable"><tt>servlet-name</tt></i></tt> folder
+		(<i class="replaceable"><tt>servlet-name</tt></i> is the name of the Tapestry <a href="../api/org/apache/tapestry/ApplicationServlet.html" target="_self"><tt class="classname">ApplicationServlet</tt></a>
+		for the application)
+		<sup>[<a href="#ftn.N1052A" name="N1052A">3</a>]</sup>
+		</p></li><li><p>
+			In the <tt class="filename">WEB-INF</tt> folder
+		</p></li><li><p>
+			In the root context directory
+		</p></li></ul></div>	
+</p><p>
+Generally, the <span class="emphasis"><em>correct</em></span>	 place is in the
+<tt class="filename">WEB-INF</tt> folder.  <a href="components.libraries.html" title="Component Libraries">Components packaged into
+	libraries</a> have a different (and simpler) search.
+</p><div class="footnotes"><br><hr align="left" width="100"><div class="footnote"><p><sup>[<a href="#N1052A" name="ftn.N1052A">3</a>] </sup>
+			This is a very rare option that will only occur when a single WAR file contains
+			multiple Tapestry applications.
+			</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.intro.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.coding.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Introduction&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Coding components</td></tr></table></div></body></html>

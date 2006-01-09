@@ -1,0 +1,21 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Property Paths</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="beans.html" title="Chapter&nbsp;2.&nbsp;JavaBeans and Properties"><link rel="previous" href="beans.properties.html" title="JavaBeans Properties"><link rel="next" href="beans.ognl.html" title="Object Graph Navigation Library"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Property Paths</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="beans.properties.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;2.&nbsp;JavaBeans and Properties</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="beans.ognl.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="beans.property-path"></a>Property Paths</h2></div></div><div></div></div><p>
+The JavaBeans framework provides basic named properties for JavaBean objects.  Tapestry
+extends this from simple properties to <span class="emphasis"><em>property paths</em></span>.
+</p><p>
+A property path is a series of property names, separated by periods.  When reading a property path, each
+property is read in series.
+</p><p>
+In the <a href="intro.scripting.html#intro.ex">example from the introduction</a>, the property path <tt class="varname">visit.userName</tt>
+was referenced.  This path means that the <tt class="varname">visit</tt> property of the start object (a Tapestry page) should be accessed, then the <tt class="varname">userName</tt> property of the visit object should
+be accessed.  This is approximately the same as Java code
+<tt class="literal">getVisit().getUserName()</tt> (except that property access is not typesafe).
+</p><p>
+In some cases, property paths are used to change a value, instead of reading it.  When this occurs, all properties
+but the last a read; only the last property is written.  In other words, updating <tt class="varname">visit.userName</tt>
+would be similar to the JavaCode <tt class="literal">getVisit().setUserName(<i class="replaceable"><tt>value</tt></i>)</tt>.
+</p><p>
+Property paths can be of any length; however, they are just as susceptable to <tt class="classname">NullPointerException</tt>s
+as any other JavaCode.  Care must be taken that none of the properties in a property path, 
+except the final one, return null.  This can often be accomplished 
+using <a href="beans.properties.html#beans.properties.synthesized">synthesized properties</a>.
+      </p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="beans.properties.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="beans.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="beans.ognl.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">JavaBeans Properties&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Object Graph Navigation Library</td></tr></table></div></body></html>

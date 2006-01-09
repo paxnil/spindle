@@ -1,0 +1,22 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Server-Side State</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="engine.html" title="Chapter&nbsp;5.&nbsp;Application Engines and Services"><link rel="previous" href="engine.req-pages.html" title="Required Pages"><link rel="next" href="engine.stateless.html" title="Stateful vs. Stateless"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Server-Side State</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="engine.req-pages.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;Application Engines and Services</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="engine.stateless.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="engine.state"></a>Server-Side State</h2></div></div><div></div></div><p>
+There are two types of server side state that are supported by Tapestry: persistent page properties 
+and the visit object.  The first (page properties) have already been discussed.
+</p><p>
+The visit object is a central repository for application state and presentation logic.  The visit object 
+is accessible through the application engine (the engine implements a <tt class="varname">visit</tt> property).
+The application engine doesn't care about the class of the visit object, or what properties it 
+implements.
+</p><p>
+The visit object holds central information that is needed by many pages.  For example, an e-
+commerce application may store the shopping cart as a property of the visit object.
+</p><p>
+When using Enterprise JavaBeans, the visit object is a good place to store remote object 
+references (centralizing the logic to look up home interfaces, instantiate references, etc.).
+</p><p>
+Every page implements a <tt class="varname">visit</tt> property that allows access to the visit object.
+</p><p>
+When using the <a href="../api/org/apache/tapestry/engine/SimpleEngine.html" target="_self"><tt class="classname">SimpleEngine</tt></a> engine, 
+the visit object is 
+created the first time it is referenced.  The class of the visit object is stored in the application 
+specification.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="engine.req-pages.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="engine.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="engine.stateless.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Required Pages&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Stateful vs. Stateless</td></tr></table></div></body></html>

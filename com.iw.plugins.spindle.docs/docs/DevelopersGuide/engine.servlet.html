@@ -1,0 +1,54 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Application Servlet</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="engine.html" title="Chapter&nbsp;5.&nbsp;Application Engines and Services"><link rel="previous" href="engine.html" title="Chapter&nbsp;5.&nbsp;Application Engines and Services"><link rel="next" href="engine.req-pages.html" title="Required Pages"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Application Servlet</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="engine.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;Application Engines and Services</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="engine.req-pages.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="engine.servlet"></a>Application Servlet</h2></div></div><div></div></div><p>
+Every Tapestry application has a single servlet, which acts 
+as a bridge between the servlet container and the 
+application engine.  The application servlet is an instance of 
+<a href="../api/org/apache/tapestry/ApplicationServlet.html" target="_self"><tt class="classname">ApplicationServlet</tt></a>.
+</p><p>
+The first thing a servlet does, upon initialization, is read the application specification.
+To do this, it must know <span class="emphasis"><em>where</em></span> the application specification is stored.
+</p><p>
+Specifications are stored on the classpath, which means in a JAR file, or in the 
+<tt class="filename">WEB-INF/classes</tt> directory of the WAR.
+</p><p>
+The servlet determines the location of the application specification from the
+web deployment descriptor.  A servlet initialization property, <tt class="varname">org.apache.tapestry.application-specification</tt>
+provides the locations of the specificiation as a path.
+</p><div class="example"><a name="N109EB"></a><p class="title"><b>Example&nbsp;5.1.&nbsp;Web Deployment Descriptor</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+
+&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+ "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd"&gt;
+&lt;web-app&gt;
+  &lt;display-name&gt;Tapestry Virtual Library Demo&lt;/display-name&gt;
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;vlib&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.apache.tapestry.ApplicationServlet&lt;/servlet-class&gt;
+    &lt;init-param&gt;
+    	&lt;param-name&gt;org.apache.tapestry.application-specification&lt;/param-name&gt;
+    	&lt;param-value&gt;/net/sf/tapestry/vlib/Vlib.application&lt;/param-value&gt;
+    &lt;/init-param&gt;
+  	&lt;load-on-startup&gt;0&lt;/load-on-startup&gt;
+  &lt;/servlet&gt;
+  
+  &lt;!-- The single mapping used for the Virtual Library application --&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;vlib&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/app&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+  
+  &lt;session-config&gt;
+  	&lt;session-timeout&gt;15&lt;/session-timeout&gt;
+  &lt;/session-config&gt;
+    
+  &lt;welcome-file-list&gt;
+    &lt;welcome-file&gt;index.html&lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
+&lt;/web-app&gt;
+
+</pre></td></tr></table></div><p>
+The servlet's main job is to find or create the <a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a> instance.  It then delegates all the behavior
+for processing the request to the application engine.  Encoded in the URL will be a particular
+application service; the engine delegates to the service to perform the real work of handling
+the request.
+</p><div class="figure"><a name="N109F8"></a><p class="title"><b>Figure&nbsp;5.1.&nbsp;ApplicationServlet Sequence</b></p><div class="mediaobject"><img src="images/ApplicationServlet-sequence.gif" alt="ApplicationServlet Sequence"></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="engine.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="engine.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="engine.req-pages.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;5.&nbsp;Application Engines and Services&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Required Pages</td></tr></table></div></body></html>

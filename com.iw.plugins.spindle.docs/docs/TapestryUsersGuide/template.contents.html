@@ -1,0 +1,19 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Template Contents</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="template.html" title="Chapter&nbsp;2.&nbsp;Page and component templates"><link rel="previous" href="template.locations.html" title="Template locations"><link rel="next" href="template.components.html" title="Components in templates"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Template Contents</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="template.locations.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;2.&nbsp;Page and component templates</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="template.components.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="template.contents"></a>Template Contents</h2></div></div><div></div></div><p>
+Tapestry templates contain a mix of the following elements:
+</p><div class="itemizedlist"><ul type="disc"><li><p>Static HTML markup</p></li><li><p>Tapestry components</p></li><li><p>Localized messages</p></li><li><p>Special template directives</p></li></ul></div><p>
+Usually, about 90% of a template is ordinary HTML markup.  Hidden inside that markup are particular tags that
+are placeholders for Tapestry components; these tags are recognized by the presence of the <tt class="literal">jwcid</tt> attribute.  "JWC"
+is short for "Java Web Component", and was chosen as the "magic" attribute so as not to conflict with any real HTML attribute.	
+</p><p>
+Tapestry's parser is quite flexible, accepting all kinds of invalid HTML markup. That is, attributes don't <span class="emphasis"><em>have</em></span> to be
+quoted. Start and end tags don't have to balance.  Case is ignored when matching start and end tags.  Basically,
+the kind of ugly HTML you'll find "in the field" is accepted.
+</p><p>
+The goal is to allow you to preview your HTML templates using a WYSIWYG HTML editor (or even an ordinary web browser).
+The editor will ignore the undefined HTML attributes (such as <tt class="literal">jwcid</tt>).	
+</p><p>
+A larger goal is to support real project teams: The special markup for Tapestry is unobtrusive, even invisible.
+This allows an HTML designer to work on a template without breaking the dynamic portions of it.	This is completely unlike
+JSPs, where the changes to support dynamic output are extremelyobtrusive and result in a file that is meaningless to an HTML
+editor.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="template.locations.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="template.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="template.components.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Template locations&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Components in templates</td></tr></table></div></body></html>

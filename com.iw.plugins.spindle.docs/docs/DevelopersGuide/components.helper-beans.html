@@ -1,0 +1,29 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Helper Beans</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="components.html" title="Chapter&nbsp;3.&nbsp;Tapestry Components"><link rel="previous" href="components.assets.html" title="Assets"><link rel="next" href="pages.html" title="Chapter&nbsp;4.&nbsp;Tapestry Pages"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Helper Beans</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.assets.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Tapestry Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="pages.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.helper-beans"></a>Helper Beans</h2></div></div><div></div></div><p>
+There is a second form of aggregation allowed with Tapestry components.  The first way, covered previously, is to use embedded
+components to extend the functionality of the outer component.  In some cases, useful behavior can be isolated, 
+not into an additional component, but into a simple JavaBean.
+</p><p>
+These additional beans, called helper beans, are defined in the component specification, in the
+<a href="spec.bean.html" title="bean element"><tt class="sgmltag-starttag">&lt;bean&gt;</tt></a> element.
+Each bean has a unique name, a class to instantiate,
+and a lifecycle (which controls how long the component keeps a reference to the bean).  The specification 
+allows properties of the bean to be set as well, using
+the <a href="spec.set-property.html" title="set-property element"><tt class="sgmltag-starttag">&lt;set-property&gt;</tt></a> and <a href="spec.set-string-property.html" title="set-string-property element"><tt class="sgmltag-starttag">&lt;set-string-property&gt;</tt></a> elements.  
+Helper beans are accessed through the <tt class="varname">beans</tt> property of the component.
+</p><p>
+Beans are created as needed, they may then be cached for future use according to their declared lifecycle.
+The default lifecycle is <tt class="varname">request</tt>, meaning that the same bean will be returned until the end of the current request cycle.
+</p><p>
+An alternate lifecycle, <tt class="varname">page</tt>, means that once the bean is instantiated, it will continue to be available
+for the lifetime of the page containing it.  Remember that helper beans should never contain any client-specific
+state, since a page will be used by multiple sessions and clients.
+</p><p>
+The last available lifecycle, <tt class="varname">none</tt>, indicates that the bean is not cached at all, and will be created fresh on
+each property access.
+</p><p>
+Tapestry includes a handful of useful helper beans.  <a href="../api/org/apache/tapestry/bean/Default.html" target="_self"><tt class="classname">Default</tt></a> is used to provide default values for optional parameters.
+<a href="../api/org/apache/tapestry/valid/ValidationDelegate.html" target="_self"><tt class="classname">ValidationDelegate</tt></a> 
+and several implementions of <a href="../api/org/apache/tapestry/valid/IValidator.html" target="_self"><tt class="classname">IValidator</tt></a>
+used with <a href="../ComponentReference/ValidField.html" target="_self"><tt class="classname">ValidField</tt></a>, it allows simple handling of validation and presentating validation errors.
+<a href="../api/org/apache/tapestry/bean/EvenOdd.html" target="_self"><tt class="classname">EvenOdd</tt></a> is used by the <a href="inspector.html" title="Chapter&nbsp;11.&nbsp;The Tapestry Inspector">Tapestry Inspector</a>; it generates a stream of values alternating between "even" and "odd"; this is combined with cascading stylesheets to make the rows alternate between white and grey backgrounds.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.assets.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="pages.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Assets&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;4.&nbsp;Tapestry Pages</td></tr></table></div></body></html>

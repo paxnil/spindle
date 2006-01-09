@@ -57,6 +57,175 @@
 			<topic label="Pseudo Variables" href="docs/template_pvars.html"></topic>
 		</topic>				
 	</topic>
+	<topic label="Tapestry Documentation (READ ME FIRST)" href="docs/TapestryDocs.html">
+	  <topic label="Users Guide" href="docs/TapestryUsersGuide/TapestryUsersGuide.html">
+	     <topic label="Introduction" href="docs/TapestryUsersGuide/intro.html">
+	     	<topic label="An overview of Tapestry" href="docs/TapestryUsersGuide/intro.overview.html"></topic>
+	     	<topic label="Pages and components" href="docs/TapestryUsersGuide/intro.pages-and-components.html"></topic>
+	     	<topic label="Engines, services and friends" href="docs/TapestryUsersGuide/intro.engive-service-visit.html"></topic>
+	     	<topic label="Object Graph Navigation Language" href="docs/TapestryUsersGuide/intro.ognl.html"></topic>
+	     </topic>	    
+	      <topic label="Page and component templates" href="docs/TapestryUsersGuide/template.html">
+	     	<topic label="Template locations" href="docs/TapestryUsersGuide/template.locations.html"></topic>
+	     	<topic label="Template Contents" href="docs/TapestryUsersGuide/template.contents.html"></topic>
+	     	<topic label="Components in templates" href="docs/TapestryUsersGuide/template.components.html">
+	     		<topic label="Component bodies" href="docs/TapestryUsersGuide/template.components.html#templates.components.body"></topic>
+	     		<topic label="Component ids" href="docs/TapestryUsersGuide/template.components.html#templates.components.ids"></topic>
+	     		<topic label="Specifying parameters" href="docs/TapestryUsersGuide/template.components.html#templates.components.parameters"></topic>
+	     		<topic label="Formal and informal parameters" href="docs/TapestryUsersGuide/template.components.html#templates.components.formal"></topic>
+	     	</topic>
+	     	<topic label="Template directives" href="docs/TapestryUsersGuide/template.directives.html">
+	     		<topic label="Localization" href="docs/TapestryUsersGuide/template.directives.html#template.directives.l10n"></topic>
+	     		<topic label="$remove$ jwcid" href="docs/TapestryUsersGuide/template.directives.html#template.directives.remove"></topic>
+	     		<topic label="$content$ jwcid" href="docs/TapestryUsersGuide/template.directives.html#template.directives.content"></topic>	     		
+	     	</topic>
+	     </topic>
+	      <topic label="Creating Tapestry components" href="docs/TapestryUsersGuide/components.html">
+	     	<topic label="Introduction" href="docs/TapestryUsersGuide/components.intro.html"></topic>
+	     	<topic label="Component Specifications" href="docs/TapestryUsersGuide/components.spec.html"></topic>
+	     	<topic label="Coding Components" href="docs/TapestryUsersGuide/components.coding.html"></topic>
+	     	<topic label="Component Parameters" href="docs/TapestryUsersGuide/components.parameters.html">
+	     		<topic label="Using Bindings" href="docs/TapestryUsersGuide/components.parameters.html#components.parameters.bindings"></topic>
+	     		<topic label="Connected Parameter Properties" href="docs/TapestryUsersGuide/components.parameters.html#components.parameters.connected"></topic>	     		
+	     	</topic>
+	     	<topic label="Component Libraries" href="docs/TapestryUsersGuide/components.libraries.html">
+	     		<topic label="Referencing Library Components" href="docs/TapestryUsersGuide/components.libraries.html#components.libraries.ref"></topic>
+	     		<topic label="Library component search path" href="docs/TapestryUsersGuide/components.libraries.html#components.libraries.search"></topic>
+	     		<topic label="Using Private Assets" href="docs/TapestryUsersGuide/components.libraries.html#components.libraries.private-assets"></topic>
+	     		<topic label="Library Specifications" href="docs/TapestryUsersGuide/components.libraries.html#components.libraries.spec"></topic>
+	     		<topic label="Libraries and Namespaces" href="docs/TapestryUsersGuide/components.libraries.html#components.libraries.namespace"></topic>
+	     	</topic>
+	     </topic>
+	      <topic label="Managing server-side state" href="docs/TapestryUsersGuide/state.html">
+	     	<topic label="Understanding servlet state" href="docs/TapestryUsersGuide/state.general.html"></topic>
+	     	<topic label="Engine" href="docs/TapestryUsersGuide/state.engine.html"></topic>
+	     	<topic label="Visit object" href="docs/TapestryUsersGuide/state.visit.html"></topic>
+	     	<topic label="Global object" href="docs/TapestryUsersGuide/state.global.html"></topic>
+	     	<topic label="Persistent page properties" href="docs/TapestryUsersGuide/state.page-properties.html"></topic>
+	     	<topic label="Implementing persistent page properties manually" href="docs/TapestryUsersGuide/state.manual-page-properties.html"></topic>
+	     	<topic label="Manual persistent component properties" href="docs/TapestryUsersGuide/state.manual-component-properties.html"></topic>
+	     	<topic label="Stateless applications" href="docs/TapestryUsersGuide/state.stateless.html"></topic>
+	     </topic>
+	      <topic label="Configuring Tapestry" href="docs/TapestryUsersGuide/configuration.html">
+	     	<topic label="Requirements" href="docs/TapestryUsersGuide/configuration.requirements.html"></topic>
+	     	<topic label="Web deployment descriptor" href="docs/TapestryUsersGuide/configuration.deployment-descriptor.html"></topic>
+	     	<topic label="Configuration Search Path" href="docs/TapestryUsersGuide/configuration.search-path.html"></topic>
+	     	<topic label="Application extensions" href="docs/TapestryUsersGuide/configuration.extensions.html"></topic>
+	     	<topic label="Character Sets" href="docs/TapestryUsersGuide/configuration.character-sets.html"></topic>
+	     </topic>
+	      <topic label="A. Tapestry Object Properties" href="docs/TapestryUsersGuide/properties.html"></topic>
+	     <topic label="B. Tapestry JAR files" href="docs/TapestryUsersGuide/jars.html"></topic>
+	     <topic label="C. Tapestry Specification DTDs" href="docs/TapestryUsersGuide/">
+	     	<topic label="application element" href="docs/TapestryUsersGuide/spec.application.html"></topic>
+	     	<topic label="bean element" href="docs/TapestryUsersGuide/spec.bean.html"></topic>
+	     	<topic label="binding element" href="docs/TapestryUsersGuide/spec.binding.html"></topic>
+	     	<topic label="component element" href="docs/TapestryUsersGuide/spec.component.html"></topic>
+	     	<topic label="component-type element" href="docs/TapestryUsersGuide/spec.component-type.html"></topic>
+	     	<topic label="component-specification element" href="docs/TapestryUsersGuide/spec.component-specification.html"></topic>
+	     	<topic label="configure element" href="docs/TapestryUsersGuide/spec.configure.html"></topic>
+	     	<topic label="context-asset element" href="docs/TapestryUsersGuide/spec.context-asset.html"></topic>
+	     	<topic label="description element" href="docs/TapestryUsersGuide/spec.description.html"></topic>
+	     	<topic label="extension element" href="docs/TapestryUsersGuide/spec.extension.html"></topic>
+	     	<topic label="external-asset element" href="docs/TapestryUsersGuide/spec.external-asset.html"></topic>
+	     	<topic label="inherited-binding element" href="docs/TapestryUsersGuide/spec.inherited-binding.html"></topic>
+	     	<topic label="library element" href="docs/TapestryUsersGuide/spec.library.html"></topic>
+	     	<topic label="library-specification element" href="docs/TapestryUsersGuide/spec.library-specification.html"></topic>
+	     	<topic label="listener-binding element" href="docs/TapestryUsersGuide/spec.listener-binding.html"></topic>
+	     	<topic label="message-binding element" href="docs/TapestryUsersGuide/spec.message-binding.html"></topic>
+	     	<topic label="page element" href="docs/TapestryUsersGuide/spec.page.html"></topic>
+	     	<topic label="page-specification element" href="docs/TapestryUsersGuide/spec.page-specification.html"></topic>
+	     	<topic label="parameter element" href="docs/TapestryUsersGuide/spec.parameter.html"></topic>
+	     	<topic label="private-asset element" href="docs/TapestryUsersGuide/spec.private-asset.html"></topic>
+	     	<topic label="property element" href="docs/TapestryUsersGuide/spec.property.html"></topic>
+	     	<topic label="property-specification element" href="docs/TapestryUsersGuide/spec.property-specification.html"></topic>
+	     	<topic label="reserved-parameter element" href="docs/TapestryUsersGuide/spec.reserved-parameter.html"></topic>
+	     	<topic label="service element" href="docs/TapestryUsersGuide/spec.service.html"></topic>
+	     	<topic label="set-message-property element" href="docs/TapestryUsersGuide/spec.set-message-property.html"></topic>
+	     	<topic label="set-property element" href="docs/TapestryUsersGuide/spec.set-property.html"></topic>
+	     	<topic label="static-binding element" href="docs/TapestryUsersGuide/spec.static-binding.html"></topic>	     	
+	     </topic>
+	     <topic label="D. Tapestry Script Specification DTD" href="docs/TapestryUsersGuide/script-spec.html">
+	     	<topic label="body element" href="docs/TapestryUsersGuide/script-spec.body.html"></topic>
+	     	<topic label="foreach element" href="docs/TapestryUsersGuide/script-spec.foreach.html"></topic>
+	     	<topic label="if element" href="docs/TapestryUsersGuide/script-spec.if.html"></topic>
+	     	<topic label="if-not element" href="docs/TapestryUsersGuide/script-spec.if-not.html"></topic>
+	     	<topic label="include-script element" href="docs/TapestryUsersGuide/script-spec.include-script.html"></topic>
+	     	<topic label="initialization element" href="docs/TapestryUsersGuide/script-spec.initialization.html"></topic>
+	     	<topic label="input-symbol element" href="docs/TapestryUsersGuide/script-spec.input-symbol.html"></topic>
+	     	<topic label="let element" href="docs/TapestryUsersGuide/script-spec.let.html"></topic>
+	     	<topic label="script element" href="docs/TapestryUsersGuide/script-spec.script.html"></topic>
+	     	<topic label="set element" href="docs/TapestryUsersGuide/script-spec.set.html"></topic>
+	     	<topic label="unique element" href="docs/TapestryUsersGuide/script-spec.unique.html"></topic>	     	
+	     </topic>	     
+	  </topic>
+	  <topic label="Developers Guide" href="docs/DevelopersGuide/DevelopersGuide.html"></topic>
+	  <topic label="Component Reference" href="docs/ComponentReference/index.html#intro">
+	  	<topic label="Framework Library" href="docs/ComponentReference/index.html#framework">
+	  		<topic label="ActionLink" href="docs/ComponentReference/ActionLink.html"></topic>
+	  		<topic label="Any" href="docs/ComponentReference/Any.html"></topic>
+	  		<topic label="Block" href="docs/ComponentReference/Block.html"></topic>
+	  		<topic label="Body" href="docs/ComponentReference/Body.html"></topic>
+	  		<topic label="Button" href="docs/ComponentReference/Button.html"></topic>
+	  		<topic label="Checkbox" href="docs/ComponentReference/Checkbox.html"></topic>
+	  		<topic label="Conditional" href="docs/ComponentReference/Conditional.html"></topic>
+	  		<topic label="DatePicker" href="docs/ComponentReference/DatePicker.html"></topic>
+	  		<topic label="Delegator" href="docs/ComponentReference/Delegator.html"></topic>
+	  		<topic label="DirectLink" href="docs/ComponentReference/DirectLink.html"></topic>
+	  		<topic label="ExceptionDisplay" href="docs/ComponentReference/ExceptionDisplay.html"></topic>
+	  		<topic label="ExternalLink" href="docs/ComponentReference/ExternalLink.html"></topic>
+	  		<topic label="FieldLabel" href="docs/ComponentReference/FieldLabel.html"></topic>
+	  		<topic label="Foreach" href="docs/ComponentReference/Foreach.html"></topic>
+	  		<topic label="Form" href="docs/ComponentReference/Form.html"></topic>
+	  		<topic label="Frame" href="docs/ComponentReference/Frame.html"></topic>
+	  		<topic label="GenericLink" href="docs/ComponentReference/GenericLink.html"></topic>
+	  		<topic label="Hidden" href="docs/ComponentReference/Hidden.html"></topic>
+	  		<topic label="Image" href="docs/ComponentReference/Image.html"></topic>
+	  		<topic label="ImageSubmit" href="docs/ComponentReference/ImageSubmit.html"></topic>
+	  		<topic label="Insert" href="docs/ComponentReference/Insert.html"></topic>
+	  		<topic label="InsertText" href="docs/ComponentReference/InsertText.html"></topic>
+	  		<topic label="LinkSubmit" href="docs/ComponentReference/LinkSubmit.html"></topic>
+	  		<topic label="ListEdit" href="docs/ComponentReference/ListEdit.html"></topic>
+	  		<topic label="Option" href="docs/ComponentReference/Option.html"></topic>
+	  		<topic label="PageLink" href="docs/ComponentReference/PageLink.html"></topic>
+	  		<topic label="PropertySelection" href="docs/ComponentReference/PropertySelection.html"></topic>
+	  		<topic label="Radio" href="docs/ComponentReference/Radio.html"></topic>
+	  		<topic label="RadioGroup" href="docs/ComponentReference/RadioGroup.html"></topic>
+	  		<topic label="RenderBlock" href="docs/ComponentReference/RenderBlock.html"></topic>
+	  		<topic label="RenderBody" href="docs/ComponentReference/RenderBody.html"></topic>
+	  		<topic label="Rollover" href="docs/ComponentReference/Rollover.html"></topic>
+	  		<topic label="Script" href="docs/ComponentReference/Script.html"></topic>
+	  		<topic label="Select" href="docs/ComponentReference/Select.html"></topic>
+	  		<topic label="ServiceLink" href="docs/ComponentReference/ServiceLink.html"></topic>
+	  		<topic label="Shell" href="docs/ComponentReference/Shell.html"></topic>
+	  		<topic label="Submit" href="docs/ComponentReference/Submit.html"></topic>
+	  		<topic label="TextArea" href="docs/ComponentReference/TextArea.html"></topic>
+	  		<topic label="TextField" href="docs/ComponentReference/TextField.html"></topic>
+	  		<topic label="Upload" href="docs/ComponentReference/Upload.html"></topic>
+	  		<topic label="ValidField" href="docs/ComponentReference/ValidField.html"></topic>
+	  	</topic>
+	  	<topic label="Contrib Library" href="docs/ComponentReference/index.html#contrib">
+	  		<topic label="Choose" href="docs/ComponentReference/contrib.Choose.html"></topic>	  		
+	  		<topic label="FormConditional" href="docs/ComponentReference/contrib.FormConditional.html"></topic>
+	  		<topic label="FormTable" href="docs/ComponentReference/contrib.FormTable.html"></topic>
+	  		<topic label="InspectorButton" href="docs/ComponentReference/contrib.InspectorButton.html"></topic>	  		
+	  		<topic label="Otherwise" href="docs/ComponentReference/contrib.Otherwise.html"></topic>
+	  		<topic label="Palette" href="docs/api/org/apache/tapestry/contrib/.Palette.html"></topic>
+	  		<topic label="PopupLink" href="docs/ComponentReference/contrib.PopupLink.html"></topic>
+	  		<topic label="Table" href="docs/ComponentReference/contrib.Table.html"></topic>
+	  		<topic label="TableColumns" href="docs/ComponentReference/contrib.TableColumns.html"></topic>
+	  		<topic label="TableFormPages" href="docs/ComponentReference/contrib.TableFormPages.html"></topic>
+	  		<topic label="TableFormRows" href="docs/ComponentReference/contrib.TableFormRows.html"></topic>
+	  		<topic label="TablePages" href="docs/ComponentReference/contrib.TablePages.html"></topic>
+	  		<topic label="TableRows" href="docs/ComponentReference/contrib.TableRows.html"></topic>
+	  		<topic label="TableValues" href="docs/ComponentReference/contrib.TableValues.html"></topic>
+	  		<topic label="TableView" href="docs/ComponentReference/contrib.TableView.html"></topic>
+	  		<topic label="When" href="docs/ComponentReference/contrib.When.html"></topic>	  		
+	  	</topic>
+	  	<topic label="WML Library" href="docs/ComponentReference/index.html#wml">
+	  	</topic>
+	  </topic>
+	  <topic label="API Reference" href="docs/api/overview-summary.html"></topic>
+	</topic>
 	
 	<topic label="Credits &amp; Resources" href="docs/credits.html">
 		<topic label="Software Versions" href="docs/versions.html"></topic>
