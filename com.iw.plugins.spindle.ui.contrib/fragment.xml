@@ -163,4 +163,13 @@
          </enablement>
       </quickAssistProcessor>      
    </extension>
+   <extension point="org.eclipse.ui.perspectiveExtensions"> 
+        <perspectiveExtension 
+            targetID="org.eclipse.jdt.ui.JavaPerspective">             
+            <newWizardShortcut id="com.iw.plugins.spindle.ui.new_jwc_wizard"/> 
+            <newWizardShortcut id="com.iw.plugins.spindle.ui.new_page_wizard"/> 
+            <newWizardShortcut id="com.iw.plugins.spindle.ui.new_project_wizard"/>     
+        </perspectiveExtension> 
+    </extension> 
+   
 </fragment>

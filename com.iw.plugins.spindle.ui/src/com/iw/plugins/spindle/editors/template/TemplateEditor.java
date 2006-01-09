@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -143,6 +144,7 @@ public class TemplateEditor extends Editor
     {
         super();
         fReconcileSwitchKey = PreferenceConstants.RECONCILE_TEMPLATE_EDITOR;
+        setHelpContextId("com.iw.plugins.spindle.docs.templateeditor");
     }
 
     protected boolean affectsTextPresentation(PropertyChangeEvent event)
@@ -224,7 +226,7 @@ public class TemplateEditor extends Editor
      */
     public void createPartControl(Composite parent)
     {
-        super.createPartControl(parent);
+        super.createPartControl(parent);             
         fHighlightUpdater = new HighlightUpdater();
     }
 

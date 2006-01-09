@@ -39,6 +39,9 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
+
+import sun.security.action.GetBooleanAction;
+
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
@@ -67,10 +70,11 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard {
 
 	public NewTapestryProjectWizard() {
 		super();
+         setHelpAvailable(true);
 		setNeedsProgressMonitor(true);
 		setWindowTitle(UIPlugin.getString("new-project-wizard-window-title"));
 		fInstallData = new TapestryProjectInstallData();
-		fInstallData.setWritingMetaData(true);
+		fInstallData.setWritingMetaData(true);        
 	}
 
 	public void entering(IWizardPage page) {

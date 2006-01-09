@@ -36,16 +36,16 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.formatter.XMLAutoIndentStrategy;
 import com.iw.plugins.spindle.ui.util.ToolTipHandler;
 
-public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
+public abstract class BaseSourceConfiguration extends TextSourceViewerConfiguration
 {
 
   protected Editor fEditor;
@@ -114,22 +114,7 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
     };
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTabWidth(org.eclipse.jface.text.source.ISourceViewer)
-   */
-  public int getTabWidth(ISourceViewer sourceViewer)
-  {
-    return fPreferenceStore.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoIndentStrategy(org.eclipse.jface.text.source.ISourceViewer,
-   *      java.lang.String)
-   */
+ 
   public IAutoIndentStrategy getAutoIndentStrategy(
       ISourceViewer sourceViewer,
       String contentType)

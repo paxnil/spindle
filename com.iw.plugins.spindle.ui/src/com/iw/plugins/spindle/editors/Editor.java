@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.editors;
 
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import net.sf.solareclipse.xml.ui.XMLPlugin;
 
@@ -36,22 +37,40 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.text.information.IInformationProviderExtension2;
+import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.source.IAnnotationAccess;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -61,6 +80,8 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ResourceAction;
+import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -81,6 +102,7 @@ import com.iw.plugins.spindle.editors.actions.JumpToNextTagAction;
 import com.iw.plugins.spindle.editors.actions.JumpToSpecAction;
 import com.iw.plugins.spindle.editors.actions.JumpToTemplateAction;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
+import com.iw.plugins.spindle.ui.util.ToolTipHandler.TooltipPresenter;
 
 /**
  * Abstract base class for Editors.
@@ -166,6 +188,8 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
 
     private IPropertyChangeListener fPreferenceListener;
 
+    private InformationPresenter fInformationPresenter;
+
     public Editor()
     {
         super();
@@ -179,6 +203,26 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         setKeyBindingScopes(new String[]
         { "com.iw.plugins.spindle.ui.editor.commands" });
 
+    }
+
+    public void createPartControl(Composite parent)
+    {
+        super.createPartControl(parent);
+
+        IInformationControlCreator informationControlCreator = new IInformationControlCreator()
+        {
+            public IInformationControl createInformationControl(Shell shell)
+            {
+                boolean cutDown = false;
+                int style = cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
+                return new DefaultInformationControl(shell, SWT.RESIZE | SWT.TOOL, style,
+                        new TooltipPresenter());
+            }
+        };
+
+        fInformationPresenter = new InformationPresenter(informationControlCreator);
+        fInformationPresenter.setSizeConstraints(60, 10, true, true);
+        fInformationPresenter.install(getSourceViewer());
     }
 
     protected void initializeEditor()
@@ -226,8 +270,9 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     {
         super.createActions();
 
-        Action action = new TextOperationAction(UIPlugin.getDefault().getResourceBundle(),
-                "Format.", this, ISourceViewer.FORMAT);
+        ResourceBundle resourceBundle = UIPlugin.getDefault().getResourceBundle();
+        Action action = new TextOperationAction(resourceBundle, "Format.", this,
+                ISourceViewer.FORMAT);
         // Hook the action to the format command (plugin.xml)
         action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.format");
         setAction("Format", action);
@@ -237,6 +282,12 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         // in this case the format command is not called if there is
         // a text selection in the editor
         markAsSelectionDependentAction("Format", true);
+
+        // ResourceAction resAction= new TextOperationAction(resourceBundle, "Info.", this,
+        // ISourceViewer.INFORMATION, true);
+        ResourceAction resAction = new InformationDispatchAction(resourceBundle, "Info.");
+        resAction.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.show.info");
+        setAction("Info", resAction);
 
         JumpToNextAttributeAction jumpNavNext = new JumpToNextAttributeAction(true);
         jumpNavNext.setActiveEditor(null, this);
@@ -283,6 +334,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         fJumpActions[0] = jumpToJava;
         fJumpActions[1] = jumpToSpec;
         fJumpActions[2] = jumpToTemplate;
+
     }
 
     // public void createPartControl(Composite parent)
@@ -335,9 +387,11 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         Map specs = manager.getSpecMap(project);
         try
         {
-            if (specs != null) {
+            if (specs != null)
+            {
                 result = specs.get(storage);
-            } else if (!project.hasNature(TapestryCore.NATURE_ID))
+            }
+            else if (!project.hasNature(TapestryCore.NATURE_ID))
             {
                 IProject[] potentials = Markers.getHomeProjects(project);
 
@@ -514,6 +568,181 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     public final ISourceViewer getViewer()
     {
         return getSourceViewer();
+    }
+
+    /**
+     * This action behaves in two different ways: If there is no current text hover, the hover
+     * information is displayed using information presenter. If there is a current text hover, it is
+     * converted into a information presenter in order to make it sticky. Patterned after
+     * {@link JavaEditor$InformationDispatchAction}
+     */
+    class InformationDispatchAction extends TextEditorAction
+    {
+
+        /**
+         * Creates a dispatch action.
+         * 
+         * @param resourceBundle
+         *            the resource bundle
+         * @param prefix
+         *            the prefix
+         * @param textOperationAction
+         *            the text operation action
+         */
+        public InformationDispatchAction(ResourceBundle resourceBundle, String prefix)
+        {
+            super(resourceBundle, prefix, Editor.this);
+        }
+
+        /*
+         * @see org.eclipse.jface.action.IAction#run()
+         */
+        public void run()
+        {
+
+            /**
+             * Information provider used to present the information.
+             */
+            class InformationProvider implements IInformationProvider,
+                    IInformationProviderExtension2
+            {
+
+                private IRegion fHoverRegion;
+
+                private String fHoverInfo;
+
+                private IInformationControlCreator fControlCreator;
+
+                InformationProvider(IRegion hoverRegion, String hoverInfo,
+                        IInformationControlCreator controlCreator)
+                {
+                    fHoverRegion = hoverRegion;
+                    fHoverInfo = hoverInfo;
+                    fControlCreator = controlCreator;
+                }
+
+                /*
+                 * @see org.eclipse.jface.text.information.IInformationProvider#getSubject(org.eclipse.jface.text.ITextViewer,
+                 *      int)
+                 */
+                public IRegion getSubject(ITextViewer textViewer, int invocationOffset)
+                {
+                    return fHoverRegion;
+                }
+
+                /*
+                 * @see org.eclipse.jface.text.information.IInformationProvider#getInformation(org.eclipse.jface.text.ITextViewer,
+                 *      org.eclipse.jface.text.IRegion)
+                 */
+                public String getInformation(ITextViewer textViewer, IRegion subject)
+                {
+                    return fHoverInfo;
+                }
+
+                /*
+                 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
+                 * @since 3.0
+                 */
+                public IInformationControlCreator getInformationPresenterControlCreator()
+                {
+                    return fControlCreator;
+                }
+            }
+
+            ISourceViewer sourceViewer = getSourceViewer();
+            if (sourceViewer == null)
+                return;
+
+            if (sourceViewer instanceof ITextViewerExtension4)
+            {
+                ITextViewerExtension4 extension4 = (ITextViewerExtension4) sourceViewer;
+                if (extension4.moveFocusToWidgetToken())
+                    return;
+            }
+
+            if (!(sourceViewer instanceof ITextViewerExtension2))
+                return;
+
+            ITextViewerExtension2 textViewerExtension2 = (ITextViewerExtension2) sourceViewer;
+
+            // does a text hover exist?
+            ITextHover textHover = textViewerExtension2.getCurrentTextHover();
+            if (textHover == null)
+                return;
+
+            Point hoverEventLocation = textViewerExtension2.getHoverEventLocation();
+            int offset = computeOffsetAtLocation(
+                    sourceViewer,
+                    hoverEventLocation.x,
+                    hoverEventLocation.y);
+            if (offset == -1)
+                return;
+
+            try
+            {
+                // get the text hover content
+                String partitioning = IDocumentExtension3.DEFAULT_PARTITIONING;
+                String contentType = TextUtilities.getContentType(
+                        sourceViewer.getDocument(),
+                        partitioning,
+                        offset,
+                        true);
+
+                IRegion hoverRegion = textHover.getHoverRegion(sourceViewer, offset);
+                if (hoverRegion == null)
+                    return;
+
+                String hoverInfo = textHover.getHoverInfo(sourceViewer, hoverRegion);
+
+                IInformationControlCreator controlCreator = null;
+                if (textHover instanceof IInformationProviderExtension2)
+                    controlCreator = ((IInformationProviderExtension2) textHover)
+                            .getInformationPresenterControlCreator();
+
+                IInformationProvider informationProvider = new InformationProvider(hoverRegion,
+                        hoverInfo, controlCreator);
+
+                fInformationPresenter.setOffset(offset);
+                fInformationPresenter.setDocumentPartitioning(partitioning);
+                fInformationPresenter.setInformationProvider(informationProvider, contentType);
+                fInformationPresenter.showInformation();
+
+            }
+            catch (BadLocationException e)
+            {
+            }
+        }
+
+        // modified version from TextViewer
+        private int computeOffsetAtLocation(ITextViewer textViewer, int x, int y)
+        {
+
+            StyledText styledText = textViewer.getTextWidget();
+            IDocument document = textViewer.getDocument();
+
+            if (document == null)
+                return -1;
+
+            try
+            {
+                int widgetLocation = styledText.getOffsetAtLocation(new Point(x, y));
+                if (textViewer instanceof ITextViewerExtension5)
+                {
+                    ITextViewerExtension5 extension = (ITextViewerExtension5) textViewer;
+                    return extension.widgetOffset2ModelOffset(widgetLocation);
+                }
+                else
+                {
+                    IRegion visibleRegion = textViewer.getVisibleRegion();
+                    return widgetLocation + visibleRegion.getOffset();
+                }
+            }
+            catch (IllegalArgumentException e)
+            {
+                return -1;
+            }
+
+        }
     }
 
 }

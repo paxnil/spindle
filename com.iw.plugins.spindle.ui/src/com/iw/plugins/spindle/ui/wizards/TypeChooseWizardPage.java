@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.tapestry.INamespace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,7 +41,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
@@ -59,12 +57,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
@@ -216,6 +214,12 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
     }
 
+    public void performHelp()
+    {
+        PlatformUI.getWorkbench().getHelpSystem().displayHelp(
+                "com.iw.plugins.spindle.docs.componentwizard");
+    }
+
     public void init(IJavaElement initElement)
     {
         IDialogSettings settings = getDialogSettings();
@@ -223,24 +227,25 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         if (initElement != null)
         {
             IJavaProject jproject = initElement.getJavaProject();
-            
+
             restoreRootAndPackageSettings(jproject);
-            
+
             IPackageFragmentRoot settingsRoot = getPackageFragmentRoot();
             IPackageFragment settingsPackage = getPackageFragment();
-            
+
             IPackageFragmentRoot root = CoreUtils.getPackageFragmentRoot(initElement);
             if (root != null)
-            {             
+            {
                 setPackageFragmentRoot(root, true);
                 IPackageFragment pack = (IPackageFragment) CoreUtils.findElementOfKind(
                         initElement,
                         IJavaElement.PACKAGE_FRAGMENT);
-                //its a diff
-               if (pack == null && settingsPackage != null) {
-                   pack = root.getPackageFragment(settingsPackage.getElementName());
-               } 
-               setPackageFragment(pack, true);
+                // its a diff
+                if (pack == null && settingsPackage != null)
+                {
+                    pack = root.getPackageFragment(settingsPackage.getElementName());
+                }
+                setPackageFragment(pack, true);
 
             }
             else if (settingsRoot == null)
@@ -252,7 +257,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
                 setPackageFragment(null, true);
             }
         }
-        
+
     }
 
     protected IDialogSettings getDialogSettings()

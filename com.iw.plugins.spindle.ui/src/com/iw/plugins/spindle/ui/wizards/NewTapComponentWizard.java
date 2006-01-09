@@ -46,6 +46,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
   public NewTapComponentWizard()
   {
     super();
+    setHelpAvailable(true);
   }
 
   /**

@@ -25,6 +25,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.wizards.project;
 
+import org.eclipse.ui.PlatformUI;
+
 /**
  * 
  * @author glongman@gmail.com
@@ -47,4 +49,11 @@ public class NewTapestryProjectTemplateSelectionWizardPage extends
 			wiz.leaving(this);
 		}
 	}
+
+    public void performHelp()
+    {
+        PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.iw.plugins.spindle.docs.projectwizard");
+    }
+    
+    
 }

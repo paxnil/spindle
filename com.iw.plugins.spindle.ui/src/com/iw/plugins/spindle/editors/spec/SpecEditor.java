@@ -150,7 +150,8 @@ public class SpecEditor extends Editor
     public SpecEditor()
     {
         super();
-        fReconcileSwitchKey = PreferenceConstants.RECONCILE_SPEC_EDITOR;
+        fReconcileSwitchKey = PreferenceConstants.RECONCILE_SPEC_EDITOR;       
+        setHelpContextId("com.iw.plugins.spindle.docs.speceditor");
     }
 
     public Object getInformationControlInput()
@@ -189,7 +190,7 @@ public class SpecEditor extends Editor
     {
         // TODO get rid of this kludge
 
-        super.createPartControl(parent);
+        super.createPartControl(parent);        
 
         IStorage storage = getStorage();
         IProject project = (IProject) storage.getAdapter(IProject.class);

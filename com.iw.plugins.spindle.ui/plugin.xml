@@ -211,7 +211,7 @@
    -->
 <!--
 
-This is from the old Spindle. Have not decided if I will port them to
+This is from the old Spindle (1.0.X). Have not decided if I will port them to
 the new Spindle
 
       <extension
@@ -302,6 +302,18 @@ the new Spindle
             id="com.iw.plugins.spindle.ui.editor.commands.format">
       </command>
        <command
+            name="More Information"
+            description=""
+            categoryId="org.eclipse.ui.category.edit"
+            id="com.iw.plugins.spindle.ui.editor.commands.show.info">
+      </command>
+       <keyBinding
+            string="F2"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.show.info"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+       <command
             name="Open Declaration"
             description=""
             category="org.eclipse.ui.category.textEditor"
@@ -330,7 +342,7 @@ the new Spindle
             description="Move left/up to the next attribute"
             category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft">
-      </command>
+      </command>     
       <keyBinding
             string="Ctrl+Alt+ARROW_LEFT"
             scope="com.iw.plugins.spindle.ui.editor.commands"

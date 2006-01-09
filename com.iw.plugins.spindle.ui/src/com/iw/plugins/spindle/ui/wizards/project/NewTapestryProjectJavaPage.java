@@ -26,33 +26,42 @@
 
 package com.iw.plugins.spindle.ui.wizards.project;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 /**
- * As addition to the JavaCapabilityConfigurationPage, the wizard does an early
- * project creation (so that linked folders can be defined) and, if an existing
- * external location was specified, offers to do a classpath detection
+ * As addition to the JavaCapabilityConfigurationPage, the wizard does an early project creation (so
+ * that linked folders can be defined) and, if an existing external location was specified, offers
+ * to do a classpath detection
  */
 public class NewTapestryProjectJavaPage extends BaseNewTapestryProjectJavaPage
 {
-  /**
-   * Constructor for NewProjectCreationWizardPage.
-   */
-  public NewTapestryProjectJavaPage(WizardNewProjectCreationPage mainPage, TapestryProjectInstallData data)
-  {
-    super(mainPage, data);
-  }
-  
-  public void setVisible(boolean visible)
-  {
-    super.setVisible(visible);
-    NewTapestryProjectWizard wiz = (NewTapestryProjectWizard) getWizard();
-    if (visible)
+    /**
+     * Constructor for NewProjectCreationWizardPage.
+     */
+    public NewTapestryProjectJavaPage(WizardNewProjectCreationPage mainPage,
+            TapestryProjectInstallData data)
     {
-    	wiz.entering(this);
-    } else
-    {
-    	wiz.leaving(this);
+        super(mainPage, data);
     }
-  }
+
+    public void setVisible(boolean visible)
+    {
+        super.setVisible(visible);
+        NewTapestryProjectWizard wiz = (NewTapestryProjectWizard) getWizard();
+        if (visible)
+        {
+            wiz.entering(this);
+        }
+        else
+        {
+            wiz.leaving(this);
+        }
+    }
+
+    public void performHelp()
+    {
+        PlatformUI.getWorkbench().getHelpSystem().displayHelp(
+                "com.iw.plugins.spindle.docs.projectwizard");
+    }
 }

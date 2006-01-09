@@ -71,6 +71,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
@@ -272,6 +273,11 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
                 this instanceof NewTapComponentWizardPage);
 
     }   
+    
+    public void performHelp()
+    {
+        PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.iw.plugins.spindle.docs.componentwizard");
+    }
     
     protected boolean isComponentWizard() {
     	return true;
