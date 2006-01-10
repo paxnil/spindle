@@ -35,11 +35,9 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.Images;
@@ -56,7 +54,6 @@ import com.iw.plugins.spindle.core.util.Markers;
  */
 public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEditorActionDelegate
 {
-    protected AbstractTextEditor fEditor;
 
     protected IType fType;
 
@@ -64,10 +61,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
 
     public CUEditorJumpToSpecDelegate()
     {
-    }
-    
-    
-    
+    }    
 
     /**
      * @see IEditorActionDelegate#run
@@ -138,7 +132,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
                 } 
 
                 if (buildState == null){
-                    showFailedMessage("Jump to Spec requires that a successful Tapestry build has occured. Check the problem markers on the project.");
+                    showFailedMessage("'Jump to' requires that a successful Tapestry build has occured.");
                     return;
                 }
                     
@@ -154,7 +148,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
     }
     
     protected void showFailedMessage(String message) {
-        showMessage("Jump To Spec Failed", message);
+        showMessage("'Jump To' Failed", message);
     }
 
     protected IAdaptable getInputObject(IEditorInput input)
@@ -221,36 +215,24 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
                 if (location != null && location.getStorage() != null)
                     locations.add(location);
             }
-            new ChooseSpecPopup(locations, true).run();
+            reveal(locations.toArray(new Object [] {}));
         }
-
     }
 
-    /**
-     * @see IEditorActionDelegate#selectionChanged
-     */
-    public void selectionChanged(IAction action, ISelection selection)
-    {
-        // don't care
+    protected ChooseLocationPopup getChooseLocationPopup(Object[] locations)
+    {        
+        return new ChooseSpecPopup(locations, true);
     }
-
-    /**
-     * @see IEditorActionDelegate#setActiveEditor
-     */
-    public void setActiveEditor(IAction action, IEditorPart targetEditor)
-    {
-        fEditor = (AbstractTextEditor) targetEditor;
-    }
-
+    
     class ChooseSpecPopup extends ChooseLocationPopup
     {
         /**
          * @param templateLocations
          * @param forward
          */
-        public ChooseSpecPopup(List templateLocations, boolean forward)
+        public ChooseSpecPopup(Object [] locations, boolean forward)
         {
-            super(templateLocations, forward);
+            super(locations, forward);
         }
 
         /*
@@ -271,5 +253,9 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
         }
 
     }
+
+
+
+    
 
 }

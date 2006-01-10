@@ -26,6 +26,7 @@ package com.iw.plugins.spindle.editors;
 import net.sf.solareclipse.xml.internal.ui.text.XMLPartitionScanner;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -92,6 +93,9 @@ public abstract class BaseSourceConfiguration extends TextSourceViewerConfigurat
    */
   public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
   {
+      Editor editor = getEditor();
+      if (editor.getEditorInput() instanceof JarEntryEditorInput)
+          return null;
     return new ProblemAnnotationTextHover((Editor) getEditor());
   }
 

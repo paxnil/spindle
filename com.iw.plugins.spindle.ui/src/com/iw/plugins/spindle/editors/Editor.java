@@ -37,7 +37,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
@@ -95,7 +94,9 @@ import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.editors.actions.BaseAction;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
+import com.iw.plugins.spindle.editors.actions.BaseJumpAction;
 import com.iw.plugins.spindle.editors.actions.JumpToJavaAction;
 import com.iw.plugins.spindle.editors.actions.JumpToNextAttributeAction;
 import com.iw.plugins.spindle.editors.actions.JumpToNextTagAction;
@@ -182,7 +183,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
 
     protected IPreferenceStore fPreferenceStore;
 
-    protected BaseEditorAction[] fJumpActions;
+    protected BaseJumpAction[] fJumpActions;
 
     protected String fReconcileSwitchKey;
 
@@ -202,7 +203,6 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         setRangeIndicator(new DefaultRangeIndicator());
         setKeyBindingScopes(new String[]
         { "com.iw.plugins.spindle.ui.editor.commands" });
-
     }
 
     public void createPartControl(Composite parent)
@@ -315,22 +315,22 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
                 .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp");
         setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp", jumpPreviousTag);
 
-        BaseEditorAction jumpToJava = new JumpToJavaAction();
+        BaseJumpAction jumpToJava = new JumpToJavaAction();
         jumpToJava.setActiveEditor(null, this);
         jumpToJava.setActionDefinitionId(JUMP_JAVA_ACTION_ID);
         setAction(JUMP_JAVA_ACTION_ID, jumpToJava);
 
-        BaseEditorAction jumpToSpec = new JumpToSpecAction();
+        BaseJumpAction jumpToSpec = new JumpToSpecAction();
         jumpToSpec.setActiveEditor(null, this);
         jumpToSpec.setActionDefinitionId(JUMP_SPEC_ACTION_ID);
         setAction(JUMP_SPEC_ACTION_ID, jumpToSpec);
 
-        BaseEditorAction jumpToTemplate = new JumpToTemplateAction();
+        BaseJumpAction jumpToTemplate = new JumpToTemplateAction();
         jumpToTemplate.setActiveEditor(null, this);
         jumpToTemplate.setActionDefinitionId(JUMP_TEMPLATE_ACTION_ID);
         setAction(JUMP_TEMPLATE_ACTION_ID, jumpToTemplate);
 
-        fJumpActions = new BaseEditorAction[3];
+        fJumpActions = new BaseJumpAction[3];
         fJumpActions[0] = jumpToJava;
         fJumpActions[1] = jumpToSpec;
         fJumpActions[2] = jumpToTemplate;
@@ -441,11 +441,12 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
 
     public Object getAdapter(Class clazz)
     {
-        Object result = super.getAdapter(clazz);
-        if (result == null && IContentOutlinePage.class.equals(clazz))
-        {
+        if (Editor.class == clazz)
+            return this;
+        
+        if (IContentOutlinePage.class == clazz)
             return fOutline;
-        }
+
         return super.getAdapter(clazz);
     }
 

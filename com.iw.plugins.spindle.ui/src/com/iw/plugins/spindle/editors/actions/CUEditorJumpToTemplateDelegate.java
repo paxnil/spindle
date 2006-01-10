@@ -67,7 +67,7 @@ public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate
       if (locatable.getSpecificationType() != BaseSpecification.COMPONENT_SPEC)
         return;
       PluginComponentSpecification spec = (PluginComponentSpecification) locatable;
-      revealTemplates(spec.getTemplateLocations());
+      reveal(spec.getTemplateLocations().toArray());
 
     } else
     {
@@ -81,25 +81,13 @@ public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate
         locations.addAll(spec.getTemplateLocations());
 
       }
-      revealTemplates(locations);
+      reveal(locations.toArray());
     }
   }
 
-  /**
-   * @param list
-   */
-  private void revealTemplates(List locations)
-  {
-    if (locations == null || locations.isEmpty())
-      return;
-
-    if (locations.size() == 1)
-    {
-      reveal((IResourceWorkspaceLocation) locations.get(0));
-    } else
-    {
-      new ChooseTemplateLocationPopup(locations, true).run();
-    }
+  protected ChooseLocationPopup getChooseLocationPopup(Object[] locations)
+  {      
+      return new ChooseTemplateLocationPopup(locations, true);
   }
 
   protected class ChooseTemplateLocationPopup extends ChooseLocationPopup
@@ -108,9 +96,9 @@ public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate
      * @param templateLocations
      * @param forward
      */
-    public ChooseTemplateLocationPopup(List templateLocations, boolean forward)
+    public ChooseTemplateLocationPopup(Object [] locations, boolean forward)
     {
-      super(templateLocations, forward);
+      super(locations, forward);
     }
 
     /*
@@ -124,4 +112,8 @@ public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate
     }
 
   }
+
+
+
+
 }

@@ -93,9 +93,9 @@ public abstract class BaseSpecAction extends BaseEditorAction
             {
 
                 IEditorInput editorInput = fEditor.getEditorInput();
-                IDocumentProvider documentProvider = fEditor.getDocumentProvider();
+                IDocumentProvider documentProvider = getTextEditor().getDocumentProvider();
                 fDocument = documentProvider.getDocument(editorInput);
-                if (fDocument.getLength() > 0 && fDocument.get().trim().length() == 0)
+                if (fDocument.getLength() > 0 && fDocument.get().trim().length() > 0)
                 {
                     IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
 

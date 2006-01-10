@@ -29,10 +29,12 @@ package com.iw.plugins.spindle.editors.actions;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.IEditorPart;
 
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
@@ -71,10 +73,11 @@ public class JumpToSpecAction extends BaseJumpAction
 
   protected IResourceWorkspaceLocation getSpecLocation()
   {
-    if (!(fEditor instanceof TemplateEditor))
+    Editor editorPart = getSpindleEditor();
+    if (!(editorPart instanceof TemplateEditor))
       return null;
 
-    BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
+    BaseSpecLocatable spec = (BaseSpecLocatable) editorPart.getSpecification();
     if (spec != null)
       return (IResourceWorkspaceLocation) spec.getSpecificationLocation();
 

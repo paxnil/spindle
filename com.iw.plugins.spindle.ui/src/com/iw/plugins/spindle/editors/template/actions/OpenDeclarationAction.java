@@ -34,14 +34,13 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
@@ -51,6 +50,7 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
@@ -65,6 +65,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
             + ".editor.commands.navigate.openDeclaration";
 
     private TemplateTapestryAccess fAccess;
+
     private XMLNode fJwcidAttribute;
 
     public OpenDeclarationAction()
@@ -73,99 +74,133 @@ public class OpenDeclarationAction extends BaseTemplateAction
         setText(UIPlugin.getString(ACTION_ID));
         setId(ACTION_ID);
     }
-    
-    public IRegion getRegion() {
-        
-        fJwcidAttribute = null;
-        Region region = new Region();
-        
-        return region;
-    }
-    
-    
 
-    protected void doRun()
+    protected IStatus getStatus()
     {
-       
-        INamespace namespace = fEditor.getNamespace();
+        SpindleStatus status = (SpindleStatus) super.getStatus();
+        if (status == null || !status.isOK())
+            return status;
+
+        INamespace namespace = getSpindleEditor().getNamespace();
         if (namespace == null)
         {
-            MessageDialog.openError(
-                    UIPlugin.getDefault().getActiveWorkbenchShell(),
-                    "Operation Aborted",
-                    "This file can not be seen by the Tapestry builder");
-            return;
+            status.setError("This file can not be seen by the Tapestry builder");
+            return status;
         }
 
-        XMLNode artifact = XMLNode.getArtifactAt(fDocument, fDocumentOffset);
+        XMLNode artifact = XMLNode.getArtifactAt(fDocument, getDocumentOffset());
         if (artifact == null)
-            return;
+            return status;
         String type = artifact.getType();
         if (type == ITypeConstants.TEXT || type == ITypeConstants.COMMENT
                 || type == ITypeConstants.PI || type == ITypeConstants.DECL
                 || type == ITypeConstants.ENDTAG)
         {
-            return;
+            return status;
         }
 
-        XMLNode attrAtOffset = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attrAtOffset = artifact.getAttributeAt(getDocumentOffset());
         if (attrAtOffset == null)
-            return;
+            return status;
 
         Map attrs = artifact.getAttributesMap();
 
         XMLNode jwcidAttribute = (XMLNode) attrs.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
 
         if (jwcidAttribute == null)
-            return;
+            return status;
+
+        TemplateTapestryAccess access = getTemplateAccess();
+        if (access == null)
+            return status;
 
         IComponentSpecification componentSpec = resolveComponentSpec(jwcidAttribute
-                .getAttributeValue());
+                .getAttributeValue(), access);
 
         if (componentSpec == null)
-            return;
+            return status;
 
         if (attrAtOffset.equals(jwcidAttribute))
         {
-            handleComponentLookup(componentSpec);
+            status = handleComponentLookup(componentSpec, status, access);
         }
         else
         {
-            handleBinding(componentSpec, attrAtOffset.getName());
+            status = handleBinding(componentSpec, attrAtOffset.getName(), status);
         }
+
+        return status;
     }
 
-    /**
-     * @param componentSpec
-     */
-    private void handleComponentLookup(IComponentSpecification componentSpec)
+    protected ChooseLocationPopup getChooseLocationPopup(Object[] locations)
+    {       
+        return null;
+    }
+    
+    
+
+    protected void reveal(Object[] objects)
+    {
+        if (objects.length != 3)
+            return;
+        foundResult(objects[0], (String) objects[1], objects[2]);
+    }
+
+    protected void postReveal(Object revealed, IEditorPart editor)
+    {
+       //do nothing
+    }
+
+
+    private SpindleStatus handleComponentLookup(IComponentSpecification componentSpec,
+            SpindleStatus status, TemplateTapestryAccess templateTapestryAccess)
     {
         IResourceWorkspaceLocation location = null;
-        IContainedComponent contained = fAccess.getContainedComponent();
+        IContainedComponent contained = templateTapestryAccess.getContainedComponent();
         if (contained != null)
         {
-            String simpleId = fAccess.getSimpleId();
-            location = (IResourceWorkspaceLocation) fAccess.getBaseSpecification()
+            String simpleId = templateTapestryAccess.getSimpleId();
+            location = (IResourceWorkspaceLocation) templateTapestryAccess.getBaseSpecification()
                     .getSpecificationLocation();
-            if (location != null && location.getStorage() != null)
-                foundResult(location.getStorage(), simpleId, contained);
+
+            if (location == null)
+                return status;
+
+            IStorage storage = location.getStorage();
+
+            if (storage == null)
+                return status;
+
+            fInterestingObjects = new Object[]
+            { storage, simpleId, contained };
         }
         else
         {
             location = (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation();
-            if (location == null || location.getStorage() == null)
-                return;
+            if (location == null)
+                return status;
 
-            foundResult(location.getStorage(), null, null);
+            IStorage storage = location.getStorage();
+
+            if (storage == null)
+                return status;
+
+            fInterestingObjects = new Object[]
+            { storage, null, null };
         }
 
+        return status;
     }
 
     /**
      * @param componentSpec
+     * @param status
+     *            TODO
      * @param string
+     * @return TODO
      */
-    private void handleBinding(IComponentSpecification componentSpec, String parameterName)
+    private SpindleStatus handleBinding(IComponentSpecification componentSpec,
+            String parameterName, SpindleStatus status)
     {
         IParameterSpecification parameterSpec = (IParameterSpecification) componentSpec
                 .getParameter(parameterName);
@@ -173,34 +208,43 @@ public class OpenDeclarationAction extends BaseTemplateAction
         {
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) componentSpec
                     .getSpecificationLocation();
-            if (location == null || location.getStorage() == null)
-                return;
+            if (location == null)
+                return status;
 
-            foundResult(location.getStorage(), parameterName, parameterSpec);
+            IStorage storage = location.getStorage();
+            if (storage == null)
+                return status;
+
+            fInterestingObjects = new Object[]
+            { storage, parameterName, parameterSpec };
+            // foundResult(location.getStorage(), parameterName, parameterSpec);
         }
+
+        return status;
 
     }
 
-    /**
-     * @param string
-     * @return
-     */
-    private IComponentSpecification resolveComponentSpec(String jwcid)
+    private TemplateTapestryAccess getTemplateAccess()
     {
-        if (jwcid == null)
-            return null;
-
         try
         {
-            fAccess = new TemplateTapestryAccess(fEditor);
-            fAccess.setJwcid(jwcid);
-            return fAccess.getResolvedComponent();
+            return new TemplateTapestryAccess(getSpindleEditor());
         }
         catch (IllegalArgumentException e)
         {
             // do nothing
         }
         return null;
+    }
+
+    private IComponentSpecification resolveComponentSpec(String jwcid,
+            TemplateTapestryAccess templateTapestryAccess)
+    {
+        if (jwcid == null || templateTapestryAccess == null)
+            return null;
+
+        templateTapestryAccess.setJwcid(jwcid);
+        return templateTapestryAccess.getResolvedComponent();
     }
 
     protected void foundResult(Object result, String key, Object moreInfo)

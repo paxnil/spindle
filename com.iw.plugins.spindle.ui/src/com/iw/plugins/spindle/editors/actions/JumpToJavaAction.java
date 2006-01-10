@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IStorageEditorInput;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
@@ -46,6 +47,8 @@ import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.extensions.ComponentTypeResourceResolvers;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
@@ -94,7 +97,8 @@ public class JumpToJavaAction extends BaseJumpAction
 
     private Object getTypeFromTemplate()
     {
-        IComponentSpecification componentSpec = (IComponentSpecification) fEditor
+        Editor editorPart = (Editor) getSpindleEditor();
+        IComponentSpecification componentSpec = (IComponentSpecification) editorPart
                 .getSpecification();
         if (componentSpec != null)
         {
@@ -156,9 +160,11 @@ public class JumpToJavaAction extends BaseJumpAction
 
                                 ITapestryProject tproject = (ITapestryProject) storage
                                         .getAdapter(ITapestryProject.class);
-                                
-                                if (tproject == null) {
-                                    UIPlugin.log("bug [ 1200049 ] NullPointerException[JumpToJava]");
+
+                                if (tproject == null)
+                                {
+                                    UIPlugin
+                                            .log("bug [ 1200049 ] NullPointerException[JumpToJava]");
                                     return null;
                                 }
 
@@ -174,7 +180,8 @@ public class JumpToJavaAction extends BaseJumpAction
                                             storage);
                                 }
 
-                                IComponentSpecification componentSpec = (IComponentSpecification) fEditor
+                                SpecEditor editorPart = (SpecEditor) getSpindleEditor();
+                                IComponentSpecification componentSpec = (IComponentSpecification) editorPart
                                         .getSpecification();
 
                                 ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();

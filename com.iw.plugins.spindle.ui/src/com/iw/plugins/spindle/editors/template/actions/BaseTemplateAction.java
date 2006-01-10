@@ -27,67 +27,68 @@
 package com.iw.plugins.spindle.editors.template.actions;
 
 import org.apache.tapestry.INamespace;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 
 /**
- * Base class for spec actions that need the xml partitioning.
+ * Base class for spec actions that need the xml partitioning (templates).
  * 
  * @author glongman@gmail.com
  */
 public abstract class BaseTemplateAction extends BaseEditorAction
 {
 
-  protected INamespace fNamespace;
-  protected INamespace fFrameworkNamespace;
+    protected INamespace fNamespace;
 
-  protected IDocument fDocument;
+    protected INamespace fFrameworkNamespace;
 
-  public BaseTemplateAction()
-  {
-    super();
-  }
+    protected IDocument fDocument;
 
-  public BaseTemplateAction(String text)
-  {
-    super(text);
-  }
-
-  public BaseTemplateAction(String text, ImageDescriptor image)
-  {
-    super(text, image);
-  }
-
-  public BaseTemplateAction(String text, int style)
-  {
-    super(text, style);
-  }
-
-  public final void run()
-  {
-    super.run();
-
-    if (fDocumentOffset < 0)
-      return;
-
-    try
+    public BaseTemplateAction()
     {
-      fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-      if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
-        return;
-      doRun();
-
-    } catch (RuntimeException e)
-    {
-      UIPlugin.log(e);
-      throw e;
+        super();
     }
 
-  }
+    public BaseTemplateAction(String text)
+    {
+        super(text);
+    }
 
-  protected abstract void doRun();
+    public BaseTemplateAction(String text, ImageDescriptor image)
+    {
+        super(text, image);
+    }
 
+    public BaseTemplateAction(String text, int style)
+    {
+        super(text, style);
+    }
+
+    protected IStatus getStatus()
+    {                
+        if (getDocumentOffset() < 0)
+            return null;
+
+        try
+        {
+            ITextEditor editor = getTextEditor();
+            fDocument = editor.getDocumentProvider().getDocument(editor.getEditorInput());
+            if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
+                return null;            
+
+        }
+        catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
+        }
+        
+        return new SpindleStatus();
+    }
 }

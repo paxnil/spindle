@@ -28,147 +28,170 @@ package com.iw.plugins.spindle.editors.actions;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IEditorPart;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.editors.actions.BaseAction.ChooseLocationPopup;
 import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
 
 /**
  * Base class for actions that cause a jump from one editor to another
  * 
  * @author glongman@gmail.com
- * 
  */
-public abstract class BaseJumpAction extends BaseEditorAction
+public abstract class BaseJumpAction extends BaseAction 
 {
 
-  static protected ILabelProvider LABEL_PROVIDER = new LabelProvider();
+    static protected ILabelProvider LABEL_PROVIDER = new LabelProvider();
 
-  static private class LabelProvider implements ILabelProvider
-  {
-    ILabelProvider javaElementProvider;
-    public LabelProvider()
+    protected IDocument fDocument = null;
+
+    /**
+     *  
+     */
+    public BaseJumpAction()
     {
-      super();
-      javaElementProvider = new JavaElementLabelProvider(
-          JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED
-              | JavaElementLabelProvider.SHOW_ROOT);
+        super();
     }
 
-    public Image getImage(Object element)
+    /**
+     * @param text
+     */
+    public BaseJumpAction(String text)
     {
-      if (element instanceof IJavaElement)
-      {
-        return javaElementProvider.getImage(element);
-      } else
-      {
+        super(text);
+    }
+
+    /**
+     * @param text
+     * @param image
+     */
+    public BaseJumpAction(String text, ImageDescriptor image)
+    {
+        super(text, image);
+    }
+
+    /**
+     * @param text
+     * @param style
+     */
+    public BaseJumpAction(String text, int style)
+    {
+        super(text, style);
+    }
+
+    public void run()
+    {
+        try
+        {
+            doRun();
+        }
+        catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+        }
+    }
+
+    protected void showMessage(String title, String message)
+    {
+        MessageDialog.openInformation(
+                UIPlugin.getDefault().getActiveWorkbenchShell(),
+                title,
+                message);
+    }
+
+    protected abstract void doRun();
+
+    protected IDocument getDocument()
+    {
+        Assert.isTrue(fDocument != null);
+        return fDocument;
+    }
+
+    protected ImageDescriptor getImageDescriptorFor(Image image)
+    {
+        if (image == null)
+            return null;
+        return new WrappedImageDescriptor(image);
+    }
+    
+    protected ChooseLocationPopup getChooseLocationPopup(Object[] locations)
+    {       
         return null;
-      }
+    }
+    
+    static private class LabelProvider implements ILabelProvider
+    {
+        ILabelProvider javaElementProvider;
+
+        public LabelProvider()
+        {
+            super();
+            javaElementProvider = new JavaElementLabelProvider(
+                    JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED
+                            | JavaElementLabelProvider.SHOW_ROOT);
+        }
+
+        public Image getImage(Object element)
+        {
+            if (element instanceof IJavaElement)
+            {
+                return javaElementProvider.getImage(element);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public String getText(Object element)
+        {
+            if (element instanceof IJavaElement)
+            {
+                return javaElementProvider.getText(element);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public void addListener(ILabelProviderListener listener)
+        {
+        }
+
+        public void dispose()
+        {
+            javaElementProvider.dispose();
+        }
+
+        public boolean isLabelProperty(Object element, String property)
+        {
+            return false;
+        }
+
+        public void removeListener(ILabelProviderListener listener)
+        {
+        }
     }
 
-    public String getText(Object element)
+    protected void postReveal(Object revealed, IEditorPart editor)
     {
-      if (element instanceof IJavaElement)
-      {
-        return javaElementProvider.getText(element);
-      } else
-      {
-        return null;
-      }
+        // do nothing
+    }
+    
+    public void editorContextMenuAboutToShow(IMenuManager menu) {
+        
     }
 
-    public void addListener(ILabelProviderListener listener)
-    {
-    }
-
-    public void dispose()
-    {
-      javaElementProvider.dispose();
-    }
-
-    public boolean isLabelProperty(Object element, String property)
-    {
-      return false;
-    }
-
-    public void removeListener(ILabelProviderListener listener)
-    {
-    }
-  }
-
-  protected IDocument fDocument = null;
-  /**
-   *  
-   */
-  public BaseJumpAction()
-  {
-    super();
-  }
-
-  /**
-   * @param text
-   */
-  public BaseJumpAction(String text)
-  {
-    super(text);
-  }
-
-  /**
-   * @param text
-   * @param image
-   */
-  public BaseJumpAction(String text, ImageDescriptor image)
-  {
-    super(text, image);
-  }
-
-  /**
-   * @param text
-   * @param style
-   */
-  public BaseJumpAction(String text, int style)
-  {
-    super(text, style);
-  }
-
-  public void run()
-  {
-    super.run();
-    try
-    {
-      doRun();
-    } catch (RuntimeException e)
-    {
-      UIPlugin.log(e);
-    } 
-  }
-  
-  protected void showMessage(String title, String message) {
-      MessageDialog.openInformation(UIPlugin.getDefault().getActiveWorkbenchShell(), title, message);
-  }
-
-
-  protected abstract void doRun();
-
-  protected IDocument getDocument()
-  {
-    Assert.isTrue(fDocument != null);
-    return fDocument;
-  }
-
-  protected ImageDescriptor getImageDescriptorFor(Image image)
-  {
-    if (image == null)
-      return null;
-    return new WrappedImageDescriptor(image);
-  }
-  
-  
+ 
 
 }

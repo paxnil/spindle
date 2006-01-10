@@ -55,6 +55,8 @@ import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
 
 /**
@@ -80,7 +82,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         init();
     }
 
-    protected ChooseLocationPopup getChooseLocationPopup(Object[] interesting)
+    protected ChooseLocationPopup getChooseLocationPopup(Object[] locations)
     {
         return null;
     }
@@ -89,18 +91,19 @@ public class OpenDeclarationAction extends BaseSpecAction
     {
         if (fHandler == null)
             return;
-        fHandler.postReveal(revealed, null);
+        fHandler.postReveal(revealed, editor);
     }
 
     protected IStatus getStatus()
     {
         SpindleStatus status = (SpindleStatus) super.getStatus();
-        if (status == null)
+        if (status == null || !status.isOK())
             return status;
 
         try
         {
             XMLNode artifact = XMLNode.getArtifactAt(fDocument, getDocumentOffset());
+            
             String type = artifact.getType();
             if (type == ITypeConstants.TEXT || type == ITypeConstants.COMMENT
                     || type == ITypeConstants.PI || type == ITypeConstants.DECL)
@@ -134,7 +137,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             if (handler == null)
             {
                 status
-                        .setError("This file is not well formed or can not be seen by the Tapestry builder");
+                        .setError("This file is not well formed, not valid, or can not be seen by the Tapestry builder");
                 return status;
             }
 
@@ -241,7 +244,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
                 try
                 {
-                    access = new SpecTapestryAccess(fEditor);
+                    access = new SpecTapestryAccess(getSpindleEditor());
                 }
                 catch (IllegalArgumentException e)
                 {
@@ -317,7 +320,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
                 // here we are doing a classpath lookup,
                 // need to get access to the ClasspathRoot
-                IStorage storage = fEditor.getStorage();
+                IStorage storage = getEditorStorage();
                 if (storage == null)
                     return status;
 
@@ -371,7 +374,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
                 // here we are doing a context lookup,
                 // need to get access to the ContextRoot
-                IStorage storage = fEditor.getStorage();
+                IStorage storage = getEditorStorage();
                 if (storage == null)
                     return status;
 
@@ -427,7 +430,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
                 // here we are doing a classpath lookup,
                 // need to get access to the ClasspathRoot
-                IStorage storage = fEditor.getStorage();
+                IStorage storage = getEditorStorage();
                 if (storage == null)
                     return status;
 
@@ -546,7 +549,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
             try
             {
-                access = new SpecTapestryAccess(fEditor);
+                access = new SpecTapestryAccess(getSpindleEditor());
             }
             catch (IllegalArgumentException e)
             {
@@ -627,7 +630,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         {
             interestingObject = null;
 
-            if (needsNamespace && fEditor.getNamespace() == null)
+            if (needsNamespace && getSpindleEditor().getNamespace() == null)
             {
                 status
                         .setError("This file is not well formed or can not be seen by the Tapestry builder");
@@ -722,9 +725,10 @@ public class OpenDeclarationAction extends BaseSpecAction
 
                 if (resolver.canResolve(type))
                 {
+                    Editor spindleEditor = (Editor) getSpindleEditor();
                     IStatus resolveStatus = resolver.doResolve(
-                            fEditor.getLocation(),
-                            (IComponentSpecification) fEditor.getSpecification());
+                            spindleEditor.getLocation(),
+                            (IComponentSpecification) spindleEditor.getSpecification());
                     if (!resolveStatus.isOK())
                     {
                         status.setError(resolveStatus.getMessage());
@@ -781,7 +785,8 @@ public class OpenDeclarationAction extends BaseSpecAction
             // That means it can have no error markers (parsed without error in the
             // last
             // build)
-            BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
+            SpecEditor editorPart = (SpecEditor) getSpindleEditor();
+            BaseSpecLocatable spec = (BaseSpecLocatable) editorPart.getSpecification();
 
             if (spec == null)
                 return status;

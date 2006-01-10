@@ -60,7 +60,7 @@ public class ShowInPackageExplorerAction extends OpenDeclarationAction
         Object result = results[i];
         if (result instanceof BinaryType || result instanceof JarEntryFile)
         {
-          IStorage storage = fEditor.getStorage();
+          IStorage storage = getEditorStorage();
           IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
          
           if (jproject != null)

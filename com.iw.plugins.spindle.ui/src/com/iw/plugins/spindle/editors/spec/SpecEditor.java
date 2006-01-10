@@ -150,7 +150,7 @@ public class SpecEditor extends Editor
     public SpecEditor()
     {
         super();
-        fReconcileSwitchKey = PreferenceConstants.RECONCILE_SPEC_EDITOR;       
+        fReconcileSwitchKey = PreferenceConstants.RECONCILE_SPEC_EDITOR;
         setHelpContextId("com.iw.plugins.spindle.docs.speceditor");
     }
 
@@ -190,7 +190,7 @@ public class SpecEditor extends Editor
     {
         // TODO get rid of this kludge
 
-        super.createPartControl(parent);        
+        super.createPartControl(parent);
 
         IStorage storage = getStorage();
         IProject project = (IProject) storage.getAdapter(IProject.class);
@@ -324,6 +324,8 @@ public class SpecEditor extends Editor
 
         IStorage storage = getStorage();
         IProject project = (IProject) storage.getAdapter(IProject.class);
+        if (project == null)
+            return result;
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
         try
@@ -713,8 +715,8 @@ public class SpecEditor extends Editor
                     IFile file = ((IFileEditorInput) input).getFile();
                     ITapestryProject project = (ITapestryProject) file
                             .getAdapter(ITapestryProject.class);
-                                        
-                    Object spec = getSpecification();                   
+
+                    Object spec = getSpecification();
                     if (project != null && spec != null)
                     {
 

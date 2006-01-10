@@ -81,7 +81,7 @@ public class JumpToNextAttributeAction extends BaseJumpAction
    */
   protected void doRun()
   {
-    fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+    fDocument = getTextEditor().getDocumentProvider().getDocument(fEditor.getEditorInput());
 
     IDocument currentDocument = getDocument();
 
@@ -101,18 +101,19 @@ public class JumpToNextAttributeAction extends BaseJumpAction
     }
 
     IRegion attributeRegion = null;
+    int documentOffset = getDocumentOffset();
     if (fForward)
     {
-      attributeRegion = getNextAttributeRegion(fDocumentOffset);
+      attributeRegion = getNextAttributeRegion(documentOffset);
     } else
     {
-      attributeRegion = getPreviousAttributeRegion(fDocumentOffset, fStoredDocument
+      attributeRegion = getPreviousAttributeRegion(documentOffset, fStoredDocument
           .getLength() - 1);
     }
 
     if (attributeRegion != null)
     {
-      fEditor.selectAndReveal(attributeRegion.getOffset(), attributeRegion.getLength());
+      getSpindleEditor().selectAndReveal(attributeRegion.getOffset(), attributeRegion.getLength());
     }
 
   }
