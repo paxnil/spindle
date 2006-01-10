@@ -19,7 +19,7 @@
 <p class="Note"><strong>Note:</strong> that lots of plugins provide thier own project natures. Most do 
   what Spindle does, i.e. add thier nature to a project that already has the Java nature. It is perfectly 
   ok to add the Tapestry nature to a project with any number of other natures; as long as the Java nature 
-  is one of them. So it is possible to use, say, the <a href="http://www.sysdeo.com/eclipse/tomcatPlugin.html" class="namedurl">Sysdeo 
+  is one of them. So it is possible to use, say, the <a href="http://www.sysdeo.com/eclipse/tomcatplugin" class="namedurl">Sysdeo 
   Tomcat</a> plugin and Spindle in the same project (the Tomcat plugin adds its own nature in addition 
   to the Java nature).</p>
 <p>So, how does one add the Tapestry nature to a project? There are two answers. First, one can use the 
@@ -37,7 +37,7 @@
     itself can't be the context folder.</em></li>
   <li>The exploded war structure under the context folder must, of course, have a WEB-INF folder containing 
     a web.xml file. The new project wizard will generate a generic web.xml. To customize the web.xml file 
-    to use other Tapestry features, consult the <a href="http://jakarta.apache.org/tapestry/doc.html" class="namedurl">Tapestry 
+    to use other Tapestry features, consult the <a href="TapestryUsersGuide\configuration.html" class="namedurl">Tapestry 
     documentation</a>.</li>
   <li>Also, Spindle requires that web.xml contain a valid J2EE doctype declaration as the Spindle project 
     builder uses a validating XML parser.<em> Exception: Spindle 3.1 allows the use of XML schema by turning 
