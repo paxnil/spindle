@@ -57,12 +57,12 @@
 			<topic label="Pseudo Variables" href="docs/template_pvars.html"></topic>
 		</topic>				
 	</topic>
-	<topic label="Tapestry Documentation (READ ME FIRST)" href="docs/TapestryDocs.html">
+	<topic label="Tapestry Documentation (Notice)" href="docs/TapestryDocs.html">
 	  <topic label="Users Guide" href="docs/TapestryUsersGuide/TapestryUsersGuide.html">
 	     <topic label="Introduction" href="docs/TapestryUsersGuide/intro.html">
 	     	<topic label="An overview of Tapestry" href="docs/TapestryUsersGuide/intro.overview.html"></topic>
 	     	<topic label="Pages and components" href="docs/TapestryUsersGuide/intro.pages-and-components.html"></topic>
-	     	<topic label="Engines, services and friends" href="docs/TapestryUsersGuide/intro.engive-service-visit.html"></topic>
+	     	<topic label="Engines, services and friends" href="docs/TapestryUsersGuide/intro.engine-service-visit.html"></topic>
 	     	<topic label="Object Graph Navigation Language" href="docs/TapestryUsersGuide/intro.ognl.html"></topic>
 	     </topic>	    
 	      <topic label="Page and component templates" href="docs/TapestryUsersGuide/template.html">
@@ -72,7 +72,7 @@
 	     		<topic label="Component bodies" href="docs/TapestryUsersGuide/template.components.html#templates.components.body"></topic>
 	     		<topic label="Component ids" href="docs/TapestryUsersGuide/template.components.html#templates.components.ids"></topic>
 	     		<topic label="Specifying parameters" href="docs/TapestryUsersGuide/template.components.html#templates.components.parameters"></topic>
-	     		<topic label="Formal and informal parameters" href="docs/TapestryUsersGuide/template.components.html#templates.components.formal"></topic>
+	     		<topic label="Formal and informal parameters" href="docs/TapestryUsersGuide/template.components.html#template.components.formal"></topic>
 	     	</topic>
 	     	<topic label="Template directives" href="docs/TapestryUsersGuide/template.directives.html">
 	     		<topic label="Localization" href="docs/TapestryUsersGuide/template.directives.html#template.directives.l10n"></topic>
@@ -115,7 +115,7 @@
 	     </topic>
 	      <topic label="A. Tapestry Object Properties" href="docs/TapestryUsersGuide/properties.html"></topic>
 	     <topic label="B. Tapestry JAR files" href="docs/TapestryUsersGuide/jars.html"></topic>
-	     <topic label="C. Tapestry Specification DTDs" href="docs/TapestryUsersGuide/">
+	     <topic label="C. Tapestry Specification DTDs" href="docs/TapestryUsersGuide/spec.html">
 	     	<topic label="application element" href="docs/TapestryUsersGuide/spec.application.html"></topic>
 	     	<topic label="bean element" href="docs/TapestryUsersGuide/spec.bean.html"></topic>
 	     	<topic label="binding element" href="docs/TapestryUsersGuide/spec.binding.html"></topic>
@@ -158,7 +158,7 @@
 	     	<topic label="unique element" href="docs/TapestryUsersGuide/script-spec.unique.html"></topic>	     	
 	     </topic>	     
 	  </topic>
-	  <topic label="Developers Guide" href="docs/DevelopersGuide/DevelopersGuide.html"></topic>
+	  <!--<topic label="Developers Guide" href="docs/DevelopersGuide/DevelopersGuide.html"></topic>-->
 	  <topic label="Component Reference" href="docs/ComponentReference/index.html#intro">
 	  	<topic label="Framework Library" href="docs/ComponentReference/index.html#framework">
 	  		<topic label="ActionLink" href="docs/ComponentReference/ActionLink.html"></topic>
@@ -224,6 +224,7 @@
 	  	<topic label="WML Library" href="docs/ComponentReference/index.html#wml">
 	  	</topic>
 	  </topic>
+	   <topic label="Tapestry Tutorial" href="docs/Tutorial/Tutorial.html"></topic>
 	  <topic label="API Reference" href="docs/api/overview-summary.html"></topic>
 	</topic>
 	
