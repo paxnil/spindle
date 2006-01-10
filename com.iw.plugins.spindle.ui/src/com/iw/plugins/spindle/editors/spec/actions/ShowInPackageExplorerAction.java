@@ -27,13 +27,10 @@
 package com.iw.plugins.spindle.editors.spec.actions;
 
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.core.BinaryType;
 import org.eclipse.jdt.internal.core.JarEntryFile;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.IStorageEditorInput;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.ui.util.Revealer;
@@ -55,43 +52,35 @@ public class ShowInPackageExplorerAction extends OpenDeclarationAction
     setId(ACTION_ID);
   }
 
-  protected void canNotContinue(String message)
+  
+  protected void reveal(Object [] results)
   {
-    super.canNotContinue(message);
-    try
+    for (int i = 0; i < results.length; i++)
     {
-      foundResult(((IStorageEditorInput) fEditor.getEditorInput()).getStorage(), null, null);
-    } catch (CoreException e)
-    {
-     ErrorDialog.openError(UIPlugin.getDefault().getActiveWorkbenchShell(), "Error", null, e.getStatus());
+        Object result = results[i];
+        if (result instanceof BinaryType || result instanceof JarEntryFile)
+        {
+          IStorage storage = fEditor.getStorage();
+          IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
+         
+          if (jproject != null)
+          {
+            Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
+                .getDefault()
+                .getActiveWorkbenchWindow(), jproject);
+          } else
+          {
+            Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
+                .getDefault()
+                .getActiveWorkbenchWindow());
+          }
+        } else
+        {
+          Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
+              .getDefault()
+              .getActiveWorkbenchWindow());
+        }
     }
-  }
-  protected void foundResult(Object result, String key, Object moreInfo)
-  {
-    
-    if (result instanceof BinaryType || result instanceof JarEntryFile)
-    {
-      IStorage storage = fEditor.getStorage();
-      IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
-     
-      if (jproject != null)
-      {
-        Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-            .getDefault()
-            .getActiveWorkbenchWindow(), jproject);
-      } else
-      {
-        Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-            .getDefault()
-            .getActiveWorkbenchWindow());
-      }
-    } else
-    {
-      Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-          .getDefault()
-          .getActiveWorkbenchWindow());
-    }
-
   }
 
 }

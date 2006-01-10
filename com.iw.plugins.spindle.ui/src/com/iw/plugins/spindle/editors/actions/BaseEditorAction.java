@@ -44,7 +44,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelection;
@@ -84,14 +83,14 @@ import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
  */
 public abstract class BaseEditorAction extends Action implements IEditorActionDelegate
 {
-    protected Editor fEditor;    
+    protected Editor fEditor;
 
     protected Object[] fInterestingObjects;
-    
+
     protected IStatus fStatus;
 
     /**
-     *  
+     * 
      */
     public BaseEditorAction()
     {
@@ -133,21 +132,27 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
     {
         if (isEnabled())
             reveal(fInterestingObjects);
-        else if (fStatus != null && fStatus.getSeverity() == IStatus.ERROR) {
-            ErrorDialog.openError(UIPlugin.getDefault().getActiveWorkbenchShell(), "Spindle Error", "Unable to complete the request", fStatus);
+        else if (fStatus != null && fStatus.getSeverity() == IStatus.ERROR)
+        {
+            ErrorDialog.openError(
+                    UIPlugin.getDefault().getActiveWorkbenchShell(),
+                    "Spindle Error",
+                    "Unable to complete the request",
+                    fStatus);
         }
     }
 
     public final boolean isEnabled()
-    {     
+    {
         fInterestingObjects = null;
         fStatus = null;
-        
+
         IStatus status = getStatus();
         return status != null && status.isOK();
     }
-    
-    protected int getDocumentOffset() {
+
+    protected int getDocumentOffset()
+    {
         return fEditor.getCaretOffset();
     }
 
@@ -437,7 +442,8 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     // "accelerat:\t"
                     // + accelerator
                     // + "\t ("
-                    // + KeySupport.formatStroke(Stroke.create(accelerator), true)
+                    // + KeySupport.formatStroke(Stroke.create(accelerator),
+                    // true)
                     // + ")");
 
                     boolean acceleratorForward = false;
@@ -447,7 +453,8 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     // {
                     // Map commandMap =
                     // Manager.getInstance().getKeyMachine().getCommandMap();
-                    // SortedSet sequenceSet = (SortedSet) commandMap.get(commandForward);
+                    // SortedSet sequenceSet = (SortedSet)
+                    // commandMap.get(commandForward);
                     //
                     // if (sequenceSet != null)
                     // {
@@ -459,7 +466,8 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     // List strokes = sequence.getStrokes();
                     // int size = strokes.size();
                     //
-                    // if (size > 0 && accelerator == ((Stroke) strokes.get(size -
+                    // if (size > 0 && accelerator == ((Stroke) strokes.get(size
+                    // -
                     // 1)).getValue())
                     // {
                     // acceleratorForward = true;
@@ -486,7 +494,8 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     // List strokes = sequence.getStrokes();
                     // int size = strokes.size();
                     //
-                    // if (size > 0 && accelerator == ((Stroke) strokes.get(size -
+                    // if (size > 0 && accelerator == ((Stroke) strokes.get(size
+                    // -
                     // 1)).getValue())
                     // {
                     // acceleratorBackward = true;
@@ -537,11 +546,11 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     // "accelerat:\t"
                     // + accelerator
                     // + "\t ("
-                    // + KeySupport.formatStroke(Stroke.create(accelerator), true)
+                    // + KeySupport.formatStroke(Stroke.create(accelerator),
+                    // true)
                     // + ")");
 
-                    if ((firstKey || quickReleaseMode) && keyCode == stateMask
-                            && keyCode != SWT.ALT)
+                    if ((firstKey || quickReleaseMode) && keyCode == stateMask && keyCode != SWT.ALT)
                         ok(dialog, table);
                 }
             });
@@ -567,7 +576,8 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         // + "\t ("
         // + KeySupport.formatStroke(Stroke.create(keyEvent.stateMask), true)
         // + ")");
-        // System.out.println("character:\t" + (int) keyEvent.character + "\t (" +
+        // System.out.println("character:\t" + (int) keyEvent.character + "\t ("
+        // +
         // keyEvent.character + ")");
         // }
 
@@ -623,7 +633,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
 
     protected abstract ChooseLocationPopup getChooseLocationPopup(Object[] interesting);
 
-    protected abstract void postReveal(Object revealed);
+    protected abstract void postReveal(Object revealed, IEditorPart editor);
 
     protected void reveal(Object[] objects)
     {
@@ -641,8 +651,19 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         else
         {
-            getChooseLocationPopup(objects).run();
+            ChooseLocationPopup chooseLocationPopup = getChooseLocationPopup(objects);
+            if (chooseLocationPopup == null)
+                reveal(new Object[]
+                { objects[0] });
+            else
+                chooseLocationPopup.run();
         }
+    }
+
+    private void revealOccurred(Object revealed, IEditorPart editor)
+    {
+        if (editor != null)
+            postReveal(revealed, editor);
     }
 
     protected void reveal(IResourceWorkspaceLocation location)
@@ -655,18 +676,14 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
     protected void reveal(IStorage storage)
     {
         if (storage != null)
-        {
-            UIPlugin.openTapestryEditor((IStorage) storage);
-            postReveal(storage);
-        }
+            revealOccurred(storage, UIPlugin.openTapestryEditor((IStorage) storage));
     }
 
     protected void reveal(IType resolvedType)
     {
         try
-        {
-            JavaUI.openInEditor(resolvedType);
-            postReveal(resolvedType);
+        {           
+            revealOccurred(resolvedType, JavaUI.openInEditor(resolvedType));
         }
         catch (PartInitException e)
         {

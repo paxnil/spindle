@@ -36,7 +36,6 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -57,7 +56,6 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
-import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * Open an interesting thing, if possible.
@@ -66,7 +64,7 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  */
 public class OpenDeclarationAction extends BaseSpecAction
 {
-    private Handler fHandler
+    private Handler fHandler;
 
     public static final String ACTION_ID = UIPlugin.PLUGIN_ID
             + ".editor.commands.navigate.openDeclaration";
@@ -74,25 +72,25 @@ public class OpenDeclarationAction extends BaseSpecAction
     private Map fHandlers;
 
     public OpenDeclarationAction()
+
     {
         super();
         setText(UIPlugin.getString(ACTION_ID));
         setId(ACTION_ID);
         init();
     }
-    
-    
 
-    protected void postReveal(Object revealed)
+    protected ChooseLocationPopup getChooseLocationPopup(Object[] interesting)
     {
-        if (fInterestingObjects.length > 0 || !revealed.equals(fInterestingObjects[0]))
-            return;
-        
-        
-        
+        return null;
     }
 
-
+    protected void postReveal(Object revealed, IEditorPart editor)
+    {
+        if (fHandler == null)
+            return;
+        fHandler.postReveal(revealed, null);
+    }
 
     protected IStatus getStatus()
     {
@@ -122,220 +120,52 @@ public class OpenDeclarationAction extends BaseSpecAction
 
             String name = artifact.getName();
 
-            if (name == null) {
-                status.setError("no applicable data found at the cursor postion (missing element name)");
+            if (name == null)
+            {
+                status
+                        .setError("no applicable data found at the cursor postion (missing element name)");
                 return status;
             }
-                
 
             name = name.toLowerCase();
 
             Handler handler = (Handler) fHandlers.get(name);
 
-            if (handler == null) {
-                status.setError("This file is not well formed or can not be seen by the Tapestry builder");
+            if (handler == null)
+            {
+                status
+                        .setError("This file is not well formed or can not be seen by the Tapestry builder");
                 return status;
             }
-               
-            status = handler.handle(artifact);           
+
+            status = handler.handle(artifact, status);
+            Object interesting = status.isOK() ? handler.getInterestingObject() : null;
+            fInterestingObjects = interesting == null ? new Object[] {} : new Object[]
+            { interesting };
+            return status;
 
         }
         catch (CoreException e)
-        {           
-           SpindleMultiStatus result = new SpindleMultiStatus(IStatus.ERROR, "Operation Aborted");
-           result.addStatus(e.getStatus());
-           status = result;       
+        {
+            SpindleMultiStatus result = new SpindleMultiStatus(IStatus.ERROR, "Operation Aborted");
+            result.addStatus(e.getStatus());
+            status = result;
         }
         return status;
-    }    
-
-    private void handleLibraryLookup(XMLNode artifact) throws IllegalArgumentException,
-            CoreException
-    {
-
-        XMLNode attribute = getAttribute(artifact, fDocumentOffset, "specification-path");
-        if (attribute == null)
-            throw new IllegalArgumentException(
-                    "could not location the 'specification-path' attribute");
-
-        String path = attribute.getAttributeValue();
-        if (path == null)
-            throw new IllegalArgumentException(
-                    "could not location the 'specification-path' attribute value");
-
-        // here we are doing a classpath lookup,
-        // need to get access to the ClasspathRoot
-        IStorage storage = fEditor.getStorage();
-        if (storage != null)
-        {
-            ITapestryProject project = (ITapestryProject) storage
-                    .getAdapter(ITapestryProject.class);
-            if (project == null)
-                return;
-
-            ClasspathRootLocation root = project.getClasspathRoot();
-            if (root == null)
-                return;
-
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
-                    .getRelativeLocation(path);
-            IStorage s = location.getStorage();
-            if (s != null)
-                foundResult(s, null, null);
-
-        }
     }
 
     /**
      * @param artifact
      */
-    private IStatus handlePrivateAsset(XMLNode artifact) throws CoreException
-    {
-        SpindleStatus status = new SpindleStatus();
-        
-        XMLNode attribute = getAttribute(artifact, getDocumentOffset(), "resource-path");
-        if (attribute == null) {
-            status.setError("could not location the 'resource-path' attribute");
-            return status;
-        }
-                    
-        String path = attribute.getAttributeValue();
-        if (path == null) {
-            status.setError("could not locate the 'resource-path' attribute value");
-            return status;
-        }
-            
-        // here we are doing a classpath lookup,
-        // need to get access to the ClasspathRoot
-        IStorage storage = fEditor.getStorage();
-        if (storage != null)
-        {
-            ITapestryProject project = (ITapestryProject) storage
-                    .getAdapter(ITapestryProject.class);
-            if (project == null) 
-                return null;                
-
-            ClasspathRootLocation root = project.getClasspathRoot();
-            if (root == null)
-                return null;
-
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
-                    .getRelativeLocation(path);
-            IStorage s = location.getStorage();
-            if (s != null)
-                foundResult(s, null, null);
-        }
-    }
 
     /**
      * @param artifact
      */
-    private void handleContextAsset(XMLNode artifact)
-    {
-
-        XMLNode attribute = getAttribute(artifact, fDocumentOffset, "path");
-        if (attribute == null)
-            throw new IllegalArgumentException("could not location the 'path' attribute");
-
-        String path = attribute.getAttributeValue();
-
-        if (path == null)
-            throw new IllegalArgumentException("could not location the 'path' attribute value");
-
-        // here we are doing a context lookup,
-        // need to get access to the ContextRoot
-        IStorage storage = fEditor.getStorage();
-        if (storage != null)
-        {
-            ITapestryProject project = (ITapestryProject) storage
-                    .getAdapter(ITapestryProject.class);
-            if (project == null)
-                return;
-
-            ContextRootLocation contextRoot = project.getWebContextLocation();
-            if (contextRoot == null)
-                return;
-
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) contextRoot
-                    .getRelativeLocation(path);
-            IStorage s = location.getStorage();
-            if (s != null)
-                foundResult(s, null, null);
-        }
-    }
-
-    private void handleRelativeLookup(XMLNode artifact, String attrName)
-    {
-        XMLNode attribute = (XMLNode) artifact.getAttributesMap().get(attrName);
-        if (attribute == null)
-            return;
-
-        String name = attribute.getName();
-
-        if (name == null)
-            return;
-
-        if (!attrName.equals(name.toLowerCase()))
-            return;
-
-        String path = attribute.getAttributeValue();
-        if (path == null)
-            return;
-
-        // here we are doing a relative lookup
-        // need to get the location object for the Spec we are editing
-        // That means it can have no error markers (parsed without error in the last
-        // build)
-        BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
-        if (spec != null)
-        {
-            IResourceWorkspaceLocation rootLocation = (IResourceWorkspaceLocation) spec
-                    .getSpecificationLocation();
-            if (rootLocation == null)
-                return;
-
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) rootLocation
-                    .getRelativeLocation(path);
-            IStorage s = location.getStorage();
-            if (s != null)
-                foundResult(s, null, null);
-        }
-    }
 
     /**
      * @param artifact
      * @return TODO
      */
-    private IStorage handleComponentLookup(XMLNode artifact) throws IllegalArgumentException
-    {
-
-        SpecTapestryAccess access = new SpecTapestryAccess(fEditor);
-
-        // first try and resolve the component...
-        XMLNode attribute = getAttribute(artifact, fDocumentOffset, "type");
-        if (attribute == null)
-            throw new IllegalArgumentException("could not find the 'type' attribute");
-
-        String typeName = attribute.getAttributeValue();
-
-        if (typeName == null)
-            throw new IllegalArgumentException("could not find a valid the 'type' attribute value");
-
-        PluginComponentSpecification spec = (PluginComponentSpecification) access
-                .resolveComponentType(typeName);
-        if (spec == null)
-            throw new IllegalArgumentException("could not resolve '" + typeName + "'");
-
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec
-                .getSpecificationLocation();
-        if (location != null)
-            return location.getStorage();
-
-        return null;
-
-        // foundResult(location.getStorage(), null, null);
-
-    }
 
     protected XMLNode getAttribute(XMLNode artifact, String name)
     {
@@ -353,7 +183,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         XMLNode attribute = null;
         if (documentOffset >= 0)
-            attribute = artifact.getAttributeAt(fDocumentOffset);
+            attribute = artifact.getAttributeAt(documentOffset);
 
         if (attribute == null)
             return (XMLNode) attrs.get(name);
@@ -364,164 +194,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             return (XMLNode) attrs.get(name.toLowerCase());
 
         return attribute;
-    }
-
-    protected void canNotContinue(String message)
-    {
-        MessageDialog.openError(
-                UIPlugin.getDefault().getActiveWorkbenchShell(),
-                "Problem Encountered",
-                message);
-    }
-
-    private IStorage handleComponentBinding(XMLNode parent, XMLNode binding)
-            throws IllegalArgumentException
-    {
-
-        SpecTapestryAccess access = new SpecTapestryAccess(fEditor);
-
-        XMLNode typeAttribute = getAttribute(parent, fDocumentOffset, "type");
-        if (typeAttribute == null)
-            throw new IllegalArgumentException(
-                    "could not locate the component type in the parent element");
-
-        String resolveType = typeAttribute.getAttributeValue();
-
-        if (resolveType == null)
-            throw new IllegalArgumentException(
-                    "could not locate the component type in the parent element");
-
-        PluginComponentSpecification spec = (PluginComponentSpecification) access
-                .resolveComponentType(resolveType);
-        if (spec == null)
-            throw new IllegalArgumentException("could not resolve the component type '"
-                    + resolveType + "' in the parent element");
-
-        Map bindingAttrs = binding.getAttributesMap();
-        XMLNode nameAttribute = (XMLNode) bindingAttrs.get("name");
-        if (nameAttribute == null)
-            throw new IllegalArgumentException("binding name is missing");
-
-        String parameterName = nameAttribute.getAttributeValue();
-        if (parameterName == null)
-            throw new IllegalArgumentException("binding name is missing");
-
-        IParameterSpecification parameterSpec = spec.getParameter(parameterName);
-
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec
-                .getSpecificationLocation();
-        if (location != null)
-            return location.getStorage();
-
-        foundResult(location.getStorage(), parameterName, parameterSpec);
-    }
-
-    private void handleTypeLookup(XMLNode artifact, String attrName)
-    {
-        handleTypeLookup(artifact, attrName, false);
-    }
-
-    private void handleTypeLookup(XMLNode artifact, String attrName, boolean useComponentResolver)
-    {
-        XMLNode attribute = getAttribute(artifact, fDocumentOffset, attrName);
-        if (attribute == null)
-            throw new IllegalArgumentException("could not find the '" + attrName + "' attribute");
-
-        String typeName = attribute.getAttributeValue();
-
-        if (typeName == null)
-            return;
-
-        IType type = resolveType(typeName);
-
-        if (type == null)
-            throw new IllegalArgumentException("could resolve the type '" + typeName + "'");
-
-        if (useComponentResolver)
-        {
-            ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
-
-            if (resolver.canResolve(type))
-            {
-                IStatus resolveStatus = resolver.doResolve(
-                        fEditor.getLocation(),
-                        (IComponentSpecification) fEditor.getSpecification());
-                if (!resolveStatus.isOK())
-                    throw new IllegalArgumentException(resolveStatus.getMessage());
-                foundResult(resolver.getStorage(), null, null);
-            }
-            else
-            {
-                foundResult(type, null, null);
-            }
-        }
-        else
-        {
-            foundResult(type, null, null);
-        }
-
-    }
-
-    protected void foundResult(Object result, String key, Object moreInfo)
-    {
-        if (result instanceof IType)
-        {
-            reveal((IType) result);
-        }
-        else if (result instanceof IStorage)
-        {
-            reveal((IStorage) result);
-            IEditorPart editor = UIUtils.getEditorFor((IStorage) result);
-            if (editor != null && (editor instanceof AbstractTextEditor) || moreInfo != null)
-            {
-                if (moreInfo instanceof IParameterSpecification && key != null)
-                {
-                    revealParameter((AbstractTextEditor) editor, key);
-                }
-            }
-        }
-    }
-
-    private void revealParameter(AbstractTextEditor editor, String parameterName)
-    {
-        IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
-        try
-        {
-            XMLNode reveal = null;
-            Position[] pos = null;
-            pos = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
-            for (int i = 0; i < pos.length; i++)
-            {
-                XMLNode artifact = (XMLNode) pos[i];
-                if (artifact.getType() == ITypeConstants.ENDTAG)
-                    continue;
-                String name = artifact.getName();
-                if (name == null)
-                    continue;
-
-                if (!"parameter".equals(name.toLowerCase()))
-                    continue;
-
-                XMLNode attribute = getAttribute(artifact, "name");
-                if (attribute == null)
-                    continue;
-
-                String value = attribute.getAttributeValue();
-                if (value != null && value.equals(parameterName))
-                {
-                    reveal = artifact;
-                    break;
-                }
-            }
-            if (reveal != null)
-                editor.setHighlightRange(reveal.getOffset(), reveal.getLength(), true);
-
-        }
-        catch (Exception e)
-        {
-            UIPlugin.log(e);
-        }
-    }
+    }   
 
     protected void init()
     {
@@ -533,38 +206,18 @@ public class OpenDeclarationAction extends BaseSpecAction
         fHandlers.put("extension", new TypeHandler("class"));
         fHandlers.put("service", new TypeHandler("class"));
         fHandlers.put("property-specification", new TypeHandler("type"));
-        fHandlers.put("parameter", new Handler(false)
+        fHandlers.put("parameter", new TypeHandler()
         {
-            protected void doHandle(XMLNode artifact) throws IllegalArgumentException,
-                    CoreException
+            protected SpindleStatus doHandle(XMLNode artifact, SpindleStatus status)
+                    throws CoreException
             {
                 if (fDTD.getPublicId() == SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)
-                {
-                    handleTypeLookup(artifact, "java-type");
-                }
+                    return handleTypeLookup(artifact, "java-type", false, status);
                 else
-                {
-                    handleTypeLookup(artifact, "type");
-                }
+                    return handleTypeLookup(artifact, "type", false, status);
             }
         });
-        Handler bindingHandler = new Handler(true)
-        {
-            protected void doHandle(XMLNode artifact) throws IllegalArgumentException,
-                    CoreException
-            {
-                XMLNode parent = artifact.getParent();
-                String parentName = parent.getName();
-                if (parentName == null)
-                    throw new IllegalArgumentException(
-                            "could not locate a valid parent  tag  (expected <component>)");
-                parentName = parentName.toLowerCase();
-                if (!parentName.equals("component"))
-                    throw new IllegalArgumentException(
-                            "could not locate a valid parent  tag (expected <component>)");
-                handleComponentBinding(parent, artifact);
-            }
-        };
+        Handler bindingHandler = new BindingHandler();
         fHandlers.put("binding", bindingHandler);
         fHandlers.put("static-binding", bindingHandler);
         fHandlers.put("inherited-binding", bindingHandler);
@@ -573,26 +226,173 @@ public class OpenDeclarationAction extends BaseSpecAction
         fHandlers.put("field-binding", bindingHandler);
         fHandlers.put("component", new Handler(true)
         {
-            protected void doHandle(XMLNode artifact) throws IllegalArgumentException,
-                    CoreException
+            protected SpindleStatus doHandle(XMLNode artifact, SpindleStatus status)
+                    throws CoreException
             {
-                handleComponentLookup(artifact);
+
+                return handleComponentLookup(artifact, status);
+            }
+
+            private SpindleStatus handleComponentLookup(XMLNode artifact, SpindleStatus status)
+                    throws IllegalArgumentException
+            {
+
+                SpecTapestryAccess access = null;
+
+                try
+                {
+                    access = new SpecTapestryAccess(fEditor);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    UIPlugin.log(e);
+                }
+
+                if (access == null)
+                    return status;
+
+                // first try and resolve the component...
+                XMLNode attribute = getAttribute(artifact, getDocumentOffset(), "type");
+                if (attribute == null)
+                {
+                    status.setError("could not find the 'type' attribute");
+                    return status;
+                }
+
+                String typeName = attribute.getAttributeValue();
+
+                if (typeName == null)
+                {
+                    status.setError("could not find a valid the 'type' attribute value");
+                    return status;
+                }
+
+                PluginComponentSpecification spec = (PluginComponentSpecification) access
+                        .resolveComponentType(typeName);
+                if (spec == null)
+                {
+                    status.setError("could not resolve '" + typeName + "'");
+                    return status;
+                }
+
+                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec
+                        .getSpecificationLocation();
+                if (location == null)
+                    return status;
+
+                interestingObject = location.getStorage();
+
+                return status;
+
+                // foundResult(location.getStorage(), null, null);
+
             }
         });
         fHandlers.put("private-asset", new Handler(true)
         {
-            protected void doHandle(XMLNode artifact) throws IllegalArgumentException,
-                    CoreException
+
+            protected SpindleStatus doHandle(XMLNode artifact, SpindleStatus status)
+                    throws CoreException
             {
-                handlePrivateAsset(artifact);
+                return handlePrivateAsset(artifact);
+            }
+
+            private SpindleStatus handlePrivateAsset(XMLNode artifact) throws CoreException
+            {
+                SpindleStatus status = new SpindleStatus();
+
+                XMLNode attribute = getAttribute(artifact, getDocumentOffset(), "resource-path");
+                if (attribute == null)
+                {
+                    status.setError("could not location the 'resource-path' attribute");
+                    return status;
+                }
+
+                String path = attribute.getAttributeValue();
+                if (path == null)
+                {
+                    status.setError("could not locate the 'resource-path' attribute value");
+                    return status;
+                }
+
+                // here we are doing a classpath lookup,
+                // need to get access to the ClasspathRoot
+                IStorage storage = fEditor.getStorage();
+                if (storage == null)
+                    return status;
+
+                ITapestryProject project = (ITapestryProject) storage
+                        .getAdapter(ITapestryProject.class);
+                if (project == null)
+                    return status;
+
+                ClasspathRootLocation root = project.getClasspathRoot();
+                if (root == null)
+                    return status;
+
+                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
+                        .getRelativeLocation(path);
+                IStorage s = location.getStorage();
+
+                if (s == null)
+                    return status;
+
+                interestingObject = s;
+
+                return status;
+
             }
         });
         fHandlers.put("context-asset", new Handler(true)
         {
-            protected void doHandle(XMLNode artifact) throws IllegalArgumentException,
-                    CoreException
+            protected SpindleStatus doHandle(XMLNode artifact, SpindleStatus status)
+                    throws CoreException
             {
-                handleContextAsset(artifact);
+                return handleContextAsset(artifact, status);
+            }
+
+            private SpindleStatus handleContextAsset(XMLNode artifact, SpindleStatus status)
+            {
+
+                XMLNode attribute = getAttribute(artifact, getDocumentOffset(), "path");
+                if (attribute == null)
+                {
+                    status.setError("could not location the 'path' attribute");
+                    return status;
+                }
+
+                String path = attribute.getAttributeValue();
+
+                if (path == null)
+                {
+                    status.setError("could not location the 'path' attribute");
+                    return status;
+                }
+
+                // here we are doing a context lookup,
+                // need to get access to the ContextRoot
+                IStorage storage = fEditor.getStorage();
+                if (storage == null)
+                    return status;
+
+                ITapestryProject project = (ITapestryProject) storage
+                        .getAdapter(ITapestryProject.class);
+                if (project == null)
+                    return status;
+
+                ContextRootLocation contextRoot = project.getWebContextLocation();
+                if (contextRoot == null)
+                    return status;
+
+                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) contextRoot
+                        .getRelativeLocation(path);
+                IStorage s = location.getStorage();
+                if (s == null)
+                    return status;
+
+                interestingObject = s;
+
+                return status;
             }
         });
         fHandlers.put("component-alias", new RelativeLookupHandler("specification-path"));
@@ -600,16 +400,222 @@ public class OpenDeclarationAction extends BaseSpecAction
         fHandlers.put("page", new RelativeLookupHandler("specification-path"));
         fHandlers.put("library", new Handler(true)
         {
-            protected void doHandle(XMLNode artifact) throws IllegalArgumentException,
-                    CoreException
+            protected SpindleStatus doHandle(XMLNode artifact, SpindleStatus status)
+                    throws IllegalArgumentException, CoreException
             {
-                handleLibraryLookup(artifact);
+                return handleLibraryLookup(artifact, status);
+            }
+
+            private SpindleStatus handleLibraryLookup(XMLNode artifact, SpindleStatus status)
+                    throws CoreException
+            {
+
+                XMLNode attribute = getAttribute(artifact, getDocumentOffset(), "specification-path");
+                if (attribute == null)
+                {
+                    status.setError("could not location the 'specification-path' attribute");
+                    return status;
+                }
+
+                String path = attribute.getAttributeValue();
+                if (path == null)
+                {
+                    status.setError("could not location the 'specification-path' attribute value");
+                    return status;
+
+                }
+
+                // here we are doing a classpath lookup,
+                // need to get access to the ClasspathRoot
+                IStorage storage = fEditor.getStorage();
+                if (storage == null)
+                    return status;
+
+                ITapestryProject project = (ITapestryProject) storage
+                        .getAdapter(ITapestryProject.class);
+                if (project == null)
+                    return status;
+
+                ClasspathRootLocation root = project.getClasspathRoot();
+                if (root == null)
+                    return status;
+
+                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
+                        .getRelativeLocation(path);
+                IStorage s = location.getStorage();
+                if (s == null)
+                    return status;
+
+                interestingObject = s;
+                // foundResult(s, null, null);
+
+                return status;
             }
         });
     }
 
+    class BindingHandler extends Handler
+    {
+        private IParameterSpecification parameterSpec;
+
+        private String parameterName;
+
+        BindingHandler()
+        {
+            super(true);
+        }
+
+        protected SpindleStatus doHandle(XMLNode artifact, SpindleStatus status) throws CoreException
+        {
+            parameterName = null;
+            parameterSpec = null;
+
+            XMLNode parent = artifact.getParent();
+            String parentName = parent.getName();
+            if (parentName == null)
+            {
+                status.setError("could not locate a valid parent tag  (expected <component>)");
+                return status;
+            }
+            parentName = parentName.toLowerCase();
+            if (!parentName.equals("component"))
+            {
+                status.setError("could not locate a valid parent tag  (expected <component>)");
+                return status;
+            }
+
+            return handleComponentBinding(parent, artifact, status);
+        }
+
+        public void postReveal(Object object, IEditorPart editor)
+        {
+            if (object != null && object == interestingObject && editor != null
+                    && (editor instanceof AbstractTextEditor))
+            {
+                if (parameterSpec != null && parameterName != null)
+                    revealParameter((AbstractTextEditor) editor, parameterName);
+            }
+        }
+
+        private void revealParameter(AbstractTextEditor editor, String parameterName)
+        {
+            IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
+            try
+            {
+                XMLNode reveal = null;
+                Position[] pos = null;
+                pos = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
+                for (int i = 0; i < pos.length; i++)
+                {
+                    XMLNode artifact = (XMLNode) pos[i];
+                    if (artifact.getType() == ITypeConstants.ENDTAG)
+                        continue;
+                    String name = artifact.getName();
+                    if (name == null)
+                        continue;
+
+                    if (!"parameter".equals(name.toLowerCase()))
+                        continue;
+
+                    XMLNode attribute = getAttribute(artifact, "name");
+                    if (attribute == null)
+                        continue;
+
+                    String value = attribute.getAttributeValue();
+                    if (value != null && value.equals(parameterName))
+                    {
+                        reveal = artifact;
+                        break;
+                    }
+                }
+                if (reveal != null)
+                    editor.setHighlightRange(reveal.getOffset(), reveal.getLength(), true);
+
+            }
+            catch (Exception e)
+            {
+                UIPlugin.log(e);
+            }
+        }
+
+        private SpindleStatus handleComponentBinding(XMLNode parent, XMLNode binding,
+                SpindleStatus status) throws IllegalArgumentException
+        {
+
+            SpecTapestryAccess access = null;
+
+            try
+            {
+                access = new SpecTapestryAccess(fEditor);
+            }
+            catch (IllegalArgumentException e)
+            {
+                UIPlugin.log(e);
+            }
+
+            if (access == null)
+                return status;
+
+            XMLNode typeAttribute = getAttribute(parent, getDocumentOffset(), "type");
+            if (typeAttribute == null)
+            {
+                status.setError("could not locate the component type in the parent element");
+                return status;
+            }
+
+            String resolveType = typeAttribute.getAttributeValue();
+
+            if (resolveType == null)
+            {
+                status.setError("could not locate the component type in the parent element");
+                return status;
+            }
+
+            PluginComponentSpecification spec = (PluginComponentSpecification) access
+                    .resolveComponentType(resolveType);
+            if (spec == null)
+            {
+                status.setError("could not resolve the component type '" + resolveType
+                        + "' in the parent element");
+                return status;
+            }
+
+            Map bindingAttrs = binding.getAttributesMap();
+            XMLNode nameAttribute = (XMLNode) bindingAttrs.get("name");
+            if (nameAttribute == null)
+            {
+                status.setError("binding name is missing");
+                return status;
+            }
+
+            parameterName = nameAttribute.getAttributeValue();
+            if (parameterName == null)
+            {
+                status.setError("binding name is missing");
+                return status;
+            }
+
+            parameterSpec = spec.getParameter(parameterName);
+            if (parameterSpec == null)
+                return status;
+
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec
+                    .getSpecificationLocation();
+
+            if (location == null)
+                return status;
+
+            interestingObject = location.getStorage();
+
+            return status;
+
+        }
+    }
+
     abstract class Handler
     {
+        Object interestingObject;
+
         boolean needsNamespace;
 
         Handler(boolean needsNamespace)
@@ -617,17 +623,33 @@ public class OpenDeclarationAction extends BaseSpecAction
             this.needsNamespace = needsNamespace;
         }
 
-        public final void handle(XMLNode node) throws IllegalArgumentException, CoreException
+        public final SpindleStatus handle(XMLNode node, SpindleStatus status) throws CoreException
         {
-            if (needsNamespace && fEditor.getNamespace() == null)
-                throw new IllegalArgumentException(
-                        "This file is not well formed or can not be seen by the Tapestry builder");
+            interestingObject = null;
 
-            doHandle(node);
+            if (needsNamespace && fEditor.getNamespace() == null)
+            {
+                status
+                        .setError("This file is not well formed or can not be seen by the Tapestry builder");
+                return status;
+            }
+
+            return doHandle(node, status);
         }
 
-        protected abstract void doHandle(XMLNode artifact) throws IllegalArgumentException,
-                CoreException;
+        protected abstract SpindleStatus doHandle(XMLNode artifact, SpindleStatus status)
+                throws CoreException;
+
+        public void postReveal(Object object, IEditorPart editor)
+        {
+            // default impl does nothing
+        }
+
+        public Object getInterestingObject()
+        {
+            return interestingObject;
+        }
+
     }
 
     abstract class AttributeHandler extends Handler
@@ -646,6 +668,11 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         private boolean useComponentResolver;
 
+        public TypeHandler()
+        {
+            this(null, false);
+        }
+
         public TypeHandler(String attrName)
         {
             this(attrName, false);
@@ -657,9 +684,64 @@ public class OpenDeclarationAction extends BaseSpecAction
             this.useComponentResolver = useComponentResolver;
         }
 
-        protected void doHandle(XMLNode artifact) throws IllegalArgumentException, CoreException
+        protected SpindleStatus doHandle(XMLNode artifact, SpindleStatus status)
+                throws IllegalArgumentException, CoreException
         {
-            handleTypeLookup(artifact, attrName, useComponentResolver);
+            return handleTypeLookup(artifact, attrName, useComponentResolver, status);
+        }
+
+        protected SpindleStatus handleTypeLookup(XMLNode artifact, String attrName,
+                boolean useComponentResolver, SpindleStatus status)
+        {
+            XMLNode attribute = getAttribute(artifact, getDocumentOffset(), attrName);
+            if (attribute == null)
+            {
+                status.setError("could not find the '" + attrName + "' attribute");
+                return status;
+            }
+
+            String typeName = attribute.getAttributeValue();
+
+            if (typeName == null)
+            {
+                status.setError("could not find the '" + attrName + "' attribute's value.");
+                return status;
+            }
+
+            IType type = resolveType(typeName);
+
+            if (type == null)
+            {
+                status.setError("could not resolve the type '" + typeName + "'.");
+                return status;
+            }
+
+            if (useComponentResolver)
+            {
+                ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
+
+                if (resolver.canResolve(type))
+                {
+                    IStatus resolveStatus = resolver.doResolve(
+                            fEditor.getLocation(),
+                            (IComponentSpecification) fEditor.getSpecification());
+                    if (!resolveStatus.isOK())
+                    {
+                        status.setError(resolveStatus.getMessage());
+                        return status;
+                    }
+                    interestingObject = resolver.getStorage();
+                }
+                else
+                {
+                    interestingObject = type;
+                }
+            }
+            else
+            {
+                interestingObject = type;
+            }
+            return status;
         }
     }
 
@@ -670,9 +752,54 @@ public class OpenDeclarationAction extends BaseSpecAction
             super(true, attrName);
         }
 
-        protected void doHandle(XMLNode artifact) throws IllegalArgumentException, CoreException
+        protected SpindleStatus doHandle(XMLNode artifact, SpindleStatus status) throws CoreException
         {
-            handleRelativeLookup(artifact, attrName);
+            return handleRelativeLookup(artifact, attrName, status);
+        }
+
+        private SpindleStatus handleRelativeLookup(XMLNode artifact, String attrName,
+                SpindleStatus status)
+        {
+            XMLNode attribute = (XMLNode) artifact.getAttributesMap().get(attrName);
+            if (attribute == null)
+                return status;
+
+            String name = attribute.getName();
+
+            if (name == null)
+                return status;
+
+            if (!attrName.equals(name.toLowerCase()))
+                return status;
+
+            String path = attribute.getAttributeValue();
+            if (path == null)
+                return status;
+
+            // here we are doing a relative lookup
+            // need to get the location object for the Spec we are editing
+            // That means it can have no error markers (parsed without error in the
+            // last
+            // build)
+            BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
+
+            if (spec == null)
+                return status;
+
+            IResourceWorkspaceLocation rootLocation = (IResourceWorkspaceLocation) spec
+                    .getSpecificationLocation();
+
+            if (rootLocation == null)
+                return status;
+
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) rootLocation
+                    .getRelativeLocation(path);
+            IStorage s = location.getStorage();
+            if (s == null)
+                return status;
+            interestingObject = s;
+
+            return status;
         }
     }
 

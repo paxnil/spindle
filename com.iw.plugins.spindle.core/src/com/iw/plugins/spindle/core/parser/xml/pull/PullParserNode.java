@@ -594,19 +594,19 @@ public class PullParserNode implements Node
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, "not supported");
     }
 
-    public Object setUserData(String key, Object data, UserDataHandler handler)
-    {
-        throw new DOMException(DOMException.NOT_SUPPORTED_ERR, "not supported");
-    }
+//    public Object setUserData(String key, Object data, UserDataHandler handler)
+//    {
+//        throw new DOMException(DOMException.NOT_SUPPORTED_ERR, "not supported");
+//    }
 
     public Object getUserData(String key)
     {
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, "not supported");
     }
 
-	public Object setUserData(String arg0, Object arg1, org.w3c.dom.UserDataHandler arg2) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	public Object setUserData(String arg0, Object arg1, UserDataHandler arg2) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 }
