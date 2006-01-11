@@ -2,11 +2,11 @@
 <?eclipse version="3.0"?>
 <fragment
    id="com.iw.plugins.spindle.ui.contrib"
-   name="UI Contrib Fragment"
-   version="3.2.9" 
+   name="Spindle UI Contrib Fragment"
+   version="3.2.10" 
    provider-name="Geoffrey Longman"
    plugin-id="com.iw.plugins.spindle.ui"
-   plugin-version="3.2.9" 
+   plugin-version="3.2.10" 
    match="perfect">
    <requires>
       <import plugin="org.eclipse.core.resources"/>

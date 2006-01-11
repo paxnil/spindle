@@ -26,8 +26,6 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
-import java.util.Map;
-
 import org.apache.xerces.dom.DocumentImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
@@ -35,7 +33,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.xml.pull.PullParserNode;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
@@ -53,15 +50,15 @@ public class W3CAccess
   public static String getAttribute(Node node, String attributeName)
   {
     String result = null;
-    if (node instanceof PullParserNode)
-    {
-      PullParserNode ppnode = (PullParserNode) node;
-      Map attrs = ppnode.getKludgeAttributes();
-      if (attrs != null)
-        result = (String) attrs.get(attributeName);
-
-    } else
-    {
+//    if (node instanceof PullParserNode)
+//    {
+//      PullParserNode ppnode = (PullParserNode) node;
+//      Map attrs = ppnode.getKludgeAttributes();
+//      if (attrs != null)
+//        result = (String) attrs.get(attributeName);
+//
+//    } else
+//    {
       NamedNodeMap map = node.getAttributes();
 
       if (map != null)
@@ -71,7 +68,7 @@ public class W3CAccess
         if (attributeNode != null)
           result = attributeNode.getNodeValue();
       }
-    }
+//    }
     return result;
   }
 
@@ -121,16 +118,16 @@ public class W3CAccess
   public static ISourceLocationInfo getSourceLocationInfo(Node node)
   {
     ISourceLocationInfo result = null;
-    if (node instanceof PullParserNode)
-    {
-      PullParserNode ppnode = (PullParserNode) node;
-      result = ppnode.getSourceLocationInfo();
-
-    } else
-    {
+//    if (node instanceof PullParserNode)
+//    {
+//      PullParserNode ppnode = (PullParserNode) node;
+//      result = ppnode.getSourceLocationInfo();
+//
+//    } else
+//    {
       DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
       result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.PLUGIN_ID);
-    }
+//    }
     return result;
   }
 
