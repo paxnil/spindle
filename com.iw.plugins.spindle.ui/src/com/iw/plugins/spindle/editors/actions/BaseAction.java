@@ -1,9 +1,12 @@
 package com.iw.plugins.spindle.editors.actions;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.tapestry.IResourceLocation;
+import org.apache.tapestry.Tapestry;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IClassFile;
@@ -111,8 +114,25 @@ public abstract class BaseAction extends Action implements IEditorActionDelegate
         return null;
     }
 
+    static public List PRIMITIVE_TYPES;
+    static
+    {
+        PRIMITIVE_TYPES = new ArrayList();
+        PRIMITIVE_TYPES.add("int");
+        PRIMITIVE_TYPES.add("long");
+        PRIMITIVE_TYPES.add("boolean");
+        PRIMITIVE_TYPES.add("float");
+        PRIMITIVE_TYPES.add("char");
+        PRIMITIVE_TYPES.add("float");
+        PRIMITIVE_TYPES.add("double");
+        PRIMITIVE_TYPES.add("byte");
+        PRIMITIVE_TYPES.add("short");
+        PRIMITIVE_TYPES = Collections.unmodifiableList(PRIMITIVE_TYPES);
+    }
+
     protected IType resolveType(String typeName)
     {
+
         IStorage storage = getSpindleEditor().getStorage();
         IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
         if (jproject == null || typeName == null)
@@ -235,7 +255,7 @@ public abstract class BaseAction extends Action implements IEditorActionDelegate
         IDocumentProvider documentProvider = getTextEditor().getDocumentProvider();
         IDocument document = documentProvider.getDocument(fEditor.getEditorInput());
         IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
-    
+
         XMLReconciler model = modelProvider.getModel(document);
         if (model == null)
             return null;

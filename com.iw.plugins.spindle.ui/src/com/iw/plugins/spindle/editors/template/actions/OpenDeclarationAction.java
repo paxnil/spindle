@@ -75,13 +75,13 @@ public class OpenDeclarationAction extends BaseTemplateAction
         setId(ACTION_ID);
     }
 
-    protected IStatus getStatus()
+    protected IStatus doGetStatus(SpindleStatus status)
     {
-        SpindleStatus status = (SpindleStatus) super.getStatus();
+        status = (SpindleStatus) super.doGetStatus(status);
         if (status == null || !status.isOK())
             return status;
 
-        INamespace namespace = getSpindleEditor().getNamespace();
+        INamespace namespace = getSpindleEditor().getNamespace(false);
         if (namespace == null)
         {
             status.setError("This file can not be seen by the Tapestry builder");

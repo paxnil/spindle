@@ -90,10 +90,10 @@ public class MoveToSpecAction extends BaseTemplateAction
         setText("Move Implicit to Spec");
     }
 
-    protected IStatus getStatus()
+    protected IStatus doGetStatus(SpindleStatus status)
     {
         
-        SpindleStatus status = (SpindleStatus) super.getStatus();
+        status = (SpindleStatus) super.doGetStatus(status);
         if (status == null || !status.isOK())
             return status;
 

@@ -103,6 +103,8 @@ public class JumpToJavaAction extends BaseJumpAction
         if (componentSpec != null)
         {
             String typeName = componentSpec.getComponentClassName();
+            if (BaseAction.PRIMITIVE_TYPES.contains(typeName.trim()))
+                return null;
             IType type = resolveType(typeName);
             if (type != null)
             {
@@ -148,6 +150,9 @@ public class JumpToJavaAction extends BaseJumpAction
                     {
                         String attrValue = attribute.getAttributeValue();
                         if (attrValue == null)
+                            return null;
+                        
+                        if (BaseAction.PRIMITIVE_TYPES.contains(attrValue.trim()))
                             return null;
 
                         IType javaType = resolveType(attrValue);

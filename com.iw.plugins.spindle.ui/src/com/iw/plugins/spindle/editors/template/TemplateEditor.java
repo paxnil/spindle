@@ -214,7 +214,7 @@ public class TemplateEditor extends Editor
 
         MenuManager sourceMenu = new MenuManager("Refactor");
         MoveToSpecAction moveAction = (MoveToSpecAction) getAction(MoveToSpecAction.ACTION_ID);
-        moveAction.update();
+        moveAction.setEnabled(moveAction.canProceed());
         sourceMenu.add(moveAction);
         menu.appendToGroup(SOURCE_GROUP, sourceMenu);
     }
@@ -269,7 +269,7 @@ public class TemplateEditor extends Editor
                 UIPlugin.getDefault().getPreferenceStore());
     }
 
-    public ICoreNamespace getNamespace()
+    public ICoreNamespace getNamespace(boolean buildProjectIfRequired)
     {
         PluginComponentSpecification spec = (PluginComponentSpecification) getSpecification();
         if (spec != null)

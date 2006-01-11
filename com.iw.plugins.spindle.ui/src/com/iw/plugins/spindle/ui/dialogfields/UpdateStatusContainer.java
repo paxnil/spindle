@@ -69,7 +69,7 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
   }
 
   /**
-   * @see IUpdateStatus#getStatus()
+   * @see IUpdateStatus#computeStatus()
    */
   public IStatus getStatus()
   {

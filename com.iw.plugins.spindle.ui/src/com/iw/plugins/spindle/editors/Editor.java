@@ -376,7 +376,11 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         return (IStorage) input.getAdapter(IStorage.class);
     }
 
-    public abstract ICoreNamespace getNamespace();
+    public abstract ICoreNamespace getNamespace(boolean buildProjectIfRequired);
+    
+    public final ICoreNamespace getNamespace() {
+        return getNamespace(true);
+    }
 
     public Object getSpecification()
     {

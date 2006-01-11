@@ -69,8 +69,8 @@ public abstract class BaseTemplateAction extends BaseEditorAction
     {
         super(text, style);
     }
-
-    protected IStatus getStatus()
+    
+    protected IStatus doGetStatus(SpindleStatus status)
     {                
         if (getDocumentOffset() < 0)
             return null;
@@ -89,6 +89,6 @@ public abstract class BaseTemplateAction extends BaseEditorAction
             throw e;
         }
         
-        return new SpindleStatus();
+        return status;
     }
 }

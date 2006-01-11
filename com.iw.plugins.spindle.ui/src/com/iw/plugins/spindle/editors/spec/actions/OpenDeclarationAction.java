@@ -56,6 +56,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.actions.BaseAction;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
 
@@ -94,9 +95,11 @@ public class OpenDeclarationAction extends BaseSpecAction
         fHandler.postReveal(revealed, editor);
     }
 
-    protected IStatus getStatus()
+    protected IStatus doGetStatus(SpindleStatus status)
     {
-        SpindleStatus status = (SpindleStatus) super.getStatus();
+        fHandler = null;
+        
+        status = (SpindleStatus) super.doGetStatus(status);
         if (status == null || !status.isOK())
             return status;
 
@@ -132,17 +135,17 @@ public class OpenDeclarationAction extends BaseSpecAction
 
             name = name.toLowerCase();
 
-            Handler handler = (Handler) fHandlers.get(name);
+            fHandler = (Handler) fHandlers.get(name);
 
-            if (handler == null)
+            if (fHandler == null)
             {
                 status
                         .setError("This file is not well formed, not valid, or can not be seen by the Tapestry builder");
                 return status;
             }
 
-            status = handler.handle(artifact, status);
-            Object interesting = status.isOK() ? handler.getInterestingObject() : null;
+            status = fHandler.handle(artifact, status);
+            Object interesting = status.isOK() ? fHandler.getInterestingObject() : null;
             fInterestingObjects = interesting == null ? new Object[] {} : new Object[]
             { interesting };
             return status;
@@ -630,10 +633,10 @@ public class OpenDeclarationAction extends BaseSpecAction
         {
             interestingObject = null;
 
-            if (needsNamespace && getSpindleEditor().getNamespace() == null)
+            if (needsNamespace && getSpindleEditor().getNamespace(false) == null)
             {
                 status
-                        .setError("This file is not well formed or can not be seen by the Tapestry builder");
+                        .setError("This file is not well formed, the project has not been built, or can not be seen by the Tapestry builder");
                 return status;
             }
 
@@ -710,6 +713,9 @@ public class OpenDeclarationAction extends BaseSpecAction
                 status.setError("could not find the '" + attrName + "' attribute's value.");
                 return status;
             }
+            
+            if (BaseAction.PRIMITIVE_TYPES.contains(typeName.trim()))
+                return status;
 
             IType type = resolveType(typeName);
 

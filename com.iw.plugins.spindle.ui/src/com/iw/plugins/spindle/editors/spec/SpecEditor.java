@@ -318,7 +318,7 @@ public class SpecEditor extends Editor
      * 
      * @see com.iw.plugins.spindle.editors.Editor#getNamespace()
      */
-    public ICoreNamespace getNamespace()
+    public ICoreNamespace getNamespace(boolean buildProjectIfRequired)
     {
         ICoreNamespace result = null;
 
@@ -327,7 +327,7 @@ public class SpecEditor extends Editor
         if (project == null)
             return result;
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        Map specs = manager.getSpecMap(project);
+        Map specs = manager.getSpecMap(project, buildProjectIfRequired);
         try
         {
             if (specs != null)
@@ -342,7 +342,7 @@ public class SpecEditor extends Editor
 
                 for (int i = 0; i < potentials.length; i++)
                 {
-                    specs = manager.getSpecMap(potentials[i]);
+                    specs = manager.getSpecMap(potentials[i], buildProjectIfRequired);
                     if (specs != null)
                     {
                         BaseSpecLocatable bspec = (BaseSpecLocatable) specs.get(storage);

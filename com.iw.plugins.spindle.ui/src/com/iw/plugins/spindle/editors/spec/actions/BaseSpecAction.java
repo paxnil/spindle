@@ -80,9 +80,8 @@ public abstract class BaseSpecAction extends BaseEditorAction
         super(text, style);
     }
 
-    protected IStatus getStatus()
+    protected IStatus doGetStatus(SpindleStatus status)
     {
-        SpindleStatus status = null;
         if (getDocumentOffset() >= 0)
         {
             fDeclaredRootElementName = null;
@@ -95,22 +94,23 @@ public abstract class BaseSpecAction extends BaseEditorAction
                 IEditorInput editorInput = fEditor.getEditorInput();
                 IDocumentProvider documentProvider = getTextEditor().getDocumentProvider();
                 fDocument = documentProvider.getDocument(editorInput);
-                if (fDocument.getLength() > 0 && fDocument.get().trim().length() > 0)
-                {
-                    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+                if (fDocument.getLength() == 0 && fDocument.get().trim().length() == 0)
+                    return null;
 
-                    XMLReconciler model = (modelProvider).getModel(fDocument);
-                    if (model != null)
-                    {
-                        XMLNode root = model.getRoot();
-                        fPublicId = model.getPublicId();
-                        fDeclaredRootElementName = model.getRootNodeId();
-                        fDTD = DOMValidator.getDTD(fPublicId);
+                IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
 
-                        if (fDTD != null && fDeclaredRootElementName != null)
-                            status = new SpindleStatus();
-                    }
-                }
+                XMLReconciler model = (modelProvider).getModel(fDocument);
+                if (model == null)
+                    return null;
+
+                XMLNode root = model.getRoot();
+                fPublicId = model.getPublicId();
+                fDeclaredRootElementName = model.getRootNodeId();
+                fDTD = DOMValidator.getDTD(fPublicId);
+
+                if (fDTD == null || fDeclaredRootElementName == null)
+                    return null;
+
             }
             catch (RuntimeException e)
             {

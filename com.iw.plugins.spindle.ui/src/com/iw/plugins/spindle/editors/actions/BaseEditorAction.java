@@ -26,29 +26,28 @@
 
 package com.iw.plugins.spindle.editors.actions;
 
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IEditorActionDelegate;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 
 /**
  * Base class for editor actions
  * 
  * @author glongman@gmail.com
  */
-public abstract class BaseEditorAction extends BaseAction 
-{   
+public abstract class BaseEditorAction extends BaseAction
+{
 
     protected Object[] fInterestingObjects;
 
     protected IStatus fStatus;
+
+    private int fOffsetOverride;
 
     /**
      * 
@@ -86,7 +85,7 @@ public abstract class BaseEditorAction extends BaseAction
 
     public final void run()
     {
-        if (isEnabled())
+        if (canProceed())
             reveal(fInterestingObjects);
         else if (fStatus != null && fStatus.getSeverity() == IStatus.ERROR)
         {
@@ -98,16 +97,47 @@ public abstract class BaseEditorAction extends BaseAction
         }
     }
 
-    public final boolean isEnabled()
+    public final void run(int offset)
+    {
+        try {
+            fOffsetOverride = offset;
+            run();
+        } finally {
+            fOffsetOverride = -1;
+        }
+    }
+
+    protected int getDocumentOffset()
+    {
+        if (fOffsetOverride >= 0)
+            return fOffsetOverride;
+        return super.getDocumentOffset();
+    }
+    
+    public boolean canProceed(int offset) {
+        try {
+            fOffsetOverride = offset;
+            return canProceed();
+        } finally {
+            fOffsetOverride = -1;
+        }
+    }
+
+    public boolean canProceed()
     {
         fInterestingObjects = null;
         fStatus = null;
 
-        IStatus status = getStatus();
-        return status != null && status.isOK();
+        fStatus = doGetStatus(new SpindleStatus());
+
+        return fStatus != null && fStatus.isOK() && fInterestingObjects != null
+                && fInterestingObjects.length != 0;
     }
 
-    protected abstract IStatus getStatus();
+    protected IStatus doGetStatus(SpindleStatus status)
+    {
+        return status;
+    }
 
     /*
      * (non-Javadoc)
@@ -117,7 +147,7 @@ public abstract class BaseEditorAction extends BaseAction
     public void run(IAction action)
     {
         run();
-    }    
+    }
 
     /**
      * contribute to a menu. Override in subclasses.

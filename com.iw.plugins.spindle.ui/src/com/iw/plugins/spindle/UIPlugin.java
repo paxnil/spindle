@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.jar.JarEntry;
 
 import net.sf.solareclipse.xml.ui.XMLPlugin;
 import net.sf.solareclipse.xml.ui.text.XMLTextTools;
@@ -42,6 +43,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Shell;
@@ -56,6 +59,8 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.IPersistableElement;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -293,7 +298,7 @@ public class UIPlugin extends AbstractUIPlugin
 
       if (storage instanceof JarEntryFile)
       {
-        input = new JarEntryEditorInput(storage);
+        input = new BinaryEditorInput(storage);
       } else
       {
         input = new FileEditorInput((IFile) storage);
@@ -306,6 +311,27 @@ public class UIPlugin extends AbstractUIPlugin
       UIPlugin.log(piex);
     }
     return null;
+  }
+  
+  static class BinaryEditorInput extends JarEntryEditorInput {
+    
+    public BinaryEditorInput(IStorage jarEntryFile)
+    {
+        super(jarEntryFile);       
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (!(obj instanceof JarEntryEditorInput))
+            return false;
+        JarEntryEditorInput other= (JarEntryEditorInput) obj;
+        return getStorage().toString().equals(other.getStorage().toString());
+    }
+
+   
+      
   }
 
   //The shared instance.
