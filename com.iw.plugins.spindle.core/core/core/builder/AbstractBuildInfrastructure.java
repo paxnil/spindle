@@ -36,12 +36,12 @@ import org.apache.tapestry.engine.IPropertySource;
 
 
 
-import core.IJavaType;
 import core.IJavaTypeFinder;
 import core.ITapestryProject;
 import core.parser.dom.IDOMModelSource;
 import core.properties.CorePropertySource;
 import core.resources.IResourceRoot;
+import core.types.IJavaType;
 import core.util.Assert;
 import core.util.IProblemPeristManager;
 

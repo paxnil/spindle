@@ -37,7 +37,6 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 
 import core.CoreMessages;
-import core.IJavaType;
 import core.parser.dom.IDOMModel;
 import core.resources.ICoreResource;
 import core.resources.IResourceRoot;
@@ -47,6 +46,7 @@ import core.scanning.BaseValidator;
 import core.scanning.ScannerException;
 import core.source.IProblem;
 import core.source.ISourceLocation;
+import core.types.IJavaType;
 
 /**
  * A Processor class used by FullBuild that extracts Tapestry information from the file web.xml

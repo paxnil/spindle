@@ -1,14 +1,16 @@
 package core;
 
+import core.types.IJavaType;
+
 /**
  * <code>IJavaTypeFinder</code>s are used to create instances of
- * {@link core.IJavaType}.
+ * {@link core.types.IJavaType}.
  * <p>
  * Implementations may cache results and will indicate this having implemented
  * {@link #isCachingJavaTypes()}
  * 
  * @author gwl
- * @see core.IJavaType
+ * @see core.types.IJavaType
  */
 public interface IJavaTypeFinder
 {

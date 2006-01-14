@@ -43,7 +43,6 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import core.CoreMessages;
-import core.IJavaType;
 import core.ITapestryProject;
 import core.TapestryCore;
 import core.builder.IBuild.IPostBuildRunnable;
@@ -72,6 +71,7 @@ import core.spec.BaseSpecification;
 import core.spec.PluginApplicationSpecification;
 import core.spec.PluginComponentSpecification;
 import core.spec.PluginLibrarySpecification;
+import core.types.IJavaType;
 import core.util.IProblemPeristManager;
 
 /**

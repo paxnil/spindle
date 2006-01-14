@@ -26,6 +26,8 @@
 
 package core.source;
 
+import core.util.Assert;
+
 /**
  * Default impl of IProblem
  * 
@@ -52,9 +54,8 @@ public class DefaultProblem implements IProblem
 
     public DefaultProblem(int severity, String message, ISourceLocation location,
             boolean isTemporary, int code)
-    {
-        this(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message, location != null ? location
-                : SourceLocation.FILE_LOCATION, isTemporary, code);
+    {        
+        this(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message, location, isTemporary, code);
 
     }
 

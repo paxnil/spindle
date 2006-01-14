@@ -24,7 +24,6 @@ import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
 
 import core.ICoreListeners;
-import core.IJavaType;
 import core.IJavaTypeFinder;
 import core.IPreferenceSource;
 import core.ITapestryProject;
@@ -34,6 +33,7 @@ import core.source.IProblem;
 import core.source.IProblemCollector;
 import core.source.ISourceLocation;
 import core.test.TestLogger.LoggingEvent;
+import core.types.IJavaType;
 
 /**
  * Borrowed from Hivemind (HivemindTestCase) and modified.

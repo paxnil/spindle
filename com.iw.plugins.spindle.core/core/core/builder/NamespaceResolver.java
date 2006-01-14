@@ -44,7 +44,6 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import core.CoreMessages;
-import core.IJavaType;
 import core.TapestryCore;
 import core.namespace.ComponentSpecificationResolver;
 import core.namespace.CoreNamespace;
@@ -60,6 +59,7 @@ import core.source.IProblem;
 import core.source.SourceLocation;
 import core.spec.PluginComponentSpecification;
 import core.spec.PluginLibrarySpecification;
+import core.types.IJavaType;
 import core.util.Assert;
 
 /**

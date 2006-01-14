@@ -18,8 +18,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -62,6 +64,8 @@ public abstract class AbstractEclipsePluginTestCase extends AbstractTestCase
         COMMON_MARKER_PROPERTIES_DESC.put(IProblem.PROBLEM_CODE, "Code");
     }
 
+    protected boolean autobuild = true;
+
     public static String convertToIndependantLineDelimiter(String source)
     {
         if (source.indexOf('\n') == -1 && source.indexOf('\r') == -1)
@@ -89,6 +93,30 @@ public abstract class AbstractEclipsePluginTestCase extends AbstractTestCase
     public AbstractEclipsePluginTestCase(String name)
     {
         super(name);
+    }
+
+    public void setWorkspaceAutobuild(boolean flag) throws CoreException
+    {
+        IWorkspace workspace = getWorkspace();
+        IWorkspaceDescription description = workspace.getDescription();
+        description.setAutoBuilding(false);
+        workspace.setDescription(description);
+    }
+    
+    public boolean isWorkspaceAutobuild() throws CoreException {
+        IWorkspace workspace = getWorkspace();
+        IWorkspaceDescription description = workspace.getDescription();
+        return description.isAutoBuilding();       
+    }
+    
+    public void fullBuild(IProject project) throws CoreException {
+        waitForEclipseBuilder();
+        project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+    }
+    
+    public void incrementalBuild(IProject project) throws CoreException {
+        waitForEclipseBuilder();
+        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
     }
 
     protected void setUpTapestryCore()
@@ -130,11 +158,13 @@ public abstract class AbstractEclipsePluginTestCase extends AbstractTestCase
     protected void deleteProject(String projectName) throws CoreException
     {
         IProject project = this.getProject(projectName);
-        if (project.exists() && !project.isOpen())
-        { // force opening so that project can be deleted without logging (see bug 23629)
-            project.open(null);
+        if (project.exists())
+        {
+            if (!project.isOpen())
+                project.open(null);
+            
+            deleteResource(project);
         }
-        deleteResource(project);
     }
 
     public void deleteResource(IResource resource) throws CoreException

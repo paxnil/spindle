@@ -1,3 +1,12 @@
+package com.iw.plugins.spindle.core.eclipse.lang;
+
+import junit.framework.Test;
+import all.tests.Tests;
+import core.build.ResourceClashTests;
+import core.test.eclipse.ContextTests;
+import core.test.eclipse.DirectLinkTests;
+import core.test.eclipse.ProjectAdapterFactoryTests;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -24,24 +33,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package core.scanning;
-
-import core.types.IJavaType;
-
-/**
- * Listener interface for classes that are interested in things the Validators
- * find/don't find.
- * 
- * @author glongman@gmail.com
-  */
-public interface IScannerValidatorListener
+public class AllTypeTests extends Tests
 {
-  /**
-   * @deprecated use recordTypeDependency
-   * @param fullyQualifiedName the fully qualified name of a type defined in a
-   *          Tapestry artifact
-   * @param result the IType the fullyQualifiedName resolved to, if any
-   */
-  void typeChecked(String fullyQualifiedName, IJavaType result);
 
+    public AllTypeTests(String name)
+    {
+        super(name);
+    }
+
+    public static Test suite()
+    {
+        return Tests.createSuite(AllTypeTests.class, getAllTestClasses());
+    }
+
+    static Class[] getAllTestClasses()
+    {
+        return new Class[] {TypeTests.class, InterfaceTests.class};
+    }
 }

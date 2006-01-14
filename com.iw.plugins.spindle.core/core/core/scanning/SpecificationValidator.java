@@ -43,7 +43,6 @@ import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 import com.iw.plugins.spindle.messages.PageloadMessages;
 
 import core.CoreMessages;
-import core.IJavaType;
 import core.IJavaTypeFinder;
 import core.ITapestryProject;
 import core.PicassoMigration;
@@ -59,6 +58,7 @@ import core.source.ISourceLocation;
 import core.source.ISourceLocationInfo;
 import core.spec.PluginAssetSpecification;
 import core.spec.PluginComponentSpecification;
+import core.types.IJavaType;
 import core.util.Assert;
 
 /**

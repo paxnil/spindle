@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.eclipse.lang.EclipseJavaType;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
@@ -49,11 +50,11 @@ import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
-import core.IJavaType;
 import core.IJavaTypeFinder;
 import core.ITapestryProject;
 import core.TapestryCore;
 import core.resources.IResourceRoot;
+import core.types.IJavaType;
 
 /**
  * The Tapestry project nature. Configures and Deconfigures the builder TODO the metadata stuff is

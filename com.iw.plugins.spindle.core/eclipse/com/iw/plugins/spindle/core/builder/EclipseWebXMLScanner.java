@@ -7,12 +7,12 @@ import org.eclipse.jdt.core.JavaModelException;
 
 
 import core.CoreMessages;
-import core.IJavaType;
 import core.TapestryCore;
 import core.builder.AbstractBuild;
 import core.builder.WebXMLScanner;
 import core.scanning.ScannerException;
 import core.source.IProblem;
+import core.types.IJavaType;
 
 /**
  * @author gwl

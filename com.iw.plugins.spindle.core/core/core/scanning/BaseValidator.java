@@ -52,7 +52,6 @@ import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 import com.iw.plugins.spindle.messages.ParseMessages;
 
 import core.CoreMessages;
-import core.IJavaType;
 import core.IJavaTypeFinder;
 import core.TapestryCore;
 import core.builder.AbstractBuild;
@@ -62,6 +61,7 @@ import core.source.IProblem;
 import core.source.IProblemCollector;
 import core.source.ISourceLocation;
 import core.source.ISourceLocationInfo;
+import core.types.IJavaType;
 
 /**
  * TODO Add Type comment
