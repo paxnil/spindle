@@ -262,9 +262,9 @@ public class NamespaceResolver
     /**
      * @return List a list of all the templates for all page files in this Namespace
      */
-    protected Set getAllPageSpecTemplates()
+    protected Set<Resource> getAllPageSpecTemplates()
     {
-        Set result = new HashSet();
+        Set<Resource> result = new HashSet<Resource>();
         List pageNames = namespace.getPageNames();
         int count = pageNames.size();
         for (int i = 0; i < count; i++)
@@ -436,11 +436,11 @@ public class NamespaceResolver
      * 
      * @return a Map of Component Type name -> location
      */
-    private Map getAllJWCFilesForNamespace()
+    private Map<String, Resource> getAllJWCFilesForNamespace()
     {
         ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
 
-        Map result = new HashMap();
+        Map<String, Resource> result = new HashMap<String, Resource>();
         ILibrarySpecification spec = namespace.getSpecification();
 
         // pull the ones that are defined in the spec.
@@ -475,9 +475,9 @@ public class NamespaceResolver
         return result;
     }
 
-    private Map resolveAllAnnotatedSpeclessComponentsForNamespace()
+    private Map<String, Resource> resolveAllAnnotatedSpeclessComponentsForNamespace()
     {
-        Map result = new HashMap();
+        Map<String, Resource> result = new HashMap<String, Resource>();
         if (build.infrastructure.projectSupportsAnnotations())
         {
             ILibrarySpecification spec = namespace.getSpecification();
@@ -494,7 +494,7 @@ public class NamespaceResolver
                     IJavaType type = (IJavaType) iter.next();
                     String simpleName = type.getSimpleName();
 
-                    ICoreResource location = (ICoreResource) namespace.getSpecificationLocation()
+                    Resource location = namespace.getSpecificationLocation()
                             .getRelativeResource(simpleName + ".jwc");
 
                     resolveSpeclessComponent(location, type);
@@ -506,7 +506,7 @@ public class NamespaceResolver
         return result;
     }
 
-    protected void resolveSpeclessComponent(ICoreResource location, IJavaType componentType)
+    protected void resolveSpeclessComponent(Resource location, IJavaType componentType)
     {
         PluginComponentSpecification specification = new PluginComponentSpecification();
         specification.setPageSpecification(false);
@@ -538,11 +538,11 @@ public class NamespaceResolver
     /**
      * @return Map a map of the names and file locations of all the .page files for the Namespace
      */
-    private Map getAllPageFilesForNamespace()
+    private Map<String, Resource> getAllPageFilesForNamespace()
     {
         ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
 
-        Map result = new HashMap();
+        Map<String, Resource> result = new HashMap<String, Resource>();
         ILibrarySpecification spec = namespace.getSpecification();
 
         // pull the ones that are defined in the spec.
@@ -585,20 +585,18 @@ public class NamespaceResolver
      */
     protected void resolvePages()
     {
-        Map dotPageFiles = getAllPageFilesForNamespace();
-        for (Iterator iter = dotPageFiles.keySet().iterator(); iter.hasNext();)
+        Map<String, Resource> dotPageFiles = getAllPageFilesForNamespace();
+        for (String name : dotPageFiles.keySet())
         {
-            String name = (String) iter.next();
-            ICoreResource location = (ICoreResource) dotPageFiles.get(name);
-            resolvePageFile(name, location);
-        }
+            resolvePageFile(name, dotPageFiles.get(name));
+        }       
     }
 
     /**
      * resolve a single .page file There could be recursive calls to resolveComponent() downstream
      * from this method But this method will never be called recursively.
      */
-    protected IComponentSpecification resolvePageFile(String name, ICoreResource location)
+    protected IComponentSpecification resolvePageFile(String name, Resource location)
     {
         IComponentSpecification result = namespace.getPageSpecification(name);
         if (result != null || location == null)

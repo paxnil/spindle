@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.engine.IPropertySource;
 
 
@@ -46,7 +47,9 @@ import core.util.Assert;
 import core.util.IProblemPeristManager;
 
 /**
- * The Tapestry Builder, kicks off full and incremental builds.
+ * Represents the infrastructure needed to perfom a build.
+ * <p>
+ * It is intended that clients will subclass on a platform by platform basis.
  * 
  * @author glongman@gmail.com
  */
@@ -80,11 +83,11 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     private static final String TYPE_CACHE = "TYPE_CACHE";
 
-    protected static ThreadLocal BUILD_CACHE;
+    protected static ThreadLocal<Map> BUILD_CACHE;
 
     static
     {
-        BUILD_CACHE = new ThreadLocal();
+        BUILD_CACHE = new ThreadLocal<Map>();
     }
 
     // TODO this is really ugly, but I need this fast.
@@ -125,7 +128,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     protected boolean validateWebXML;
 
-    protected BuildNotifier notifier;
+    protected IBuildNotifier notifier;
 
     protected AbstractBuild build;
 
@@ -188,13 +191,15 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
      * extensions.
      * <p>
      * This method searches in the classpath only.
+     * <p>
+     * Clients must subclass on a platform by platform basis.
      * 
-     * @param knownTemplateExtensions
+     * @param knownTemplateExtensions the set of known valid template extensions
      * @param found
      *            all found artifacts are added to this list.
      */
-    public abstract void findAllTapestryArtifactsInClasspath(Set knownTemplateExtensions,
-            ArrayList found);
+    public abstract void findAllTapestryArtifactsInClasspath(Set<String> knownTemplateExtensions,
+            ArrayList<Resource> found);
 
     /**
      * Deep inside the build we need to find all the artifacts - mostly for the purpose of provided
@@ -207,8 +212,8 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
      * @param found
      *            all found artifacts are added to this list.
      */
-    public abstract void findAllTapestryArtifactsInWebContext(Set knownTemplateExtensions,
-            ArrayList found);
+    public abstract void findAllTapestryArtifactsInWebContext(Set<String> knownTemplateExtensions,
+            ArrayList<Resource> found);
 
     /**
      * @return the state saved from the last build, if any

@@ -43,12 +43,12 @@ import core.resources.search.AbstractTapestrySearchAcceptor;
 public abstract class AbstractEclipseSearchAcceptor extends AbstractTapestrySearchAcceptor
 {
 
-    private List fExcludedFiles;
+    private List<String> fExcludedFiles;
 
-    private List fExcludedExtensions;
+    private List<String> fExcludedExtensions;
 
-    public AbstractEclipseSearchAcceptor(int acceptFlags, Set allowedTemplateExtensions,
-            List exclusions)
+    public AbstractEclipseSearchAcceptor(int acceptFlags, Set<String> allowedTemplateExtensions,
+            List<String> exclusions)
     {
         super(acceptFlags, allowedTemplateExtensions);
         setupExclusions(exclusions);
@@ -56,8 +56,8 @@ public abstract class AbstractEclipseSearchAcceptor extends AbstractTapestrySear
 
     private void setupExclusions(List exclusions)
     {
-        fExcludedFiles = new ArrayList();
-        fExcludedExtensions = new ArrayList();
+        fExcludedFiles = new ArrayList<String>();
+        fExcludedExtensions = new ArrayList<String>();
         for (Iterator iter = exclusions.iterator(); iter.hasNext();)
         {
             String element = (String) iter.next();

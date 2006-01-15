@@ -26,7 +26,6 @@
 
 package com.wutka.dtd;
 
-import org.apache.commons.lang.enum.Enum;
 
 /**
  * An easy way to determine the type of a DTDContainer
@@ -34,19 +33,13 @@ import org.apache.commons.lang.enum.Enum;
  * @author glongman@gmail.com
  * 
  */
-public class DTDItemType extends Enum
+public enum DTDItemType 
 {
-  public static final DTDItemType DTD_NAME = new DTDItemType("DTD_NAME");
-  public static final DTDItemType DTD_EMPTY = new DTDItemType("DTD_EMPTY");
-  public static final DTDItemType DTD_PCDATA = new DTDItemType("DTD_PCDATA");
-  public static final DTDItemType DTD_ANY = new DTDItemType("DTD_ANY");
-  public static final DTDItemType DTD_CHOICE = new DTDItemType("DTD_CHOICE");
-  public static final DTDItemType DTD_MIXED = new DTDItemType("DTD_MIXED");
-  public static final DTDItemType DTD_SEQUENCE = new DTDItemType("DTD_SEQUENCE");
-
-  public DTDItemType(String name)
-  {
-    super(name);
-  }
-
+  DTD_NAME,
+  DTD_EMPTY,
+  DTD_PCDATA,
+  DTD_ANY,
+  DTD_CHOICE,
+  DTD_MIXED,
+  DTD_SEQUENCE;
 }

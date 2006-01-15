@@ -74,24 +74,24 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
      * Keyed on component id, value is {@link IContainedComponent}.
      */
 
-    protected Map fComponents;
+    protected Map<String, IContainedComponent> fComponents;
 
-    private List fComponentObjects;
+    private List<PluginContainedComponent> fComponentObjects;
 
     /**
      * Keyed on asset name, value is {@link IAssetSpecification}.
      */
 
-    protected Map fAssets;
+    protected Map<String, IAssetSpecification> fAssets;
 
-    private List fAssetObjects;
+    private List<PluginAssetSpecification> fAssetObjects;
 
     /**
      * Defines all formal parameters. Keyed on parameter name, value is
      * {@link IParameterSpecification}.
      */
 
-    protected Map fParameters;
+    protected Map<String, IParameterSpecification> fParameters;
 
     protected List fParameterObjects;
 
@@ -173,7 +173,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
      * A List of the resource locations of all the templates for this component
      */
 
-    private List fTemplates;
+    private List<Resource> fTemplates;
 
     public PluginComponentSpecification()
     {
@@ -208,15 +208,15 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
     {
         if (fAssetObjects == null)
         {
-            fAssetObjects = new ArrayList();
-            fAssets = new HashMap();
+            fAssetObjects = new ArrayList<PluginAssetSpecification>();
+            fAssets = new HashMap<String, IAssetSpecification>();
         }
 
         PluginAssetSpecification pAsset = (PluginAssetSpecification) asset;
         pAsset.setIdentifier(name);
         pAsset.setParent(this);
 
-        fAssetObjects.add(asset);
+        fAssetObjects.add(pAsset);
 
         if (!fAssets.containsKey(name))
             fAssets.put(name, asset);
@@ -233,8 +233,8 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
     {
         if (fComponents == null)
         {
-            fComponents = new HashMap();
-            fComponentObjects = new ArrayList();
+            fComponents = new HashMap<String, IContainedComponent>();
+            fComponentObjects = new ArrayList<PluginContainedComponent>();
         }
 
         PluginContainedComponent pluginContained = (PluginContainedComponent) component;
@@ -256,7 +256,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
     {
         if (fParameters == null)
         {
-            fParameters = new HashMap();
+            fParameters = new HashMap<String, IParameterSpecification>();
             fParameterObjects = new ArrayList();
         }
 
@@ -622,11 +622,11 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
         fTemplates.add(location);
     }
 
-    public List getTemplateLocations()
+    public List<Resource> getTemplateLocations()
     {
         if (fTemplates == null)
         {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         return fTemplates;
     }

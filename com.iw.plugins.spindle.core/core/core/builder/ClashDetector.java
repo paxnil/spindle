@@ -3,6 +3,8 @@ package core.builder;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hivemind.Resource;
+
 import core.namespace.ICoreNamespace;
 import core.resources.ICoreResource;
 
@@ -38,9 +40,9 @@ public class ClashDetector
 //        }
     }
 
-    private Map fNamespaceMap;
+    private Map<Resource, ICoreNamespace> fNamespaceMap;
 
-    private Map fResourceMap;
+    private Map<Resource, ICoreNamespace> fResourceMap;
 
     /**
      * Some resources, components mostly, we want to ensure are not claimed by more than one

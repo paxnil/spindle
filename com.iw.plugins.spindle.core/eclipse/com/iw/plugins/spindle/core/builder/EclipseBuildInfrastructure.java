@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -71,7 +72,6 @@ import core.TapestryCore;
 import core.TapestryCoreException;
 import core.builder.AbstractBuildInfrastructure;
 import core.builder.BrokenWebXMLException;
-import core.builder.BuildNotifier;
 import core.builder.BuilderException;
 import core.builder.ClashException;
 import core.builder.FullBuild;
@@ -139,7 +139,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     IResourceDelta fDelta;
 
-    private List excludedFileNames;
+    private List<String> excludedFileNames;
     
     private boolean projectSupportsAnnotations = false;
 
@@ -151,7 +151,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     {
         super();
         currentIProject = project;
-        notifier = new BuildNotifier(monitor, currentIProject);
+        notifier = new EclipseBuildNotifier(monitor);
         this.domModelSource = domModelSource;
         projectSupportsAnnotations = doesProjectSupportJavaAnnotations(project);
     }
@@ -271,7 +271,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         if (javaProject == null || workspaceRoot == null)
             return new IProject[0];
 
-        ArrayList projects = new ArrayList();
+        ArrayList<IProject> projects = new ArrayList<IProject>();
         try
         {
             IClasspathEntry[] entries = ((JavaProject) javaProject).getExpandedClasspath(true);
@@ -544,8 +544,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /**
      * Find and add all files with Tapestry extensions found in the classpath to a List.
      */
-    public void findAllTapestryArtifactsInClasspath(Set knownTemplateExtensions,
-            final ArrayList found)
+    public void findAllTapestryArtifactsInClasspath(Set<String> knownTemplateExtensions,
+            final ArrayList<Resource> found)
     {
         Assert.isLegal(knownTemplateExtensions != null && !knownTemplateExtensions.isEmpty());
         ISearch searcher = null;
@@ -574,8 +574,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /**
      * Find and add all files with Tapestry extensions found in the web context to a List.
      */
-    public void findAllTapestryArtifactsInWebContext(Set knownTemplateExtensions,
-            final ArrayList found)
+    public void findAllTapestryArtifactsInWebContext(Set<String> knownTemplateExtensions,
+            final ArrayList<Resource> found)
     {
         ISearch searcher = null;
         try
@@ -620,7 +620,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
      */
     abstract class ArtifactCollector extends AbstractEclipseSearchAcceptor
     {
-        public ArtifactCollector(Set allowed, List excluded)
+        public ArtifactCollector(Set<String> allowed, List<String> excluded)
         {
             super(ACCEPT_ANY, allowed, excluded);
         }

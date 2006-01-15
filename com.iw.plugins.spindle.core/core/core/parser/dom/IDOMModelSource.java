@@ -1,12 +1,12 @@
 package core.parser.dom;
 
-import core.resources.ICoreResource;
+import org.apache.hivemind.Resource;
 
 public interface IDOMModelSource
 {
-    IDOMModel parseDocument(ICoreResource resource, boolean validate, Object requestor);
+    IDOMModel parseDocument(Resource resource, boolean validate, Object requestor);
 
-    IDOMModel parseDocument(ICoreResource resource, String encoding, boolean validate, Object consumer);
+    IDOMModel parseDocument(Resource resource, String encoding, boolean validate, Object consumer);
 
     void release(IDOMModel model, Object requestor);
 }

@@ -38,13 +38,13 @@ import java.util.List;
 public class BuilderQueue
 {
 
-  List fToBeProcessed;
-  List fHaveBeenProcessed;
+  List<Object> fToBeProcessed;
+  List<Object> fHaveBeenProcessed;
 
   public BuilderQueue()
   {
-    this.fToBeProcessed = new ArrayList(11);
-    this.fHaveBeenProcessed = new ArrayList(11);
+    this.fToBeProcessed = new ArrayList<Object>(11);
+    this.fHaveBeenProcessed = new ArrayList<Object>(11);
   }
 
   public int getProcessedCount()
@@ -69,7 +69,7 @@ public class BuilderQueue
 
   }
 
-  public void addAll(Collection elements)
+  public void addAll(Collection<Object> elements)
   {
     fToBeProcessed.addAll(elements);
   }

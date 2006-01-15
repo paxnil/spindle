@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.hivemind.Resource;
+
 
 import core.TapestryCore;
 import core.namespace.ICoreNamespace;
@@ -253,9 +255,9 @@ public class ApplicationResolver extends NamespaceResolver
     /**
      * @return List a list of all the templates for all components in this Namespace (that have specs)
      */
-    protected Set getAllComponentTemplates()
+    protected Set<Resource> getAllComponentTemplates()
     {
-        Set result = new HashSet();
+        Set<Resource> result = new HashSet<Resource>();
         for (Iterator iter = namespace.getComponentTypes().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
