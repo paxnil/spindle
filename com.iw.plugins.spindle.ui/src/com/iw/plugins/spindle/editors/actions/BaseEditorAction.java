@@ -47,7 +47,7 @@ public abstract class BaseEditorAction extends BaseAction
 
     protected IStatus fStatus;
 
-    private int fOffsetOverride;
+    private int fOffsetOverride = -1;
 
     /**
      * 

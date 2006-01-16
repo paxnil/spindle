@@ -43,6 +43,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
@@ -90,7 +91,7 @@ public class JumpToTemplateAction extends BaseJumpAction
      */
     private BaseSpecification getEditorSpecification()
     {
-        return (BaseSpecification) ((SpecEditor)getSpindleEditor()).getSpecification();
+        return (BaseSpecification) ((Editor)getSpindleEditor()).getSpecification();
     }
 
     private List getTemplateLocations(PluginComponentSpecification spec)

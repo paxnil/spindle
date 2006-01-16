@@ -209,7 +209,7 @@
 	  		<topic label="FormTable" href="docs/ComponentReference/contrib.FormTable.html"></topic>
 	  		<topic label="InspectorButton" href="docs/ComponentReference/contrib.InspectorButton.html"></topic>	  		
 	  		<topic label="Otherwise" href="docs/ComponentReference/contrib.Otherwise.html"></topic>
-	  		<topic label="Palette" href="docs/api/org/apache/tapestry/contrib/.Palette.html"></topic>
+	  		<topic label="Palette" href="docs/api/org/apache/tapestry/contrib/Palette.html"></topic>
 	  		<topic label="PopupLink" href="docs/ComponentReference/contrib.PopupLink.html"></topic>
 	  		<topic label="Table" href="docs/ComponentReference/contrib.Table.html"></topic>
 	  		<topic label="TableColumns" href="docs/ComponentReference/contrib.TableColumns.html"></topic>

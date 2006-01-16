@@ -192,11 +192,7 @@ public class SpecEditor extends Editor
 
         super.createPartControl(parent);
 
-        IStorage storage = getStorage();
-        IProject project = (IProject) storage.getAdapter(IProject.class);
-        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        if (!storage.isReadOnly())
-            manager.pingProjectState(project);
+        pingProjectState();
 
         Control[] children = parent.getChildren();
         fControl = children[children.length - 1];
@@ -236,6 +232,15 @@ public class SpecEditor extends Editor
         // setup the outline view!
         reconcileOutline();
 
+    }
+
+    private void pingProjectState()
+    {
+        IStorage storage = getStorage();
+        IProject project = (IProject) storage.getAdapter(IProject.class);
+        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+        if (!storage.isReadOnly())
+            manager.pingProjectState(project);
     }
 
     public void openTo(Object obj)
