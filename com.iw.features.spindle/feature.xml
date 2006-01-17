@@ -2,7 +2,7 @@
 <feature
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.2.11"
+      version="3.2.12"
       provider-name="Geoffrey Longman"
       image="spindle.gif">
 
