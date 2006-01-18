@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.tapestry.IResourceLocation;
+import org.apache.tapestry.resource.ClasspathResourceLocation;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -130,10 +131,10 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
     if (storage == null)
       return false;
 
-    if (storage instanceof JarEntryFile)
-      return true;
+    if (storage instanceof IResource)
+      return false;  
 
-    return false;
+    return true;
   }
 
   /*
@@ -199,26 +200,27 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
       Object[] nonJavaResources = null;
       try
       {
-        if (fragments[i].isReadOnly())
-        {
-          //TODO - is this the correct check for a package in a jar file?
-          nonJavaResources = fragments[i].getNonJavaResources();
-        } else
-        {
-          IContainer container = (IContainer) fragments[i].getUnderlyingResource();
-          if (container != null && container.exists())
-          {
-            IResource[] members = container.members(false);
-            ArrayList resultList = new ArrayList();
-            for (int j = 0; j < members.length; j++)
-            {
-              if (members[j] instanceof IFile)
-                resultList.add(members[j]);
-            }
-            nonJavaResources = resultList.toArray();
-          }
-        }
-      } catch (JavaModelException e)
+          nonJavaResources = ClasspathRootLocation.getNonJavaResources(fragments[i]);
+//        if (fragments[i].isReadOnly())
+//        {
+//          //TODO - is this the correct check for a package in a jar file?
+//          nonJavaResources = fragments[i].getNonJavaResources();
+//        } else
+//        {
+//          IContainer container = (IContainer) fragments[i].getUnderlyingResource();
+//          if (container != null && container.exists())
+//          {
+//            IResource[] members = container.members(false);
+//            ArrayList resultList = new ArrayList();
+//            for (int j = 0; j < members.length; j++)
+//            {
+//              if (members[j] instanceof IFile)
+//                resultList.add(members[j]);
+//            }
+//            nonJavaResources = resultList.toArray();
+//          }
+//        }
+      } catch (CoreException e)
       {
         TapestryCore.log(e);
       }

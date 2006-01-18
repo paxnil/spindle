@@ -78,6 +78,7 @@ import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 import com.iw.plugins.spindle.editors.SharedTextColors;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.iw.plugins.spindle.editors.documentsAndModels.SpecDocumentSetupParticipant;
@@ -87,480 +88,500 @@ import com.iw.plugins.spindle.editors.documentsAndModels.TemplateDocumentSetupPa
 import com.iw.plugins.spindle.editors.template.TemplateTextTools;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 import com.iw.plugins.spindle.ui.util.Revealer;
+import com.sun.org.apache.bcel.internal.generic.ISTORE;
 
 /**
  * The main plugin class to be used in the desktop.
  */
 public class UIPlugin extends AbstractUIPlugin
 {
-  public static final String PLUGIN_ID = "com.iw.plugins.spindle.ui";
+    public static final String PLUGIN_ID = "com.iw.plugins.spindle.ui";
 
-  public static PluginComponentSpecification DEFAULT_COMPONENT_SPEC;
-  public static PluginComponentSpecification DEFAULT_PAGE_SPEC;
-  public static PluginApplicationSpecification DEFAULT_APPLICATION_SPEC;
-  public static PluginLibrarySpecification DEFAULT_LIBRARY_SPEC;
+    public static PluginComponentSpecification DEFAULT_COMPONENT_SPEC;
 
-  static private Map EDITOR_ID_LOOKUP;
+    public static PluginComponentSpecification DEFAULT_PAGE_SPEC;
 
-  static
-  {
-    DEFAULT_COMPONENT_SPEC = new PluginComponentSpecification();
-    DEFAULT_COMPONENT_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
-    DEFAULT_COMPONENT_SPEC.setPageSpecification(false);
-    DEFAULT_COMPONENT_SPEC.setComponentClassName(TapestryCore
-        .getString("TapestryComponentSpec.defaultSpec"));
-    DEFAULT_COMPONENT_SPEC.setDescription(UIPlugin
-        .getString("auto-create-spec-description"));
+    public static PluginApplicationSpecification DEFAULT_APPLICATION_SPEC;
 
-    DEFAULT_PAGE_SPEC = new PluginComponentSpecification();
-    DEFAULT_PAGE_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
-    DEFAULT_PAGE_SPEC.setPageSpecification(true);
-    DEFAULT_PAGE_SPEC.setComponentClassName(TapestryCore
-        .getString("TapestryPageSpec.defaultSpec"));
-    DEFAULT_PAGE_SPEC.setDescription(UIPlugin.getString("auto-create-spec-description"));
+    public static PluginLibrarySpecification DEFAULT_LIBRARY_SPEC;
 
-    DEFAULT_APPLICATION_SPEC = new PluginApplicationSpecification();
-    DEFAULT_APPLICATION_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
-    DEFAULT_APPLICATION_SPEC.setEngineClassName(TapestryCore
-        .getString("TapestryEngine.defaultEngine"));
-    DEFAULT_APPLICATION_SPEC.setDescription(UIPlugin
-        .getString("auto-create-spec-description"));
+    static private Map EDITOR_ID_LOOKUP;
 
-    DEFAULT_LIBRARY_SPEC = new PluginApplicationSpecification();
-    DEFAULT_LIBRARY_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
-    DEFAULT_LIBRARY_SPEC.setDescription(UIPlugin
-        .getString("auto-create-spec-description"));
-
-    String ID_PLUGIN = "com.iw.plugins.spindle.ui";
-
-    EDITOR_ID_LOOKUP = new HashMap();
-    EDITOR_ID_LOOKUP.put("application", ID_PLUGIN + ".editors.spec");
-    EDITOR_ID_LOOKUP.put("library", ID_PLUGIN + ".editors.spec");
-    EDITOR_ID_LOOKUP.put("jwc", ID_PLUGIN + ".editors.spec");
-    EDITOR_ID_LOOKUP.put("page", ID_PLUGIN + ".editors.spec");
-    EDITOR_ID_LOOKUP.put("html", ID_PLUGIN + ".editors.template");
-  }
-
-  private static ResourceBundle UIStrings;
-
-  public static ResourceBundle getResourceBundle()
-  {
-    if (UIStrings == null)
-      UIStrings = ResourceBundle.getBundle("com.iw.plugins.spindle.resources");
-    return UIStrings;
-  }
-
-  public static String getString(String key)
-  {
-    return getString(key, null);
-  }
-  public static String getString(String key, Object arg)
-  {
-    return getString(key, new Object[]{arg});
-  }
-  public static String getString(String key, Object arg1, Object arg2)
-  {
-    return getString(key, new Object[]{arg1, arg2});
-  }
-  public static String getString(String key, Object arg1, Object arg2, Object arg3)
-  {
-    return getString(key, new Object[]{arg1, arg2, arg3});
-  }
-  public static String getString(String key, Object[] args)
-  {
-    getResourceBundle();
-
-    try
+    static
     {
-      String pattern = UIStrings.getString(key);
-      if (args == null)
-        return pattern;
+        DEFAULT_COMPONENT_SPEC = new PluginComponentSpecification();
+        DEFAULT_COMPONENT_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+        DEFAULT_COMPONENT_SPEC.setPageSpecification(false);
+        DEFAULT_COMPONENT_SPEC.setComponentClassName(TapestryCore
+                .getString("TapestryComponentSpec.defaultSpec"));
+        DEFAULT_COMPONENT_SPEC.setDescription(UIPlugin.getString("auto-create-spec-description"));
 
-      return MessageFormat.format(pattern, args);
-    } catch (MissingResourceException e)
-    {
-      return "!" + key + "!";
+        DEFAULT_PAGE_SPEC = new PluginComponentSpecification();
+        DEFAULT_PAGE_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+        DEFAULT_PAGE_SPEC.setPageSpecification(true);
+        DEFAULT_PAGE_SPEC.setComponentClassName(TapestryCore
+                .getString("TapestryPageSpec.defaultSpec"));
+        DEFAULT_PAGE_SPEC.setDescription(UIPlugin.getString("auto-create-spec-description"));
+
+        DEFAULT_APPLICATION_SPEC = new PluginApplicationSpecification();
+        DEFAULT_APPLICATION_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+        DEFAULT_APPLICATION_SPEC.setEngineClassName(TapestryCore
+                .getString("TapestryEngine.defaultEngine"));
+        DEFAULT_APPLICATION_SPEC.setDescription(UIPlugin.getString("auto-create-spec-description"));
+
+        DEFAULT_LIBRARY_SPEC = new PluginApplicationSpecification();
+        DEFAULT_LIBRARY_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+        DEFAULT_LIBRARY_SPEC.setDescription(UIPlugin.getString("auto-create-spec-description"));
+
+        String ID_PLUGIN = "com.iw.plugins.spindle.ui";
+
+        EDITOR_ID_LOOKUP = new HashMap();
+        EDITOR_ID_LOOKUP.put("application", ID_PLUGIN + ".editors.spec");
+        EDITOR_ID_LOOKUP.put("library", ID_PLUGIN + ".editors.spec");
+        EDITOR_ID_LOOKUP.put("jwc", ID_PLUGIN + ".editors.spec");
+        EDITOR_ID_LOOKUP.put("page", ID_PLUGIN + ".editors.spec");
+        EDITOR_ID_LOOKUP.put("html", ID_PLUGIN + ".editors.template");
     }
-  }
 
-  static public void log(String msg)
-  {
-    ILog log = getDefault().getLog();
-    Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg + "\n", null);
-    log.log(status);
-  }
+    private static ResourceBundle UIStrings;
 
-  static public void warn(Throwable e)
-  {
-    StringBuffer buffer = new StringBuffer("Warning:");
-    buffer.append(e.getClass().getName());
-    buffer.append('\n');
-    buffer.append(e.getStackTrace()[0].toString());
-    log(buffer.toString());
-  }
-
-  static public void warn(String message)
-  {
-    log("Warning:" + message);
-  }
-
-  static public void log(Throwable ex)
-  {
-    ILog log = getDefault().getLog();
-    StringWriter stringWriter = new StringWriter();
-    ex.printStackTrace(new PrintWriter(stringWriter));
-    String msg = stringWriter.getBuffer().toString();
-
-    Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg, null);
-    log.log(status);
-  }
-
-  public static IResource getActiveEditorFileInput()
-  {
-    IWorkbenchPage page = getDefault().getActivePage();
-
-    if (page != null)
+    public static ResourceBundle getResourceBundle()
     {
-      IEditorPart part = page.getActiveEditor();
-      if (part != null)
-      {
-        IEditorInput editorInput = part.getEditorInput();
-        if (editorInput != null)
-          return (IResource) editorInput.getAdapter(IResource.class);
-      }
+        if (UIStrings == null)
+            UIStrings = ResourceBundle.getBundle("com.iw.plugins.spindle.resources");
+        return UIStrings;
     }
-    return null;
-  }
 
-  public static IJavaElement getActiveEditorJavaInput()
-  {
-
-    IWorkbenchPage page = getDefault().getActivePage();
-
-    if (page != null)
+    public static String getString(String key)
     {
-      IEditorPart part = page.getActiveEditor();
-      if (part != null)
-      {
-        IEditorInput editorInput = part.getEditorInput();
-        if (editorInput != null)
+        return getString(key, null);
+    }
+
+    public static String getString(String key, Object arg)
+    {
+        return getString(key, new Object[]
+        { arg });
+    }
+
+    public static String getString(String key, Object arg1, Object arg2)
+    {
+        return getString(key, new Object[]
+        { arg1, arg2 });
+    }
+
+    public static String getString(String key, Object arg1, Object arg2, Object arg3)
+    {
+        return getString(key, new Object[]
+        { arg1, arg2, arg3 });
+    }
+
+    public static String getString(String key, Object[] args)
+    {
+        getResourceBundle();
+
+        try
         {
-          IJavaElement result = (IJavaElement) editorInput.getAdapter(IJavaElement.class);
-          if (result == null)
-          {
-            IResource nonjava = (IResource) editorInput.getAdapter(IResource.class);
-            if (nonjava != null)
+            String pattern = UIStrings.getString(key);
+            if (args == null)
+                return pattern;
+
+            return MessageFormat.format(pattern, args);
+        }
+        catch (MissingResourceException e)
+        {
+            return "!" + key + "!";
+        }
+    }
+
+    static public void log(String msg)
+    {
+        ILog log = getDefault().getLog();
+        Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg + "\n", null);
+        log.log(status);
+    }
+
+    static public void warn(Throwable e)
+    {
+        StringBuffer buffer = new StringBuffer("Warning:");
+        buffer.append(e.getClass().getName());
+        buffer.append('\n');
+        buffer.append(e.getStackTrace()[0].toString());
+        log(buffer.toString());
+    }
+
+    static public void warn(String message)
+    {
+        log("Warning:" + message);
+    }
+
+    static public void log(Throwable ex)
+    {
+        ILog log = getDefault().getLog();
+        StringWriter stringWriter = new StringWriter();
+        ex.printStackTrace(new PrintWriter(stringWriter));
+        String msg = stringWriter.getBuffer().toString();
+
+        Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg, null);
+        log.log(status);
+    }
+
+    public static IResource getActiveEditorFileInput()
+    {
+        IWorkbenchPage page = getDefault().getActivePage();
+
+        if (page != null)
+        {
+            IEditorPart part = page.getActiveEditor();
+            if (part != null)
             {
-              IContainer parent = nonjava.getParent();
-              while (parent != null)
-              {
-                result = (IJavaElement) parent.getAdapter(IJavaElement.class);
-                if (result != null)
-                {
-                  break;
-                }
-                parent = parent.getParent();
-              }
+                IEditorInput editorInput = part.getEditorInput();
+                if (editorInput != null)
+                    return (IResource) editorInput.getAdapter(IResource.class);
             }
-          }
-          return result;
+        }
+        return null;
+    }
+
+    public static IJavaElement getActiveEditorJavaInput()
+    {
+
+        IWorkbenchPage page = getDefault().getActivePage();
+
+        if (page != null)
+        {
+            IEditorPart part = page.getActiveEditor();
+            if (part != null)
+            {
+                IEditorInput editorInput = part.getEditorInput();
+                if (editorInput != null)
+                {
+                    IJavaElement result = (IJavaElement) editorInput.getAdapter(IJavaElement.class);
+                    if (result == null)
+                    {
+                        IResource nonjava = (IResource) editorInput.getAdapter(IResource.class);
+                        if (nonjava != null)
+                        {
+                            IContainer parent = nonjava.getParent();
+                            while (parent != null)
+                            {
+                                result = (IJavaElement) parent.getAdapter(IJavaElement.class);
+                                if (result != null)
+                                {
+                                    break;
+                                }
+                                parent = parent.getParent();
+                            }
+                        }
+                    }
+                    return result;
+                }
+
+            }
+        }
+        return null;
+    }
+
+    static public IEditorPart openTapestryEditor(IStorage storage)
+    {
+        String editorId = null;
+
+        String extension = storage.getFullPath().getFileExtension();
+
+        editorId = (String) EDITOR_ID_LOOKUP.get(extension);
+        try
+        {
+
+            if (editorId == null)
+            {
+                if (storage instanceof IFile)
+                {
+                    return IDE.openEditor(UIPlugin.getDefault().getActivePage(), ((IFile) storage));
+                }
+                else
+                {
+                    IEditorRegistry editorReg = PlatformUI.getWorkbench().getEditorRegistry();
+                    IEditorDescriptor desc = editorReg.getDefaultEditor(storage.getName());
+                    editorId = desc.getId();
+                }
+            }
+
+            IEditorInput input = null;
+
+            if (storage instanceof IFile)
+            {
+                input = new FileEditorInput((IFile) storage);
+            }
+            else
+            {
+                input = new BinaryEditorInput(storage);
+            }
+
+            return IDE.openEditor(UIPlugin.getDefault().getActivePage(), input, editorId);
+
+        }
+        catch (PartInitException piex)
+        {
+            UIPlugin.log(piex);
+        }
+        return null;
+    }
+
+    public static class BinaryEditorInput extends JarEntryEditorInput
+    {
+        static JarEntryFile coerce(IStorage storage)
+        {
+            if (storage instanceof JarEntryFile)
+                return (JarEntryFile) storage;
+            if (storage instanceof JarEntryFileWrapper)
+                return ((JarEntryFileWrapper) storage).getEntry();
+            throw new IllegalStateException("is not coercable to a JarEntryFile:"
+                    + storage.toString());
         }
 
-      }
-    }
-    return null;
-  }
-
-  static public IEditorPart openTapestryEditor(IStorage storage)
-  {
-    String editorId = null;
-
-    String extension = storage.getFullPath().getFileExtension();
-
-    editorId = (String) EDITOR_ID_LOOKUP.get(extension);
-    try
-    {
-
-      if (editorId == null)
-      {
-        if (storage instanceof IFile)
+        public BinaryEditorInput(IStorage storage)
         {
-          return IDE.openEditor(UIPlugin.getDefault().getActivePage(), ((IFile) storage));
-        } else
+            super(coerce(storage));
+        }      
+
+        public boolean equals(Object obj)
         {
-          IEditorRegistry editorReg = PlatformUI.getWorkbench().getEditorRegistry();
-          IEditorDescriptor desc = editorReg.getDefaultEditor(storage.getName());
-          editorId = desc.getId();
+            if (this == obj)
+                return true;
+            if (!(obj instanceof JarEntryEditorInput))
+                return false;
+            JarEntryEditorInput other = (JarEntryEditorInput) obj;
+            return getStorage().toString().equals(other.getStorage().toString());
         }
-      }
 
-      IEditorInput input = null;
-
-      if (storage instanceof JarEntryFile)
-      {
-        input = new BinaryEditorInput(storage);
-      } else
-      {
-        input = new FileEditorInput((IFile) storage);
-      }
-
-      return IDE.openEditor(UIPlugin.getDefault().getActivePage(), input, editorId);
-
-    } catch (PartInitException piex)
-    {
-      UIPlugin.log(piex);
-    }
-    return null;
-  }
-  
-  static class BinaryEditorInput extends JarEntryEditorInput {
-    
-    public BinaryEditorInput(IStorage jarEntryFile)
-    {
-        super(jarEntryFile);       
     }
 
-    public boolean equals(Object obj)
+    // The shared instance.
+    private static UIPlugin plugin;
+
+    /** shared document provider for Templates that come from files * */
+    private SpindleFileDocumentProvider fTemplateFileDocumentProvider;
+
+    /** shared document provider for Template that don't come from files (ie jars) * */
+    private SpindleStorageDocumentProvider fTemplateStorageDocumentProvider;
+
+    /** shared document provider for Specifications that come from files * */
+    private SpindleFileDocumentProvider fSpecFileDocumentProvider;
+
+    /** shared document provider for Specifications that come jars */
+    private SpindleStorageDocumentProvider fSpecStorageDocumentProvider;
+
+    private TemplateTextTools fTemplatelTextTools;
+
+    private ILabelProvider fStorageLableProvider;
+
+    private IXMLModelProvider fModelProvider = new SpecDocumentSetupParticipant();
+
+    /**
+     * these are shared colors not specific to any one editor used mostly for the Annotations.
+     */
+    private ISharedTextColors fSharedTextColors;
+
+    public UIPlugin()
     {
-        if (this == obj)
-            return true;
-        if (!(obj instanceof JarEntryEditorInput))
-            return false;
-        JarEntryEditorInput other= (JarEntryEditorInput) obj;
-        return getStorage().toString().equals(other.getStorage().toString());
+        plugin = this;
+        setupRevealer();
     }
 
-   
-      
-  }
-
-  //The shared instance.
-  private static UIPlugin plugin;
-
-  /** shared document provider for Templates that come from files * */
-  private SpindleFileDocumentProvider fTemplateFileDocumentProvider;
-
-  /** shared document provider for Template that don't come from files (ie jars) * */
-  private SpindleStorageDocumentProvider fTemplateStorageDocumentProvider;
-
-  /** shared document provider for Specifications that come from files * */
-  private SpindleFileDocumentProvider fSpecFileDocumentProvider;
-
-  /** shared document provider for Specifications that come jars */
-  private SpindleStorageDocumentProvider fSpecStorageDocumentProvider;
-
-  private TemplateTextTools fTemplatelTextTools;
-
-  private ILabelProvider fStorageLableProvider;
-
-  private IXMLModelProvider fModelProvider = new SpecDocumentSetupParticipant();
-
-  /**
-   * these are shared colors not specific to any one editor used mostly for the
-   * Annotations.
-   */
-  private ISharedTextColors fSharedTextColors;
-
-  public UIPlugin()
-  {
-    plugin = this;
-    setupRevealer();
-  }
-
-  private void setupRevealer()
-  {
-    if (getActiveWorkbenchShell() == null)
+    private void setupRevealer()
     {
-      setUpDeferredRevealer();
+        if (getActiveWorkbenchShell() == null)
+        {
+            setUpDeferredRevealer();
 
-    } else
-    {
-      Revealer.start();
-    }
-  }
-
-  private IWindowListener RevealerTrigger = new IWindowListener()
-  {
-    public void windowActivated(IWorkbenchWindow window)
-    {
-      Revealer.start();
-      tearDownDeferredRevealer();
+        }
+        else
+        {
+            Revealer.start();
+        }
     }
 
-    public void windowDeactivated(IWorkbenchWindow window)
+    private IWindowListener RevealerTrigger = new IWindowListener()
     {
+        public void windowActivated(IWorkbenchWindow window)
+        {
+            Revealer.start();
+            tearDownDeferredRevealer();
+        }
+
+        public void windowDeactivated(IWorkbenchWindow window)
+        {
+        }
+
+        public void windowClosed(IWorkbenchWindow window)
+        {
+        }
+
+        public void windowOpened(IWorkbenchWindow window)
+        {
+        }
+    };
+
+    public static final String SPINDLEUI_PREFS_FILE = ".spindleUI.prefs";
+
+    private void setUpDeferredRevealer()
+    {
+        getWorkbench().addWindowListener(RevealerTrigger);
     }
 
-    public void windowClosed(IWorkbenchWindow window)
+    private void tearDownDeferredRevealer()
     {
+        getWorkbench().removeWindowListener(RevealerTrigger);
     }
 
-    public void windowOpened(IWorkbenchWindow window)
+    /**
+     * Returns the shared instance.
+     */
+    public static UIPlugin getDefault()
     {
-    }
-  };
-
-  public static final String SPINDLEUI_PREFS_FILE = ".spindleUI.prefs";
-
-  private void setUpDeferredRevealer()
-  {
-    getWorkbench().addWindowListener(RevealerTrigger);
-  }
-
-  private void tearDownDeferredRevealer()
-  {
-    getWorkbench().removeWindowListener(RevealerTrigger);
-  }
-  /**
-   * Returns the shared instance.
-   */
-  public static UIPlugin getDefault()
-  {
-    return plugin;
-  }
-
-  public synchronized FileDocumentProvider getTemplateFileDocumentProvider()
-  {
-    if (fTemplateFileDocumentProvider == null)
-    {
-      fTemplateFileDocumentProvider = new SpindleFileDocumentProvider(
-          new TemplateDocumentSetupParticipant());
+        return plugin;
     }
 
-    return fTemplateFileDocumentProvider;
-  }
-
-  public synchronized StorageDocumentProvider getTemplateStorageDocumentProvider()
-  {
-    if (fTemplateStorageDocumentProvider == null)
-      fTemplateStorageDocumentProvider = new SpindleStorageDocumentProvider(
-          new TemplateDocumentSetupParticipant());
-
-    return fTemplateStorageDocumentProvider;
-  }
-
-  public synchronized FileDocumentProvider getSpecFileDocumentProvider()
-  {
-    if (fSpecFileDocumentProvider == null)
-      fSpecFileDocumentProvider = new SpindleFileDocumentProvider(
-          new SpecDocumentSetupParticipant());
-
-    return fSpecFileDocumentProvider;
-  }
-
-  public synchronized StorageDocumentProvider getSpecStorageDocumentProvider()
-  {
-    if (fSpecStorageDocumentProvider == null)
-      fSpecStorageDocumentProvider = new SpindleStorageDocumentProvider(
-          new SpecDocumentSetupParticipant());
-
-    return fSpecStorageDocumentProvider;
-  }
-
-  /**
-   * Returns the workspace instance.
-   */
-  public static IWorkspace getWorkspace()
-  {
-    return ResourcesPlugin.getWorkspace();
-  }
-
-  public IWorkbenchPage getActivePage()
-  {
-    IWorkbenchWindow window = getActiveWorkbenchWindow();
-    if (window != null)
+    public synchronized FileDocumentProvider getTemplateFileDocumentProvider()
     {
-      return window.getActivePage();
-    }
-    return null;
-  }
+        if (fTemplateFileDocumentProvider == null)
+        {
+            fTemplateFileDocumentProvider = new SpindleFileDocumentProvider(
+                    new TemplateDocumentSetupParticipant());
+        }
 
-  public String getPluginId()
-  {
-    return PLUGIN_ID;
-  }
-
-//  public IProject getProjectFor(IEditorInput input)
-//  {
-//      
-//    if (input instanceof IFileEditorInput)
-//      return ((IFileEditorInput) input).getFile().getProject();
-//    if (input instanceof IStorageEditorInput)
-//    {
-//      try
-//      {
-//        return TapestryCore.getDefault().getProjectFor(
-//            ((IStorageEditorInput) input).getStorage());
-//      } catch (CoreException e)
-//      {
-//        log(e);
-//      }
-//    }
-//    return null;
-//  }
-
-  public Shell getActiveWorkbenchShell()
-  {
-    IWorkbenchWindow window = getActiveWorkbenchWindow();
-    if (window != null)
-    {
-      return window.getShell();
-    }
-    return null;
-  }
-
-  public IWorkbenchWindow getActiveWorkbenchWindow()
-  {
-    IWorkbench workbench = getWorkbench();
-    if (workbench != null)
-    {
-      return workbench.getActiveWorkbenchWindow();
-    }
-    return null;
-  }
-
-  /**
-   * Returns instance of text tools for Templates.
-   */
-  public TemplateTextTools getTemplateTextTools()
-  {
-    if (fTemplatelTextTools == null)
-    {
-      IPreferenceStore wrapped = new PreferenceStoreWrapper(
-          getPreferenceStore(),
-          XMLPlugin.getDefault().getPreferenceStore());
-      fTemplatelTextTools = new TemplateTextTools(wrapped);
+        return fTemplateFileDocumentProvider;
     }
 
-    return fTemplatelTextTools;
-  }
+    public synchronized StorageDocumentProvider getTemplateStorageDocumentProvider()
+    {
+        if (fTemplateStorageDocumentProvider == null)
+            fTemplateStorageDocumentProvider = new SpindleStorageDocumentProvider(
+                    new TemplateDocumentSetupParticipant());
 
-  /**
-   * Returns instance of text tools for Tapestry spec files.
-   */
-  public XMLTextTools getXMLTextTools()
-  {
-    return XMLPlugin.getDefault().getXMLTextTools();
-  }
+        return fTemplateStorageDocumentProvider;
+    }
 
-  public ISharedTextColors getSharedTextColors()
-  {
-    if (fSharedTextColors == null)
-      fSharedTextColors = new SharedTextColors();
-    return fSharedTextColors;
-  }
+    public synchronized FileDocumentProvider getSpecFileDocumentProvider()
+    {
+        if (fSpecFileDocumentProvider == null)
+            fSpecFileDocumentProvider = new SpindleFileDocumentProvider(
+                    new SpecDocumentSetupParticipant());
 
-  public ILabelProvider getStorageLabelProvider()
-  {
-    if (fStorageLableProvider == null)
-      fStorageLableProvider = new StorageLabelProvider();
+        return fSpecFileDocumentProvider;
+    }
 
-    return fStorageLableProvider;
-  }
+    public synchronized StorageDocumentProvider getSpecStorageDocumentProvider()
+    {
+        if (fSpecStorageDocumentProvider == null)
+            fSpecStorageDocumentProvider = new SpindleStorageDocumentProvider(
+                    new SpecDocumentSetupParticipant());
 
-  public IXMLModelProvider getXMLModelProvider()
-  {
-    return fModelProvider;
-  }
+        return fSpecStorageDocumentProvider;
+    }
+
+    /**
+     * Returns the workspace instance.
+     */
+    public static IWorkspace getWorkspace()
+    {
+        return ResourcesPlugin.getWorkspace();
+    }
+
+    public IWorkbenchPage getActivePage()
+    {
+        IWorkbenchWindow window = getActiveWorkbenchWindow();
+        if (window != null)
+        {
+            return window.getActivePage();
+        }
+        return null;
+    }
+
+    public String getPluginId()
+    {
+        return PLUGIN_ID;
+    }
+
+    // public IProject getProjectFor(IEditorInput input)
+    // {
+    //      
+    // if (input instanceof IFileEditorInput)
+    // return ((IFileEditorInput) input).getFile().getProject();
+    // if (input instanceof IStorageEditorInput)
+    // {
+    // try
+    // {
+    // return TapestryCore.getDefault().getProjectFor(
+    // ((IStorageEditorInput) input).getStorage());
+    // } catch (CoreException e)
+    // {
+    // log(e);
+    // }
+    // }
+    // return null;
+    // }
+
+    public Shell getActiveWorkbenchShell()
+    {
+        IWorkbenchWindow window = getActiveWorkbenchWindow();
+        if (window != null)
+        {
+            return window.getShell();
+        }
+        return null;
+    }
+
+    public IWorkbenchWindow getActiveWorkbenchWindow()
+    {
+        IWorkbench workbench = getWorkbench();
+        if (workbench != null)
+        {
+            return workbench.getActiveWorkbenchWindow();
+        }
+        return null;
+    }
+
+    /**
+     * Returns instance of text tools for Templates.
+     */
+    public TemplateTextTools getTemplateTextTools()
+    {
+        if (fTemplatelTextTools == null)
+        {
+            IPreferenceStore wrapped = new PreferenceStoreWrapper(getPreferenceStore(), XMLPlugin
+                    .getDefault().getPreferenceStore());
+            fTemplatelTextTools = new TemplateTextTools(wrapped);
+        }
+
+        return fTemplatelTextTools;
+    }
+
+    /**
+     * Returns instance of text tools for Tapestry spec files.
+     */
+    public XMLTextTools getXMLTextTools()
+    {
+        return XMLPlugin.getDefault().getXMLTextTools();
+    }
+
+    public ISharedTextColors getSharedTextColors()
+    {
+        if (fSharedTextColors == null)
+            fSharedTextColors = new SharedTextColors();
+        return fSharedTextColors;
+    }
+
+    public ILabelProvider getStorageLabelProvider()
+    {
+        if (fStorageLableProvider == null)
+            fStorageLableProvider = new StorageLabelProvider();
+
+        return fStorageLableProvider;
+    }
+
+    public IXMLModelProvider getXMLModelProvider()
+    {
+        return fModelProvider;
+    }
 
 }

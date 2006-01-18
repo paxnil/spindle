@@ -287,7 +287,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         if (resolved == null)
             return NoInformation;
 
-        UITapestryAccess.Result info = fAssistHelper.createComponentInformationResult(
+        UITapestryAccess.Result info = SpecTapestryAccess.createComponentInformationResult(
                 value,
                 value,
                 resolved);
@@ -313,7 +313,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         if (parameter == null)
             return NoInformation;
 
-        UITapestryAccess.Result info = fAssistHelper.createParameterResult(
+        UITapestryAccess.Result info = SpecTapestryAccess.createParameterResult(
                 value,
                 parameter,
                 containedComponent.getPublicId());
@@ -628,7 +628,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
      */
     private List chooseJavaTypeNameProposals(boolean includeInterfaces, String hierarchyRoot)
     {
-        IStorage storage = fEditor.getStorage();
+        IStorage storage = Editor.getStorage(fEditor.getEditorInput());
         if (storage == null)
             return Collections.EMPTY_LIST;
 
@@ -644,7 +644,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private List chooseWorkspacePath(ChooseResourceProposal.Filter filter)
     {
-        IStorage storage = fEditor.getStorage();
+        IStorage storage = Editor.getStorage(fEditor.getEditorInput());
         ITapestryProject tproject = null;
 
         if (storage != null)
@@ -659,7 +659,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private List chooseLibraryPath(ChooseResourceProposal.Filter filter)
     {
-        IStorage storage = fEditor.getStorage();
+        IStorage storage = Editor.getStorage(fEditor.getEditorInput());
         ITapestryProject tproject = null;
 
         if (storage != null)
@@ -697,7 +697,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     private List chooseSpecPath(ChooseResourceProposal.Filter filter)
     {
 
-        IStorage storage = fEditor.getStorage();
+        IStorage storage = Editor.getStorage(fEditor.getEditorInput());
         ITapestryProject tproject = null;
 
         if (storage != null)
@@ -783,7 +783,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private List chooseAssetPath(boolean isContextPath)
     {
-        IStorage storage = fEditor.getStorage();
+        IStorage storage = Editor.getStorage(fEditor.getEditorInput());
         ITapestryProject tproject = null;
 
         if (storage != null)
@@ -817,15 +817,15 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         if (root.isOnClasspath())
         {
-            proposal.setContainerExclusionFilter(proposal.EXCLUDE_PACKAGES);
-            proposal.setFileExclusionFilter(proposal.EXCLUDE_PACKAGE_DOT_HTML);
+            proposal.setContainerExclusionFilter(ChooseResourceProposal.EXCLUDE_PACKAGES);
+            proposal.setFileExclusionFilter(ChooseResourceProposal.EXCLUDE_PACKAGE_DOT_HTML);
         }
         else
         {
-            proposal.setContainerExclusionFilter(proposal.EXCLUDE_CVS_FOLDERS);
+            proposal.setContainerExclusionFilter(ChooseResourceProposal.EXCLUDE_CVS_FOLDERS);
         }
 
-        proposal.setExtensionExclusionFilter(proposal.ASSET_EXCLUDE_EXTENSIONS);
+        proposal.setExtensionExclusionFilter(ChooseResourceProposal.ASSET_EXCLUDE_EXTENSIONS);
         proposal.setAllowRelativePaths(false);
 
         result.add(proposal);

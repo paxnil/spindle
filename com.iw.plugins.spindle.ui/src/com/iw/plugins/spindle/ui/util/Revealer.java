@@ -35,6 +35,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -60,6 +61,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 
 /**
  * Reveals IStorages in the workbench as editors are selected
@@ -157,8 +159,8 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
     if (structured.size() > 1 || !(first instanceof JarEntryFile))
       return useSelection;
 
-    JarEntryFile entry = (JarEntryFile) first;
-    IPath path = entry.getFullPath().removeFileExtension();
+    JarEntryFileWrapper wrapped = (JarEntryFileWrapper)JarEntryFileUtil.wrap((JarEntryFile) first);
+    IPath path = new Path(wrapped.getName()).removeFileExtension();
     String name = path.lastSegment();
 
     IPackageFragment[] fragments = null;
@@ -166,7 +168,8 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
     {
       if (jproject != null)
       {
-        IPackageFragment frag = JarEntryFileUtil.getPackageFragment(jproject, entry);
+        
+        IPackageFragment frag = JarEntryFileUtil.getPackageFragment(jproject, wrapped);
         if (frag != null)
           fragments = new IPackageFragment[]{frag};
 
@@ -174,7 +177,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
       {
         fragments = JarEntryFileUtil.getPackageFragments(ResourcesPlugin
             .getWorkspace()
-            .getRoot(), entry);
+            .getRoot(), wrapped);
       }
       if (fragments.length != 1)
         return useSelection;
@@ -261,7 +264,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
         {
 //          TODO use platform adapters
           JarEntryEditorInput jeei = (JarEntryEditorInput) input;
-          storage = jeei.getStorage();
+          storage = JarEntryFileUtil.wrap((JarEntryFile)jeei.getStorage());
         }
         if (storage != null && isTapestry(storage))
           selectAndReveal(new StructuredSelection(storage), fCurrentWindow);

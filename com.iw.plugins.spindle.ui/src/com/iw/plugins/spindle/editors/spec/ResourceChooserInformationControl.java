@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -63,6 +64,7 @@ import com.iw.plugins.spindle.core.resources.AbstractRootLocation;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
 import com.iw.plugins.spindle.editors.util.BusyIndicatorSpindle;
 
@@ -350,7 +352,16 @@ public class ResourceChooserInformationControl extends TreeInformationControl
                         packageMap.put(fragmentName, holder);
                     }
 
-                    Object[] children = fragment.getNonJavaResources();
+                    Object[] children = null;
+                    
+                    try
+                    {
+                        ClasspathRootLocation.getNonJavaResources(fragment);
+                    }
+                    catch (CoreException e)
+                    {
+                        //Do nothing!
+                    }
 
                     if (children == null || children.length == 0)
                         continue;
@@ -534,7 +545,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
         {
             if (element instanceof IJavaElement)
                 return javaVerboseLabels.getImage(element);
-            if (element instanceof JarEntryFile)
+            if (element instanceof JarEntryFileWrapper)
                 return Images.getSharedImage("file_obj.gif");
             return workbenchLabels.getImage(element);
         }
@@ -545,8 +556,8 @@ public class ResourceChooserInformationControl extends TreeInformationControl
                 return getPackageLabel((IPackageFragment) element);
             if (element instanceof IContainer)
                 return getContainerLabel((IContainer) element);
-            if (element instanceof JarEntryFile)
-                return ((JarEntryFile) element).getName();
+            if (element instanceof JarEntryFileWrapper)
+                return ((JarEntryFileWrapper) element).getName();
             return workbenchLabels.getText(element);
         }
 

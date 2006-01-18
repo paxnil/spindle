@@ -25,6 +25,7 @@
 package com.iw.plugins.spindle.editors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
@@ -35,99 +36,139 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 
-public class ReconcilingStrategy
-    implements
-      IReconcilingStrategy,
-      IReconcilingStrategyExtension
+public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension
 {
 
-  private AbstractTextEditor fEditor;
+    private AbstractTextEditor fEditor;
 
-  private IDocumentProvider fDocumentProvider;
-  private IProgressMonitor fProgressMonitor;
+    private IDocumentProvider fDocumentProvider;
 
-  public ReconcilingStrategy(AbstractTextEditor editor)
-  {
-    fEditor = editor;
-    fDocumentProvider = editor.getDocumentProvider();
-  }
+    private IProgressMonitor fProgressMonitor;
 
-  private IProblemCollector getProblemCollector()
-  {
-    IAnnotationModel model = fDocumentProvider.getAnnotationModel(fEditor
-        .getEditorInput());
-    if (model instanceof IProblemCollector)
-      return (IProblemCollector) model;
-    return null;
-  }
-
-  private void reconcile()
-  {
-    if (!(fEditor instanceof IReconcileWorker))
-      return;
-
-    IReconcileWorker selfReconciler = (IReconcileWorker) fEditor;
-
-    if (!selfReconciler.isReadyToReconcile())
-      return;
-    try
+    public ReconcilingStrategy(AbstractTextEditor editor)
     {
-      IProblemCollector collector = getProblemCollector();
-
-      if (collector == null)
-        return;
-
-      // reconcile
-      synchronized (selfReconciler)
-      {
-        selfReconciler.reconcile(collector, fProgressMonitor);
-      }
-
-    } catch (Exception x)
-    {
-      UIPlugin.log(x);
+        fEditor = editor;
+        fDocumentProvider = editor.getDocumentProvider();
     }
-  }
 
-  /*
-   * @see IReconcilingStrategy#reconcile(IRegion)
-   */
-  public void reconcile(IRegion partition)
-  {
-    reconcile();
-  }
+    private IProblemCollector getProblemCollector()
+    {
+        IAnnotationModel model = fDocumentProvider.getAnnotationModel(fEditor.getEditorInput());
+        if (model instanceof IProblemCollector)
+            return (IProblemCollector) model;
+        return new IProblemCollector()
+        {
 
-  /*
-   * @see IReconcilingStrategy#reconcile(DirtyRegion, IRegion)
-   */
-  public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion)
-  {
-    reconcile();
-  }
+            public void addProblem(IProblem problem)
+            {
+                // TODO Auto-generated method stub
 
-  /*
-   * @see IReconcilingStrategy#setDocument(IDocument)
-   */
-  public void setDocument(IDocument document)
-  {
-  }
+            }
 
-  /*
-   * @see IReconcilingStrategyExtension#setProgressMonitor(IProgressMonitor)
-   */
-  public void setProgressMonitor(IProgressMonitor monitor)
-  {
-    fProgressMonitor = monitor;
-  }
+            public void addProblem(int severity, ISourceLocation location, String message,
+                    boolean isTemporary, int code)
+            {
+                // TODO Auto-generated method stub
 
-  /*
-   * @see IReconcilingStrategyExtension#initialReconcile()
-   */
-  public void initialReconcile()
-  {
-    reconcile();
-  }
+            }
+
+            public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
+            {
+                // TODO Auto-generated method stub
+
+            }
+
+            public IProblem[] getProblems()
+            {
+                // TODO Auto-generated method stub
+                return new IProblem[] {};
+            }
+
+            public void beginCollecting()
+            {
+                // TODO Auto-generated method stub
+
+            }
+
+            public void endCollecting()
+            {
+                // TODO Auto-generated method stub
+
+            }
+
+        };
+    }
+
+    private void reconcile()
+    {
+        if (!(fEditor instanceof IReconcileWorker))
+            return;
+
+        IReconcileWorker selfReconciler = (IReconcileWorker) fEditor;
+
+        if (!selfReconciler.isReadyToReconcile())
+            return;
+        try
+        {
+            IProblemCollector collector = getProblemCollector();
+
+            if (collector == null)
+                return;
+
+            // reconcile
+            synchronized (selfReconciler)
+            {
+                selfReconciler.reconcile(collector, fProgressMonitor);
+            }
+
+        }
+        catch (Exception x)
+        {
+            UIPlugin.log(x);
+        }
+    }
+
+    /*
+     * @see IReconcilingStrategy#reconcile(IRegion)
+     */
+    public void reconcile(IRegion partition)
+    {
+        reconcile();
+    }
+
+    /*
+     * @see IReconcilingStrategy#reconcile(DirtyRegion, IRegion)
+     */
+    public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion)
+    {
+        reconcile();
+    }
+
+    /*
+     * @see IReconcilingStrategy#setDocument(IDocument)
+     */
+    public void setDocument(IDocument document)
+    {
+    }
+
+    /*
+     * @see IReconcilingStrategyExtension#setProgressMonitor(IProgressMonitor)
+     */
+    public void setProgressMonitor(IProgressMonitor monitor)
+    {
+        fProgressMonitor = monitor;
+    }
+
+    /*
+     * @see IReconcilingStrategyExtension#initialReconcile()
+     */
+    public void initialReconcile()
+    {
+        reconcile();
+    }
 
 }

@@ -26,10 +26,10 @@
 
 package com.iw.plugins.spindle.editors.template.actions;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.core.BinaryType;
-import org.eclipse.jdt.internal.core.JarEntryFile;
+import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -54,8 +54,12 @@ public class ShowInPackageExplorerAction extends OpenDeclarationAction
     protected void foundResult(Object result, String key, Object moreInfo)
     {
         IJavaProject jproject = null;
-        if (result instanceof BinaryType || result instanceof JarEntryFile)
+        if (result instanceof SourceType || result instanceof IResource) 
         {
+            Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault()
+                    .getActiveWorkbenchWindow());
+        } else {
+      
             IStorage storage = getEditorStorage();
             if (storage != null)
                 jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
@@ -71,12 +75,6 @@ public class ShowInPackageExplorerAction extends OpenDeclarationAction
                         .getActiveWorkbenchWindow());
             }
         }
-        else
-        {
-            Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault()
-                    .getActiveWorkbenchWindow());
-        }
-
     }
 
 }

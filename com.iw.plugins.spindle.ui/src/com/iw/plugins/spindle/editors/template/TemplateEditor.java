@@ -28,15 +28,13 @@ package com.iw.plugins.spindle.editors.template;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Map;
 
-import org.apache.tapestry.spec.IComponentSpecification;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -56,7 +54,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -190,7 +187,7 @@ public class TemplateEditor extends Editor
     protected void editorContextMenuAboutToShow(IMenuManager menu)
     {
         super.editorContextMenuAboutToShow(menu);
-        if (!(getStorage() instanceof JarEntryFile))
+        if (getStorage(getEditorInput()) instanceof IFile)
         {
             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
@@ -277,14 +274,19 @@ public class TemplateEditor extends Editor
 
         return null;
     }
-
+    
     /**
      * Override: template return the spec they belong to!
      */
     public Object getSpecification()
     {
+        if (fReadOnlySpecification != null)
+            return fReadOnlySpecification;
+    
+        
         Object result = null;
-        IStorage storage = getStorage();
+        IEditorInput input = getEditorInput();
+        IStorage storage = getStorage(input);
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map templates = manager.getTemplateMap(project);
@@ -315,14 +317,16 @@ public class TemplateEditor extends Editor
         {
             // do nothing.
         }
-
+        if (!isEditable())
+            fReadOnlySpecification = result;
+    
         return result;
     }
 
     public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor)
     {
         boolean didReconcile = false;
-        if ((getEditorInput() instanceof IFileEditorInput))
+        if (isEditable())
         {
             PluginComponentSpecification component = (PluginComponentSpecification) getSpecification();
 

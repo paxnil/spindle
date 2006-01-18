@@ -74,14 +74,14 @@ public class JumpToTemplateAction extends BaseJumpAction
         if (spec instanceof ILibrarySpecification)
             return;
 
-        if (fEditor.getEditorInput() instanceof JarEntryEditorInput)
-        {
-            MessageDialog.openInformation(
-                    fEditor.getEditorSite().getShell(),
-                    "Operation Aborted",
-                    "Unable to Jump to Templates from  a jar based Specification");
-            return;
-        }
+//        if (fEditor.getEditorInput() instanceof JarEntryEditorInput)
+//        {
+//            MessageDialog.openInformation(
+//                    fEditor.getEditorSite().getShell(),
+//                    "Operation Aborted",
+//                    "Unable to Jump to Templates from  a jar based Specification");
+//            return;
+//        }
 
         reveal(getTemplateLocations((PluginComponentSpecification) spec).toArray());       
     }

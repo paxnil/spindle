@@ -124,7 +124,7 @@ public abstract class SpecCompletionProcessor extends AbstractContentAssistProce
       int documentOffset)
   {
 
-    IStorage storage = fEditor.getStorage();
+    IStorage storage = Editor.getStorage(fEditor.getEditorInput());
     String extension = storage.getFullPath().getFileExtension();
     if (extension == null || extension.length() == 0)
     {

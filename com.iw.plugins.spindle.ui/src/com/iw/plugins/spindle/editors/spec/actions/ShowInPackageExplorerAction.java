@@ -26,10 +26,10 @@
 
 package com.iw.plugins.spindle.editors.spec.actions;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.core.BinaryType;
-import org.eclipse.jdt.internal.core.JarEntryFile;
+import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -42,45 +42,42 @@ import com.iw.plugins.spindle.ui.util.Revealer;
  */
 public class ShowInPackageExplorerAction extends OpenDeclarationAction
 {
-  public static final String ACTION_ID = UIPlugin.PLUGIN_ID
-      + ".spec.showInPackageExplorer";
+    public static final String ACTION_ID = UIPlugin.PLUGIN_ID + ".spec.showInPackageExplorer";
 
-  public ShowInPackageExplorerAction()
-  {
-    super();
-    setText(UIPlugin.getString(ACTION_ID));
-    setId(ACTION_ID);
-  }
-
-  
-  protected void reveal(Object [] results)
-  {
-    for (int i = 0; i < results.length; i++)
+    public ShowInPackageExplorerAction()
     {
-        Object result = results[i];
-        if (result instanceof BinaryType || result instanceof JarEntryFile)
+        super();
+        setText(UIPlugin.getString(ACTION_ID));
+        setId(ACTION_ID);
+    }
+
+    protected void reveal(Object[] results)
+    {
+        for (int i = 0; i < results.length; i++)
         {
-          IStorage storage = getEditorStorage();
-          IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
-         
-          if (jproject != null)
-          {
-            Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-                .getDefault()
-                .getActiveWorkbenchWindow(), jproject);
-          } else
-          {
-            Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-                .getDefault()
-                .getActiveWorkbenchWindow());
-          }
-        } else
-        {
-          Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-              .getDefault()
-              .getActiveWorkbenchWindow());
+            Object result = results[i];
+            if (result instanceof SourceType || result instanceof IResource)
+            {
+                Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault()
+                        .getActiveWorkbenchWindow());
+            }
+            else
+            {
+                IStorage storage = getEditorStorage();
+                IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
+
+                if (jproject != null)
+                {
+                    Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault()
+                            .getActiveWorkbenchWindow(), jproject);
+                }
+                else
+                {
+                    Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault()
+                            .getActiveWorkbenchWindow());
+                }
+            }
         }
     }
-  }
 
 }

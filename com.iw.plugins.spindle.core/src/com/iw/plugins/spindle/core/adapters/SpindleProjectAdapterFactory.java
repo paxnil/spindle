@@ -23,7 +23,9 @@ import org.eclipse.ui.IFileEditorInput;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.ClasspathSearch;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
 import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 
 /**
  * @author Administrator TODO To change the template for this generated type comment go to Window -
@@ -57,9 +59,9 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
         if (adapterType == ITapestryProject.class)
         {
             ITapestryProject result = null;
-            
+
             IProject project = (IProject) adaptToProject(obj);
-            
+
             if (project != null)
             {
                 result = TapestryProject.create(project);
@@ -101,6 +103,10 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
             return getProjectFor((JarEntryFile) obj);
 
         }
+        else if (obj instanceof JarEntryFileWrapper)
+        {
+            return getProjectFor((JarEntryFileWrapper) obj);
+        }
         else if (obj instanceof IFileEditorInput)
         {
 
@@ -132,6 +138,11 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
     }
 
     private IProject getProjectFor(JarEntryFile jarFile)
+    {
+        return getProjectFor((JarEntryFileWrapper) JarEntryFileUtil.wrap(jarFile));
+    }
+
+    private IProject getProjectFor(JarEntryFileWrapper jarFile)
     {
         ClasspathSearch lookup = null;
 

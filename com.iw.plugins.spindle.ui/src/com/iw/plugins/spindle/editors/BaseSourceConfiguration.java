@@ -81,7 +81,7 @@ public abstract class BaseSourceConfiguration extends TextSourceViewerConfigurat
 
     public IReconciler getReconciler(ISourceViewer sourceViewer)
     {
-        if (getEditor() != null && getEditor().isEditable())
+        if (getEditor() != null)
         {
             Reconciler reconciler = new Reconciler(getEditor(),
                     new ReconcilingStrategy(getEditor()), false);

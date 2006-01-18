@@ -110,7 +110,7 @@ public abstract class BaseAction extends Action implements IEditorActionDelegate
     {
         Editor editor = getSpindleEditor();
         if (editor != null)
-            return editor.getStorage();
+            return Editor.getStorage(editor.getEditorInput());
         return null;
     }
 
@@ -133,7 +133,8 @@ public abstract class BaseAction extends Action implements IEditorActionDelegate
     protected IType resolveType(String typeName)
     {
 
-        IStorage storage = getSpindleEditor().getStorage();
+        Editor spindleEditor = getSpindleEditor();
+        IStorage storage = Editor.getStorage(spindleEditor.getEditorInput());
         IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
         if (jproject == null || typeName == null)
             return null;

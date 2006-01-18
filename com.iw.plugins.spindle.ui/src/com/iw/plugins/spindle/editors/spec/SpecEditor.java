@@ -39,8 +39,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jface.action.IAction;
@@ -236,7 +238,7 @@ public class SpecEditor extends Editor
 
     private void pingProjectState()
     {
-        IStorage storage = getStorage();
+        IStorage storage = getStorage(getEditorInput());
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         if (!storage.isReadOnly())
@@ -327,7 +329,7 @@ public class SpecEditor extends Editor
     {
         ICoreNamespace result = null;
 
-        IStorage storage = getStorage();
+        IStorage storage = getStorage(getEditorInput());
         IProject project = (IProject) storage.getAdapter(IProject.class);
         if (project == null)
             return result;
@@ -374,7 +376,7 @@ public class SpecEditor extends Editor
      */
     public IComponentSpecification getComponent()
     {
-        IStorage storage = getStorage();
+        IStorage storage = getStorage(getEditorInput());
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
@@ -398,15 +400,12 @@ public class SpecEditor extends Editor
     {
         super.doSetInput(input);
         fReconciler = null;
-        if (input instanceof IFileEditorInput)
+        IStorage storage = ((IStorageEditorInput) input).getStorage();
+        String extension = new Path(storage.getName()).getFileExtension();
+
+        if (extension != null)
         {
-            setRulerContextMenuId("#TapestrySpecificationRulerContext"); //$NON-NLS-1$
-            setEditorContextMenuId("#TapestrySpecificationMenuContext");
-            // only files have reconcilers
-            IFile file = ((IFileEditorInput) input).getFile();
-            String extension = file.getFullPath().getFileExtension();
-            if (extension == null)
-                return;
+
             if ("application".equals(extension))
             {
                 fReconciler = new ApplicationReconciler();
@@ -420,6 +419,13 @@ public class SpecEditor extends Editor
             {
                 fReconciler = new LibraryReconciler();
             }
+
+        }
+
+        if (isEditable())
+        {
+            setRulerContextMenuId("#TapestrySpecificationRulerContext");
+            setEditorContextMenuId("#TapestrySpecificationMenuContext");
             initializeFoldingRegions();
         }
         else
@@ -704,6 +710,14 @@ public class SpecEditor extends Editor
         public final void reconcile(IProblemCollector problemCollector,
                 IProgressMonitor progressMonitor)
         {
+            if (!isEditable())
+            {
+                fireReconcileStarted();
+                fReconciledSpec = getSpecification();
+                fireReconciled(fReconciledSpec);
+                return;
+            }
+
             Assert.isNotNull(problemCollector);
             fireReconcileStarted();
             this.collector = problemCollector;
@@ -1047,7 +1061,7 @@ public class SpecEditor extends Editor
     protected void editorContextMenuAboutToShow(IMenuManager menu)
     {
         super.editorContextMenuAboutToShow(menu);
-        if (!(getStorage() instanceof JarEntryFile))
+        if ((getStorage(getEditorInput()) instanceof IFile))
         {
             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);

@@ -72,6 +72,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
@@ -93,6 +94,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
 import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.editors.actions.BaseAction;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
@@ -175,7 +177,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
 
     protected boolean fShouldReconcile = false;
 
-    protected IEditorInput fInput;
+   
 
     protected IContentOutlinePage fOutline = null;
 
@@ -190,6 +192,8 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     private IPropertyChangeListener fPreferenceListener;
 
     private InformationPresenter fInformationPresenter;
+
+    protected Object fReadOnlySpecification;
 
     public Editor()
     {
@@ -359,33 +363,35 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
 
     protected void doSetInput(IEditorInput input) throws CoreException
     {
-        super.doSetInput(input);
-        fInput = input;
+        super.doSetInput(input); 
+        fReadOnlySpecification = null;
         if (fOutline != null)
             fOutline.dispose();
         fOutline = createContentOutlinePage(input);
         fShouldReconcile = getPreferenceStore().getBoolean(fReconcileSwitchKey);
-    }
-
-    public IStorage getStorage()
-    {
-        IEditorInput input = getEditorInput();
-        if (input instanceof JarEntryEditorInput)
-            return ((JarEntryEditorInput) input).getStorage();
-
-        return (IStorage) input.getAdapter(IStorage.class);
-    }
+    }    
 
     public abstract ICoreNamespace getNamespace(boolean buildProjectIfRequired);
     
     public final ICoreNamespace getNamespace() {
         return getNamespace(true);
     }
+    
+    public static IStorage getStorage(IEditorInput input)
+    {        
+        if (input instanceof JarEntryEditorInput)
+            return JarEntryFileUtil.wrap(((JarEntryEditorInput) input).getStorage());
+
+        return (IStorage) input.getAdapter(IStorage.class);
+    }
 
     public Object getSpecification()
     {
+        if (fReadOnlySpecification != null)
+            return fReadOnlySpecification;
+        
         Object result = null;
-        IStorage storage = getStorage();
+        IStorage storage = getStorage(getEditorInput());
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
@@ -416,6 +422,8 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         {
             // do nothing.
         }
+        if (!isEditable())
+            fReadOnlySpecification = result;
 
         return result;
     }
@@ -465,7 +473,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
      */
     public boolean isReadyToReconcile()
     {
-        return fShouldReconcile && getSourceViewer() != null && isEditable();
+        return fShouldReconcile && getSourceViewer() != null;
     }
 
     public int getCaretOffset()
@@ -573,7 +581,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     public final ISourceViewer getViewer()
     {
         return getSourceViewer();
-    }
+    }    
 
     /**
      * This action behaves in two different ways: If there is no current text hover, the hover

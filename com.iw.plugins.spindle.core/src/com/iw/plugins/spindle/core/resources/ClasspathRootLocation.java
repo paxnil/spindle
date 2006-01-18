@@ -45,13 +45,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 
 /**
  * Used for the root of the Classpath
@@ -60,6 +60,27 @@ import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
  */
 public class ClasspathRootLocation extends AbstractRootLocation
 {
+    
+  public static Object [] getNonJavaResources(IPackageFragment pkg) throws CoreException {
+      Object [] result = new Object [0];
+      if (pkg.getKind() == IPackageFragmentRoot.K_BINARY) {
+          result = JarEntryFileUtil.getNonJavaResources(pkg);
+      } else {
+          IContainer container = (IContainer) pkg.getUnderlyingResource();
+          if (container != null && container.exists())
+          {
+            IResource[] members = container.members(false);
+            ArrayList resultList = new ArrayList();
+            for (int i = 0; i < members.length; i++)
+            {
+              if (members[i] instanceof IFile)
+                resultList.add(members[i]);
+            }
+            result = resultList.toArray();
+          }
+      }
+      return result;
+  }
 
   IJavaProject fJavaProject;
   ClasspathSearch fSearch;
@@ -202,11 +223,11 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
       IContainer container = ((IResource) storage).getParent();
       return (IPackageFragment) JavaCore.create(container);
-    } else if (storage instanceof JarEntryFile)
+    } else if (storage instanceof JarEntryFileWrapper)
     {
       try
       {
-        return JarEntryFileUtil.getPackageFragment(fJavaProject, (JarEntryFile) storage);
+        return JarEntryFileUtil.getPackageFragment(fJavaProject, (JarEntryFileWrapper) storage);
       } catch (CoreException e)
       {
         TapestryCore.log(e);
@@ -223,39 +244,40 @@ public class ClasspathRootLocation extends AbstractRootLocation
       Object[] nonJavaResources = null;
       try
       {
-        IPackageFragmentRoot root = (IPackageFragmentRoot) fragments[i].getParent();
-        if (root.getKind() == IPackageFragmentRoot.K_SOURCE)
-        {
-          IFolder folder = (IFolder) fragments[i].getUnderlyingResource();
-          try
-          {
-            nonJavaResources = folder.members();
-          } catch (CoreException e1)
-          {
-            // do nothing
-          }
-        } else
-        {
-          if (fragments[i].isReadOnly())
-          {
-            //TODO - is this the correct check for a package in a jar file?
-            nonJavaResources = fragments[i].getNonJavaResources();
-          } else
-          {
-            IContainer container = (IContainer) fragments[i].getUnderlyingResource();
-            if (container != null && container.exists())
-            {
-              IResource[] members = container.members(false);
-              ArrayList resultList = new ArrayList();
-              for (int j = 0; j < members.length; j++)
-              {
-                if (members[j] instanceof IFile)
-                  resultList.add(members[j]);
-              }
-              nonJavaResources = resultList.toArray();
-            }
-          }
-        }
+          nonJavaResources = getNonJavaResources(fragments[i]);
+//        IPackageFragmentRoot root = (IPackageFragmentRoot) fragments[i].getParent();
+//        if (root.getKind() == IPackageFragmentRoot.K_SOURCE)
+//        {
+//          IFolder folder = (IFolder) fragments[i].getUnderlyingResource();
+//          try
+//          {
+//            nonJavaResources = folder.members();
+//          } catch (CoreException e1)
+//          {
+//            // do nothing
+//          }
+//        } else
+//        {
+//          if (fragments[i].isReadOnly())
+//          {
+//            //TODO - is this the correct check for a package in a jar file?
+//            nonJavaResources = JarEntryFileUtil.getJarNonJavaResources(fragments[i]);
+//          } else
+//          {
+//            IContainer container = (IContainer) fragments[i].getUnderlyingResource();
+//            if (container != null && container.exists())
+//            {
+//              IResource[] members = container.members(false);
+//              ArrayList resultList = new ArrayList();
+//              for (int j = 0; j < members.length; j++)
+//              {
+//                if (members[j] instanceof IFile)
+//                  resultList.add(members[j]);
+//              }
+//              nonJavaResources = resultList.toArray();
+//            }
+//          }
+//        }
       } catch (CoreException e)
       {
         TapestryCore.log(e);

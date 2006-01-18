@@ -26,17 +26,21 @@
 
 package com.iw.plugins.spindle.core.util;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 
@@ -47,16 +51,92 @@ import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
  */
 public class JarEntryFileUtil
 {
-    static private final int start = "JarEntryFile[".length();
+    static private final int start = "JarEntryFile[".length();    
+    
+    public static IStorage wrap(JarEntryFile entry) {
+        Assert.isNotNull(entry);
+        return new JarEntryFileWrapper(entry);
+    }
+    
+    public static IStorage wrap(IStorage storage) {
+        if (storage instanceof JarEntryFile)
+            return wrap((JarEntryFile)storage);
+        return storage;
+    }
+    
+    public static Object [] getNonJavaResources(IPackageFragment fragment) throws JavaModelException {
+        Assert.isTrue(fragment.getKind() == IPackageFragmentRoot.K_BINARY);
+        Object [] resources = fragment.getNonJavaResources();
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < resources.length; i++)
+        {
+            result.add(new JarEntryFileWrapper((JarEntryFile)resources[i]));
+        }
+        return result.toArray();
+    }
+    
+    public static class JarEntryFileWrapper implements IStorage {
+        JarEntryFile entry;
+        public JarEntryFileWrapper(JarEntryFile entry) {
+            this.entry = entry;
+        }
+        public InputStream getContents() throws CoreException
+        {
+            return entry.getContents();
+        }
+        public IPath getFullPath()
+        {            
+            return entry.getFullPath();
+        }
+        public String getName()
+        {           
+            return entry.getName();
+        }
+        public boolean isReadOnly()
+        {           
+            return entry.isReadOnly();
+        }
+        public Object getAdapter(Class adapter)
+        {
+          return entry.getAdapter(adapter);
+        }
+        
+        public JarEntryFile getEntry() {
+            return entry;
+        }
+        
+        public boolean equals(Object obj)
+        {
+            if (obj == null)
+                return false;
+            
+            if (!(obj instanceof JarEntryFileWrapper))
+                return false;
+            
+            return this.toString().equals(((JarEntryFileWrapper)obj).toString());
+        }
+        public int hashCode()
+        {           
+            return toString().hashCode();
+        }
+        
+        public String toString()
+        {           
+            return entry.toString();
+        }        
+    }
+    
+    
+    
 
-    public static String getJarPath(JarEntryFile entry)
+    public static String getJarPath(JarEntryFileWrapper entry)
     {
         String content = entry.toString();
         int stop = content.indexOf("::");
         return content.substring(start, stop);
     }
 
-    public static String getPackageName(JarEntryFile entry)
+    public static String getPackageName(JarEntryFileWrapper entry)
     {
         String content = entry.toString();
         int start = content.indexOf("::");
@@ -69,13 +149,13 @@ public class JarEntryFileUtil
     }
 
     public static IPackageFragmentRoot getPackageFragmentRoot(IJavaProject project,
-            JarEntryFile entry) throws CoreException
+            JarEntryFileWrapper entry) throws CoreException
     {
         return getPackageFragmentRoot(project, entry, true);
     }
 
     private static IPackageFragmentRoot getPackageFragmentRoot(IJavaProject project,
-            JarEntryFile entry, boolean includeOtherProjects) throws CoreException
+            JarEntryFileWrapper entry, boolean includeOtherProjects) throws CoreException
     {
         String path = getJarPath(entry);
         IPackageFragmentRoot[] roots = includeOtherProjects ? project.getAllPackageFragmentRoots()
@@ -91,13 +171,13 @@ public class JarEntryFileUtil
         return null;
     }
 
-    public static IPackageFragment getPackageFragment(IJavaProject project, JarEntryFile entry)
+    public static IPackageFragment getPackageFragment(IJavaProject project, JarEntryFileWrapper entry)
             throws CoreException
     {
         return getPackageFragment(project, entry, true);
     }
 
-    private static IPackageFragment getPackageFragment(IJavaProject project, JarEntryFile entry,
+    private static IPackageFragment getPackageFragment(IJavaProject project, JarEntryFileWrapper entry,
             boolean includeOtherProjects) throws CoreException
     {
         IPackageFragmentRoot root = getPackageFragmentRoot(project, entry, includeOtherProjects);
@@ -117,7 +197,7 @@ public class JarEntryFileUtil
         return null;
     }
 
-    public static IPackageFragment[] getPackageFragments(IWorkspaceRoot root, JarEntryFile entry)
+    public static IPackageFragment[] getPackageFragments(IWorkspaceRoot root, JarEntryFileWrapper entry)
             throws CoreException
     {
         ArrayList result = new ArrayList();

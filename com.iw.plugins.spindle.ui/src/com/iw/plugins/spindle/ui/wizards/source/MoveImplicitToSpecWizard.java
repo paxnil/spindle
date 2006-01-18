@@ -64,6 +64,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
 
@@ -683,7 +684,7 @@ public class MoveImplicitToSpecWizard extends Wizard
 
   public IStorage getTemplateStorage()
   {
-    return fTemplateEditor.getStorage();
+    return Editor.getStorage(fTemplateEditor.getEditorInput());
   }
 
   public IStorage getSpecStorage()
