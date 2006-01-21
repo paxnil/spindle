@@ -84,7 +84,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
         INamespace namespace = getSpindleEditor().getNamespace(false);
         if (namespace == null)
         {
-            status.setError("This file can not be seen by the Tapestry builder");
+            status.setError("This file can/has not been visited by the Tapestry builder");
             return status;
         }
 

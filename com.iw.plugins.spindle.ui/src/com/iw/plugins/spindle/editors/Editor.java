@@ -31,6 +31,7 @@ import java.util.ResourceBundle;
 
 import net.sf.solareclipse.xml.ui.XMLPlugin;
 
+import org.eclipse.core.internal.resources.Project;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -60,6 +62,7 @@ import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.source.IAnnotationAccess;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -69,6 +72,7 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -87,7 +91,9 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryModelException;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -176,8 +182,6 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
             + ".editor.commands.jump.template";
 
     protected boolean fShouldReconcile = false;
-
-   
 
     protected IContentOutlinePage fOutline = null;
 
@@ -363,22 +367,40 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
 
     protected void doSetInput(IEditorInput input) throws CoreException
     {
-        super.doSetInput(input); 
+        super.doSetInput(input);
         fReadOnlySpecification = null;
         if (fOutline != null)
             fOutline.dispose();
         fOutline = createContentOutlinePage(input);
         fShouldReconcile = getPreferenceStore().getBoolean(fReconcileSwitchKey);
-    }    
+        clearStatusLine();
+    }
+
+    protected void clearStatusLine()
+    {
+        Display display = Display.getDefault();
+        display.asyncExec(new Runnable()
+        {
+            public void run()
+            {
+                IStatusLineManager manager = getEditorSite().getActionBars().getStatusLineManager();
+                if (manager == null)
+                    return;
+                manager.setMessage(null);
+                manager.setErrorMessage(null);
+            }
+        });       
+    }
 
     public abstract ICoreNamespace getNamespace(boolean buildProjectIfRequired);
-    
-    public final ICoreNamespace getNamespace() {
+
+    public final ICoreNamespace getNamespace()
+    {
         return getNamespace(true);
     }
-    
+
     public static IStorage getStorage(IEditorInput input)
-    {        
+    {
         if (input instanceof JarEntryEditorInput)
             return JarEntryFileUtil.wrap(((JarEntryEditorInput) input).getStorage());
 
@@ -389,7 +411,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     {
         if (fReadOnlySpecification != null)
             return fReadOnlySpecification;
-        
+
         Object result = null;
         IStorage storage = getStorage(getEditorInput());
         IProject project = (IProject) storage.getAdapter(IProject.class);
@@ -455,7 +477,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     {
         if (Editor.class == clazz)
             return this;
-        
+
         if (IContentOutlinePage.class == clazz)
             return fOutline;
 
@@ -506,13 +528,17 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
      */
     public void dispose()
     {
-
         super.dispose();
         if (fPreferenceListener != null)
         {
             UIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(
                     fPreferenceListener);
             fPreferenceListener = null;
+        }
+
+        for (int i = 0; i < fJumpActions.length; i++)
+        {
+            fJumpActions[i].dispose();
         }
     }
 
@@ -581,7 +607,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     public final ISourceViewer getViewer()
     {
         return getSourceViewer();
-    }    
+    }
 
     /**
      * This action behaves in two different ways: If there is no current text hover, the hover

@@ -110,22 +110,24 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="Tapestry Template Editor"
-            default="false"
-            icon="./icons/full/html16.gif"
-            extensions="htm,html"
-            contributorClass="com.iw.plugins.spindle.editors.template.TemplateEditorContributor"
             class="com.iw.plugins.spindle.editors.template.TemplateEditor"
-            id="com.iw.plugins.spindle.ui.editors.template">
+            contributorClass="com.iw.plugins.spindle.editors.template.TemplateEditorContributor"
+            default="false"
+            extensions="htm,html"
+            icon="./icons/full/html16.gif"
+            id="com.iw.plugins.spindle.ui.editors.template"
+            matchingStrategy="com.iw.plugins.spindle.editors.template.TemplateEditorMatchingStrategy"
+            name="Tapestry Template Editor">
       </editor>
       <editor
-            name="Tapestry Spec Editor"
-            default="true"
-            icon="./icons/full/application16.gif"
-            extensions="application, page, jwc, library"
-            contributorClass="com.iw.plugins.spindle.editors.spec.SpecEditorContributor"
             class="com.iw.plugins.spindle.editors.spec.SpecEditor"
-            id="com.iw.plugins.spindle.ui.editors.spec">
+            contributorClass="com.iw.plugins.spindle.editors.spec.SpecEditorContributor"
+            default="true"
+            extensions="application, page, jwc, library"
+            icon="./icons/full/application16.gif"
+            id="com.iw.plugins.spindle.ui.editors.spec"
+            matchingStrategy="com.iw.plugins.spindle.editors.spec.SpecEditorMatchingStrategy"
+            name="Tapestry Spec Editor">
       </editor>
       
      

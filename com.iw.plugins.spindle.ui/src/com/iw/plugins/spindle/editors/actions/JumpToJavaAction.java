@@ -26,18 +26,25 @@
 
 package com.iw.plugins.spindle.editors.actions;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IStorageEditorInput;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
@@ -56,12 +63,27 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  * 
  * @author glongman@gmail.com
  */
-public class JumpToJavaAction extends BaseJumpAction
+public class JumpToJavaAction extends BaseJumpAction implements IElementChangedListener
 {
+
+    IType fType;
 
     public JumpToJavaAction()
     {
         super();
+        JavaCore.addElementChangedListener(this);
+    }
+
+    public JumpToJavaAction(IType type)
+    {
+        this();
+        fType = type;
+    }
+
+    public void dispose()
+    {
+        super.dispose();
+        JavaCore.removeElementChangedListener(this);
     }
 
     /*
@@ -95,6 +117,13 @@ public class JumpToJavaAction extends BaseJumpAction
         return result;
     }
 
+    private boolean typeResolved(String typeName)
+    {
+        if (fType == null || typeName == null)
+            return false;
+        return fType.getFullyQualifiedName().equals(typeName.trim());
+    }
+
     private Object getTypeFromTemplate()
     {
         Editor editorPart = (Editor) getSpindleEditor();
@@ -105,12 +134,12 @@ public class JumpToJavaAction extends BaseJumpAction
             String typeName = componentSpec.getComponentClassName();
             if (BaseAction.PRIMITIVE_TYPES.contains(typeName.trim()))
                 return null;
-            IType type = resolveType(typeName);
-            if (type != null)
+            IType javaType = findType(typeName);
+            if (javaType != null)
             {
                 ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
-                if (!resolver.canResolve(type))
-                    return type;
+                if (!resolver.canResolve(javaType))
+                    return javaType;
 
                 if (!resolver.doResolve(
                         (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation(),
@@ -121,6 +150,21 @@ public class JumpToJavaAction extends BaseJumpAction
             }
         }
         return null;
+    }
+
+    private IType findType(String typeName)
+    {
+        IType javaType = null;
+        if (typeResolved(typeName))
+        {
+            javaType = fType;
+        }
+        else
+        {
+            javaType = resolveType(typeName);
+            fType = javaType;
+        }
+        return javaType;
     }
 
     private Object getTypeFromSpec()
@@ -151,27 +195,27 @@ public class JumpToJavaAction extends BaseJumpAction
                         String attrValue = attribute.getAttributeValue();
                         if (attrValue == null)
                             return null;
-                        
+
                         if (BaseAction.PRIMITIVE_TYPES.contains(attrValue.trim()))
                             return null;
 
-                        IType javaType = resolveType(attrValue);
+                        IType javaType = findType(attrValue);
                         if (javaType != null)
                         {
                             try
                             {
-                                IStorage storage = ((IStorageEditorInput) fEditor.getEditorInput())
-                                        .getStorage();
+                                ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
+                                if (!resolver.canResolve(javaType))
+                                    return javaType;
 
-                                ITapestryProject tproject = (ITapestryProject) storage
-                                        .getAdapter(ITapestryProject.class);
+                                IStorage storage = ((IStorageEditorInput) fEditor.getEditorInput())
+                                        .getStorage(); // potentially expensive!!
+
+                                ITapestryProject tproject = (ITapestryProject) javaType
+                                        .getJavaProject().getAdapter(ITapestryProject.class);
 
                                 if (tproject == null)
-                                {
-                                    UIPlugin
-                                            .log("bug [ 1200049 ] NullPointerException[JumpToJava]");
-                                    return null;
-                                }
+                                    return javaType;
 
                                 IResourceWorkspaceLocation specLocation;
                                 if (storage instanceof IFile)
@@ -188,10 +232,6 @@ public class JumpToJavaAction extends BaseJumpAction
                                 SpecEditor editorPart = (SpecEditor) getSpindleEditor();
                                 IComponentSpecification componentSpec = (IComponentSpecification) editorPart
                                         .getSpecification();
-
-                                ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
-                                if (!resolver.canResolve(javaType))
-                                    return javaType;
 
                                 if (!resolver.doResolve(specLocation, componentSpec).isOK())
                                     return javaType;
@@ -266,6 +306,16 @@ public class JumpToJavaAction extends BaseJumpAction
             else if (typeObject instanceof IStorage)
                 reveal((IStorage) typeObject);
         }
+    }
+
+    public void elementChanged(ElementChangedEvent event)
+    {
+        if (fType == null || event.getType() != ElementChangedEvent.POST_CHANGE)
+            return;
+        
+        if (!fType.exists())
+            fType = null;
+    
     }
 
 }

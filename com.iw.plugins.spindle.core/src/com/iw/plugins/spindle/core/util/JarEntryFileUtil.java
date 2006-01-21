@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
+import org.eclipse.ui.IStorageEditorInput;
 
 /**
  * TODO Add Type comment
@@ -51,83 +53,100 @@ import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
  */
 public class JarEntryFileUtil
 {
-    static private final int start = "JarEntryFile[".length();    
-    
-    public static IStorage wrap(JarEntryFile entry) {
+    static private final int start = "JarEntryFile[".length();
+
+    public static IStorage wrap(JarEntryFile entry)
+    {
         Assert.isNotNull(entry);
         return new JarEntryFileWrapper(entry);
     }
-    
-    public static IStorage wrap(IStorage storage) {
-        if (storage instanceof JarEntryFile)
-            return wrap((JarEntryFile)storage);
-        return storage;
+
+    public static IStorage wrap(IStorage storage)
+    {
+       return wrap(storage, false);
     }
     
-    public static Object [] getNonJavaResources(IPackageFragment fragment) throws JavaModelException {
+    public static IStorage wrap(IStorage storage, boolean mustBeJarEntryFile)
+    {
+        if (storage instanceof JarEntryFile)
+            return wrap((JarEntryFile) storage);
+        if (mustBeJarEntryFile)
+            return null;
+        return storage;
+    }
+
+    public static Object[] getNonJavaResources(IPackageFragment fragment) throws JavaModelException
+    {
         Assert.isTrue(fragment.getKind() == IPackageFragmentRoot.K_BINARY);
-        Object [] resources = fragment.getNonJavaResources();
+        Object[] resources = fragment.getNonJavaResources();
         ArrayList result = new ArrayList();
         for (int i = 0; i < resources.length; i++)
         {
-            result.add(new JarEntryFileWrapper((JarEntryFile)resources[i]));
+            result.add(new JarEntryFileWrapper((JarEntryFile) resources[i]));
         }
         return result.toArray();
     }
-    
-    public static class JarEntryFileWrapper implements IStorage {
+
+    public static class JarEntryFileWrapper implements IStorage
+    {
         JarEntryFile entry;
-        public JarEntryFileWrapper(JarEntryFile entry) {
+
+        public JarEntryFileWrapper(JarEntryFile entry)
+        {
             this.entry = entry;
         }
+
         public InputStream getContents() throws CoreException
         {
             return entry.getContents();
         }
+
         public IPath getFullPath()
-        {            
+        {
             return entry.getFullPath();
         }
+
         public String getName()
-        {           
+        {
             return entry.getName();
         }
+
         public boolean isReadOnly()
-        {           
+        {
             return entry.isReadOnly();
         }
+
         public Object getAdapter(Class adapter)
         {
-          return entry.getAdapter(adapter);
+            return entry.getAdapter(adapter);
         }
-        
-        public JarEntryFile getEntry() {
+
+        public JarEntryFile getEntry()
+        {
             return entry;
         }
-        
+
         public boolean equals(Object obj)
         {
             if (obj == null)
                 return false;
-            
+
             if (!(obj instanceof JarEntryFileWrapper))
                 return false;
-            
-            return this.toString().equals(((JarEntryFileWrapper)obj).toString());
+
+            return this.toString().equals(((JarEntryFileWrapper) obj).toString());
         }
+
         public int hashCode()
-        {           
+        {
             return toString().hashCode();
         }
-        
+
         public String toString()
-        {           
+        {
             return entry.toString();
-        }        
+        }
     }
-    
-    
-    
 
     public static String getJarPath(JarEntryFileWrapper entry)
     {
@@ -171,14 +190,14 @@ public class JarEntryFileUtil
         return null;
     }
 
-    public static IPackageFragment getPackageFragment(IJavaProject project, JarEntryFileWrapper entry)
-            throws CoreException
+    public static IPackageFragment getPackageFragment(IJavaProject project,
+            JarEntryFileWrapper entry) throws CoreException
     {
         return getPackageFragment(project, entry, true);
     }
 
-    private static IPackageFragment getPackageFragment(IJavaProject project, JarEntryFileWrapper entry,
-            boolean includeOtherProjects) throws CoreException
+    private static IPackageFragment getPackageFragment(IJavaProject project,
+            JarEntryFileWrapper entry, boolean includeOtherProjects) throws CoreException
     {
         IPackageFragmentRoot root = getPackageFragmentRoot(project, entry, includeOtherProjects);
         if (root == null)
@@ -197,8 +216,8 @@ public class JarEntryFileUtil
         return null;
     }
 
-    public static IPackageFragment[] getPackageFragments(IWorkspaceRoot root, JarEntryFileWrapper entry)
-            throws CoreException
+    public static IPackageFragment[] getPackageFragments(IWorkspaceRoot root,
+            JarEntryFileWrapper entry) throws CoreException
     {
         ArrayList result = new ArrayList();
         IProject[] projects = root.getProjects();
@@ -215,4 +234,29 @@ public class JarEntryFileUtil
         return (IPackageFragment[]) result.toArray(new IPackageFragment[result.size()]);
     }
 
+    public static boolean inputsEqual(IStorageEditorInput lhs, IStorageEditorInput rhs)
+            throws CoreException
+    {
+        // if (lhs.equals(rhs)) can't do this with JarEditorInput as it calls JarEntry.equals()
+        // return true;
+        IStorage left = lhs.getStorage();
+        IStorage right = rhs.getStorage();
+
+        boolean leftIsResource = left instanceof IResource;
+        boolean rightIsResource = right instanceof IResource;
+
+        if (leftIsResource && rightIsResource)
+            return left.equals(right);
+
+        if ((!leftIsResource && rightIsResource) || (leftIsResource && !rightIsResource))
+            return false;
+
+        left = wrap(left, true);
+        right = wrap(right, true);
+
+        if (left != null && right != null)
+            return left.equals(right);
+
+        return false;
+    }
 }

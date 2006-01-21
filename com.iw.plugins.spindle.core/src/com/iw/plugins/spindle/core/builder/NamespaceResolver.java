@@ -186,6 +186,7 @@ public abstract class NamespaceResolver
 
         try
         {
+            fBuild.fTapestryBuilder.fNotifier.checkCancel();
             fWorking = true;
             fComponentStack.clear();
             //            fProblemCollector.beginCollecting();
@@ -343,10 +344,10 @@ public abstract class NamespaceResolver
                     ICoreNamespace childNamespace = childResolver.resolve();
 
                 }
-                else if (fBuild.fTapestryBuilder.DEBUG)
-                {
-                    System.out.println("not found:" + libLocation);
-                }
+//                else if (fBuild.fTapestryBuilder.DEBUG)
+//                {
+//                    System.out.println("not found:" + libLocation);
+//                }
             }
         }
     }

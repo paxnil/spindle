@@ -50,274 +50,291 @@ import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 public class ClasspathSearch implements ISearch
 {
 
-  protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
+    protected HashMap fPackageFragments;
 
-  protected HashMap fPackageFragments;
+    protected IJavaProject fJavaProject;
 
-  protected IJavaProject fJavaProject;
-  
-  protected ITapestryProject fTapestryProject;
+    protected ITapestryProject fTapestryProject;
 
-  private boolean fInitialized = false;
+    private boolean fInitialized = false;
 
-  public ClasspathSearch()
-  {
-  }
-
-  public void configure(Object root) throws CoreException
-  {
-    this.fJavaProject = (IJavaProject) root;
-    configureClasspath();
-    fInitialized = true;
-  }
-
-  /* pull the classpath info we need from the JavaModel */
-  protected void configureClasspath() throws TapestryModelException
-  {
-    try
+    public ClasspathSearch()
     {
-      fPackageFragmentRoots = fJavaProject.getAllPackageFragmentRoots();
-      fPackageFragments = new HashMap();
-      IPackageFragment[] frags = getPackageFragmentsInRoots(
-          fPackageFragmentRoots,
-          fJavaProject);
-      for (int i = 0; i < frags.length; i++)
-      {
-        IPackageFragment fragment = frags[i];
-        String elementName = fragment
-            .getElementName();
-        
-        if (elementName.startsWith("java.") || elementName.startsWith("sun.") || elementName.startsWith("javax") || elementName.startsWith("com.sun."))
-            continue;
-        
-        IPackageFragment[] entry = (IPackageFragment[]) fPackageFragments.get(elementName);
-        if (entry == null)
+    }
+
+    public void configure(Object root) throws CoreException
+    {
+        this.fJavaProject = (IJavaProject) root;
+        configureClasspath();
+        fInitialized = true;
+    }
+
+    /* pull the classpath info we need from the JavaModel */
+    protected void configureClasspath() throws TapestryModelException
+    {
+        try
         {
-          entry = new IPackageFragment[1];
-          entry[0] = fragment;
-          fPackageFragments.put(elementName, entry);
-        } else
-        {
-          IPackageFragment[] copy = new IPackageFragment[entry.length + 1];
-          System.arraycopy(entry, 0, copy, 0, entry.length);
-          copy[entry.length] = fragment;
-          fPackageFragments.put(elementName, copy);
+            IPackageFragmentRoot[] roots = fJavaProject.getAllPackageFragmentRoots();
+            fPackageFragments = new HashMap();
+            IPackageFragment[] frags = getPackageFragmentsInRoots(roots, fJavaProject);
+            for (int i = 0; i < frags.length; i++)
+            {
+                IPackageFragment fragment = frags[i];
+
+                String elementName = fragment.getElementName();
+                
+                IPackageFragment[] entry = (IPackageFragment[]) fPackageFragments.get(elementName);
+                if (entry == null)
+                {
+                    entry = new IPackageFragment[1];
+                    entry[0] = fragment;
+                    fPackageFragments.put(elementName, entry);
+                }
+                else
+                {
+                    IPackageFragment[] copy = new IPackageFragment[entry.length + 1];
+                    System.arraycopy(entry, 0, copy, 0, entry.length);
+                    copy[entry.length] = fragment;
+                    fPackageFragments.put(elementName, copy);
+                }
+            }
         }
-      }
-    } catch (JavaModelException e)
-    {
-      throw new TapestryModelException(null);
-    }
-  }
-
-  private IPackageFragment[] getPackageFragmentsInRoots(
-      IPackageFragmentRoot[] roots,
-      IJavaProject project)
-  {
-
-    ArrayList frags = new ArrayList();
-    for (int i = 0; i < roots.length; i++)
-    {
-      IPackageFragmentRoot root = roots[i];
-      try
-      {
-        IJavaElement[] children = root.getChildren();
-
-        int length = children.length;
-        if (length == 0)
-          continue;
-        if (children[0].getParent().getParent().equals(project))
+        catch (JavaModelException e)
         {
-          for (int j = 0; j < length; j++)
-            frags.add(children[j]);
-        } else
-        {
-          for (int j = 0; j < length; j++)
-            frags.add(root.getPackageFragment(children[j].getElementName()));
+            throw new TapestryModelException(null);
         }
-      } catch (JavaModelException e)
-      {
-        // do nothing
-      }
     }
-    IPackageFragment[] fragments = new IPackageFragment[frags.size()];
-    frags.toArray(fragments);
-    return fragments;
-  }
 
-  public void search(ISearchAcceptor acceptor)
-  {
-    if (!fInitialized)
+    private IPackageFragment[] getPackageFragmentsInRoots(IPackageFragmentRoot[] roots,
+            IJavaProject project)
     {
-      throw new Error("not initialized");
-    }
-    
-    for (Iterator iter = fPackageFragments.keySet().iterator(); iter.hasNext();)
-    {
-        String key = (String) iter.next();
-        IPackageFragment[] packages = (IPackageFragment [])fPackageFragments.get(key);
-        if (packages != null)
+
+        ArrayList frags = new ArrayList();
+        for (int i = 0; i < roots.length; i++)
         {
-          for (int j = 0, packageCount = packages.length; j < packageCount; j++)
-          {
-            boolean keepGoing = searchInPackage((IPackageFragment) packages[j], acceptor);
+            
+            try
+            {
+                IJavaElement[] children = roots[i].getChildren();
+
+                int length = children.length;
+                if (length == 0)
+                    continue;
+
+                for (int j = 0; j < length; j++)
+                {
+                    try
+                    {
+                        String elementName = children[j].getElementName();
+
+                        if (elementName.startsWith("java.") || elementName.startsWith("sun.")
+                                || elementName.startsWith("javax")
+                                || elementName.startsWith("com.sun."))
+                            break;
+                        
+                        if (((IPackageFragment) children[j]).getNonJavaResources().length == 0)
+                            continue;                      
+
+                        frags.add(children[j]);
+                    }
+                    catch (JavaModelException e)
+                    {
+                        // do nothing
+                    }
+                }
+                
+            }
+            catch (JavaModelException e)
+            {
+                // do nothing
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                throw e;
+            }
+        }
+        return (IPackageFragment[]) frags.toArray(new IPackageFragment[] {});
+    }
+
+    public void search(ISearchAcceptor acceptor)
+    {
+        if (!fInitialized)
+        {
+            throw new Error("not initialized");
+        }
+
+        for (Iterator iter = fPackageFragments.keySet().iterator(); iter.hasNext();)
+        {
+            String key = (String) iter.next();
+            IPackageFragment[] packages = (IPackageFragment[]) fPackageFragments.get(key);
+            if (packages != null)
+            {
+                for (int j = 0, packageCount = packages.length; j < packageCount; j++)
+                {
+                    boolean keepGoing = searchInPackage((IPackageFragment) packages[j], acceptor);
+                    if (!keepGoing)
+                        return;
+                }
+            }
+        }
+    }
+
+    protected boolean searchInPackage(IPackageFragment pkg, ISearchAcceptor acceptor)
+    {
+
+        if (!fInitialized)
+            throw new Error("not initialized");
+
+        boolean keepGoing = true;
+
+        try
+        {
+            int packageFlavor = pkg.getKind();
+
+            switch (packageFlavor)
+            {
+                case IPackageFragmentRoot.K_BINARY:
+                    keepGoing = searchInBinaryPackage(pkg, acceptor);
+                    break;
+                case IPackageFragmentRoot.K_SOURCE:
+                    keepGoing = searchInSourcePackage(pkg, acceptor);
+                    break;
+                default:
+                    return keepGoing;
+            }
+        }
+        catch (JavaModelException e)
+        {
+            TapestryCore.log(e);
+        }
+        return keepGoing;
+    }
+
+    protected boolean searchInBinaryPackage(IPackageFragment pkg, ISearchAcceptor requestor)
+    {
+        boolean keepGoing = true;
+        Object[] jarFiles = null;
+        try
+        {
+            jarFiles = ClasspathRootLocation.getNonJavaResources(pkg);
+        }
+        catch (CoreException npe)
+        {
+            return keepGoing; // the package is not present
+        }
+        int length = jarFiles.length;
+        for (int i = 0; i < length; i++)
+        {
+            JarEntryFileWrapper jarFile = null;
+            try
+            {
+                jarFile = (JarEntryFileWrapper) jarFiles[i];
+            }
+            catch (ClassCastException ccex)
+            {
+                // skip it
+                continue;
+            }
+
+            keepGoing = requestor.accept(pkg, (IStorage) jarFile);
             if (!keepGoing)
-              return;
-          }
+                break;
+
         }
-    }   
-  }
-
-  protected boolean searchInPackage(IPackageFragment pkg, ISearchAcceptor acceptor)
-  {
-
-    if (!fInitialized)
-      throw new Error("not initialized");
-
-    boolean keepGoing = true;   
-
-    try
-    {
-      int packageFlavor = pkg.getKind();
-
-      switch (packageFlavor)
-      {
-        case IPackageFragmentRoot.K_BINARY :
-          keepGoing = searchInBinaryPackage(pkg, acceptor);
-          break;
-        case IPackageFragmentRoot.K_SOURCE :
-          keepGoing = searchInSourcePackage(pkg, acceptor);
-          break;
-        default :
-          return keepGoing;
-      }
-    } catch (JavaModelException e)
-    {
-      TapestryCore.log(e);
-    }
-    return keepGoing;
-  }
-
-  protected boolean searchInBinaryPackage(IPackageFragment pkg, ISearchAcceptor requestor)
-  { 
-    boolean keepGoing = true;
-    Object[] jarFiles = null;
-    try
-    {
-      jarFiles = ClasspathRootLocation.getNonJavaResources(pkg);
-    } catch (CoreException npe)
-    {
-      return keepGoing; // the package is not present
-    }
-    int length = jarFiles.length;
-    for (int i = 0; i < length; i++)
-    {
-      JarEntryFileWrapper jarFile = null;
-      try
-      {
-        jarFile = (JarEntryFileWrapper) jarFiles[i];
-      } catch (ClassCastException ccex)
-      {
-        //skip it
-        continue;
-      }
-
-      keepGoing = requestor.accept(pkg, (IStorage) jarFile);
-      if (!keepGoing)
-          break;
-   
-    }
-    return keepGoing; 
-  }
-
-  protected boolean searchInSourcePackage(IPackageFragment pkg, ISearchAcceptor requestor)
-  {
-      boolean keepGoing = true;
-    Object[] files = null;
-    
-    try
-    {
-      files = getSourcePackageResources(pkg);
-
-    } catch (CoreException npe)
-    {
-      return true; // the package is not present
-    }
-    if (files == null)
-      return true;
-
-    int length = files.length;
-    for (int i = 0; i < length; i++)
-    {
-      IFile file = null;
-      try
-      {
-        file = (IFile) files[i];
-      } catch (ClassCastException ccex)
-      {
-        // skip it
-        continue;
-      }
-
-      keepGoing = requestor.accept(pkg, (IStorage) file);
-      if (!keepGoing)
-          break;
-       
-    }
-    return keepGoing; // continue the search
-  }
-
-  /**
-   * Method getPackageResources.
-   * 
-   * @param pkg
-   * @return Object[]
-   */
-  private Object[] getSourcePackageResources(IPackageFragment pkg) throws CoreException
-  {
-    Object[] result = new Object[0];
-    //        if (!pkg.isDefaultPackage())
-    //        {
-    //            result = pkg.getNonJavaResources();
-    //        } else
-    //        {
-    IContainer container = (IContainer) pkg.getUnderlyingResource();
-    if (container != null && container.exists())
-    {
-      IResource[] members = container.members(false);
-      ArrayList resultList = new ArrayList();
-      for (int i = 0; i < members.length; i++)
-      {
-        if (members[i] instanceof IFile)
-          resultList.add(members[i]);
-      }
-      result = resultList.toArray();
-    }
-    //        }
-    return result;
-  }
-  class JarEntryAcceptor implements ISearchAcceptor
-  {
-    private JarEntryFileWrapper fToBeFound;
-    public boolean success = false;
-
-    public JarEntryAcceptor(JarEntryFileWrapper toBeFound)
-    {
-      fToBeFound = toBeFound;
+        return keepGoing;
     }
 
-    public boolean accept(Object parent, IStorage storage)
+    protected boolean searchInSourcePackage(IPackageFragment pkg, ISearchAcceptor requestor)
     {
-      success = fToBeFound.equals(storage);
-      return !success; //we want to continue until we find it or we run out of stuff!
-    }
-  }
+        boolean keepGoing = true;
+        Object[] files = null;
 
-  public boolean projectContainsJarEntry(final JarEntryFileWrapper entry)
-  {
-    JarEntryAcceptor acceptor = new JarEntryAcceptor(entry);
-    search(acceptor);
-    return acceptor.success;
-  }
+        try
+        {
+            files = getSourcePackageResources(pkg);
+
+        }
+        catch (CoreException npe)
+        {
+            return true; // the package is not present
+        }
+        if (files == null)
+            return true;
+
+        int length = files.length;
+        for (int i = 0; i < length; i++)
+        {
+            IFile file = null;
+            try
+            {
+                file = (IFile) files[i];
+            }
+            catch (ClassCastException ccex)
+            {
+                // skip it
+                continue;
+            }
+
+            keepGoing = requestor.accept(pkg, (IStorage) file);
+            if (!keepGoing)
+                break;
+
+        }
+        return keepGoing; // continue the search
+    }
+
+    /**
+     * Method getPackageResources.
+     * 
+     * @param pkg
+     * @return Object[]
+     */
+    private Object[] getSourcePackageResources(IPackageFragment pkg) throws CoreException
+    {
+        Object[] result = new Object[0];
+        // if (!pkg.isDefaultPackage())
+        // {
+        // result = pkg.getNonJavaResources();
+        // } else
+        // {
+        IContainer container = (IContainer) pkg.getUnderlyingResource();
+        if (container != null && container.exists())
+        {
+            IResource[] members = container.members(false);
+            ArrayList resultList = new ArrayList();
+            for (int i = 0; i < members.length; i++)
+            {
+                if (members[i] instanceof IFile)
+                    resultList.add(members[i]);
+            }
+            result = resultList.toArray();
+        }
+        // }
+        return result;
+    }
+
+    class JarEntryAcceptor implements ISearchAcceptor
+    {
+        private JarEntryFileWrapper fToBeFound;
+
+        public boolean success = false;
+
+        public JarEntryAcceptor(JarEntryFileWrapper toBeFound)
+        {
+            fToBeFound = toBeFound;
+        }
+
+        public boolean accept(Object parent, IStorage storage)
+        {
+            success = fToBeFound.equals(storage);
+            return !success; // we want to continue until we find it or we run out of stuff!
+        }
+    }
+
+    public boolean projectContainsJarEntry(final JarEntryFileWrapper entry)
+    {
+        JarEntryAcceptor acceptor = new JarEntryAcceptor(entry);
+        search(acceptor);
+        return acceptor.success;
+    }
 
 }

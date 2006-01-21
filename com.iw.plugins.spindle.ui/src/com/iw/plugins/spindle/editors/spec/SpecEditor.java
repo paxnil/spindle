@@ -39,11 +39,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -521,12 +519,17 @@ public class SpecEditor extends Editor
     protected void createActions()
     {
         super.createActions();
-        IAction action = new TextOperationAction(UIPlugin.getResourceBundle(),
-                "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS);
-        action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-        markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
-        setAction("ContentAssistProposal", action);
-
+        IAction action;
+        if (isEditable())
+        {
+            action = new TextOperationAction(UIPlugin.getResourceBundle(),
+                    "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS);
+            action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+            markAsStateDependentAction(
+                    ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS,
+                    true);
+            setAction("ContentAssistProposal", action);
+        }
         action = new TextOperationAction(UIPlugin.getResourceBundle(),
                 "ShowOutline.", this, SpecSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
         action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.show.outline");
@@ -572,8 +575,7 @@ public class SpecEditor extends Editor
             public void run()
             {
                 initializeFoldingRegions();
-                IActionBars bars = getEditorSite().getActionBars();
-                bars.getStatusLineManager().setMessage(null);
+                clearStatusLine();
             }
         });
 

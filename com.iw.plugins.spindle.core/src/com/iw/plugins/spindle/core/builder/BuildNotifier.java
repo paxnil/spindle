@@ -134,9 +134,9 @@ public class BuildNotifier
         if (fMonitor != null)
           fMonitor.worked(work - this.fWorkDone);
 
-        if (TapestryBuilder.DEBUG)
-          System.out.println(java.text.NumberFormat.getPercentInstance().format(
-              this.fPercentComplete));
+//        if (TapestryBuilder.DEBUG)
+//          System.out.println(java.text.NumberFormat.getPercentInstance().format(
+//              this.fPercentComplete));
 
         this.fWorkDone = work;
       }

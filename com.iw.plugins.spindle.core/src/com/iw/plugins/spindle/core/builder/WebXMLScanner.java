@@ -342,11 +342,11 @@ public class WebXMLScanner extends AbstractScanner
                 }
             }
         }
-        if (TapestryBuilder.DEBUG)
-        {
-            System.out.println("parsing web.xml found servlet:");
-            System.out.println(newInfo.toString());
-        }
+//        if (TapestryBuilder.DEBUG)
+//        {
+//            System.out.println("parsing web.xml found servlet:");
+//            System.out.println(newInfo.toString());
+//        }
         return newInfo;
     }
 
@@ -522,10 +522,10 @@ public class WebXMLScanner extends AbstractScanner
                     message,
                     false,
                     IProblem.NOT_QUICK_FIXABLE);
-            if (TapestryBuilder.DEBUG)
-            {
-                System.out.println(message);
-            }
+//            if (TapestryBuilder.DEBUG)
+//            {
+//                System.out.println(message);
+//            }
             return false;
         }
         return true;

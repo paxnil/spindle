@@ -75,6 +75,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.Markers;
+import com.sun.net.ssl.internal.ssl.Debug;
 
 /**
  * Abstract base class for full and incremental builds
@@ -177,6 +178,8 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
 
         fBuildQueue.addAll(findAllTapestryArtifacts());
 
+        fNotifier.checkCancel();
+
         resolveFramework(parser);
         try
         {
@@ -192,31 +195,34 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
 
         fNotifier.updateProgressDelta(0.15f);
         if (fBuildQueue.hasWaiting())
-        {
-            int missPriority = TapestryCore.getDefault().getBuildMissPriority();
-            fNotifier.setProcessingProgressPer(0.75f / fBuildQueue.getWaitingCount());
-            while (fBuildQueue.getWaitingCount() > 0)
-            {
+            handleBuildMisses();
 
-                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fBuildQueue
-                        .peekWaiting();
-                fNotifier.processed(location);
-                fBuildQueue.finished(location);
-
-                IStorage storage = location.getStorage();
-                if (missPriority >= 0 && storage != null
-                        && storage.getAdapter(IResource.class) != null)
-                {
-                    IResource resource = (IResource) storage.getAdapter(IResource.class);
-                    recordBuildMiss(missPriority, resource);
-                }
-            }
-        }
         // TODO remove
         System.out.println("template count:" + fTemplateMap.keySet().size());
-        System.out.println(" file specification count" + fFileSpecificationMap.keySet().size());
-        System.out.println(" binary specification count" + fBinarySpecificationMap.keySet().size());
+        System.out.println("file specification count" + fFileSpecificationMap.keySet().size());
+        System.out.println("binary specification count" + fBinarySpecificationMap.keySet().size());
         saveState();
+    }
+
+    protected void handleBuildMisses()
+    {
+        int missPriority = TapestryCore.getDefault().getBuildMissPriority();
+        fNotifier.setProcessingProgressPer(0.75f / fBuildQueue.getWaitingCount());
+        while (fBuildQueue.getWaitingCount() > 0)
+        {
+
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fBuildQueue
+                    .peekWaiting();
+            fNotifier.processed(location);
+            fBuildQueue.finished(location);
+
+            if (missPriority >= 0 && location.isWorkspaceResource())
+            {
+                IStorage storage = location.getStorage();
+                IResource resource = (IResource) storage.getAdapter(IResource.class);
+                recordBuildMiss(missPriority, resource);
+            }
+        }
     }
 
     protected void recordBuildMiss(int missPriority, IResource resource)
@@ -377,10 +383,19 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
      */
     protected List findAllTapestryArtifacts()
     {
-        ArrayList found = new ArrayList();
-        findAllArtifactsInWebContext(found);
-        findAllArtifactsInClasspath(found);
-        return found;
+        long start = System.currentTimeMillis();
+        try
+        {
+            ArrayList found = new ArrayList();
+            findAllArtifactsInWebContext(found);
+            findAllArtifactsInClasspath(found);
+            return found;
+        }
+        finally
+        {
+            if (TapestryBuilder.DEBUG)
+                System.out.println("findall:" + (System.currentTimeMillis() - start));
+        }
     }
 
     /**
@@ -493,14 +508,15 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
     protected ILibrarySpecification resolveLibrarySpecification(Parser parser, IStorage storage,
             IResourceLocation location, String encoding)
     {
+        fTapestryBuilder.fNotifier.checkCancel();
         IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
         ILibrarySpecification result = null;
         if (fProcessedLocations.containsKey(useLocation))
             return (ILibrarySpecification) fProcessedLocations.get(useLocation);
 
         if (storage instanceof IFile)
-            Markers.removeProblemsFor((IFile)storage);
-        
+            Markers.removeProblemsFor((IFile) storage);
+
         try
         {
             Document document = parseToDocument(
@@ -585,7 +601,7 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
             if (storage != null)
             {
                 if (storage instanceof IFile)
-                    Markers.removeProblemsFor((IFile)storage);
+                    Markers.removeProblemsFor((IFile) storage);
 
                 fTemplateMap.put(storage, spec);
 
@@ -738,84 +754,91 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
             String encoding)
 
     {
+
+        fTapestryBuilder.fNotifier.checkCancel();
         // to avoid double parsing specs that are accessible
         // by multiple means in Tapestry
         if (fProcessedLocations.containsKey(location))
             return (IComponentSpecification) fProcessedLocations.get(location);
 
+        if (TapestryBuilder.DEBUG)
+            System.out.println("parsing: " + location);
+
         PluginComponentSpecification result = null;
         if (storage != null)
-            
+
             if (storage instanceof IFile)
-                Markers.removeProblemsFor((IFile)storage);
-            
-            try
+                Markers.removeProblemsFor((IFile) storage);
+
+        try
+        {
+            Document document = parseToDocument(
+                    parser,
+                    storage,
+                    location,
+                    encoding == null ? "UTF-8" : encoding);
+            // while editor reconcilers can re-use the scanner, we can't here
+            // because scanning may invoke the scanning of another, nested,
+            // component.
+            ComponentScanner scanner = new ComponentScanner();
+
+            if (document != null)
             {
-                Document document = parseToDocument(
-                        parser,
-                        storage,
-                        location,
-                        encoding == null ? "UTF-8" : encoding);
-                // while editor reconcilers can re-use the scanner, we can't here
-                // because scanning may invoke the scanning of another, nested,
-                // component.
-                ComponentScanner scanner = new ComponentScanner();
+                scanner.setResourceInformation(storage, location);
+                scanner.setNamespace(namespace);
+                scanner.setFactory(TapestryCore.getSpecificationFactory());
 
-                if (document != null)
+                IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
+                useValidator.addListener(this);
+                try
                 {
-                    scanner.setResourceInformation(storage, location);
-                    scanner.setNamespace(namespace);
-                    scanner.setFactory(TapestryCore.getSpecificationFactory());
+                    result = (PluginComponentSpecification) scanner.scan(document, useValidator);
+                    if (result != null)
+                        result.setTemplateLocations(TapestryBuilder.scanForTemplates(
+                                result,
+                                scanner));
 
-                    IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
-                    useValidator.addListener(this);
-                    try
-                    {
-                        result = (PluginComponentSpecification) scanner
-                                .scan(document, useValidator);
-                        if (result != null)
-                            result.setTemplateLocations(TapestryBuilder.scanForTemplates(
-                                    result,
-                                    scanner));
-
-                    }
-                    finally
-                    {
-                        useValidator.removeListener(this);
-                    }
-
-                    Markers.recordProblems(location, scanner.getProblems());
-
-                    rememberSpecification(storage, result);
                 }
-                else
+                finally
                 {
-                    PluginComponentSpecification dummy = new PluginComponentSpecification();
-                    dummy.makePlaceHolder();
-                    dummy.setSpecificationLocation(location);
-                    dummy.setNamespace(namespace);
-                    dummy.setTemplateLocations(TapestryBuilder.scanForTemplates(dummy, null));
-                    result = dummy;
+                    useValidator.removeListener(this);
                 }
 
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            catch (CoreException e)
-            {
-                e.printStackTrace();
-            }
-            catch (ScannerException e)
-            {
-                recordFatalProblem(location, e);
+                Markers.recordProblems(location, scanner.getProblems());
 
+                rememberSpecification(storage, result);
             }
-            finally
+            else
             {
-                finished(location);
+                PluginComponentSpecification dummy = new PluginComponentSpecification();
+                dummy.makePlaceHolder();
+                dummy.setSpecificationLocation(location);
+                dummy.setNamespace(namespace);
+                dummy.setTemplateLocations(TapestryBuilder.scanForTemplates(dummy, null));
+                result = dummy;
             }
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        catch (CoreException e)
+        {
+            e.printStackTrace();
+        }
+        catch (ScannerException e)
+        {
+            recordFatalProblem(location, e);
+
+        }
+        finally
+        {
+            finished(location);
+
+        }
+
+        fTapestryBuilder.fNotifier.checkCancel();
 
         if (result != null)
             fProcessedLocations.put(location, result);

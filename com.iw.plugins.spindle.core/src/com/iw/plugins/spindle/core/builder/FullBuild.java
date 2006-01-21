@@ -75,10 +75,10 @@ public class FullBuild extends Build
   protected void postBuild()
   {
     BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
-    if (fTapestryBuilder.DEBUG)
-    {
-      listener.dump();
-    }
+//    if (fTapestryBuilder.DEBUG)
+//    {
+//      listener.dump();
+//    }
   }
 
   /**

@@ -29,10 +29,9 @@ package com.iw.plugins.spindle.editors.actions;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IActionBars;
 
-import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 
 /**
@@ -89,11 +88,8 @@ public abstract class BaseEditorAction extends BaseAction
             reveal(fInterestingObjects);
         else if (fStatus != null && fStatus.getSeverity() == IStatus.ERROR)
         {
-            ErrorDialog.openError(
-                    UIPlugin.getDefault().getActiveWorkbenchShell(),
-                    "Spindle Error",
-                    "Unable to complete the request",
-                    fStatus);
+            IActionBars bars = fEditor.getEditorSite().getActionBars();
+            bars.getStatusLineManager().setErrorMessage(null, fStatus.getMessage());
         }
     }
 

@@ -313,7 +313,7 @@ public class UIPlugin extends AbstractUIPlugin
             }
             else
             {
-                input = new BinaryEditorInput(storage);
+                input = new JarEntryEditorInput(storage);
             }
 
             return IDE.openEditor(UIPlugin.getDefault().getActivePage(), input, editorId);
@@ -324,36 +324,7 @@ public class UIPlugin extends AbstractUIPlugin
             UIPlugin.log(piex);
         }
         return null;
-    }
-
-    public static class BinaryEditorInput extends JarEntryEditorInput
-    {
-        static JarEntryFile coerce(IStorage storage)
-        {
-            if (storage instanceof JarEntryFile)
-                return (JarEntryFile) storage;
-            if (storage instanceof JarEntryFileWrapper)
-                return ((JarEntryFileWrapper) storage).getEntry();
-            throw new IllegalStateException("is not coercable to a JarEntryFile:"
-                    + storage.toString());
-        }
-
-        public BinaryEditorInput(IStorage storage)
-        {
-            super(coerce(storage));
-        }      
-
-        public boolean equals(Object obj)
-        {
-            if (this == obj)
-                return true;
-            if (!(obj instanceof JarEntryEditorInput))
-                return false;
-            JarEntryEditorInput other = (JarEntryEditorInput) obj;
-            return getStorage().toString().equals(other.getStorage().toString());
-        }
-
-    }
+    }   
 
     // The shared instance.
     private static UIPlugin plugin;

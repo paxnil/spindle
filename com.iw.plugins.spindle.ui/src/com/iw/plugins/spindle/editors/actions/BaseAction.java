@@ -80,6 +80,10 @@ public abstract class BaseAction extends Action implements IEditorActionDelegate
     {
         fEditor = targetEditor;
     }
+    
+    public void dispose() {
+        
+    }
 
     public void run(IAction action)
     {

@@ -123,8 +123,8 @@ public class BuilderContextVisitor implements IResourceVisitor
         IResourceLocation location = fBuild.fTapestryBuilder.fContextRoot
             .getRelativeLocation(resource);
         fCollector.add(location);
-        if (TapestryBuilder.DEBUG)
-          System.out.println(location);
+//        if (TapestryBuilder.DEBUG)
+//          System.out.println(location);
       }
     }
     return true;

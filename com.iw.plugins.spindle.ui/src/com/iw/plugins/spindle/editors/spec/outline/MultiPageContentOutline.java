@@ -176,7 +176,7 @@ public class MultiPageContentOutline implements IContentOutlinePage,
 					|| fCurrentPage == fMessagePage) {
 				if (fReconciledObject == null) {
 					fMessagePoster
-							.postMessage("Unable to resolve this outline. \n\nThere may be malformed XML, or the file can not be seen by Tapestry.");
+							.postMessage("Outline is not available.");
 					fPageTurner.post(fMessagePage);
 				} else {
 					fPageTurner.post(fTapestryOutlinePage);
@@ -466,6 +466,7 @@ public class MultiPageContentOutline implements IContentOutlinePage,
 		public void createControl(Composite parent) {
 			Font font = parent.getFont();
 			Composite top = new Composite(parent, SWT.CENTER);
+            top.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 			top.setLayout(new GridLayout());
 			fControl = top;
 			top.setFont(font);
@@ -477,11 +478,12 @@ public class MultiPageContentOutline implements IContentOutlinePage,
 			createVerticalSpacer(top, 1);
 
 			fMessageLabel = new Label(top, SWT.WRAP);
+            fMessageLabel.setBackground(top.getBackground());
 			fMessageLabel.setForeground(top.getDisplay().getSystemColor(
-					SWT.COLOR_RED));
+					SWT.COLOR_LIST_FOREGROUND));
 			fMessageLabel.setLayoutData(new GridData(GridData.FILL_BOTH
 					| GridData.GRAB_VERTICAL));
-			fMessageLabel.setText(fSavedMessage == null ? "working..."
+			fMessageLabel.setText(fSavedMessage == null ? "Outline is not available."
 					: fSavedMessage);
 		}
 

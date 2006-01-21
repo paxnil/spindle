@@ -70,6 +70,16 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     {
         super(builder, deltas);
     }
+    
+    protected void findDeclaredApplication() throws CoreException
+    {
+       fApplicationServlet = fLastState.fApplicationServlet;
+    }
+    
+    protected void handleBuildMisses()
+    {
+        //do nothing - only fulll builds care.
+    }
 
     protected IApplicationSpecification resolveApplication(Parser parser, IStorage storage,
             IResourceLocation location, String encoding)

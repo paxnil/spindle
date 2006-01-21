@@ -131,6 +131,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
 
     public static boolean DEBUG = false;
+    
+    public static long BUILD_START;
 
     // TODO this is really ugly, but I need this fast.
     public static List fDeferredActions = new ArrayList();
@@ -213,6 +215,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException
     {
 
+        if (DEBUG)
+            System.out.println("***************************************************************");
         if (systemBundle.getState() == Bundle.STOPPING)
             throw new OperationCanceledException();
 
@@ -229,7 +233,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         if (fCurrentProject == null || !fCurrentProject.isAccessible())
             return new IProject[0];
 
-        long start = System.currentTimeMillis();
+        BUILD_START = System.currentTimeMillis();
         if (DEBUG)
             System.out.println("\nStarting build of " + fCurrentProject.getName() + " @ "
                     + new Date(System.currentTimeMillis()));
@@ -251,12 +255,14 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 {
                     buildIncremental();
                 }
+                System.out.println("about to do deferred at:"+ (System.currentTimeMillis() - BUILD_START));
                 for (Iterator iter = fDeferredActions.iterator(); iter.hasNext();)
                 {
                     IBuildAction action = (IBuildAction) iter.next();
                     action.run();
                 }
                 ok = true;
+                System.out.println("finished build proper:"+  (System.currentTimeMillis() - BUILD_START));
             }
         }
         catch (CoreException e)
@@ -312,7 +318,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         if (DEBUG)
             System.out.println("Finished build of " + fCurrentProject.getName() + " @ "
                     + new Date(stop));
-        System.out.println("elapsed (ms) = " + (stop - start));
+        System.out.println("elapsed (ms) = " + (stop - BUILD_START));
         return fInterestingProjects;
     }
 
@@ -409,6 +415,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
     protected void buildIncremental() throws BuilderException, CoreException
     {
+        System.out.println("buildIncremental() time so far = "+ (BUILD_START - System.currentTimeMillis()));
 
         IIncrementalBuild incBuild = null;
 
@@ -436,7 +443,10 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
             fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STRING_KEY
                     + "incremental-build-starting"));
+            
+            System.out.println("about to call incBuild.build(); = "+  (System.currentTimeMillis() - BUILD_START));
             incBuild.build();
+            System.out.println("finished incBuild.build(); = "+  (System.currentTimeMillis() - BUILD_START));
         }
         else
         {
@@ -498,23 +508,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         {
             throw new BuilderException(TapestryCore.getString(STRING_KEY
                     + "abort-no-output-location"));
-        }
-
-        // // make sure all prereq projects have valid build states...
-        // IProject[] requiredProjects = getInterestingProjects();
-        // next: for (int i = 0, length = requiredProjects.length; i < length; i++)
-        // {
-        // IProject p = requiredProjects[i];
-        // if (getLastState(p) == null)
-        // {
-        // if (DEBUG)
-        // System.out.println(TapestryCore.getString(
-        // STRING_KEY + "abort-prereq-not-built",
-        // p.getName()));
-        // throw new BuilderException(TapestryCore.getString(STRING_KEY
-        // + "abort-prereq-not-built", p.getName()));
-        // }
-        // }
+        }       
 
         if (fTapestryProject == null)
             throw new BuilderException("could not obtain the TapestryProject instance!");

@@ -264,7 +264,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
         {
 //          TODO use platform adapters
           JarEntryEditorInput jeei = (JarEntryEditorInput) input;
-          storage = JarEntryFileUtil.wrap((JarEntryFile)jeei.getStorage());
+          storage = JarEntryFileUtil.wrap(jeei.getStorage());
         }
         if (storage != null && isTapestry(storage))
           selectAndReveal(new StructuredSelection(storage), fCurrentWindow);
