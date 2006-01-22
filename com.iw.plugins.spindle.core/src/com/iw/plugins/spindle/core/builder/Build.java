@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,7 +76,6 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.Markers;
-import com.sun.net.ssl.internal.ssl.Debug;
 
 /**
  * Abstract base class for full and incremental builds
@@ -142,6 +142,10 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
 
     protected SpecificationValidator.TypeFinder fTypeFinder;
 
+    protected int fBuildMissPriority = TapestryCore.getDefault().getBuildMissPriority();
+
+    private final int IGNORE_BUILD_MISSES = -1;
+
     public Build(TapestryBuilder builder)
     {
         fTapestryServletType = builder.getType(TapestryCore.getString(TapestryBuilder.STRING_KEY
@@ -173,14 +177,20 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
 
         fNotifier.updateProgressDelta(0.1f);
 
-        fNotifier
-                .subTask(TapestryCore.getString(TapestryBuilder.STRING_KEY + "locating-artifacts"));
+        if (fBuildMissPriority != IGNORE_BUILD_MISSES)
+            fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STRING_KEY
+                    + "locating-artifacts"));
+        else
+            fNotifier.subTask("building...");
+
+        fNotifier.updateProgressDelta(0.10f);
 
         fBuildQueue.addAll(findAllTapestryArtifacts());
 
         fNotifier.checkCancel();
 
         resolveFramework(parser);
+
         try
         {
             doBuild(parser);
@@ -192,6 +202,8 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
         {
             setDependencyListener(null);
         }
+        
+        fNotifier.subTask("cleaning up...");
 
         fNotifier.updateProgressDelta(0.15f);
         if (fBuildQueue.hasWaiting())
@@ -206,21 +218,23 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
 
     protected void handleBuildMisses()
     {
-        int missPriority = TapestryCore.getDefault().getBuildMissPriority();
+
         fNotifier.setProcessingProgressPer(0.75f / fBuildQueue.getWaitingCount());
+        if (fBuildMissPriority == IGNORE_BUILD_MISSES)
+            return;
+
         while (fBuildQueue.getWaitingCount() > 0)
         {
-
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fBuildQueue
                     .peekWaiting();
             fNotifier.processed(location);
             fBuildQueue.finished(location);
 
-            if (missPriority >= 0 && location.isWorkspaceResource())
+            if (location.isWorkspaceResource())
             {
                 IStorage storage = location.getStorage();
                 IResource resource = (IResource) storage.getAdapter(IResource.class);
-                recordBuildMiss(missPriority, resource);
+                recordBuildMiss(fBuildMissPriority, resource);
             }
         }
     }
@@ -315,6 +329,9 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
      */
     protected void findAllArtifactsInClasspath(final ArrayList found)
     {
+        if (TapestryCore.getDefault().getBuildMissPriority() == -1)
+            return;
+
         ISearch searcher = null;
         try
         {
@@ -383,6 +400,9 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
      */
     protected List findAllTapestryArtifacts()
     {
+        if (fBuildMissPriority == IGNORE_BUILD_MISSES)
+            return Collections.EMPTY_LIST;
+
         long start = System.currentTimeMillis();
         try
         {
@@ -848,10 +868,9 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
     protected void finished(IResourceLocation location)
     {
         if (fBuildQueue.isWaiting(location))
-        {
             fBuildQueue.finished(location);
-            fNotifier.processed(location);
-        }
+
+        fNotifier.processed(location);
     }
 
     /**

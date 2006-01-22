@@ -310,15 +310,17 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 // build next time.
                 clearLastState();
             fNotifier.done();
+            long stop = System.currentTimeMillis();
+            if (DEBUG)
+                System.out.println("Finished build of " + fCurrentProject.getName() + " @ "
+                        + new Date(stop));
+            System.out.println("elapsed (ms) = " + (stop - BUILD_START));
             fDeferredActions.clear();
             cleanup();
             TapestryCore.getDefault().buildOccurred();
         }
-        long stop = System.currentTimeMillis();
-        if (DEBUG)
-            System.out.println("Finished build of " + fCurrentProject.getName() + " @ "
-                    + new Date(stop));
-        System.out.println("elapsed (ms) = " + (stop - BUILD_START));
+        
+        
         return fInterestingProjects;
     }
 

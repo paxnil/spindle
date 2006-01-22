@@ -84,7 +84,7 @@ public class BuildNotifier
     processed(descriptor.getName());
   }
 
-  private void processed(String message)
+  public void processed(String message)
   {
     subTask("processed " + message);
     updateProgressDelta(fProcessingProgress);

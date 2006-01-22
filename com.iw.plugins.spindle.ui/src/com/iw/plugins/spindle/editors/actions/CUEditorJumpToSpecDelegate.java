@@ -110,10 +110,8 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
             return;
 
         IEditorInput input = fEditor.getEditorInput();
-        IAdaptable file = getInputObject(input);
-        if (file instanceof IClassFile) {
-            showFailedMessage("Jump to Spec is not available for .class files");
-        } else if (file != null)
+        IAdaptable file = getInputObject(input);       
+        if (file != null)
         {
             // must be a file
             ITapestryProject tproject = (ITapestryProject) file.getAdapter(ITapestryProject.class);
@@ -148,7 +146,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
     }
     
     protected void showFailedMessage(String message) {
-        showMessage("'Jump To' Failed", message);
+        showMessage("'Jump To Spec' Failed", message);
     }
 
     protected IAdaptable getInputObject(IEditorInput input)

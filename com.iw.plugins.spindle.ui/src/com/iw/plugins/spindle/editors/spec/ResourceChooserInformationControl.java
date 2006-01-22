@@ -330,7 +330,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
                     IPackageFragment fragment = (IPackageFragment) childElements[j];
 
                     if (fragment.isDefaultPackage())
-                        continue;
+                        continue;                  
 
                     String fragmentName = fragment.getElementName();
                     ChooseResourceProposal.Filter f = fProposal.getPackageExclusionFilter();
@@ -356,7 +356,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
                     
                     try
                     {
-                        ClasspathRootLocation.getNonJavaResources(fragment);
+                       children =  ClasspathRootLocation.getNonJavaResources(fragment);
                     }
                     catch (CoreException e)
                     {
@@ -367,7 +367,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
                         continue;
 
                     for (int k = 0; k < children.length; k++)
-                        holder.addNonJavaResource(children[k]);
+                        holder.addNonJavaResource(children[k]);                                    
                 }
             }
 

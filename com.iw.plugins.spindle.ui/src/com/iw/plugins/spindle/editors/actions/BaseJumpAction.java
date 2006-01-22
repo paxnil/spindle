@@ -102,10 +102,7 @@ public abstract class BaseJumpAction extends BaseAction
 
     protected void showMessage(String title, String message)
     {
-        MessageDialog.openInformation(
-                UIPlugin.getDefault().getActiveWorkbenchShell(),
-                title,
-                message);
+        fEditor.getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(message);      
     }
 
     protected abstract void doRun();

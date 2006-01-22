@@ -62,10 +62,8 @@ public class JumpToSpecAction extends BaseJumpAction
     if (location == null && fEditor instanceof TemplateEditor)
     {
 
-      MessageDialog.openInformation(
-          fEditor.getEditorSite().getShell(),
-          "Operation Aborted",
-          "Unable to Jump to Specifications from  a jar based Template");
+        fEditor.getEditorSite().getActionBars().getStatusLineManager().setErrorMessage("Unable to Jump to Specification");
+     
       return;
     }
     reveal(location);

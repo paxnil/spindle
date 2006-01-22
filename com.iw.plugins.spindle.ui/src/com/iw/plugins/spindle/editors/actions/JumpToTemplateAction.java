@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.editors.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,7 +55,8 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  */
 public class JumpToTemplateAction extends BaseJumpAction
 {
-    /**
+    /**99
+     * 
      *  
      */
     public JumpToTemplateAction()
@@ -96,6 +98,9 @@ public class JumpToTemplateAction extends BaseJumpAction
 
     private List getTemplateLocations(PluginComponentSpecification spec)
     {
+        if (spec == null)
+            return Collections.EMPTY_LIST;
+        
         List locations = spec.getTemplateLocations();
 
         if (locations.isEmpty() || !(fEditor instanceof TemplateEditor))

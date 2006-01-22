@@ -68,6 +68,9 @@ public class JarEntryFileUtil
     
     public static IStorage wrap(IStorage storage, boolean mustBeJarEntryFile)
     {
+        if (storage instanceof JarEntryFileWrapper)
+            return storage;
+        
         if (storage instanceof JarEntryFile)
             return wrap((JarEntryFile) storage);
         if (mustBeJarEntryFile)
