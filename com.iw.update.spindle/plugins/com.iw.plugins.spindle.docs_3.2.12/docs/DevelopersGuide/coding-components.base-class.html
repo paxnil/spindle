@@ -1,0 +1,19 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Choosing a base class</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="coding-components.html" title="Chapter&nbsp;9.&nbsp;Designing new components"><link rel="previous" href="coding-components.html" title="Chapter&nbsp;9.&nbsp;Designing new components"><link rel="next" href="coding-components.parameters.html" title="Parameters and Bindings"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Choosing a base class</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="coding-components.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Designing new components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="coding-components.parameters.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="coding-components.base-class"></a>Choosing a base class</h2></div></div><div></div></div><p>
+There are two basic types of components:  those that use an HTML template, and those that don't.
+</p><p>
+Nearly all of the base components provided with the Tapestry framework don't 
+use templates.  They inherit from the class 
+<a href="../api/org/apache/tapestry/AbstractComponent.html" target="_self"><tt class="classname">AbstractComponent</tt></a>.  Such 
+components must implement the protected <tt class="function">renderComponent()</tt> method.
+</p><p>
+Components that use templates inherit from a subclass of 
+<a href="../api/org/apache/tapestry/AbstractComponent.html" target="_self"><tt class="classname">AbstractComponent</tt></a>: 
+<a href="../api/org/apache/tapestry/BaseComponent.html" target="_self"><tt class="classname">BaseComponent</tt></a>.  They should leave the <tt class="function">renderComponent()</tt>
+method alone.
+</p><p>
+In some cases, a new component can be written just by combining existing components 
+(this often involves using inherited bindings).  Such a codeless 
+component will consist of just a specification and an HTML 
+template and will use the <a href="../api/org/apache/tapestry/BaseComponent.html" target="_self"><tt class="classname">BaseComponent</tt></a> class without subclassing.  This
+is even more possible when using <a href="components.helper-beans.html" title="Helper Beans">helper beans</a>.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="coding-components.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="coding-components.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="coding-components.parameters.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;9.&nbsp;Designing new components&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Parameters and Bindings</td></tr></table></div></body></html>

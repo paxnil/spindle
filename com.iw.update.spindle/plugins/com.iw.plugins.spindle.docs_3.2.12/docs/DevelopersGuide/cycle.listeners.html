@@ -1,0 +1,62 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Action and Direct listeners</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="cycle.html" title="Chapter&nbsp;6.&nbsp;Understanding the Request Cycle"><link rel="previous" href="cycle.page.html" title="Page service"><link rel="next" href="cycle.direct.html" title="Direct service"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Action and Direct listeners</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="cycle.page.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Understanding the Request Cycle</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="cycle.direct.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="cycle.listeners"></a>Action and Direct listeners</h2></div></div><div></div></div><p>
+The <a href="../ComponentReference/ActionLink.html" target="_self"><tt class="classname">ActionLink</tt></a>, <a href="../ComponentReference/DirectLink.html" target="_self"><tt class="classname">DirectLink</tt></a> and <a href="../ComponentReference/Form.html" target="_self"><tt class="classname">Form</tt></a> components (which make use of
+the <a href="cycle.action.html" title="Action service">action</a> and <a href="cycle.direct.html" title="Direct service">direct</a>
+services) inform the application when they have been triggered using listeners.
+</p><p>
+A listener is an object that implements the <a href="../api/org/apache/tapestry/IActionListener.html" target="_self"><tt class="classname">IActionListener</tt></a> interface.
+</p><p>
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+public void actionTriggered(IComponent component, IRequestCycle cycle)
+  throws RequestCycleException;
+</pre></td></tr></table></div>
+      </p><p>
+Prior to release 1.0.2, it was necessary to create an object to be notified
+by the component; this was almost always an annonymous inner class:
+
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+public IActionListener getFormListener()
+{
+  return new IActionListener()
+  {
+    public void actionTriggered(IComponent component, IRequestCycle cycle)
+      throws RequestCycleException
+    {
+      // perform some operation ...
+    }
+  };
+}
+</pre></td></tr></table></div>
+      </p><p>
+Although elegant in theory, that's simply too much Java code for too little effect.
+Starting with Tapestry 1.0.2, it is possible to create a
+<span class="emphasis"><em>listener method</em></span> instead.
+</p><p>
+A listener method takes the form:
+
+<div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+public void <i class="replaceable"><tt>method-name</tt></i>(IRequestCycle cycle)
+throws RequestCycleException;
+</pre></td></tr></table></div>
+      </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="common-images/note.png"></td><th align="left">Note</th></tr><tr><td valign="top" align="left" colspan="2"><p>The throws clause is optional and may be omitted.  However, no other
+	exception may be thrown.
+	</p></td></tr></table></div><p>
+In reality, listener <span class="emphasis"><em>objects</em></span> have not gone away.  Instead, there's a mechanism
+whereby a listener object is created automatically when needed.
+Each component includes a property, <tt class="varname">listeners</tt>, that is a collection of
+listener objects for the component, synthesized from the available public methods.  The
+listener objects are properties, with the names corresponding to the method names.
+</p><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Tip"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Tip]" src="common-images/tip.png"></td><th align="left">Tip</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+The class <tt class="classname">AbstractEngine</tt> (the base class for <a href="../api/org/apache/tapestry/engine/SimpleEngine.html" target="_self"><tt class="classname">SimpleEngine</tt></a>)
+also implements a listeners property.  This allows you to easily add listener methods
+to your application engine.
+</p></td></tr></table></div><p>
+The earlier example is much simpler:
+</p><div class="informalexample"><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+public void formSubmit(IRequestCycle cycle)
+{
+  // perform some operation ...
+}
+</pre></td></tr></table></div><p>
+However, the property path for the listener binding must be changed, from <tt class="varname">formListener</tt> to
+<tt class="varname">listeners.formSubmit</tt>.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="cycle.page.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="cycle.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="cycle.direct.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Page service&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Direct service</td></tr></table></div></body></html>

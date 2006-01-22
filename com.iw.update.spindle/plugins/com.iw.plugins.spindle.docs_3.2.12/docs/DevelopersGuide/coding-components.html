@@ -1,0 +1,22 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;9.&nbsp;Designing new components</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="previous" href="coding.page-classes.html" title="Page classes"><link rel="next" href="coding-components.base-class.html" title="Choosing a base class"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;9.&nbsp;Designing new components</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="coding.page-classes.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="coding-components.base-class.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="coding-components"></a>Chapter&nbsp;9.&nbsp;Designing new components</h2></div></div><div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="coding-components.base-class.html">Choosing a base class</a></span></dt><dt><span class="section"><a href="coding-components.parameters.html">Parameters and Bindings</a></span></dt><dt><span class="section"><a href="coding-components.persistent-state.html">Persistent Component State</a></span></dt><dt><span class="section"><a href="coding-components.assets.html">Component Assets</a></span></dt></dl></div><p>
+Creating new components using Tapestry is designed to be quite simple.
+</p><p>
+Components are typically created through aggregation, that is, by combining existing 
+components using an HTML template and specification.
+</p><p>
+You will almost always want to define a short alias 
+for your new component in the application specification.  This insulates developers from minor 
+name changes to the component specification, such as moving the component 
+to a different Java package.
+</p><p>
+Like pages, components should reset their state back to 
+default values when the page they are contained within is returned to the pool.
+</p><p>
+Most components do not have any state.  A component which does should 
+implement the <a href="../api/org/apache/tapestry/event/PageDetachListener.html" target="_self"><tt class="classname">PageDetachListener</tt></a> interface, 
+and implement the <tt class="function">pageDetached()</tt> method.
+</p><p>
+The <tt class="function">pageDetached()</tt> method is invoked from the page's 
+<tt class="function">detatch()</tt> method, which is invoked at the very end 
+of the request cycle, just before the page is returned to the page pool.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="coding.page-classes.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="DevelopersGuide.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="coding-components.base-class.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Page classes&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Choosing a base class</td></tr></table></div></body></html>

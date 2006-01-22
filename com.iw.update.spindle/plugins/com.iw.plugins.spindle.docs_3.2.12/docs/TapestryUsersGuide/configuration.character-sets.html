@@ -1,0 +1,58 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Character Sets</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="configuration.html" title="Chapter&nbsp;5.&nbsp;Configuring Tapestry"><link rel="previous" href="configuration.extensions.html" title="Application extensions"><link rel="next" href="properties.html" title="Appendix&nbsp;A.&nbsp;Tapestry Object Properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Character Sets</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="configuration.extensions.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;5.&nbsp;Configuring Tapestry</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="properties.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="configuration.character-sets"></a>Character Sets</h2></div></div><div></div></div><p>
+Tapestry is designed to make the web application localization easy and 
+offers the ability to define different localized templates for the same component.
+For example, <tt class="filename">Home.html</tt> would be the default template of the Home page, however
+<tt class="filename">Home_fr.html</tt> would be used in all French locales, while <tt class="filename">Home_zh_CN.html</tt> would be used in
+China and <tt class="filename">Home_zh_TW.html</tt> would be used in Taiwan.
+</p><p>
+Web developers and designers in different countries tend to use different character sets 
+for the templates they produce. English, German, French templates are typically produced in
+ISO-8859-1, Russian templates often use KOI8-R, and Chinese texts are normally written in Big5.
+Tapestry allows the application to configure the character set used in its templates 
+and makes it possible to use different character sets for templates associated with 
+different components and different locales.
+</p><p>
+The character set of a template is defined using the 
+<tt class="literal">org.apache.tapestry.template-encoding</tt>
+<a href="configuration.search-path.html" title="Configuration Search Path">configuration property</a>. The search path of this property is slightly different then the
+standard one and allows specific components to use other character sets:
+</p><div class="itemizedlist"><ul type="disc"><li><p>
+		As a <a href="spec.property.html" title="property element"><tt class="sgmltag-starttag">&lt;property&gt;</tt></a> of the <a href="spec.page-specification.html" title="page-specification element"><tt class="sgmltag-starttag">&lt;page-specification&gt;</tt></a> or the <a href="spec.component-specification.html" title="component-specification element"><tt class="sgmltag-starttag">&lt;component-specification&gt;</tt></a> 
+		(in the page or component specification). 
+		</p><p>
+		This configuration will apply only to the page or component where it is defined.
+		</p></li><li><p>
+		As a <a href="spec.property.html" title="property element"><tt class="sgmltag-starttag">&lt;property&gt;</tt></a> of the <a href="spec.library-specification.html" title="library-specification element"><tt class="sgmltag-starttag">&lt;library-specification&gt;</tt></a> 
+		(in the library specification, if the components are included in a library). 
+		</p><p>
+		This configuration will apply to all pages and components in the library.
+		</p></li><li><p>
+		As a <a href="spec.property.html" title="property element"><tt class="sgmltag-starttag">&lt;property&gt;</tt></a> of the <a href="spec.application.html" title="application element"><tt class="sgmltag-starttag">&lt;application&gt;</tt></a> (in the application specification,
+		if the application uses one).
+		</p></li><li><p>
+		As an <tt class="sgmltag-starttag">&lt;init-parameter&gt;</tt>
+		for the servlet, in the web application deployment descriptor.
+		</p></li><li><p>
+		As an <tt class="sgmltag-starttag">&lt;init-parameter&gt;</tt>
+		for the servlet context, also in the web application deployment descriptor.
+		</p></li><li><p>
+		As a JVM system property.
+		</p></li><li><p>
+		The hard-coded default "ISO-8859-1".
+		</p></li></ul></div><p>
+Tapestry also makes it possible to define the character set used by the templates specific 
+to a particular locale by appending the locale to the property name above. 
+As an example, the 
+<tt class="literal">org.apache.tapestry.template-encoding_ru</tt> configuration property would define
+the character set used by the Russian templates, such as <tt class="filename">Home_ru.html</tt>. 
+This allows templates for different locales to use different character sets, 
+even though they are in the same application. 
+For example, it is possible for all Russian templates in the application to use the KOI8-R 
+character set and all Chinese templates to use Big5 at the same time.
+</p><p>
+The character sets used by the templates do not reflect in any way on the character set 
+Tapestry uses to encode its response to the browser. The character sets are used when reading
+the template to translate it appropriately into Unicode.
+The output character set is defined by the 
+<tt class="literal">org.apache.tapestry.output-encoding</tt> configuration property.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="configuration.extensions.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="configuration.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="properties.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Application extensions&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Appendix&nbsp;A.&nbsp;Tapestry Object Properties</td></tr></table></div></body></html>

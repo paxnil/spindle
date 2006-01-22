@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+<title>Editing with Spindle</title>
+<link rel="stylesheet" href="style/book.css" type="text/css">
+</head>
+<body>
+<img src="images/headerBkgII.jpg"> 
+<h1>Tapestry Project Nature </h1>
+<p>The Tapestry project nature is what makes an Eclipse project a Tapestry project. The project builder, 
+  the Spindle wizards and in many cases Spindle editors depend on a project having this nature.</p>
+<p>Projects that have the Tapestry nature will appear like this: <img src="images/tap_prj.jpg" alt="http://spindle.sourceforge.net/unstable/images/tap_prj.jpg" width="223" height="16" class="inlineimage"> 
+  (note the little "T")</p>
+<p>Spindle requires that projects that have the Tapestry nature already have the Java nature (i.e. they 
+  are Java projects). Spindle will not allow one to add the Tapestry nature to a project that does not 
+  at least have the Java nature.</p>
+<p class="Note"><strong>Note:</strong> that lots of plugins provide thier own project natures. Most do 
+  what Spindle does, i.e. add thier nature to a project that already has the Java nature. It is perfectly 
+  ok to add the Tapestry nature to a project with any number of other natures; as long as the Java nature 
+  is one of them. So it is possible to use, say, the <a href="http://www.sysdeo.com/eclipse/tomcatplugin" class="namedurl">Sysdeo 
+  Tomcat</a> plugin and Spindle in the same project (the Tomcat plugin adds its own nature in addition 
+  to the Java nature).</p>
+<p>So, how does one add the Tapestry nature to a project? There are two answers. First, one can use the 
+  "New Tapestry Web Project&quot; Wizard to create your project. Upon completing the wizard the project 
+  will be properly configured with the Tapestry nature. The second method requires a bit of preamble...</p>
+<p>A Tapestry project requires that the project layout be similar to this:</p>
+<p><img src="images/basic_prj_layout.jpg" alt="http://spindle.sourceforge.net/unstable/images/basic_prj_layout.jpg" width="224" height="64" class="inlineimage"></p>
+<p>Note there is a folder called "context" that is the root of an exploded war file layout. The context 
+  folder is also annotated with the little "T" to indicate its special purpose in this project.</p>
+<p class="Note"> 
+<ul>
+  <li>The folder need not be named "context" or be located anywhere in particular in the project. <em>The 
+    restrictions being that the context folder must not be in a java source folder or in the folder designated 
+    as the output folder for the java compiler. Also, in the 3.0 and 3.1 versions of Spindle, the project 
+    itself can't be the context folder.</em></li>
+  <li>The exploded war structure under the context folder must, of course, have a WEB-INF folder containing 
+    a web.xml file. The new project wizard will generate a generic web.xml. To customize the web.xml file 
+    to use other Tapestry features, consult the <a href="TapestryUsersGuide\configuration.html" class="namedurl">Tapestry 
+    documentation</a>.</li>
+  <li>Also, Spindle requires that web.xml contain a valid J2EE doctype declaration as the Spindle project 
+    builder uses a validating XML parser.<em> Exception: Spindle 3.1 allows the use of XML schema by turning 
+    off validation of web.xml during a build.</em></li>
+  <li>Spindle 3.0 and 3.1 do not allow more than one Tapestry application servlet in a project.</li>
+</ul></p>
+<p>End of preamble.</p>
+<h4>Links</h4>
+<a href="project_wizard.html" title="Wizards">Creating Tapestry Projects with a Wizard</a><br>
+<a href="tapestry_nature_work.html" >Add/Remove Tapestry Project Nature</a><br>
+<a href="spindle_builder.html" >Spindle Builder</a> 
+</body>
+</html>

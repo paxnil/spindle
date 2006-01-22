@@ -6,10 +6,10 @@
    <feature url="features/com.iw.features.spindle_3.1.27.jar" id="com.iw.features.spindle" version="3.1.27">
       <category name="spindle_3_1"/>
    </feature>
-   <feature url="features/com.iw.features.spindle_3.2.12.jar" id="com.iw.features.spindle" version="3.2.12">
+   <feature url="features/com.iw.features.spindle_3.2.13.jar" id="com.iw.features.spindle" version="3.2.13">
       <category name="spindle_3_2"/>
    </feature>
-   <feature url="features/com.iw.features.spindle.groovy_3.2.12.jar" id="com.iw.features.spindle.groovy" version="3.2.12">
+   <feature url="features/com.iw.features.spindle.groovy_3.2.13.jar" id="com.iw.features.spindle.groovy" version="3.2.13">
       <category name="add ons"/>
    </feature>
    <category-def name="spindle_3_1" label="Spindle 3.1 - Eclipse 3.0">

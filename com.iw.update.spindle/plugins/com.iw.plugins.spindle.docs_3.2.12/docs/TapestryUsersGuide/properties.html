@@ -1,0 +1,107 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Appendix&nbsp;A.&nbsp;Tapestry Object Properties</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="up" href="TapestryUsersGuide.html" title="Tapestry User's Guide"><link rel="previous" href="configuration.character-sets.html" title="Character Sets"><link rel="next" href="jars.html" title="Appendix&nbsp;B.&nbsp;Tapestry JAR files"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Appendix&nbsp;A.&nbsp;Tapestry Object Properties</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="configuration.character-sets.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">&nbsp;</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="jars.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="appendix" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="properties"></a>Appendix&nbsp;A.&nbsp;Tapestry Object Properties</h2></div></div><div></div></div><p>
+When using Tapestry, an important aspect of your work is to leverage the properties exposed
+by the various objects within Tapestry. A page has properties (inherited from base classes
+such as <a href="../api/org/apache/tapestry/AbstractComponent.html" target="_self"><tt class="classname">AbstractComponent</tt></a> and <a href="../api/org/apache/tapestry/html/BasePage.html" target="_self"><tt class="classname">BasePage</tt></a>) and contains components and other objects
+with more properties. Pages are connected to an engine, which exports its own set of properties.
+This appendix is a quick guide to the most common objects and their properties.	
+</p><div class="table"><a name="N10EA1"></a><p class="title"><b>Table&nbsp;A.1.&nbsp;Tapestry Object Properties</b></p><table summary="Tapestry Object Properties" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Property name</th><th>Defining class</th><th>Property type</th><th>Description</th></tr></thead><tbody><tr><td>activePageNames</td><td><a href="../api/org/apache/tapestry/engine/BaseEngine.html" target="_self"><tt class="classname">BaseEngine</tt></a></td><td><tt class="classname">Collection</tt> of <tt class="classname">String</tt></td><td>Names of all pages for which a page recorder has been created.</td></tr><tr><td>assets</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><tt class="classname">Map</tt> of <a href="../api/org/apache/tapestry/IAsset.html" target="_self"><tt class="classname">IAsset</tt></a></td><td>
+	Localized assets as defined in the component's specification.	
+	</td></tr><tr><td>beans</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><a href="../api/org/apache/tapestry/IBeanProvider.html" target="_self"><tt class="classname">IBeanProvider</tt></a></td><td>Used to access beans defined using the <a href="spec.bean.html" title="bean element"><tt class="sgmltag-starttag">&lt;bean&gt;</tt></a> specification element.</td></tr><tr><td>bindingNames</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><tt class="classname">Collection</tt> of <tt class="classname">String</tt></td><td>
+	The names of all formal and informal parameter bindings for the component.
+	</td></tr><tr><td>bindings</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><tt class="classname">Map</tt> of <a href="../api/org/apache/tapestry/IBinding.html" target="_self"><tt class="classname">IBinding</tt></a></td><td>
+	All bindings (for both formal and informal parameters) for this component, keyed on
+	the parameter name.
+	</td></tr><tr><td>body</td><td><a href="../api/org/apache/tapestry/AbstractComponent.html" target="_self"><tt class="classname">AbstractComponent</tt></a></td><td><a href="../api/org/apache/tapestry/IRender.html" target="_self"><tt class="classname">IRender</tt></a>[]</td><td>
+	The body of the component: the text (as <a href="../api/org/apache/tapestry/IRender.html" target="_self"><tt class="classname">IRender</tt></a>) and components (which inherit from
+	<a href="../api/org/apache/tapestry/IRender.html" target="_self"><tt class="classname">IRender</tt></a>) that the component directly encloses within its container's template.
+	</td></tr><tr><td>bodyCount</td><td><a href="../api/org/apache/tapestry/AbstractComponent.html" target="_self"><tt class="classname">AbstractComponent</tt></a></td><td>int</td><td>
+	The active number of elements in the <tt class="varname">body</tt> property array.
+	</td></tr><tr><td>componentClassEnhancer</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/engine/IComponentClassEnhancer.html" target="_self"><tt class="classname">IComponentClassEnhancer</tt></a></td><td>
+	Object responsible for dynamic creation of enhanced subclasses of Tapestry pages and components.	
+	</td></tr><tr><td>components</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><tt class="classname">Map</tt> of <a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td>
+	All components contained by this component, keyed on the component id.	
+	</td></tr><tr><td>contextPath</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><tt class="classname">String</tt></td><td>
+	The path, if any, for the web application context.	
+	</td></tr><tr><td>changeObserver</td><td><a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a></td><td><a href="../api/org/apache/tapestry/event/ChangeObserver.html" target="_self"><tt class="classname">ChangeObserver</tt></a></td><td>An object that recieves notifications about changes to persistent page properties.</td></tr><tr><td>componentMessagesSource</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/engine/IComponentMessagesSource.html" target="_self"><tt class="classname">IComponentMessagesSource</tt></a></td><td>
+	An object that allows components to find their set of localized messages. 
+	</td></tr><tr><td>container</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td>
+	The page or component which contains this component.  Pages will return null.	
+	</td></tr><tr><td>dataSqueezer</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/util/io/DataSqueezer.html" target="_self"><tt class="classname">DataSqueezer</tt></a></td><td>Object used to encode and decode arbitrary values into a URL while maintaining their type.</td></tr><tr><td>dirty</td><td><a href="../api/org/apache/tapestry/engine/AbstractEngine.html" target="_self"><tt class="classname">AbstractEngine</tt></a></td><td>boolean</td><td>
+	True if the engine has been (potentially) modified, and should be stored 
+	into the <tt class="classname">HttpSession</tt>.	
+	</td></tr><tr><td>disabled</td><td><a href="../api/org/apache/tapestry/form/IFormComponent.html" target="_self"><tt class="classname">IFormComponent</tt></a></td><td>boolean</td><td>
+	If true, the component should be disabled (and not respond to query parameters passed up in the request).	
+	</td></tr><tr><td>displayName</td><td><a href="../api/org/apache/tapestry/form/IFormComponent.html" target="_self"><tt class="classname">IFormComponent</tt></a></td><td><tt class="classname">String</tt></td><td>
+	Localized string to be displayed as a label for the form control. Most implementations leave this
+	undefined (as null).	
+	</td></tr><tr><td>engine</td><td><a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a></td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td>The engine to which the page is currently attached.</td></tr><tr><td>extendedId</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><tt class="classname">String</tt></td><td>
+	An "extended" version of the <tt class="varname">idPath</tt>	 property that
+	includes the name of the page containing the component as well.
+	</td></tr><tr><td>form</td><td><a href="../api/org/apache/tapestry/form/IFormComponent.html" target="_self"><tt class="classname">IFormComponent</tt></a></td><td><a href="../api/org/apache/tapestry/IForm.html" target="_self"><tt class="classname">IForm</tt></a></td><td>
+	The form which encloses the form control component.	
+	</td></tr><tr><td>global</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a>, <a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a></td><td><tt class="classname">Object</tt></td><td>
+	The Global object for the application.	
+	</td></tr><tr><td>hasVisit</td><td><a href="../api/org/apache/tapestry/engine/AbstractEngine.html" target="_self"><tt class="classname">AbstractEngine</tt></a></td><td>boolean</td><td>
+	Returns true if the Visit object has been created, false initially.	
+	</td></tr><tr><td>id</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><tt class="classname">String</tt></td><td>
+	The id of the component, which is unique within its container. In many cases, the framework
+	may have assigned an automatically generated id. Pages do not have an id and return null.
+	</td></tr><tr><td>idPath</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><tt class="classname">String</tt></td><td>A sequence of id's used to locate a component within a page.  A component <tt class="literal">bar</tt>
+		within a component <tt class="literal">foo</tt> within a page will have an <tt class="varname">idPath</tt>
+		of <tt class="literal">foo.bar</tt>. Pages return null.
+		</td></tr><tr><td>listeners</td><td><a href="../api/org/apache/tapestry/AbstractComponent.html" target="_self"><tt class="classname">AbstractComponent</tt></a>, <a href="../api/org/apache/tapestry/engine/AbstractEngine.html" target="_self"><tt class="classname">AbstractEngine</tt></a></td><td><a href="../api/org/apache/tapestry/listener/ListenerMap.html" target="_self"><tt class="classname">ListenerMap</tt></a></td><td>
+	Used to map listener methods as objects that implement the <a href="../api/org/apache/tapestry/IActionListener.html" target="_self"><tt class="classname">IActionListener</tt></a> interface.
+	</td></tr><tr><td>locale</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><tt class="classname">Locale</tt></td><td>
+	The locale for the current client; this is used when loading pages from the page pool, or
+	when instantiating new page instances.	
+	</td></tr><tr><td>locale</td><td><a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a></td><td><tt class="classname">Locale</tt></td><td>
+	The locale to which the page and all components within the page is localized.	
+	</td></tr><tr><td>location</td><td><span class="emphasis"><em>many</em></span></td><td><a href="../api/org/apache/tapestry/ILocation.html" target="_self"><tt class="classname">ILocation</tt></a></td><td>
+	The location that should be used with any error messages generated about the object. This is
+	ultimately the file, line (and even column) of the template or specification file responsible
+	for defining the object (be it a component, a page, or some other kind of object).
+	</td></tr><tr><td>messages</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><a href="../api/org/apache/tapestry/IMessages.html" target="_self"><tt class="classname">IMessages</tt></a></td><td>
+	Localized messages for the component.	
+	</td></tr><tr><td>name</td><td><a href="../api/org/apache/tapestry/form/IFormComponent.html" target="_self"><tt class="classname">IFormComponent</tt></a></td><td><tt class="classname">String</tt></td><td>
+	The name, or element id, assigned to the form control by the <a href="../api/org/apache/tapestry/IForm.html" target="_self"><tt class="classname">IForm</tt></a>. This is set as the component
+	renders (but the property can then be read after the component renders).	
+	</td></tr><tr><td>namespace</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><a href="../api/org/apache/tapestry/INamespace.html" target="_self"><tt class="classname">INamespace</tt></a></td><td>The namespace containing the component. Components are always within <span class="emphasis"><em>some</em></span>
+		namespace, whether it is the default (application) namespace, the framework namespace,
+		or a namespace for a component library.</td></tr><tr><td>outputEncoding</td><td><a href="../api/org/apache/tapestry/AbstractPage.html" target="_self"><tt class="classname">AbstractPage</tt></a></td><td><tt class="classname">String</tt></td><td>
+	Output encoding for the page.	
+	</td></tr><tr><td>page</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a></td><td>
+	The page which ultimately contains the component.	
+	</td></tr><tr><td>propertySource</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/engine/IPropertySource.html" target="_self"><tt class="classname">IPropertySource</tt></a></td><td>
+	Source for configuration properties.	
+	</td></tr><tr><td>pageName</td><td><a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a></td><td><tt class="classname">String</tt></td><td>
+	The fully qualified page name (possibly including a namespace prefix).
+	</td></tr><tr><td>pageSource</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/engine/IPageSource.html" target="_self"><tt class="classname">IPageSource</tt></a></td><td>
+	The object used to obtain page instances.	
+	</td></tr><tr><td>pool</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="" target="_self"><tt class="classname">Pool</tt></a></td><td>
+	Stores objects that are expensive to create.	
+	</td></tr><tr><td>requestCycle</td><td><a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a></td><td><a href="../api/org/apache/tapestry/IRequestCycle.html" target="_self"><tt class="classname">IRequestCycle</tt></a></td><td>
+	The request cycle to which the page is currently attached.
+	</td></tr><tr><td>resetServiceEnabled</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td>boolean</td><td>
+	If true, the reset service is enabled. The reset service is disabled by default.	
+	</td></tr><tr><td>resourceResolver</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/IResourceResolver.html" target="_self"><tt class="classname">IResourceResolver</tt></a></td><td>
+Object responsible for locating classes and classpath resources.	
+</td></tr><tr><td>scriptSource</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/engine/IScriptSource.html" target="_self"><tt class="classname">IScriptSource</tt></a></td><td>
+Object that parses and caches script specifications.	
+</td></tr><tr><td>servletPath</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><tt class="classname">String</tt></td><td>
+	The URL path used to reference the application servlet (including the context path, if any).	
+	</td></tr><tr><td>specification</td><td><a href="../api/org/apache/tapestry/IComponent.html" target="_self"><tt class="classname">IComponent</tt></a></td><td><a href="../api/org/apache/tapestry/spec/IComponentSpecification.html" target="_self"><tt class="classname">IComponentSpecification</tt></a></td><td>
+	The specification which defines this component.	Often used to access
+	meta data defined in the component's specification using the
+	<a href="spec.property.html" title="property element"><tt class="sgmltag-starttag">&lt;property&gt;</tt></a> element.
+	</td></tr><tr><td>specification</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/spec/IApplicationSpecification.html" target="_self"><tt class="classname">IApplicationSpecification</tt></a></td><td>
+	The specification for the application.	
+	</td></tr><tr><td>specificationSource</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/engine/ISpecificationSource.html" target="_self"><tt class="classname">ISpecificationSource</tt></a></td><td>Object responsible for reading and caching page and component specifications.</td></tr><tr><td>stateful</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td>boolean</td><td>
+If true, then an <tt class="classname">HttpSession</tt> has been created for the client to store server-side state. Initially false.	
+</td></tr><tr><td>templateSource</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><a href="../api/org/apache/tapestry/engine/ITemplateSource.html" target="_self"><tt class="classname">ITemplateSource</tt></a></td><td>
+	Object responsible for reading and caching page and component templates.	
+	</td></tr><tr><td>visit</td><td><a href="../api/org/apache/tapestry/IEngine.html" target="_self"><tt class="classname">IEngine</tt></a></td><td><tt class="classname">Object</tt></td><td>
+		Returns the Visit object for the current client, or null if the Visit object
+		has not yet been created.	
+		</td></tr><tr><td>visit</td><td><a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a></td><td><tt class="classname">Object</tt></td><td>
+	Returns the Visit object for the current client, creating it if necessary.	
+	</td></tr></tbody></table></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="configuration.character-sets.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="TapestryUsersGuide.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="jars.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Character Sets&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="TapestryUsersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Appendix&nbsp;B.&nbsp;Tapestry JAR files</td></tr></table></div></body></html>

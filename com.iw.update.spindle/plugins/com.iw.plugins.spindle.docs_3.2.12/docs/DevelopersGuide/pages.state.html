@@ -1,0 +1,23 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Page State</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="pages.html" title="Chapter&nbsp;4.&nbsp;Tapestry Pages"><link rel="previous" href="pages.html" title="Chapter&nbsp;4.&nbsp;Tapestry Pages"><link rel="next" href="pages.persistent-state.html" title="Persistent Page State"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Page State</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="pages.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Tapestry Pages</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="pages.persistent-state.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="pages.state"></a>Page State</h2></div></div><div></div></div><p>
+Pages, and the components on them, have state.  State is considered the set of values for the 
+properties of the page.
+</p><p>
+In Tapestry, the lifespan of each property is very important.  There are three lifespans:
+</p><div class="itemizedlist"><ul type="disc"><li><p>
+			Persistent.  Changes the property are recorded and persist between request cycles.  
+			Persistent properties are restored when the page is next loaded.  Persistent
+			properties are specific to an individual user.
+		</p></li><li><p>
+			Transient.  The property is set before the page is rendered and will be reset 
+			(to its default value) at the end of the current request cycle.
+		</p></li><li><p>
+			Dynamic.  The property changes even while the page is rendered, but 
+			(like transient) the property is 
+			reset at the end of the current request cycle.
+		</p></li></ul></div><p>
+Persistent properties are things like the user's name, the product being displayed in an 
+e-commerce application, etc.  Transient properties are more commonly things needed just once, 
+such as an error message.  Dynamic properties are intimately tied to the rendering process ... for 
+example, to display a list of items in an order, it may be necessary to have a dynamic property take 
+the value of each line item in sequence, as part of a loop.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="pages.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="pages.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="pages.persistent-state.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;4.&nbsp;Tapestry Pages&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Persistent Page State</td></tr></table></div></body></html>

@@ -1,0 +1,41 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Formal vs. Informal Parameters</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="components.html" title="Chapter&nbsp;3.&nbsp;Tapestry Components"><link rel="previous" href="components.connected-params.html" title="Connected Parameters"><link rel="next" href="components.embedded.html" title="Embedded Components"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Formal vs. Informal Parameters</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.connected-params.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Tapestry Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.embedded.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.informal-parameters"></a>Formal vs. Informal Parameters</h2></div></div><div></div></div><p>
+Tapestry components have two types of parameters: formal and informal.
+</p><p>
+Formal parameters are parameters defined in the 
+<a href="spec.parameter.html" title="parameter element">component specification</a>.  
+Each formal parameter has a specific
+(case sensitive) name and may be required or optional.
+</p><p>
+In many cases, there is a one-to-one mapping between a Tapestry component and a specific
+HTML tag.  For example, <a href="../ComponentReference/Body.html" target="_self"><tt class="classname">Body</tt></a> and <tt class="sgmltag-starttag">&lt;body&gt;</tt>,
+<a href="../ComponentReference/Form.html" target="_self"><tt class="classname">Form</tt></a> and <tt class="sgmltag-starttag">&lt;form&gt;</tt>, etc.  In other cases, a Tapestry component
+produces a known single HTML tag.  For example, <a href="../ComponentReference/ActionLink.html" target="_self"><tt class="classname">ActionLink</tt></a>, <a href="../ComponentReference/DirectLink.html" target="_self"><tt class="classname">DirectLink</tt></a>, <a href="../ComponentReference/PageLink.html" target="_self"><tt class="classname">PageLink</tt></a> and <a href="../ComponentReference/ServiceLink.html" target="_self"><tt class="classname">ServiceLink</tt></a>
+all produce an <tt class="sgmltag-starttag">&lt;a&gt;</tt> tag.
+</p><p>
+To support truly rich interfaces, it is often necessary to specify additional attributes
+of the HTML tags; usually this means setting the <tt class="varname">class</tt> of a tag so as to
+get visual properties from a stylesheet.  In other cases, display attributes may be specified inline
+(this is often the case with attributes related to display width and height, since
+CSS support for these properties are inconsistent between the major HTML 4.0 browsers).
+</p><p>
+In theory, these components <span class="emphasis"><em>could</em></span> define additional formal parameters for
+each possible HTML attribute ... but there are a huge number of possible attributes, many of
+which are specific to a particular browser.
+</p><p>
+Instead, Tapestry has the concept of an <span class="emphasis"><em>informal parameter</em></span>.  
+This is an "additional" parameter, not specified
+in the component's specification.  In most cases, where informal parameters are allowed, they
+are added as additional HTML attributes (there are a few special exceptions, such as the <a href="../ComponentReference/Script.html" target="_self"><tt class="classname">Script</tt></a> component).
+</p><p>
+Informal parameters do have some limitations.  Informal parameters that conflict with the names of
+any formal parameters, or with any of the HTML attributes generated directly by the component, are silently
+ommitted.  The comparison is case-insensitve.  Thus, for a <a href="../ComponentReference/DirectLink.html" target="_self"><tt class="classname">DirectLink</tt></a> component, you can not change
+the <tt class="varname">href</tt> attribute, even if you supply a <tt class="varname">Href</tt> (or other variation) informal parameter.
+</p><p>
+Not all Tapestry components even allow informal parameters; this is explicitly 
+stated in the <a href="spec.component-specification.html" title="component-specification element">component specification</a>.
+</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note: Informal Parameters that are Assets"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="common-images/note.png"></td><th align="left">Informal Parameters that are Assets</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+Tapestry includes a special case when an informal parameter is actually an 
+<a href="components.assets.html" title="Assets">asset</a>.  The URL for the asset is determined and that is the value
+supplied for the attribute.
+</p></td></tr></table></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.connected-params.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.embedded.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Connected Parameters&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Embedded Components</td></tr></table></div></body></html>

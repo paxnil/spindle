@@ -1,0 +1,113 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Connected Parameters</title><link href="Tapestry.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.64.1" name="generator"><link rel="home" href="DevelopersGuide.html" title="Tapestry Developer's Guide"><link rel="up" href="components.html" title="Chapter&nbsp;3.&nbsp;Tapestry Components"><link rel="previous" href="components.params.html" title="Parameters and Bindings"><link rel="next" href="components.informal-parameters.html" title="Formal vs. Informal Parameters"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Connected Parameters</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="components.params.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Tapestry Components</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="components.informal-parameters.html"><img src="common-images/next.png" alt="Next"></a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="components.connected-params"></a>Connected Parameters</h2></div></div><div></div></div><p>
+In most cases, a developer is not interested in bindings; an easier model for developers is one
+in which Tapestry uses the parameters and bindings to set properties of the component automatically.
+Starting in release 2.1, Tapestry includes this behavior, with some constraints and limitations.
+</p><p>
+Part of the <a href="spec.parameter.html" title="parameter element"><tt class="sgmltag-starttag">&lt;parameter&gt;</tt></a> specification for a parameter
+is the <span class="emphasis"><em>direction</em></span>, which can be one of the following values:
+</p><div class="variablelist"><dl><dt><span class="term">in</span></dt><dd><p>
+		Input parameter; the value is drawn from the binding (if bound)
+		and applied to the corresponding component property just before rendering the component.
+		</p></dd><dt><span class="term">form</span></dt><dd><p>
+		A parameter which matches the semantics of a form component.
+		The parameter is treated like an <tt class="literal">in</tt>
+		parameter when the page is rendering.
+		</p><p>
+		When the form containing the component is submitted,
+		the connected property is read (after the component renders),
+		and the value applied to the parameter.
+		</p></dd><dt><span class="term">custom</span></dt><dd><p>
+		Tapestry does not try to connect the parameter with any property; the component
+		is responsible for accessing the binding and retrieving or setting values.
+		</p><p>
+		This type must be used for any kind of output parameter, or for an input parameter
+		where the property may be accessed other than during the rendering of the component.
+		</p></dd></dl></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note: Why aren't output parameters connectable?"><tr><td valign="top" align="center" rowspan="2" width="25"><img alt="[Note]" src="common-images/note.png"></td><th align="left">Why aren't output parameters connectable?</th></tr><tr><td valign="top" align="left" colspan="2"><p>
+	The problem is the timing of output parameters.  Sometimes a parameter is only an output
+	parameter when the containing form is submitted (for example, any of the form related components).
+	Sometimes a parameter is output many times (for example, <a href="../ComponentReference/Foreach.html" target="_self"><tt class="classname">Foreach</tt></a>) while the component
+	renders.
+	</p><p>
+	The latter case may always be handled as custom; the former case may be handled
+	in the future.
+	</p></td></tr></table></div><p>
+Defining a parameter as direction <tt class="literal">in</tt> causes Tapestry to connect the parameter to the corresponding
+property of the component.  The parameter specification must identify the Java type of the property.
+Properties must be read/write (they must have both
+getter and setter methods).
+</p><p>
+Tapestry will set properties from parameters just before rendering the component.  After the component renders, 
+the parameters are
+cleared; they are returned to inital values.  Tapestry reads these initial values just before it sets the
+properties the first time.  This makes it very easy to set defaults for optional parameters: just provide a default value
+for the correspoinding instance variable.
+</p><p>
+If the property is connected to an invariant binding (a static or field
+binding), then the property is set just once, and never cleared.
+</p><p>
+There are times when the parameter name can't be used as the property name.  For example,
+the <a href="../ComponentReference/PageLink.html" target="_self"><tt class="classname">PageLink</tt></a> component has a <tt class="literal">page</tt> parameter, the name of the page to link to.  
+However, all components already have a <tt class="literal">page</tt>
+property, the <a href="../api/org/apache/tapestry/IPage.html" target="_self"><tt class="classname">IPage</tt></a> that ultimately contains them.  The specification for the <a href="../ComponentReference/PageLink.html" target="_self"><tt class="classname">PageLink</tt></a> component
+connects the <tt class="literal">page</tt> parameter to a property named <tt class="literal">targetPage</tt> instead.
+</p><p>
+Defining a connected parameter as required means that the parameter must be bound
+<span class="emphasis"><em>and</em></span> the binding must provide a non-null value.  A runtime exception
+is thrown when a required parameter's binding yields a null value.
+</p><p>
+The following examples show how to declare and use a parameter:
+</p><div class="example"><a name="N1035D"></a><p class="title"><b>Example&nbsp;3.1.&nbsp;Connected Parameter - Specification</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+
+
+&lt;specification ...&gt;
+
+  &lt;parameter name="color" direction="in" java-type="java.awt.Color"/&gt;
+  
+  ...
+
+</pre></td></tr></table></div><div class="example"><a name="N10363"></a><p class="title"><b>Example&nbsp;3.2.&nbsp;Connected Parameter - Java Code</b></p><table border="0" bgcolor="#E0E0E0"><tr><td><pre class="programlisting">
+
+public class ColorComponent extends <a href="../api/org/apache/tapestry/AbstractComponent.html" target="_self"><tt class="classname">AbstractComponent</tt></a>
+{
+  private Color color = Color.RED;
+  
+  public Color getColor()
+  {
+    return color;
+  }
+    
+  public void setColor(Color color)
+  {
+    this.color = color;
+  }
+  
+  protected void renderComponent(<a href="../api/org/apache/tapestry/IMarkupWriter.html" target="_self"><tt class="classname">IMarkupWriter</tt></a> writer, <a href="../api/org/apache/tapestry/IRequestCycle.html" target="_self"><tt class="classname">IRequestCycle</tt></a> cycle)
+  throws RequestCycleException
+  {
+    writer.begin("font");
+    writer.attribute("color", ^RequestContext;.encodeColor(color);
+    
+    renderWrapped(writer, cycle);
+    
+    writer.end();
+  }
+  
+}
+</pre></td></tr></table></div><p>
+In this example, the component writes its content inside a <tt class="sgmltag-starttag">&lt;font&gt;</tt>
+element, with the HTML color attribute set from the <tt class="literal">color</tt> parameter.  <a href="../api/org/apache/tapestry/RequestContext.html" target="_self"><tt class="classname">RequestContext</tt></a>
+includes a static convienience method for converting from a 
+<tt class="classname">Color</tt> object to an encoded color
+that will be meaningful to a web browser.
+</p><p>
+The parameter is optional and defaults to red if not specified (that is, if the parameter
+is not bound).
+</p><p>
+At runtime, Tapestry will invoke <tt class="function">setColor()</tt> first (if the <tt class="literal">color</tt>
+parameter is bound).  It will then invoke <tt class="function">renderComponent()</tt>.  Finally (even if
+<tt class="function">renderComponent()</tt> throws an exception) it will invoke <tt class="function">setColor()</tt>
+again, to restore it back to the default value, <tt class="literal">Color.RED</tt>.
+</p><p>
+This code includes a defect: because the parameter is optional, there is nothing to prevent
+it from being bound to null.
+</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="components.params.html"><img src="common-images/prev.png" alt="Prev"></a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="components.html"><img src="common-images/up.png" alt="Up"></a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="components.informal-parameters.html"><img src="common-images/next.png" alt="Next"></a></td></tr><tr><td valign="top" align="left" width="40%">Parameters and Bindings&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="DevelopersGuide.html"><img src="common-images/home.png" alt="Home"></a></td><td valign="top" align="right" width="40%">&nbsp;Formal vs. Informal Parameters</td></tr></table></div></body></html>
