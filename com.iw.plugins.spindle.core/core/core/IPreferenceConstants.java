@@ -32,9 +32,15 @@ package core;
  */
 public interface IPreferenceConstants
 {
+
+  //default is 'true'
+  //I'm not sure this is used anymore
   String CACHE_GRAMMAR_PREFERENCE = TapestryCore.IDENTIFIER + ".cachinggrammars";
+  
+  // the following three preferences expect values to be Strings from  CORE_STATUS_ARRAY defined below.
   String BUILDER_MARKER_MISSES = TapestryCore.IDENTIFIER + ".BUILDER_MARKER_MISSES";
   String BUILDER_HANDLE_ASSETS = TapestryCore.IDENTIFIER + ".BUILDER_HANDLE_ASSETS";
+  String NAMESPACE_CLASH_SEVERITY = TapestryCore.IDENTIFIER+".namespaceClashSeverity";
 
   String CORE_STATUS_INFO = "info";
   String CORE_STATUS_WARN = "warn";
@@ -44,8 +50,6 @@ public interface IPreferenceConstants
   String[] CORE_STATUS_ARRAY = new String[]{CORE_STATUS_INFO, CORE_STATUS_WARN,
       CORE_STATUS_ERROR, CORE_STATUS_IGNORE};
   
-  String TAPESTRY_LIBRARY = TapestryCore.IDENTIFIER+".tapestryLibrary";
-  
-  String NAMESPACE_CLASH_SEVERITY = TapestryCore.IDENTIFIER+".namespaceClashSeverity";
+ 
 
 }

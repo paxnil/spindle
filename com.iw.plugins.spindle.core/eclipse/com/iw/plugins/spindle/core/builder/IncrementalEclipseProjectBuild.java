@@ -44,7 +44,6 @@ import org.eclipse.core.resources.IStorage;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
-import core.IJavaTypeFinder;
 import core.namespace.ICoreNamespace;
 import core.resources.ICoreResource;
 import core.resources.templates.TemplateFinder;
@@ -57,6 +56,7 @@ import core.source.ISourceLocation;
 import core.spec.PluginApplicationSpecification;
 import core.spec.PluginComponentSpecification;
 import core.spec.PluginLibrarySpecification;
+import core.types.IJavaTypeFinder;
 
 /**
  * New Incremental AbstractBuild - this one revalidates specs if thier underlying resource has not

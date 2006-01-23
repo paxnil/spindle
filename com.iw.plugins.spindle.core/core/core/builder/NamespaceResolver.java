@@ -27,6 +27,7 @@
 package core.builder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -410,7 +411,7 @@ public class NamespaceResolver
      */
     private String getCircularErrorMessage(ICoreResource location)
     {
-        List result = new ArrayList();
+        List<ICoreResource> result = new ArrayList<ICoreResource>();
         result.add(location);
         Stack clone = (Stack) componentStack.clone();
 
@@ -477,33 +478,34 @@ public class NamespaceResolver
 
     private Map<String, Resource> resolveAllAnnotatedSpeclessComponentsForNamespace()
     {
-        Map<String, Resource> result = new HashMap<String, Resource>();
-        if (build.infrastructure.projectSupportsAnnotations())
-        {
-            ILibrarySpecification spec = namespace.getSpecification();
-
-            String packages = namespace
-                    .getPropertyValue("org.apache.tapestry.component-class-packages");
-
-            if (!HiveMind.isBlank(packages))
-            {
-                List annotatedComponentTypes = build.infrastructure
-                        .getAllAnnotatedComponentTypes(packages);
-                for (Iterator iter = annotatedComponentTypes.iterator(); iter.hasNext();)
-                {
-                    IJavaType type = (IJavaType) iter.next();
-                    String simpleName = type.getSimpleName();
-
-                    Resource location = namespace.getSpecificationLocation()
-                            .getRelativeResource(simpleName + ".jwc");
-
-                    resolveSpeclessComponent(location, type);
-
-                    result.put(simpleName, location);
-                }
-            }
-        }
-        return result;
+        return Collections.emptyMap();
+//        Map<String, Resource> result = new HashMap<String, Resource>();
+//        if (build.infrastructure.projectSupportsAnnotations())
+//        {
+//            ILibrarySpecification spec = namespace.getSpecification();
+//
+//            String packages = namespace
+//                    .getPropertyValue("org.apache.tapestry.component-class-packages");
+//
+//            if (!HiveMind.isBlank(packages))
+//            {
+//                List annotatedComponentTypes = build.infrastructure
+//                        .getAllAnnotatedComponentTypes(packages);
+//                for (Iterator iter = annotatedComponentTypes.iterator(); iter.hasNext();)
+//                {
+//                    IJavaType type = (IJavaType) iter.next();
+//                    String simpleName = type.getSimpleName();
+//
+//                    Resource location = namespace.getSpecificationLocation()
+//                            .getRelativeResource(simpleName + ".jwc");
+//
+//                    resolveSpeclessComponent(location, type);
+//
+//                    result.put(simpleName, location);
+//                }
+//            }
+//        }
+//        return result;
     }
 
     protected void resolveSpeclessComponent(Resource location, IJavaType componentType)

@@ -133,7 +133,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected Map<Resource, BaseSpecification> fileSpecificationMap;
 
-    protected Map<Resource, BaseSpecification> binarySpecificationMap; // binary specs (from jars) never change
+    protected Map<Resource, BaseSpecification> binarySpecificationMap; // binary specs (from jars)
+                                                                        // never change
 
     protected AbstractBuildInfrastructure infrastructure;
 
@@ -169,31 +170,29 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     public AbstractBuild(AbstractBuildInfrastructure infrastructure)
     {
         this.infrastructure = infrastructure;
-        tapestryProject = infrastructure.tapestryProject;
-        classpathRoot = infrastructure.classpathRoot;
-        contextRoot = infrastructure.contextRoot;
-        domModelSource = infrastructure.domModelSource;
-        projectPropertySource = infrastructure.projectPropertySource;
-        validateWebXML = infrastructure.validateWebXML;
-
-        newState = new State(infrastructure);
-        buildQueue = new BuilderQueue();
-        notifier = infrastructure.notifier;
-        foundTypes = new ArrayList<IJavaType>();
-        missingTypes = new ArrayList<String>();
-        processedLocations = new HashMap<Resource, BaseSpecification>();
-        seenTemplateExtensions = new HashSet<String>();
-        declaredTemplateExtensions = new HashSet<String>();
-        declaredTemplateExtensionsClasspath = new HashSet<String>();
-        templateMap = new HashMap<Resource, BaseSpecification>();
-        fileSpecificationMap = new HashMap<Resource, BaseSpecification>();
-        binarySpecificationMap = new HashMap<Resource, BaseSpecification>();
-        libNamespace = new ArrayList<ICoreNamespace>();
-        cleanTemplates = new ArrayList<Resource>();
-        clashDetector = new ClashDetector();
-        problemPersister = infrastructure.problemPersister;
-
-        tapestryServletType = tapestryProject.findType(CoreMessages
+        this.tapestryProject = infrastructure.tapestryProject;
+        this.classpathRoot = infrastructure.classpathRoot;
+        this.contextRoot = infrastructure.contextRoot;
+        this.domModelSource = infrastructure.domModelSource;
+        this.projectPropertySource = infrastructure.projectPropertySource;
+        this.validateWebXML = infrastructure.validateWebXML;
+        this.newState = new State(infrastructure);
+        this.notifier = infrastructure.notifier;
+        this.foundTypes = new ArrayList<IJavaType>();
+        this.missingTypes = new ArrayList<String>();
+        this.processedLocations = new HashMap<Resource, BaseSpecification>();
+        this.seenTemplateExtensions = new HashSet<String>();
+        this.declaredTemplateExtensions = new HashSet<String>();
+        this.declaredTemplateExtensionsClasspath = new HashSet<String>();
+        this.templateMap = new HashMap<Resource, BaseSpecification>();
+        this.fileSpecificationMap = new HashMap<Resource, BaseSpecification>();
+        this.binarySpecificationMap = new HashMap<Resource, BaseSpecification>();
+        this.libNamespace = new ArrayList<ICoreNamespace>();
+        this.cleanTemplates = new ArrayList<Resource>();
+        this.clashDetector = new ClashDetector();
+        this.problemPersister = infrastructure.problemPersister;
+        this.buildQueue = new BuilderQueue();
+        this.tapestryServletType = tapestryProject.findType(CoreMessages
                 .format(AbstractBuildInfrastructure.STRING_KEY + "applicationServletClassname"));
 
         if (tapestryServletType == null || !tapestryServletType.exists())
@@ -222,10 +221,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                     + "locating-artifacts"));
-
-            // this may not be a definitive list if namespaces
-            // in the application declare custom template extensions
-            buildQueue.addAll(findAllTapestryArtifacts().toArray());
+            
+            buildQueue.addAll(findAllTapestrySourceFiles().toArray());
 
             // we need to eliminate the mark as "processed" ns locations we already visited.
             for (Iterator iter = appNamespace.iterator(); iter.hasNext();)
@@ -241,9 +238,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             notifier.updateProgressDelta(0.05f);
 
-            notifier.setProcessingProgressPer(0.9f / buildQueue.getWaitingCount());
-
-            notifier.setProcessingProgressPer(0.005f);
+            notifier.setProcessingProgressPer(0.9f / buildQueue.getWaitingCount());            
 
             resolveFramework();
 
@@ -364,7 +359,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected ICoreNamespace getPreBuiltNamespace(Resource location)
     {
-        if (lastState != null && ((ICoreResource)location).isBinaryResource()
+        if (lastState != null && ((ICoreResource) location).isBinaryResource()
                 && lastState.fBinaryNamespaces.containsKey(location))
             return (ICoreNamespace) lastState.fBinaryNamespaces.get(location);
 
@@ -400,18 +395,14 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     /**
      * Find all files in the project that have standard Tapestry extensions. This is less useful in
-     * that users can override the extensions allowed for templates. Not a good idea to base a
-     * "missed" test on these results.
+     * that users can override the extensions allowed for templates.
      * 
      * @return List a list containing all the Tapestry files in the project
      */
-    protected List<Resource> findAllTapestryArtifacts()
+    protected List<Resource> findAllTapestrySourceFiles()
     {
         ArrayList<Resource> found = new ArrayList<Resource>();
-        infrastructure.findAllTapestryArtifactsInWebContext(declaredTemplateExtensions, found);
-        infrastructure.findAllTapestryArtifactsInClasspath(
-                declaredTemplateExtensionsClasspath,
-                found);
+        infrastructure.findAllTapestrySourceFiles(declaredTemplateExtensions, found);
         return found;
     }
 
@@ -483,7 +474,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected void rememberSpecification(Resource location, BaseSpecification result)
     {
-        ICoreResource coreResource = (ICoreResource)location;
+        ICoreResource coreResource = (ICoreResource) location;
         if (!coreResource.exists())
         {
             Throwable t = new Throwable();
@@ -669,7 +660,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected IDOMModel getDOMModel(Resource location, String encoding, boolean validate)
             throws IOException
     {
-        if (!((ICoreResource)location).exists())
+        if (!((ICoreResource) location).exists())
             throw new IOException(CoreMessages.format("core-resource-does-not-exist", location));
 
         IDOMModel result = domModelSource.parseDocument(location, encoding, validate, this);
@@ -747,7 +738,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         PluginComponentSpecification result = null;
         IDOMModel model = null;
-        if (((ICoreResource)location).exists())
+        if (((ICoreResource) location).exists())
         {
             try
             {
@@ -819,9 +810,10 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         return result;
     }
-    
-    protected void scanComponentSpecificationAnnotations(PluginComponentSpecification specification) {
-        //TODO implement!
+
+    protected void scanComponentSpecificationAnnotations(PluginComponentSpecification specification)
+    {
+        // TODO implement!
     }
 
     protected String getComponentTemplateExtension(ICoreNamespace namespace,
@@ -1060,8 +1052,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected abstract List<ICoreNamespace> doGetApplicationNamespaces();
 
     // returns unresolved namespace tree assumes id is valid and location exists.
-    protected CoreNamespace getNamespaceTree(String namespaceId, Resource location,
-            String encoding)
+    protected CoreNamespace getNamespaceTree(String namespaceId, Resource location, String encoding)
     {
         CoreNamespace result = (CoreNamespace) createNamespace(namespaceId, location, encoding);
 

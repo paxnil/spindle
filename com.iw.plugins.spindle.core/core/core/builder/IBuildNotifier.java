@@ -14,9 +14,6 @@ public interface IBuildNotifier
 
     void checkCancel();
 
-    /**
-     * Method done.
-     */
     void done();
 
     void updateProgress(float percentComplete);

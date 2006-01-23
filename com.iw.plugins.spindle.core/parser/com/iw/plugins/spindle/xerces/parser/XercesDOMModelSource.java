@@ -2,6 +2,7 @@ package com.iw.plugins.spindle.xerces.parser;
 
 import java.io.IOException;
 
+import org.apache.hivemind.Resource;
 import org.apache.xerces.dom.DocumentImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -30,12 +31,12 @@ public class XercesDOMModelSource implements IDOMModelSource
         super();
     }
 
-    public IDOMModel parseDocument(ICoreResource resource, boolean validate, Object requestor)
+    public IDOMModel parseDocument(Resource resource, boolean validate, Object requestor)
     {
         return parseDocument(resource, null, validate, requestor);
     }
 
-    public IDOMModel parseDocument(ICoreResource resource, String encoding, boolean validate,
+    public IDOMModel parseDocument(Resource resource, String encoding, boolean validate,
             Object requestor)
     {
 
@@ -44,7 +45,7 @@ public class XercesDOMModelSource implements IDOMModelSource
         p.setDoValidation(validate);
         try
         {
-            document = p.parse(resource.getContents(), encoding);
+            document = p.parse(((ICoreResource)resource).getContents(), encoding);
         }
         catch (IOException e)
         {
@@ -157,4 +158,6 @@ public class XercesDOMModelSource implements IDOMModelSource
         }
 
     }
+
+   
 }

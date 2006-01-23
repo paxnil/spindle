@@ -2,7 +2,6 @@ package core.types;
 
 import org.eclipse.jdt.core.IMethod;
 
-import core.IJavaTypeFinder;
 
 /**
  * Wrapper interface for things are Java types (classes ir interfaces).
@@ -10,7 +9,7 @@ import core.IJavaTypeFinder;
  * Examples of underlying types would be {@link java.lang.Class} instances in a runtime
  * implementation or {@link org.eclipse.jdt.core.IType} instances in an Eclipse IDE.
  * <p>
- * Instances of IJavaType are created via calls to {@link core.IJavaTypeFinder#findType(String)}.
+ * Instances of IJavaType are created via calls to {@link core.types.IJavaTypeFinder#findType(String)}.
  * <p>
  * Clients should never directly instantiate instances of an implementation.
  * 

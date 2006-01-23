@@ -30,7 +30,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,50 +39,36 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
-import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextResource;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 import com.iw.plugins.spindle.core.resources.search.eclipse.AbstractEclipseSearchAcceptor;
-import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
 import core.CoreMessages;
 import core.TapestryCore;
 import core.TapestryCoreException;
+import core.builder.AbstractBuild;
 import core.builder.AbstractBuildInfrastructure;
-import core.builder.BrokenWebXMLException;
 import core.builder.BuilderException;
-import core.builder.ClashException;
-import core.builder.FullBuild;
 import core.builder.State;
 import core.builder.WebXMLScanner;
 import core.parser.dom.IDOMModelSource;
 import core.resources.ICoreResource;
 import core.resources.search.ISearch;
-import core.source.DefaultProblem;
-import core.source.IProblem;
-import core.source.SourceLocation;
-import core.util.Assert;
 
 /**
  * The Tapestry Builder, kicks off full and incremental builds.
@@ -96,13 +81,16 @@ import core.util.Assert;
 public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 {
 
-    private final Bundle systemBundle = Platform.getBundle("org.eclipse.osgi");
-
     private static String PACKAGE_CACHE = "PACKAGE_CACHE";
 
     private static String STORAGE_CACHE = "STORAGE_CACHE";
 
     private static String CLASSPATH_SEARCH_CACHE = "CLASSPATH_SEARCH_CACHE";
+
+    public static Map getClasspathSearchCache()
+    {
+        return getOrCreateCache(CLASSPATH_SEARCH_CACHE);
+    }
 
     public static Map getPackageCache()
     {
@@ -112,11 +100,6 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     public static Map getStorageCache()
     {
         return getOrCreateCache(STORAGE_CACHE);
-    }
-
-    public static Map getClasspathSearchCache()
-    {
-        return getOrCreateCache(CLASSPATH_SEARCH_CACHE);
     }
 
     public static State readState(DataInputStream in) throws IOException
@@ -140,7 +123,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     IResourceDelta fDelta;
 
     private List<String> excludedFileNames;
-    
+
     private boolean projectSupportsAnnotations = false;
 
     /**
@@ -156,114 +139,100 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         projectSupportsAnnotations = doesProjectSupportJavaAnnotations(project);
     }
 
-    public List getAllAnnotatedComponentTypes(String packages)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see core.builder.AbstractBuildInfrastructure#copyClasspathMemento(java.lang.Object)
+     */
+    public Object copyClasspathMemento(Object memento)
     {
-        // IJavaTypes TODO implement
-        return Collections.EMPTY_LIST;
+        IClasspathEntry[] source = (IClasspathEntry[]) memento;
+        IClasspathEntry[] result = new IClasspathEntry[source.length];
+        System.arraycopy(source, 0, result, 0, source.length);
+        return result;
     }
 
-    public List getAllAnnotatedPageTypes(String packages)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see core.builder.AbstractBuildInfrastructure#createWebXMLScanner()
+     */
+    public WebXMLScanner createWebXMLScanner()
     {
-        // IJavaTypes TODO implement
-        return Collections.EMPTY_LIST;
+        return new EclipseWebXMLScanner(build);
     }
 
-    public boolean projectSupportsAnnotations()
-    {        
-        return projectSupportsAnnotations;
-    }
-
-    public void executeBuild(boolean requestIncremental, Map args)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see core.builder.AbstractBuildInfrastructure#findAllTapestrySourceFiles(java.util.Set,
+     *      java.util.ArrayList)
+     */
+    public void findAllTapestrySourceFiles(Set<String> knownTemplateExtensions,
+            final ArrayList<Resource> found)
     {
-        problemPersister = new Markers();
-
-        notifier.begin();
-
-        boolean ok = false;
-
+        // first in the web context
+        ISearch searcher = null;
         try
         {
-            notifier.checkCancel();
-            initialize();
-            if (isWorthBuilding())
+            searcher = contextRoot.getSearch();
+            searcher.search(new ArtifactCollector(knownTemplateExtensions, getExcludedFileNames())
             {
-
-                if (!requestIncremental)
+                public boolean acceptTapestry(Object parent, Object leaf)
                 {
-                    buildAll();
+                    IResource resource = (IResource) leaf;
+                    ContextRoot ctxRoot = (ContextRoot) contextRoot;
+                    ICoreResource coreResource = new ContextResource(ctxRoot, resource);
+
+                    if (coreResource.exists() && !conflictsWithJavaOutputDirectory(resource))
+                        found.add(coreResource);
+
+                    return keepGoing();
+
                 }
-                else
-                {
-                    buildIncremental();
-                }
-                ok = true;
-            }
+            });
         }
-        catch (CoreException e)
-        {
-            ErrorDialog.openError(EclipsePluginUtils.getWorkbench().getActiveWorkbenchWindow()
-                    .getShell(), CoreMessages.format("build-failed-core-title"), CoreMessages
-                    .format("build-failed-core-message"), e.getStatus());
-        }
-        catch (BrokenWebXMLException e)
-        {
-            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
-                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
-                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-            if (AbstractBuildInfrastructure.DEBUG)
-                System.err.println("Tapestry build aborted: " + e.getMessage());
-        }
-        catch (ClashException e)
-        {
-            problemPersister.removeAllProblems(tapestryProject);
-            ICoreResource requestor = e.getRequestor();
-            problemPersister.recordProblem(requestor, new DefaultProblem(
-                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-REQUESTOR",
-                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-
-            ICoreResource owner = e.getOwner();
-            problemPersister.recordProblem(owner, new DefaultProblem(
-                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-OWNER",
-                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-
-            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
-                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR,
-                    "Tapestry Build can't proceed due to namespace clashes",
-                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-
-            if (AbstractBuildInfrastructure.DEBUG)
-                System.err.println("Tapestry build aborted: " + e.getMessage());
-        }
-        catch (BuilderException e)
-        {
-            problemPersister.removeAllProblems(tapestryProject);
-            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
-                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
-                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-            if (AbstractBuildInfrastructure.DEBUG)
-                System.err.println("Tapestry build aborted: " + e.getMessage());
-
-        }
-        catch (NullPointerException e)
+        catch (TapestryCoreException e)
         {
             TapestryCore.log(e);
-            throw e;
         }
-        catch (RuntimeException e)
+
+        // now in any source folders.
+
+        // TODO implement
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see core.builder.AbstractBuildInfrastructure#getClasspathMemento()
+     */
+    public Object getClasspathMemento()
+    {
+        return classpathEntries;
+    }
+
+    // TODO this should be configurable.
+    public List<String> getExcludedFileNames()
+    {
+        if (excludedFileNames == null)
         {
-            TapestryCore.log(e);
-            throw e;
+            excludedFileNames = new ArrayList<String>();
+            excludedFileNames.add("package.html");
         }
-        finally
-        {
-            if (!ok)
-                // If the build failed, clear the previously built state,
-                // forcing a full build next time.
-                clearLastState();
-            build.cleanUp();
-            notifier.done();            
-            TapestryCore.buildOccurred();
-        }
+        return excludedFileNames;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see core.builder.AbstractBuildInfrastructure#getLastState()
+     */
+    public State getLastState()
+    {
+        return (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(
+                currentIProject,
+                false);
     }
 
     public IProject[] getRequiredProjects(boolean includeBinaryPrerequisites)
@@ -307,33 +276,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     /*
      * (non-Javadoc)
      * 
-     * @see core.builder.AbstractBuildInfrastructure#getClasspathMemento()
+     * @see core.builder.AbstractBuildInfrastructure#persistState(core.builder.State)
      */
-    public Object getClasspathMemento()
-    {
-        return classpathEntries;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see core.builder.AbstractBuildInfrastructure#copyClasspathMemento()
-     */
-    public Object copyClasspathMemento(Object memento)
-    {
-        IClasspathEntry[] source = (IClasspathEntry[]) memento;
-        IClasspathEntry[] result = new IClasspathEntry[source.length];
-        System.arraycopy(source, 0, result, 0, source.length);
-        return result;
-    }
-
-    public State getLastState()
-    {
-        return (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(
-                currentIProject,
-                false);
-    }
-
     public void persistState(State state)
     {
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
@@ -341,78 +285,108 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
                 state);
     }
 
+    public boolean projectSupportsAnnotations()
+    {
+        return projectSupportsAnnotations;
+    }
+
+    boolean conflictsWithJavaOutputDirectory(IResource resource)
+    {
+        try
+        {
+            IPath containerPath = javaProject.getOutputLocation();
+            return containerPath.isPrefixOf(resource.getFullPath());
+        }
+        catch (JavaModelException e)
+        {
+            // do nothing
+        }
+        return false;
+    }
+
     /*
      * (non-Javadoc)
      * 
-     * @see core.builder.AbstractBuildInfrastructure#createWebXMLScanner()
+     * @see core.builder.AbstractBuildInfrastructure#clearLastState()
      */
-    public WebXMLScanner createWebXMLScanner()
-    {
-        return new EclipseWebXMLScanner(build);
-    }
-
-    /**
-     * Method clearLastState.
-     */
-    public void clearLastState()
+    protected void clearLastState()
     {
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
                 currentIProject,
                 null);
     }
 
-    /**
-     * Method buildAll.
-     */
-    private void buildAll() throws BuilderException, CoreException
-    {
-        if (AbstractBuildInfrastructure.DEBUG)
-            System.out.println("FULL Tapestry build");
-
-        notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                + "full-build-starting"));
-
-        problemPersister.removeProblems(tapestryProject);
-
-        build = new FullBuild(this);
-
-        build.build();
-    }
-
-    private void buildIncremental() throws BuilderException, CoreException
-    {
-
-        IncrementalEclipseProjectBuild incBuild = new IncrementalEclipseProjectBuild(this, fDelta);
-
-        if (incBuild.canIncrementalBuild())
-        {
-            if (!incBuild.needsIncrementalBuild())
-                return;
-
-            build = incBuild;
-            if (DEBUG)
-                System.out.println("Incremental Tapestry build");
-
-            notifier.subTask(CoreMessages.format(STRING_KEY + "incremental-build-starting"));
-            incBuild.build();
-        }
-        else
-        {
-            buildAll();
-        }
-    }
-
-    /**
-     * Method isWorthBuilding.
+    /*
+     * (non-Javadoc)
      * 
-     * @return boolean
+     * @see core.builder.AbstractBuildInfrastructure#createIncrementalBuild()
      */
-    private boolean isWorthBuilding()
+    @Override
+    protected AbstractBuild createIncrementalBuild()
     {
+        return null; // FIXME when incremental is fixed.
+    }
 
-        if (javaProject == null)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see core.builder.AbstractBuildInfrastructure#initialize()
+     */
+    protected void initialize()
+    {
+        problemPersister = new Markers();
+
+        // is it a java project at all?
+        try
+        {
+            javaProject = (IJavaProject) currentIProject.getNature(JavaCore.NATURE_ID);
+
+        }
+        catch (CoreException e)
+        {
+            TapestryCore.log(e);
+            throw new BuilderException("could not obtain the Java Project!");
+        }
+
+        // is it a Tapestry project?
+        try
+        {
+            TapestryProject project = (TapestryProject) currentIProject
+                    .getNature(TapestryCorePlugin.NATURE_ID);
+            tapestryProject = project;
+            project.clearMetadata();
+        }
+        catch (CoreException e)
+        {
+            TapestryCore.log(e);
+            throw new BuilderException("could not obtain the Tapestry Project!");
+        }
+
+        // better have a context root
+        contextRoot = tapestryProject.getWebContextLocation();
+        if (contextRoot == null || !contextRoot.exists())
+            throw new BuilderException("could not obtain the servlet context root folder");
+
+        // better have a classpath root!
+        classpathRoot = tapestryProject.getClasspathRoot();
+        if (classpathRoot == null || !classpathRoot.exists())
+            throw new BuilderException("could not obtain the Classpath Root!");
+
+        validateWebXML = tapestryProject.isValidatingWebXML();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see core.builder.AbstractBuildInfrastructure#isWorthBuilding()
+     */
+    protected boolean isWorthBuilding()
+    {
+        // project must exist
+        if (javaProject == null || !javaProject.exists())
             throw new BuilderException(CoreMessages.format(STRING_KEY + "non-java-projects"));
 
+        // must have a vlid classpath
         try
         {
             classpathEntries = javaProject.getResolvedClasspath(true);
@@ -422,6 +396,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             throw new BuilderException(CoreMessages.format(STRING_KEY + "classpath-not-determined"));
         }
 
+        // must not have fatal compiler problems
         try
         {
             IResource resource = javaProject.getUnderlyingResource();
@@ -440,6 +415,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             // assume there are no Java builder problems
         }
 
+        // the project must not be the compiler output location
         try
         {
             IPath outputPath = javaProject.getOutputLocation();
@@ -457,7 +433,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
         // make sure all prereq projects have valid build states...
         IProject[] requiredProjects = getRequiredProjects(false);
-        next: for (int i = 0, length = requiredProjects.length; i < length; i++)
+        for (int i = 0, length = requiredProjects.length; i < length; i++)
         {
             IProject p = requiredProjects[i];
             if (getLastState() == null)
@@ -470,15 +446,18 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             }
         }
 
+        // tapestry must be on the classpath!
         if (tapestryProject.findType(CoreMessages
                 .format(STRING_KEY + "applicationServletClassname")) == null)
             throw new BuilderException(CoreMessages.format(STRING_KEY + "tapestry-jar-missing"));
 
+        // the context root must exist
         if (contextRoot == null || !contextRoot.exists())
             throw new BuilderException(CoreMessages.format(STRING_KEY + "missing-context"));
 
         ICoreResource webXML = (ICoreResource) contextRoot.getRelativeResource("WEB-INF/web.xml");
 
+        // web.xml must exist in the context at the expected place.
         if (!webXML.exists())
             throw new BuilderException(CoreMessages.format(
                     STRING_KEY + "abort-missing-web-xml",
@@ -487,136 +466,48 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         return true;
     }
 
-    /**
-     * Method initializeBuilder.
-     */
-    private void initialize()
+    private boolean doesProjectSupportJavaAnnotations(IProject project)
     {
-        try
-        {
-            javaProject = (IJavaProject) currentIProject.getNature(JavaCore.NATURE_ID);
+        if (true)
+            return false; // FIXME get rid of this when we figure out how to handle annotations!
 
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
-            throw new BuilderException("could not obtain the Java Project!");
-        }
+        IJavaProject jproject = JavaCore.create(project);
 
-        try
-        {
-            TapestryProject project = (TapestryProject) currentIProject
-                    .getNature(TapestryCorePlugin.NATURE_ID);
-            tapestryProject = project;
-            project.clearMetadata();
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
-            throw new BuilderException("could not obtain the Tapestry Project!");
-        }
+        if (jproject == null || !jproject.exists() || !project.isAccessible())
+            return false;
 
-        contextRoot = tapestryProject.getWebContextLocation();
-        if (contextRoot == null || !contextRoot.exists())
-            throw new BuilderException("could not obtain the servlet context root folder");
+        Map options = jproject.getOptions(true);
 
-        classpathRoot = tapestryProject.getClasspathRoot();
-        if (classpathRoot == null || !classpathRoot.exists())
-            throw new BuilderException("could not obtain the Classpath Root!");
+        String target = (String) options.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
 
-        validateWebXML = tapestryProject.isValidatingWebXML();
-    }
+        if (target == null)
+            return false;
 
-    boolean conflictsWithJavaOutputDirectory(IResource resource)
-    {
-        try
-        {
-            IPath containerPath = javaProject.getOutputLocation();
-            return containerPath.isPrefixOf(resource.getFullPath());
-        }
-        catch (JavaModelException e)
-        {
-            // do nothing
-        }
-        return false;
+        float version = Float.parseFloat(target);
+
+        if (version < 1.5)
+            return false;
+
+        System.out.println("target: " + target);
+
+        String sourceCompatibility = (String) options.get(JavaCore.COMPILER_SOURCE);
+
+        if (sourceCompatibility == null)
+            return false;
+
+        float compat = Float.parseFloat(sourceCompatibility);
+
+        if (compat < 1.5)
+            return false;
+
+        System.out.println("sourceCompatibility: " + sourceCompatibility);
+
+        return true;
+
     }
 
     /**
-     * Find and add all files with Tapestry extensions found in the classpath to a List.
-     */
-    public void findAllTapestryArtifactsInClasspath(Set<String> knownTemplateExtensions,
-            final ArrayList<Resource> found)
-    {
-        Assert.isLegal(knownTemplateExtensions != null && !knownTemplateExtensions.isEmpty());
-        ISearch searcher = null;
-        try
-        {
-            searcher = contextRoot.getSearch();
-            searcher.search(new ArtifactCollector(knownTemplateExtensions, getExcludedFileNames())
-            {
-                public boolean acceptTapestry(Object parent, Object leaf)
-                {
-                    IPackageFragment fragment = (IPackageFragment) parent;
-                    ClasspathRoot root = (ClasspathRoot) classpathRoot;
-                    ICoreResource location = new ClasspathResource(root, fragment, (IStorage) leaf);
-                    found.add(location);
-
-                    return keepGoing();
-                }
-            });
-        }
-        catch (TapestryCoreException e)
-        {
-            TapestryCore.log(e);
-        }
-    }
-
-    /**
-     * Find and add all files with Tapestry extensions found in the web context to a List.
-     */
-    public void findAllTapestryArtifactsInWebContext(Set<String> knownTemplateExtensions,
-            final ArrayList<Resource> found)
-    {
-        ISearch searcher = null;
-        try
-        {
-            searcher = contextRoot.getSearch();
-            searcher.search(new ArtifactCollector(knownTemplateExtensions, getExcludedFileNames())
-            {
-                public boolean acceptTapestry(Object parent, Object leaf)
-                {
-                    IResource resource = (IResource) leaf;
-                    ContextRoot ctxRoot = (ContextRoot) contextRoot;
-                    ICoreResource coreResource = new ContextResource(ctxRoot, resource);
-
-                    if (coreResource.exists() && !conflictsWithJavaOutputDirectory(resource))
-                        found.add(coreResource);
-
-                    return keepGoing();
-
-                }
-            });
-        }
-        catch (TapestryCoreException e)
-        {
-            TapestryCore.log(e);
-        }
-    }
-
-    // TODO this should be configurable.
-    public List getExcludedFileNames()
-    {
-        if (excludedFileNames == null)
-        {
-            excludedFileNames = new ArrayList();
-            excludedFileNames.add("package.html");
-        }
-        return excludedFileNames;
-    }
-
-    /**
-     * A search acceptor that is used to find all the Tapestry artifacts in the web context or the
-     * classpath.
+     * A search acceptor that is used to find all the Tapestry artifacts in the web context 
      */
     abstract class ArtifactCollector extends AbstractEclipseSearchAcceptor
     {
@@ -637,45 +528,6 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             }
             return true;
         }
-    }
-    
-    private boolean doesProjectSupportJavaAnnotations(IProject project) {
-        if (project == null || !project.exists() || !project.isAccessible())
-            return false;
-        
-        IJavaProject jproject = JavaCore.create(project);
-        
-        if (project == null || !project.exists())
-            return false;
-        
-        Map options = jproject.getOptions(true);
-        
-        String target = (String)options.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
-        
-        if (target == null)
-            return false;
-        
-        float version = Float.parseFloat(target);
-        
-        if (version < 1.5)
-            return false;
-        
-        System.out.println("target: "+target);
-        
-        String sourceCompatibility = (String)options.get(JavaCore.COMPILER_SOURCE);
-        
-        if (sourceCompatibility == null)
-            return false;
-        
-        float compat = Float.parseFloat(sourceCompatibility);
-        
-        if (compat < 1.5)
-            return false;
-        
-        System.out.println("sourceCompatibility: "+sourceCompatibility);
-        
-        return true;
-        
     }
 
 }

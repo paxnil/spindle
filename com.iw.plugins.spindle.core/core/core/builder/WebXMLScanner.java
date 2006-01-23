@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 
 import core.CoreMessages;
+import core.TapestryCore;
 import core.parser.dom.IDOMModel;
 import core.resources.ICoreResource;
 import core.resources.IResourceRoot;
@@ -47,6 +48,7 @@ import core.scanning.ScannerException;
 import core.source.IProblem;
 import core.source.ISourceLocation;
 import core.types.IJavaType;
+import core.types.TypeModelException;
 
 /**
  * A Processor class used by FullBuild that extracts Tapestry information from the file web.xml
@@ -136,18 +138,26 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
         if (superclass.equals(candidate))
             return true;
 
-        if (candidate.isInterface() || candidate.isAnnotation())
+        try
         {
-            addProblem(
-                    IProblem.ERROR,
-                    location,
-                    "web-xml-must-be-class-not-interface",
-                    false,
-                    IProblem.WEB_XML_INCORRECT_APPLICATION_SERVLET_CLASS);
-            return false;
-        }
+            if (candidate.isInterface() || candidate.isAnnotation())
+            {
+                addProblem(
+                        IProblem.ERROR,
+                        location,
+                        "web-xml-must-be-class-not-interface",
+                        false,
+                        IProblem.WEB_XML_INCORRECT_APPLICATION_SERVLET_CLASS);
+                return false;
+            }
 
-        return superclass.isSuperTypeOf(candidate);
+            return superclass.isSuperTypeOf(candidate);
+        }
+        catch (TypeModelException e)
+        {
+           TapestryCore.log(e);
+        }
+        return false;
     }
 
     protected IJavaType checkJavaType(String className, ISourceLocation location)

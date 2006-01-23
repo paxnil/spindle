@@ -1,6 +1,5 @@
-package core;
+package core.types;
 
-import core.types.IJavaType;
 
 /**
  * <code>IJavaTypeFinder</code>s are used to create instances of

@@ -35,14 +35,18 @@ import java.util.Set;
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.engine.IPropertySource;
 
-
-
-import core.IJavaTypeFinder;
+import core.CoreMessages;
 import core.ITapestryProject;
+import core.TapestryCore;
 import core.parser.dom.IDOMModelSource;
 import core.properties.CorePropertySource;
+import core.resources.ICoreResource;
 import core.resources.IResourceRoot;
+import core.source.DefaultProblem;
+import core.source.IProblem;
+import core.source.SourceLocation;
 import core.types.IJavaType;
+import core.types.IJavaTypeFinder;
 import core.util.Assert;
 import core.util.IProblemPeristManager;
 
@@ -144,31 +148,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         super();
     }
 
-    public final IJavaType findType(String fullyQualifiedName)
-    {
-        Map cache = getTypeCache();
-
-        if (cache != null && cache.containsKey(fullyQualifiedName))
-            return (IJavaType) cache.get(fullyQualifiedName);
-
-        IJavaType result = tapestryProject.findType(fullyQualifiedName);
-
-        if (cache != null)
-            cache.put(fullyQualifiedName, result);
-
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see core.IJavaTypeFinder#isCachingJavaTypes()
-     */
-    public final boolean isCachingJavaTypes()
-    {
-        return true;
-    }
-
+   
     public final void build(boolean requestIncremental, Map args)
     {
         BUILD_CACHE.set(new HashMap());
@@ -182,37 +162,204 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         }
     }
 
-    protected abstract void executeBuild(boolean requestIncremental, Map args);
-
     /**
-     * Deep inside the build we need to find all the artifacts - mostly for the purpose of provided
-     * progress indications and to detect files that would be missed by Tapestry at runtime. We look
-     * for .application, .library, .jwc, .page and template files that have the specified
-     * extensions.
+     * Gives the infrastructure a chance to initialize itself set the resource roots etc.
      * <p>
-     * This method searches in the classpath only.
-     * <p>
-     * Clients must subclass on a platform by platform basis.
+     * Any problems here are fatal and must result in a {@link  BuilderException} being thrown. The
+     * message of the exception will be recorder against the project.
      * 
-     * @param knownTemplateExtensions the set of known valid template extensions
-     * @param found
-     *            all found artifacts are added to this list.
+     * @throws BuilderException
      */
-    public abstract void findAllTapestryArtifactsInClasspath(Set<String> knownTemplateExtensions,
-            ArrayList<Resource> found);
+    
+    protected abstract void initialize() throws BuilderException;
 
     /**
-     * Deep inside the build we need to find all the artifacts - mostly for the purpose of provided
+     * last check before a build occurs. Up to the platform IDE implementor to decide if the project
+     * is in a state where a build should proceed.
+     * <p>
+     * Fatal errors/state that need to be recorded against the project should result in a
+     * {@link BuilderException}.
+     * 
+     * @return true if the project is worth building
+     * @exception BuilderException
+     *                for fatal errors that should be recorded against the project.
+     */
+    protected abstract boolean isWorthBuilding() throws BuilderException;
+
+    private void executeBuild(boolean requestIncremental, Map args)
+    {
+        Assert.isNotNull(notifier);
+
+        notifier.begin();
+
+        boolean ok = false;
+
+        try
+        {
+            initialize();
+            notifier.checkCancel();
+
+            if (isWorthBuilding())
+            {
+                // at this point the infrastructure must be complete.
+                Assert.isNotNull(tapestryProject);
+                Assert.isNotNull(contextRoot);
+                Assert.isNotNull(classpathRoot);
+                Assert.isNotNull(domModelSource);
+                Assert.isNotNull(problemPersister);
+
+                notifier.checkCancel();
+                if (!requestIncremental)
+                {
+                    buildAll();
+                }
+                else
+                {
+                    buildIncremental();
+                }
+                ok = true;
+            }
+        }
+        catch (BrokenWebXMLException e)
+        {
+            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
+                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+            if (AbstractBuildInfrastructure.DEBUG)
+                System.err.println("Tapestry build aborted: " + e.getMessage());
+        }
+        catch (ClashException e)
+        {
+            problemPersister.removeAllProblems(tapestryProject);
+            ICoreResource requestor = e.getRequestor();
+            problemPersister.recordProblem(requestor, new DefaultProblem(
+                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-REQUESTOR",
+                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+
+            ICoreResource owner = e.getOwner();
+            problemPersister.recordProblem(owner, new DefaultProblem(
+                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-OWNER",
+                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+
+            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR,
+                    "Tapestry Build can't proceed due to namespace clashes",
+                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+
+            if (AbstractBuildInfrastructure.DEBUG)
+                System.err.println("Tapestry build aborted: " + e.getMessage());
+        }
+        catch (BuilderException e)
+        {
+            problemPersister.removeAllProblems(tapestryProject);
+            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
+                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+            if (AbstractBuildInfrastructure.DEBUG)
+                System.err.println("Tapestry build aborted: " + e.getMessage());
+
+        }
+        catch (NullPointerException e)
+        {
+            TapestryCore.log(e);
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+            throw e;
+        }
+        finally
+        {
+            if (!ok)
+                // If the build failed, clear the previously built state,
+                // forcing a full build next time.
+                clearLastState();
+            build.cleanUp();
+            notifier.done();
+            TapestryCore.buildOccurred();
+        }
+    }
+
+    /**
+     * Method buildAll.
+     */
+    private void buildAll() throws BuilderException
+    {
+        if (AbstractBuildInfrastructure.DEBUG)
+            System.out.println("FULL Tapestry build");
+
+        notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
+                + "full-build-starting"));
+
+        problemPersister.removeProblems(tapestryProject);
+
+        this.build = createFullBuild();
+
+        build.build();
+    }
+
+    private void buildIncremental() throws BuilderException
+    {
+        if (true) { //FIXME remove when incremental works again
+            buildAll();
+            return;
+        }
+        
+        
+        this.build = createIncrementalBuild();
+        
+        if (build == null) {
+            buildAll();
+            return;
+        }            
+
+        Assert.isLegal(build instanceof IIncrementalBuild);
+
+        IIncrementalBuild incBuild = (IIncrementalBuild) this.build;
+
+        if (incBuild.canIncrementalBuild())
+        {
+            if (!incBuild.needsIncrementalBuild())
+                return;
+
+            if (DEBUG)
+                System.out.println("Incremental Tapestry build");
+
+            notifier.subTask(CoreMessages.format(STRING_KEY + "incremental-build-starting"));
+            incBuild.build();
+        }
+        else
+        {
+            buildAll();
+        }
+    }
+
+    protected AbstractBuild createFullBuild()
+    {
+        return new FullBuild(this);
+    }
+
+    protected abstract AbstractBuild createIncrementalBuild();
+
+    /**
+     * Deep inside the build we need to find all the artifacts - for the purpose of provided
      * progress indications and to detect files that would be missed by Tapestry at runtime. We look
      * for .appliction, .library, .jwc, .page and template files that have the specified extensions.
      * <p>
-     * This method searches in the web context only.
+     * It is up to the IDE platform implementor to decide if the results returned will include
+     * tapestry files located in jar file. For example, searching in jars in Eclipse is slooooow so
+     * Spindle doesn't look there, it just includes all source files in the web context and any
+     * source folders.
+     * <p>
+     * It would not even be a sin to leave the found array empty - except that the progress
+     * indications would be less informative.
      * 
      * @param knownTemplateExtensions
      * @param found
      *            all found artifacts are added to this list.
      */
-    public abstract void findAllTapestryArtifactsInWebContext(Set<String> knownTemplateExtensions,
+    public abstract void findAllTapestrySourceFiles(Set<String> knownTemplateExtensions,
             ArrayList<Resource> found);
 
     /**
@@ -238,6 +385,8 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
      */
     public abstract void persistState(State state);
 
+    protected abstract void clearLastState();
+
     public abstract WebXMLScanner createWebXMLScanner();
 
     public IPropertySource installBasePropertySource(WebAppDescriptor webAppDescriptor)
@@ -248,8 +397,35 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     }
 
     public abstract boolean projectSupportsAnnotations();
-
-    public abstract List getAllAnnotatedComponentTypes(String packages);
     
-    public abstract List getAllAnnotatedPageTypes(String packages);
+    /* (non-Javadoc)
+     * @see core.IJavaTypeFinder#findType(java.lang.String)
+     */
+    @SuppressWarnings("unchecked")
+    public final IJavaType findType(String fullyQualifiedName)
+    {
+        Map cache = getTypeCache();
+
+        if (cache != null && cache.containsKey(fullyQualifiedName))
+            return (IJavaType) cache.get(fullyQualifiedName);
+
+        IJavaType result = tapestryProject.findType(fullyQualifiedName);
+
+        if (cache != null)
+            cache.put(fullyQualifiedName, result);
+
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see core.IJavaTypeFinder#isCachingJavaTypes()
+     */
+    public final boolean isCachingJavaTypes()
+    {
+        return true;
+    }
+
+
 }

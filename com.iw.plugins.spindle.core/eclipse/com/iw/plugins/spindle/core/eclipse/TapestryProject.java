@@ -50,11 +50,11 @@ import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
-import core.IJavaTypeFinder;
 import core.ITapestryProject;
 import core.TapestryCore;
 import core.resources.IResourceRoot;
 import core.types.IJavaType;
+import core.types.IJavaTypeFinder;
 
 /**
  * The Tapestry project nature. Configures and Deconfigures the builder TODO the metadata stuff is
@@ -302,6 +302,10 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return false;
     }
 
+    /**
+     * @param candidate
+     * @return
+     */
     public boolean isOnSourcePath(IPath candidate)
     {
         try
@@ -325,6 +329,11 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return false;
     }
 
+    /**
+     * @param existing
+     * @param candidate
+     * @return
+     */
     private boolean pathCheck(IPath existing, IPath candidate)
     {
         if (existing.equals(candidate))
@@ -336,11 +345,18 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return existing.matchingFirstSegments(candidate) == existing.segmentCount();
     }
 
+    /**
+     * @return
+     * @throws CoreException
+     */
     public IJavaProject getJavaProject() throws CoreException
     {
         return (IJavaProject) getProject().getNature(JavaCore.NATURE_ID);
     }
 
+    /* (non-Javadoc)
+     * @see core.ITapestryProject#isValidatingWebXML()
+     */
     public boolean isValidatingWebXML()
     {
         if (fUsingExternalMetadata)
@@ -362,11 +378,17 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         fValidateWebXML = flag;
     }
 
+    /**
+     * @return
+     */
     public boolean isUsingExternalMetadata()
     {
         return fUsingExternalMetadata;
     }
 
+    /* (non-Javadoc)
+     * @see core.ITapestryProject#getClasspathRoot()
+     */
     public IResourceRoot getClasspathRoot()
     {
         try
@@ -380,6 +402,9 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return null;
     }
 
+    /**
+     * @return
+     */
     public IFolder getWebContextFolder()
     {
         checkMetadata();
@@ -409,6 +434,9 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         fMetadataLoaded = flag;
     }
 
+    /* (non-Javadoc)
+     * @see core.ITapestryProject#getWebContextLocation()
+     */
     public IResourceRoot getWebContextLocation()
     {
         IFolder folder = getWebContextFolder();
@@ -493,10 +521,9 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         getProject().setDescription(description, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see core.ITapestryProject#findType(java.lang.String)
+    
+    /* (non-Javadoc)
+     * @see core.IJavaTypeFinder#findType(java.lang.String)
      */
     public IJavaType findType(String fullyQualifiedName)
     {

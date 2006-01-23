@@ -31,13 +31,13 @@ import java.util.List;
 
 
 
-import core.IJavaTypeFinder;
 import core.TapestryCore;
 import core.source.DefaultProblem;
 import core.source.IProblem;
 import core.source.IProblemCollector;
 import core.source.ISourceLocation;
 import core.source.SourceLocation;
+import core.types.IJavaTypeFinder;
 import core.util.Assert;
 
 /**

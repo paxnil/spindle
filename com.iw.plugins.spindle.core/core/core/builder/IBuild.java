@@ -26,7 +26,7 @@
 
 package core.builder;
 
-import core.IJavaTypeFinder;
+import core.types.IJavaTypeFinder;
 
 /**
  * Interface for Builders

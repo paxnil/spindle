@@ -7,6 +7,7 @@
 package core;
 
 import core.resources.IResourceRoot;
+import core.types.IJavaTypeFinder;
 
 /**
  * @author gwl
