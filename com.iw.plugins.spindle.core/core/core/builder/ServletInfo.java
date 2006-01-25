@@ -34,7 +34,7 @@ public class ServletInfo
 
   String name;
   String classname;
-  Map parameters = new HashMap();
+  Map<String, String> parameters = new HashMap<String, String>();
   boolean isServletSubclass;
   ICoreResource applicationSpecLocation;
   public String toString()

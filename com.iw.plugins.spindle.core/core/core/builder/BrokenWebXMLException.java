@@ -2,6 +2,8 @@ package core.builder;
 
 public class BrokenWebXMLException extends BuilderException {
 
+	private static final long serialVersionUID = 1L;
+
 	public BrokenWebXMLException() {
 		super();
 		// TODO Auto-generated constructor stub

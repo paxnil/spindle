@@ -28,7 +28,6 @@ package core.builder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hivemind.Resource;
@@ -50,230 +49,213 @@ import core.spec.PluginApplicationSpecification;
  * 
  * @author glongman@gmail.com
  */
-public class FullBuild extends AbstractBuild
-{
+public class FullBuild extends AbstractBuild {
 
-    protected ServletInfo[] applicationServlets;
+	protected ServletInfo[] applicationServlets;
 
-    protected WebAppDescriptor webAppDescriptor;
+	protected WebAppDescriptor webAppDescriptor;
 
-    /**
-     * Constructor for FullBuilder.
-     */
-    public FullBuild(AbstractBuildInfrastructure infrastructure)
-    {
-        super(infrastructure);
-    }
+	/**
+	 * Constructor for FullBuilder.
+	 */
+	public FullBuild(AbstractBuildInfrastructure infrastructure) {
+		super(infrastructure);
+	}
 
-    /**
-     * Use the parser to find declared applications in web.xml
-     * 
-     * @param parser
-     * @throws CoreException
-     */
-    protected void preBuild()
-    {
-        setDependencyListener(new BuilderDependencyListener());
-        findDeclaredApplications();
-    }
+	/**
+	 * Use the parser to find declared applications in web.xml
+	 * 
+	 * @param parser
+	 * @throws CoreException
+	 */
+	protected void preBuild() {
+		setDependencyListener(new BuilderDependencyListener());
+		findDeclaredApplications();
+	}
 
-    /**
-     * Resolve the Tapesty framework namespace
-     */
-    protected void resolveFramework()
-    {
-        new FrameworkResolver(this).resolve(frameworkNamespace);
-    }
+	/**
+	 * Resolve the Tapesty framework namespace
+	 */
+	protected void resolveFramework() {
+		new FrameworkResolver(this).resolve(frameworkNamespace);
+	}
 
-    protected void resolveApplication(String name, CoreNamespace namespace)
-    {
-        new ApplicationResolver(this, frameworkNamespace, name).resolve(namespace);
-    }
+	protected void resolveApplication(String name, CoreNamespace namespace) {
+		new ApplicationResolver(this, frameworkNamespace, name)
+				.resolve(namespace);
+	}
 
-    protected void postBuild()
-    {
-        super.postBuild();
-        BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
-        if (AbstractBuildInfrastructure.DEBUG)
-        {
-            listener.dump();
-        }
-    }
+	protected void postBuild() {
+		super.postBuild();
+		BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
+		if (AbstractBuildInfrastructure.DEBUG) {
+			listener.dump();
+		}
+	}
 
-    public void saveState()
-    {
-        // State newState = new State(fInfrastructure);
-        // // newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
-        // newState.fLastKnownClasspath = fInfrastructure.getClasspathMemento();
-        // newState.fJavaDependencies = fFoundTypes;
-        // newState.fMissingJavaTypes = fMissingTypes;
-        // newState.fTemplateMap = fTemplateMap;
-        // newState.fFileSpecificationMap = fFileSpecificationMap;
-        // newState.fBinarySpecificationMap = fBinarySpecificationMap;
-        // newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
-        //        
-        // newState.fDeclatedTemplateExtensions = fDeclaredTemplateExtensions;
-        // newState.fDeclaredTemplateExtensionsClasspath = fDeclaredTemplateExtensionsClasspath;
-        //        
-        // newState.fApplicationServlets = fApplicationServlets;
-        // newState.fWebAppDescriptor = fWebAppDescriptor;
-        // newState.fPrimaryNamespace = fApplicationNamespace;
-        // newState.fFrameworkNamespace = fFrameworkNamespace;
-        // newState.fCleanTemplates = fCleanTemplates;
-        //
-        // // save the processed binary libraries
-        // saveBinaryLibraries(fLibraryNamespaces, newState);
-        // fInfrastructure.persistState(newState);
-    }
+	public void saveState() {
+		// State newState = new State(fInfrastructure);
+		// // newState.fLibraryLocation =
+		// fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
+		// newState.fLastKnownClasspath = fInfrastructure.getClasspathMemento();
+		// newState.fJavaDependencies = fFoundTypes;
+		// newState.fMissingJavaTypes = fMissingTypes;
+		// newState.fTemplateMap = fTemplateMap;
+		// newState.fFileSpecificationMap = fFileSpecificationMap;
+		// newState.fBinarySpecificationMap = fBinarySpecificationMap;
+		// newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
+		//        
+		// newState.fDeclatedTemplateExtensions = fDeclaredTemplateExtensions;
+		// newState.fDeclaredTemplateExtensionsClasspath =
+		// fDeclaredTemplateExtensionsClasspath;
+		//        
+		// newState.fApplicationServlets = fApplicationServlets;
+		// newState.fWebAppDescriptor = fWebAppDescriptor;
+		// newState.fPrimaryNamespace = fApplicationNamespace;
+		// newState.fFrameworkNamespace = fFrameworkNamespace;
+		// newState.fCleanTemplates = fCleanTemplates;
+		//
+		// // save the processed binary libraries
+		// saveBinaryLibraries(fLibraryNamespaces, newState);
+		// fInfrastructure.persistState(newState);
+	}
 
-    private void saveBinaryLibraries(List libs, State state)
-    {
-        for (Iterator iter = libs.iterator(); iter.hasNext();)
-        {
-            ICoreNamespace libNS = (ICoreNamespace) iter.next();
-            ICoreResource location = (ICoreResource) libNS.getSpecificationLocation();
-            if (location.isBinaryResource())
-                state.fBinaryNamespaces.put(location, libNS);
-        }
+	private void saveBinaryLibraries(List<ICoreNamespace> libs, State state) {
+		if (libs == null)
+			return;
 
-    }
+		for (ICoreNamespace libNS : libs) {
+			ICoreResource location = (ICoreResource) libNS
+					.getSpecificationLocation();
+			if (location.isBinaryResource())
+				state.fBinaryNamespaces.put(location, libNS);
+		}
+	}
 
-    public void cleanUp()
-    {
-        super.cleanUp();
-    }
+	public void cleanUp() {
+		super.cleanUp();
+	}
 
-    // returns unresolved namespace tree
-    protected List doGetApplicationNamespaces()
-    {
-        List namespaces = new ArrayList();
+	// returns unresolved namespace tree
+	protected List<ICoreNamespace> doGetApplicationNamespaces() {
+		List<ICoreNamespace> namespaces = new ArrayList<ICoreNamespace>();
 
-        if (applicationServlets == null || applicationServlets.length == 0)
-            return Collections.EMPTY_LIST;
+		if (applicationServlets == null || applicationServlets.length == 0)
+			return Collections.emptyList();
 
-        for (int i = 0; i < applicationServlets.length; i++)
-        {
+		for (int i = 0; i < applicationServlets.length; i++) {
 
-            CoreNamespace result = null;
-            ICoreResource nsLocation = applicationServlets[i].applicationSpecLocation;
-            if (nsLocation != null)
-            {
-                if (!nsLocation.exists())
-                    throw new BuilderException(CoreMessages.format(
-                            "build-failed-missing-application-spec",
-                            nsLocation.toString()));
+			CoreNamespace result = null;
+			ICoreResource nsLocation = applicationServlets[i].applicationSpecLocation;
+			if (nsLocation != null) {
+				if (!nsLocation.exists())
+					throw new BuilderException(CoreMessages.format(
+							"build-failed-missing-application-spec", nsLocation
+									.toString()));
 
-                result = getNamespaceTree(null, nsLocation, null);
-            }
-            else
-            {
-                result = createStandinApplicationNamespace(applicationServlets[i]);
-            }
+				result = getNamespaceTree(null, nsLocation, null);
+			} else {
+				result = createStandinApplicationNamespace(applicationServlets[i]);
+			}
 
-            result.setAppNameFromWebXML(applicationServlets[i].name);
+			result.setAppNameFromWebXML(applicationServlets[i].name);
 
-            namespaces.add(result);
-        }
+			namespaces.add(result);
+		}
 
-        return namespaces;
-    }
+		return namespaces;
+	}
 
-    protected CoreNamespace createStandinApplicationNamespace(ServletInfo servlet)
-    {
+	protected CoreNamespace createStandinApplicationNamespace(
+			ServletInfo servlet) {
 
-        PluginApplicationSpecification applicationSpec = new PluginApplicationSpecification();
-        Resource virtualLocation = contextRoot.getRelativeResource("/WEB-INF/");
-        applicationSpec.setSpecificationLocation(virtualLocation);
-        applicationSpec.setName(servlet.name);
+		PluginApplicationSpecification applicationSpec = new PluginApplicationSpecification();
+		Resource virtualLocation = contextRoot.getRelativeResource("/WEB-INF/");
+		applicationSpec.setSpecificationLocation(virtualLocation);
+		applicationSpec.setName(servlet.name);
 
-        CoreNamespace result = new CoreNamespace(null, applicationSpec);
+		CoreNamespace result = new CoreNamespace(null, applicationSpec);
 
-        return result;
-    }
+		return result;
+	}
 
-    protected void findDeclaredApplications()
-    {
-        ICoreResource webXML = (ICoreResource) contextRoot.getRelativeResource("WEB-INF/web.xml");
+	protected void findDeclaredApplications() {
+		ICoreResource webXML = (ICoreResource) contextRoot
+				.getRelativeResource("WEB-INF/web.xml");
 
-        if (webXML.exists())
-        {
-            IDOMModel model = null;
-            try
-            {
-                notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                        + "scanning", webXML.toString()));
-                problemPersister.removeAllProblemsFor(webXML);
+		if (webXML.exists()) {
+			IDOMModel model = null;
+			try {
+				notifier.subTask(CoreMessages.format(
+						AbstractBuildInfrastructure.STRING_KEY + "scanning",
+						webXML.toString()));
+				problemPersister.removeAllProblemsFor(webXML);
 
-                try
-                {
-                    model = getDOMModel(webXML, null, validateWebXML);
-                }
-                catch (IOException e)
-                {
-                    TapestryCore.log(e);
-                }
+				try {
+					model = getDOMModel(webXML, null, validateWebXML);
+				} catch (IOException e) {
+					TapestryCore.log(e);
+				}
 
-                if (model == null)
-                {
-                    // fInfrastructure.fProblemPersister.recordProblems(webXML,
-                    // model.getProblems());
-                    throw new BrokenWebXMLException(
-                            "Tapestry AbstractBuild failed: could not parse web.xml. ");
-                }
+				if (model == null) {
+					// fInfrastructure.fProblemPersister.recordProblems(webXML,
+					// model.getProblems());
+					throw new BrokenWebXMLException(
+							"Tapestry AbstractBuild failed: could not parse web.xml. ");
+				}
 
-                WebAppDescriptor descriptor = null;
+				WebAppDescriptor descriptor = null;
 
-                WebXMLScanner wscanner = infrastructure.createWebXMLScanner();
-                try
-                {
-                    descriptor = wscanner.scanWebAppDescriptor(model);
-                }
-                catch (ScannerException e)
-                {
-                    TapestryCore.log(e);
-                }
-                problemPersister.recordProblems(webXML, wscanner.getProblems());
+				WebXMLScanner wscanner = infrastructure.createWebXMLScanner();
+				try {
+					descriptor = wscanner.scanWebAppDescriptor(model);
+				} catch (ScannerException e) {
+					TapestryCore.log(e);
+				}
+				problemPersister.recordProblems(webXML, wscanner.getProblems());
 
-                if (descriptor == null)
-                    throw new BrokenWebXMLException(CoreMessages
-                            .format(AbstractBuildInfrastructure.STRING_KEY
-                                    + "abort-no-valid-application-servlets-found"));
+				if (descriptor == null)
+					throw new BrokenWebXMLException(
+							CoreMessages
+									.format(AbstractBuildInfrastructure.STRING_KEY
+											+ "abort-no-valid-application-servlets-found"));
 
-                applicationServlets = descriptor.getServletInfos();
-                if (applicationServlets == null || applicationServlets.length == 0)
+				applicationServlets = descriptor.getServletInfos();
+				if (applicationServlets == null
+						|| applicationServlets.length == 0)
 
-                    throw new BrokenWebXMLException(CoreMessages
-                            .format(AbstractBuildInfrastructure.STRING_KEY
-                                    + "abort-no-valid-application-servlets-found"));
+					throw new BrokenWebXMLException(
+							CoreMessages
+									.format(AbstractBuildInfrastructure.STRING_KEY
+											+ "abort-no-valid-application-servlets-found"));
 
-                // if (servletInfos.length > 1)
-                // throw new BrokenWebXMLException(CoreMessages
-                // .format(AbstractBuildInfrastructure.STRING_KEY
-                // + "abort-too-many-valid-servlets-found"));
+				// if (servletInfos.length > 1)
+				// throw new BrokenWebXMLException(CoreMessages
+				// .format(AbstractBuildInfrastructure.STRING_KEY
+				// + "abort-too-many-valid-servlets-found"));
 
-                // fApplicationServlets = servletInfos[0];
+				// fApplicationServlets = servletInfos[0];
 
-                projectPropertySource = infrastructure.installBasePropertySource(descriptor);
-                webAppDescriptor = descriptor;
-            }
-            finally
-            {
-                if (model != null)
-                    model.release();
-            }
-        }
-        else
-        {
-            ICoreResource definedWebRoot = (ICoreResource) tapestryProject.getWebContextLocation();
-            if (definedWebRoot != null || !definedWebRoot.exists())
-            {
-                problemPersister.recordProblem(tapestryProject, new DefaultProblem(
-                        IProblem.WARNING, CoreMessages.format(
-                                AbstractBuildInfrastructure.STRING_KEY + "missing-context",
-                                definedWebRoot.toString()), SourceLocation.FOLDER_LOCATION, false,
-                        IProblem.NOT_QUICK_FIXABLE));
-            }
-        }
-    }
+				projectPropertySource = infrastructure
+						.installBasePropertySource(descriptor);
+				webAppDescriptor = descriptor;
+			} finally {
+				if (model != null)
+					model.release();
+			}
+		} else {
+			ICoreResource definedWebRoot = (ICoreResource) tapestryProject
+					.getWebContextLocation();
+			if (definedWebRoot != null || !definedWebRoot.exists()) {
+				problemPersister.recordProblem(tapestryProject,
+						new DefaultProblem(IProblem.WARNING, CoreMessages
+								.format(AbstractBuildInfrastructure.STRING_KEY
+										+ "missing-context", definedWebRoot
+										.toString()),
+								SourceLocation.FOLDER_LOCATION, false,
+								IProblem.NOT_QUICK_FIXABLE));
+			}
+		}
+	}
 
 }

@@ -31,10 +31,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.services.TemplateSource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
-
 
 import com.iw.plugins.spindle.messages.ImplMessages;
 
@@ -66,9 +66,9 @@ public class TemplateFinder
      * @param namespace
      * @return List a list with any non templates or localized templates removed.
      */
-    public static List filterTemplateList(List locations, String expectedTemplateExtension)
+    public static List<Resource> filterTemplateList(List<Resource> locations, String expectedTemplateExtension)
     {
-        List result = new ArrayList();
+        List<Resource> result = new ArrayList<Resource>();
 
         for (Iterator iter = locations.iterator(); iter.hasNext();)
         {
@@ -100,7 +100,7 @@ public class TemplateFinder
         return result;
     }
 
-    private ArrayList fFindResults = new ArrayList();
+    private ArrayList<ICoreResource> fFindResults = new ArrayList<ICoreResource>();
 
     private String fExtension;
 
@@ -124,8 +124,7 @@ public class TemplateFinder
             String templateExtension, ITapestryProject project, IProblemCollector collector)
     {
         TemplateFinder finder = new TemplateFinder();
-        ICoreResource[] locations = new ICoreResource[0];
-    
+            
         return finder.getTemplates(specification, project, templateExtension, collector);
     }
 

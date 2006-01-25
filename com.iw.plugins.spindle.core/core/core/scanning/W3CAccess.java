@@ -35,161 +35,149 @@ import org.w3c.dom.DocumentType;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-
-
 import core.TapestryCore;
 import core.util.Assert;
 
 /**
- * Static Helper methods for accessing data in DOM nodes Includes transparent support for some PULL
- * parser ideosyncracies. i.e. see getAttribute() src if you care.
+ * Static Helper methods for accessing data in DOM nodes Includes transparent
+ * support for some PULL parser ideosyncracies. i.e. see getAttribute() src if
+ * you care.
  * 
  * @author glongman@gmail.com
  */
-public class W3CAccess
-{
+public class W3CAccess {
 
-    public static Set getAttributeNames(Node node)
-    {
-        Assert.isNotNull(node);
-        if (!node.hasAttributes())
-            return Collections.EMPTY_SET;
+	public static Set<String> getAttributeNames(Node node) {
+		Assert.isNotNull(node);
+		if (!node.hasAttributes())
+			return Collections.emptySet();
 
-        HashSet result = new HashSet();
-        NamedNodeMap attrMap = node.getAttributes();
-        for (int i = 0; i < attrMap.getLength(); i++)
-            result.add(attrMap.item(i).getNodeName());
+		HashSet<String> result = new HashSet<String>();
+		NamedNodeMap attrMap = node.getAttributes();
+		for (int i = 0; i < attrMap.getLength(); i++)
+			result.add(attrMap.item(i).getNodeName());
 
-        return result;
-    }
+		return result;
+	}
 
-    public static String getAttribute(Node node, String attributeName)
-    {
-        String result = null;
-        // if (node instanceof PullParserNode)
-        // {
-        // PullParserNode ppnode = (PullParserNode) node;
-        // Map attrs = ppnode.getKludgeAttributes();
-        // if (attrs != null)
-        // result = (String) attrs.get(attributeName);
-        //
-        // }
-        // else
-        // {
-        NamedNodeMap map = node.getAttributes();
+	public static String getAttribute(Node node, String attributeName) {
+		String result = null;
+		// if (node instanceof PullParserNode)
+		// {
+		// PullParserNode ppnode = (PullParserNode) node;
+		// Map attrs = ppnode.getKludgeAttributes();
+		// if (attrs != null)
+		// result = (String) attrs.get(attributeName);
+		//
+		// }
+		// else
+		// {
+		NamedNodeMap map = node.getAttributes();
 
-        if (map != null)
-        {
-            Node attributeNode = map.getNamedItem(attributeName);
+		if (map != null) {
+			Node attributeNode = map.getNamedItem(attributeName);
 
-            if (attributeNode != null)
-                result = attributeNode.getNodeValue();
-        }
-        // }
-        return result;
-    }
+			if (attributeNode != null)
+				result = attributeNode.getNodeValue();
+		}
+		// }
+		return result;
+	}
 
-    public static boolean getBooleanAttribute(Node node, String attributeName)
-    {
-        String attributeValue = getAttribute(node, attributeName);
+	public static boolean getBooleanAttribute(Node node, String attributeName) {
+		String attributeValue = getAttribute(node, attributeName);
 
-        return "yes".equals(attributeValue);
-    }
+		return "yes".equals(attributeValue);
+	}
 
-    public static boolean getBooleanAttribute(Node node, String attributeName, boolean defaultValue)
-    {
-        String attributeValue = getAttribute(node, attributeName);
-        if (TapestryCore.isNull(attributeValue))
-            return defaultValue;
-        return "yes".equals(attributeValue);
-    }
+	public static boolean getBooleanAttribute(Node node, String attributeName,
+			boolean defaultValue) {
+		String attributeValue = getAttribute(node, attributeName);
+		if (TapestryCore.isNull(attributeValue))
+			return defaultValue;
+		return "yes".equals(attributeValue);
+	}
 
-    public static String getValue(Node node)
-    {
-        StringBuffer buffer = new StringBuffer();
-        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
-        {
-            short type = child.getNodeType();
-            if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE)
-                buffer.append(child.getNodeValue());
-        }
+	public static String getValue(Node node) {
+		StringBuffer buffer = new StringBuffer();
+		for (Node child = node.getFirstChild(); child != null; child = child
+				.getNextSibling()) {
+			short type = child.getNodeType();
+			if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE)
+				buffer.append(child.getNodeValue());
+		}
 
-        String result = buffer.toString().trim();
-        if (result == null || "".equals(result))
-            return null;
+		String result = buffer.toString().trim();
+		if (result == null || "".equals(result))
+			return null;
 
-        return result;
-    }
+		return result;
+	}
 
-    public static boolean isComment(Node node)
-    {
-        return node.getNodeType() == Node.COMMENT_NODE;
-    }
+	public static boolean isComment(Node node) {
+		return node.getNodeType() == Node.COMMENT_NODE;
+	}
 
-    public static boolean isElement(Node node)
-    {
-        return node.getNodeType() == Node.ELEMENT_NODE;
-    }
+	public static boolean isElement(Node node) {
+		return node.getNodeType() == Node.ELEMENT_NODE;
+	}
 
-    public static boolean isElement(Node node, String elementName)
-    {
-        if (node == null || node.getNodeType() != Node.ELEMENT_NODE)
-            return false;
+	public static boolean isElement(Node node, String elementName) {
+		if (node == null || node.getNodeType() != Node.ELEMENT_NODE)
+			return false;
 
-        return node.getNodeName().equals(elementName);
+		return node.getNodeName().equals(elementName);
 
-    }
+	}
 
-    // public static ISourceLocationInfo getSourceLocationInfo(Node node)
-    // {
-    // ISourceLocationInfo result = null;
-    // // if (node instanceof PullParserNode)
-    // // {
-    // // PullParserNode ppnode = (PullParserNode) node;
-    // // result = ppnode.getSourceLocationInfo();
-    // //
-    // // }
-    // // else
-    // // {
-    //       
-    // try
-    // {
-    // DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
-    // result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.IDENTIFIER);
-    // }
-    // catch (RuntimeException e)
-    // {
-    //               
-    // e.printStackTrace();
-    // }
-    // // }
-    // return result;
-    // }
+	// public static ISourceLocationInfo getSourceLocationInfo(Node node)
+	// {
+	// ISourceLocationInfo result = null;
+	// // if (node instanceof PullParserNode)
+	// // {
+	// // PullParserNode ppnode = (PullParserNode) node;
+	// // result = ppnode.getSourceLocationInfo();
+	// //
+	// // }
+	// // else
+	// // {
+	//       
+	// try
+	// {
+	// DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
+	// result = (ISourceLocationInfo) document.getUserData(node,
+	// TapestryCore.IDENTIFIER);
+	// }
+	// catch (RuntimeException e)
+	// {
+	//               
+	// e.printStackTrace();
+	// }
+	// // }
+	// return result;
+	// }
 
-    public static boolean isTextNode(Node child)
-    {
-        short type = child.getNodeType();
-        return type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE;
-    }
+	public static boolean isTextNode(Node child) {
+		short type = child.getNodeType();
+		return type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE;
+	}
 
-    /**
-     * @param document
-     * @return
-     */
-    public static String getPublicId(Document document)
-    {
-        DocumentType type = document.getDoctype();
-        if (type == null)
-            return null;
-        return type.getPublicId();
-    }
+	/**
+	 * @param document
+	 * @return
+	 */
+	public static String getPublicId(Document document) {
+		DocumentType type = document.getDoctype();
+		if (type == null)
+			return null;
+		return type.getPublicId();
+	}
 
-    public static String getDeclaredRootElement(Document document)
-    {
-        DocumentType type = document.getDoctype();
-        if (type == null)
-            return null;
-        return type.getName();
-    }
+	public static String getDeclaredRootElement(Document document) {
+		DocumentType type = document.getDoctype();
+		if (type == null)
+			return null;
+		return type.getName();
+	}
 
 }

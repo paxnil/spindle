@@ -1,16 +1,6 @@
 package core.build;
 
 import junit.framework.Test;
-
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
-
-import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-
-import core.ITapestryProject;
 import core.test.SuiteOfTestCases;
 import core.test.eclipse.AbstractEclipsePluginTestCase;
 

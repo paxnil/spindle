@@ -35,8 +35,9 @@ import core.source.ISourceLocation;
  */
 public class ScannerException extends Exception
 {
+	private static final long serialVersionUID = 1L;
 
-    ISourceLocation fLocation;
+	ISourceLocation fLocation;
 
     int fCode = -1;
 

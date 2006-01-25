@@ -115,7 +115,8 @@ public class CoreTemplateParser extends TemplateParser
         setFactory(new CoreTemplateTokenFactory(fEventHandler));
     }    
 
-    public TemplateToken[] parse(char[] templateData, ITemplateParserDelegate delegate,
+    @SuppressWarnings("unchecked") /* unchecked as getTokens() in the parser is not JDK1.5 aware */
+	public TemplateToken[] parse(char[] templateData, ITemplateParserDelegate delegate,
             Resource resourceLocation) throws TemplateParseException
     {
         TemplateToken[] result = null;

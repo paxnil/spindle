@@ -1,4 +1,5 @@
 package core.parser.template;
+
 /*******************************************************************************
  * ***** BEGIN LICENSE BLOCK Version: MPL 1.1
  * 
@@ -24,52 +25,46 @@ package core.parser.template;
  */
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import core.source.ISourceLocation;
 import core.source.SourceLocation;
 
-public class TagEventInfo
-{
+public class TagEventInfo {
 
-  private Map fAttributeMap;
-  SourceLocation fStartTagLocation;
+	private Map<String, ISourceLocation> fAttributeMap;
 
-  public Map getAttributeMap()
-  {
-    if (fAttributeMap == null)
-      fAttributeMap = new HashMap();
+	SourceLocation fStartTagLocation;
 
-    return fAttributeMap;
-  }
+	public Map<String, ISourceLocation> getAttributeMap() {
+		if (fAttributeMap == null)
+			fAttributeMap = new HashMap<String, ISourceLocation>();
 
-  public ISourceLocation getStartTagLocation()
-  {
-    return fStartTagLocation;
-  }
+		return fAttributeMap;
+	}
 
-  /**
-   * @param cursor
-   * @return
-   */
-  public ISourceLocation findLocation(int cursorPosition)
-  {
+	public ISourceLocation getStartTagLocation() {
+		return fStartTagLocation;
+	}
 
-    if (fAttributeMap != null)
-    {
-      for (Iterator iter = fAttributeMap.keySet().iterator(); iter.hasNext();)
-      {
-        ISourceLocation attrLoc = (ISourceLocation) fAttributeMap.get(iter.next());
-        if (attrLoc.contains(cursorPosition))
-          return attrLoc;
+	/**
+	 * @param cursor
+	 * @return
+	 */
+	public ISourceLocation findLocation(int cursorPosition) {
 
-      }
-    }
-    if (fStartTagLocation != null)
-      return fStartTagLocation;
+		if (fAttributeMap != null) {
+			for (String attributeName : fAttributeMap.keySet()) {
+				ISourceLocation attrLoc = (ISourceLocation) fAttributeMap
+						.get(attributeName);
+				if (attrLoc.contains(cursorPosition))
+					return attrLoc;
+			}
+		}
+		if (fStartTagLocation != null)
+			return fStartTagLocation;
 
-    return null;
-  }
+		return null;
+	}
 
 }

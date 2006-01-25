@@ -27,11 +27,9 @@
 package core.namespace;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hivemind.Resource;
-
 
 import core.resources.ICoreResource;
 import core.resources.IResourceAcceptor;
@@ -40,46 +38,41 @@ import core.spec.PluginApplicationSpecification;
 import core.spec.PluginLibrarySpecification;
 
 /**
- * A Lookup that bases its searches on the namespace it is configured with. Does not take into
- * account any sub namespaces.
+ * A Lookup that bases its searches on the namespace it is configured with. Does
+ * not take into account any sub namespaces.
  * 
  * @author glongman@gmail.com
  */
-public class NamespaceResourceLookup
-{
+public class NamespaceResourceLookup {
 
-    private List fLocations;
+	private List<Resource> fLocations;
 
-    public void configure(PluginLibrarySpecification specification)
-    {
-        fLocations = new ArrayList();
-        fLocations.add(specification.getSpecificationLocation());
-    }
+	public void configure(PluginLibrarySpecification specification) {
+		fLocations = new ArrayList<Resource>();
+		fLocations.add(specification.getSpecificationLocation());
+	}
 
-    public void configure(PluginApplicationSpecification specification, IResourceRoot contextRoot,
-            String servletName)
-    {
-        fLocations = new ArrayList();
-        fLocations.add(specification.getSpecificationLocation());
-        if (servletName != null)
-        {
-            fLocations.add(contextRoot.getRelativeResource("/WEB-INF/" + servletName));
-        }
-        fLocations.add(contextRoot.getRelativeResource("/WEB-INF/"));
-        fLocations.add(contextRoot.getRelativeResource("/"));
-    }
+	public void configure(PluginApplicationSpecification specification,
+			IResourceRoot contextRoot, String servletName) {
+		fLocations = new ArrayList<Resource>();
+		fLocations.add(specification.getSpecificationLocation());
+		if (servletName != null)
+			fLocations.add(contextRoot.getRelativeResource("/WEB-INF/"
+					+ servletName));
 
-    public Resource[] lookup(IResourceAcceptor acceptor)
-    {
-        if (fLocations == null)
-            throw new Error("not initialized");
+		fLocations.add(contextRoot.getRelativeResource("/WEB-INF/"));
+		fLocations.add(contextRoot.getRelativeResource("/"));
+	}
 
-        for (Iterator iter = fLocations.iterator(); iter.hasNext();)
-        {
-            ICoreResource location = (ICoreResource) iter.next();
-            location.lookup(acceptor);
-        }
-        return acceptor.getResults();
-    }
+	public Resource[] lookup(IResourceAcceptor acceptor) {
+		if (fLocations == null)
+			throw new Error("not initialized");
+
+		for (Resource resource : fLocations) {
+			ICoreResource location = (ICoreResource) resource;
+			location.lookup(acceptor);
+		}
+		return acceptor.getResults();
+	}
 
 }

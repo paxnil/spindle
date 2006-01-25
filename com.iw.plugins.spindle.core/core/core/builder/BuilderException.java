@@ -1,4 +1,5 @@
 package core.builder;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -31,26 +32,23 @@ package core.builder;
  * 
  * @author glongman@gmail.com
  */
-public class BuilderException extends RuntimeException
-{
+public class BuilderException extends RuntimeException {
 
-  public BuilderException()
-  {
-    super();
-  }
+	private static final long serialVersionUID = 1L;
 
-  public BuilderException(String arg0)
-  {
-    super(arg0);
-  }
+	public BuilderException() {
+		super();
+	}
 
-  public BuilderException(String arg0, Throwable arg1)
-  {
-    super(arg0, arg1);
-  }
+	public BuilderException(String arg0) {
+		super(arg0);
+	}
 
-  public BuilderException(Throwable arg0)
-  {
-    super(arg0);
-  }
+	public BuilderException(String arg0, Throwable arg1) {
+		super(arg0, arg1);
+	}
+
+	public BuilderException(Throwable arg0) {
+		super(arg0);
+	}
 }

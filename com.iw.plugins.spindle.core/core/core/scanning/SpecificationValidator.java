@@ -228,7 +228,7 @@ public class SpecificationValidator extends BaseValidator
             ISourceLocationInfo sourceInfo) throws ScannerException
     {
         Collection bindingNames = component.getBindingNames();
-        List required = findRequiredParameterNames(containedSpecification);
+        List<String> required = findRequiredParameterNames(containedSpecification);
         required.removeAll(bindingNames);
         if (!required.isEmpty())
         {
@@ -326,7 +326,7 @@ public class SpecificationValidator extends BaseValidator
 
     }
 
-    private List findRequiredParameterNames(IComponentSpecification spec)
+    private List<String> findRequiredParameterNames(IComponentSpecification spec)
     {
         // List result = new ArrayList();
         // for (Iterator iter = spec.getParameterNames().iterator();
@@ -338,7 +338,7 @@ public class SpecificationValidator extends BaseValidator
         // result.add(name);
         // }
         // return result;
-        ArrayList result = new ArrayList();
+        ArrayList<String> result = new ArrayList<String>();
         result.addAll(((PluginComponentSpecification) spec).getRequiredParameterNames());
         return result;
     }

@@ -7,15 +7,13 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Geoff Longman - modified for Spindle
  *******************************************************************************/
 package core.resources;
 
 import java.io.File;
 
 import org.apache.hivemind.Resource;
-import org.apache.tapestry.services.impl.ResourceLocalization;
-
-import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
 
 import core.util.Assert;
 

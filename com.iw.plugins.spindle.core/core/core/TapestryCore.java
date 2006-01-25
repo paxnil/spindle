@@ -39,12 +39,6 @@ public class TapestryCore implements IPreferenceConstants
 {
     public static final String IDENTIFIER = "com.iw.plugins.spindle.core";
 
-    public static final String SERVLET_2_2_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
-
-    public static final String SERVLET_2_3_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN";
-
-    public static final String SERVLET_2_4_SCHEMA = "http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd";
-
     ILogger logger;
 
     ICoreListeners coreListeners;

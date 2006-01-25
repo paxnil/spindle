@@ -7,7 +7,7 @@ Bundle-ClassPath: tests.jar,
  easymock.jar,
  easymockclassextension.jar
 Bundle-Vendor: Geoff Longman
-Fragment-Host: com.iw.plugins.spindle.core;bundle-version="4.0.0"
+Fragment-Host: spindle.core
 Bundle-Localization: plugin
 Require-Bundle: org.junit 
 Provide-Package: all.tests,

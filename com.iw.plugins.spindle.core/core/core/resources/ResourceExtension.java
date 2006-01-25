@@ -1,9 +1,6 @@
 package core.resources;
 
-import java.util.Properties;
-
 import org.apache.hivemind.Resource;
-
 
 import core.TapestryCoreException;
 import core.resources.search.ISearch;

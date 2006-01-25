@@ -2,44 +2,42 @@ package core.builder;
 
 import core.resources.ICoreResource;
 
-public class ClashException extends BuilderException
-{
-    private ICoreResource requestor;
+public class ClashException extends BuilderException {
 
-    private ICoreResource owner;
+	private static final long serialVersionUID = 1L;
 
-    private ICoreResource claimed;
+	private ICoreResource requestor;
 
-    public ClashException(ICoreResource requestor, ICoreResource owner, ICoreResource claimed)
-    {
-        super();
-        this.requestor = requestor;
-        this.owner = owner;
-        this.claimed = claimed;
-    }
-    
-    public ClashException(ICoreResource requestor, ICoreResource owner, ICoreResource claimed, String message)
-    {
-        super(message);
-        this.requestor = requestor;
-        this.owner = owner;
-        this.claimed = claimed;
-    }
+	private ICoreResource owner;
 
-    public ICoreResource getClaimed()
-    {
-        return claimed;
-    }
+	private ICoreResource claimed;
 
-    public ICoreResource getOwner()
-    {
-        return owner;
-    }
+	public ClashException(ICoreResource requestor, ICoreResource owner,
+			ICoreResource claimed) {
+		super();
+		this.requestor = requestor;
+		this.owner = owner;
+		this.claimed = claimed;
+	}
 
-    public ICoreResource getRequestor()
-    {
-        return requestor;
-    }
+	public ClashException(ICoreResource requestor, ICoreResource owner,
+			ICoreResource claimed, String message) {
+		super(message);
+		this.requestor = requestor;
+		this.owner = owner;
+		this.claimed = claimed;
+	}
 
- 
+	public ICoreResource getClaimed() {
+		return claimed;
+	}
+
+	public ICoreResource getOwner() {
+		return owner;
+	}
+
+	public ICoreResource getRequestor() {
+		return requestor;
+	}
+
 }

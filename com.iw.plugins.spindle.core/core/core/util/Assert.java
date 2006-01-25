@@ -24,94 +24,95 @@
 
 package core.util;
 
-public final class Assert
-{
+public final class Assert {
 
-  /**
-   * <code>AssertionFailedException</code> is a runtime exception thrown by
-   * some of the methods in <code>Assert</code>.
-   */
-  public static class AssertionFailedException extends RuntimeException
-  {
+	/**
+	 * <code>AssertionFailedException</code> is a runtime exception thrown by
+	 * some of the methods in <code>Assert</code>.
+	 */
+	public static class AssertionFailedException extends RuntimeException {
 
-    public AssertionFailedException()
-    {
-    }
-    public AssertionFailedException(String detail)
-    {
-      super(detail);
-    }
-  }
-  /* This class is not intended to be instantiated. */
-  private Assert()
-  {
-  }
-  /**
-   * Asserts that an argument is legal. If the given boolean is not
-   * <code>true</code>, an <code>IllegalArgumentException</code> is thrown.
-   */
-  public static boolean isLegal(boolean expression)
-  {
-    // succeed as quickly as possible
-    if (expression)
-      return true;
+		private static final long serialVersionUID = 1L;
 
-    return isLegal(expression, "");
-  }
-  /**
-   * Asserts that an argument is legal. If the given boolean is not
-   * <code>true</code>, an <code>IllegalArgumentException</code> is thrown.
-   */
-  public static boolean isLegal(boolean expression, String message)
-  {
-    if (!expression)
-      throw new IllegalArgumentException("assertion failed; " + message);
-    return expression;
-  }
-  /**
-   * Asserts that the given object is not <code>null</code>. If this is not
-   * the case, some kind of unchecked exception is thrown.
-   */
-  public static void isNotNull(Object object)
-  {
-    // succeed as quickly as possible
-    if (object != null)
-      return;
+		public AssertionFailedException() {
+		}
 
-    isNotNull(object, "");
-  }
-  /**
-   * Asserts that the given object is not <code>null</code>. If this is not
-   * the case, a <code>NullPointerException</code> exception is thrown. The
-   * given message is included in that exception, to aid debugging.
-   */
-  public static void isNotNull(Object object, String message)
-  {
-    if (object == null)
-      throw new NullPointerException("null argument;" + message);
-  }
-  /**
-   * Asserts that the given boolean is <code>true</code>. If this is not the
-   * case, some kind of unchecked exception is thrown.
-   *  
-   */
-  public static boolean isTrue(boolean expression)
-  {
-    if (expression)
-      return true;
+		public AssertionFailedException(String detail) {
+			super(detail);
+		}
+	}
 
-    return isTrue(expression, "");
-  }
-  /**
-   * Asserts that the given boolean is <code>true</code>. If this is not the
-   * case, <code>AssertionFailedException</code> exception is thrown. The
-   * given message is included in that exception.
-   *  
-   */
-  public static boolean isTrue(boolean expression, String message)
-  {
-    if (!expression)
-      throw new AssertionFailedException("Assertion failed: " + message);
-    return expression;
-  }
+	/* This class is not intended to be instantiated. */
+	private Assert() {
+	}
+
+	/**
+	 * Asserts that an argument is legal. If the given boolean is not
+	 * <code>true</code>, an <code>IllegalArgumentException</code> is
+	 * thrown.
+	 */
+	public static boolean isLegal(boolean expression) {
+		// succeed as quickly as possible
+		if (expression)
+			return true;
+
+		return isLegal(expression, "");
+	}
+
+	/**
+	 * Asserts that an argument is legal. If the given boolean is not
+	 * <code>true</code>, an <code>IllegalArgumentException</code> is
+	 * thrown.
+	 */
+	public static boolean isLegal(boolean expression, String message) {
+		if (!expression)
+			throw new IllegalArgumentException("assertion failed; " + message);
+		return expression;
+	}
+
+	/**
+	 * Asserts that the given object is not <code>null</code>. If this is not
+	 * the case, some kind of unchecked exception is thrown.
+	 */
+	public static void isNotNull(Object object) {
+		// succeed as quickly as possible
+		if (object != null)
+			return;
+
+		isNotNull(object, "");
+	}
+
+	/**
+	 * Asserts that the given object is not <code>null</code>. If this is not
+	 * the case, a <code>NullPointerException</code> exception is thrown. The
+	 * given message is included in that exception, to aid debugging.
+	 */
+	public static void isNotNull(Object object, String message) {
+		if (object == null)
+			throw new NullPointerException("null argument;" + message);
+	}
+
+	/**
+	 * Asserts that the given boolean is <code>true</code>. If this is not
+	 * the case, some kind of unchecked exception is thrown.
+	 * 
+	 */
+	public static boolean isTrue(boolean expression) {
+		if (expression)
+			return true;
+
+		return isTrue(expression, "");
+	}
+
+	/**
+	 * Asserts that the given boolean is <code>true</code>. If this is not
+	 * the case, <code>AssertionFailedException</code> exception is thrown.
+	 * The given message is included in that exception.
+	 * 
+	 */
+	public static boolean isTrue(boolean expression, String message) {
+		if (!expression)
+			throw new AssertionFailedException("Assertion failed: " + message);
+		return expression;
+	}
 }

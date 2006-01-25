@@ -107,7 +107,8 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         return getOrCreateCache(TYPE_CACHE);
     }
 
-    protected static Map getOrCreateCache(String key)
+    @SuppressWarnings("unchecked")
+	protected static Map getOrCreateCache(String key)
     {
         Map buildCache = getBuildCache();
         if (buildCache == null)

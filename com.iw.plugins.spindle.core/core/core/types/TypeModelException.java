@@ -1,29 +1,27 @@
 package core.types;
 
-public class TypeModelException extends Exception
-{
-    Object problemChild;
+public class TypeModelException extends Exception {
 
-    public TypeModelException()
-    {
-        super();
-    }
+	private static final long serialVersionUID = 1L;
 
-    public TypeModelException(String message, Object problemChild)
-    {
-        super(message);
-        this.problemChild = problemChild;
-    }
+	Object problemChild;
 
-    public TypeModelException(String message)
-    {
-        super(message);
-    }
+	public TypeModelException() {
+		super();
+	}
 
-    public TypeModelException(Throwable cause)
-    {
-        super(cause);
-        // TODO Auto-generated constructor stub
-    }
+	public TypeModelException(String message, Object problemChild) {
+		super(message);
+		this.problemChild = problemChild;
+	}
+
+	public TypeModelException(String message) {
+		super(message);
+	}
+
+	public TypeModelException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
+	}
 
 }

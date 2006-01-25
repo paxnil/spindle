@@ -44,7 +44,7 @@ public class TapestryResourceLocationAcceptor implements IResourceAcceptor
    */
   public static int ACCEPT_ANY = 0x00000004;
 
-  List fResults = new ArrayList();
+  List<ICoreResource> fResults = new ArrayList<ICoreResource>();
   String fExpectedName;
   boolean fExactMatch;
   int fAcceptFlags;

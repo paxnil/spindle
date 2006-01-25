@@ -43,15 +43,11 @@ import java.util.TreeSet;
 import org.apache.tapestry.bean.IBeanInitializer;
 import org.apache.tapestry.bean.MessageBeanInitializer;
 import org.apache.tapestry.spec.BeanLifecycle;
-import org.apache.tapestry.spec.BindingType;
-import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.util.IPropertyHolder;
-
-
 
 import core.CoreMessages;
 import core.spec.BaseSpecification;
@@ -61,21 +57,32 @@ import core.spec.PluginComponentSpecification;
 import core.spec.PluginExtensionConfiguration;
 import core.spec.PluginExtensionSpecification;
 import core.spec.PluginLibrarySpecification;
-import core.spec.PluginListenerBindingSpecification;
 import core.spec.bean.PluginExpressionBeanInitializer;
 import core.spec.bean.PluginMessageBeanInitializer;
 
 /**
+ * @deprecated
  * @author gwl Copyright 2002, Geoffrey Longman. All Rights Reserved.
  */
 public class XMLUtil
 {
+    /**
+     * @deprecated
+     * @param writer
+     * @param specification
+     */
     public static void writeSpecification(Writer writer, BaseSpecification specification)
     {
         IndentingWriter indenter = checkWriter(writer);
         writeSpecification(indenter, specification, 0);
     }
 
+    /**
+     * @deprecated
+     * @param writer
+     * @param specification
+     * @param indent
+     */
     public static void writeSpecification(Writer writer, BaseSpecification specification, int indent)
     {
         IndentingWriter indenter = checkWriter(writer);
@@ -129,12 +136,25 @@ public class XMLUtil
         return IndentingWriter.getDefaultIndentingWriter(writer);
     }
 
+    /**
+     * @deprecated
+     * @param writer
+     * @param component
+     * @param indent
+     */
     public static void writeComponentSpecification(Writer writer,
             PluginComponentSpecification component, int indent)
     {
         writeComponentSpecification(writer, component, indent, true);
     }
 
+    /**
+     * @deprecated
+     * @param writer
+     * @param component
+     * @param indent
+     * @param writeHeader
+     */
     public static void writeComponentSpecification(Writer writer,
             PluginComponentSpecification component, int indent, boolean writeHeader)
     {
@@ -171,6 +191,12 @@ public class XMLUtil
         indenter.println("</" + rootElement + ">");
     }
 
+    /**
+     * @deprecated
+     * @param writer
+     * @param component
+     * @param indent
+     */
     public static void writeComponentSpecificationHeader(Writer writer,
             IComponentSpecification component, int indent)
     {
@@ -195,6 +221,7 @@ public class XMLUtil
     }
 
     /**
+     * @deprecated
      * @param component
      * @param writer
      * @param i
@@ -222,12 +249,29 @@ public class XMLUtil
         }
     }
 
+    /**
+     * @deprecated
+     * @param component
+     * @param indent
+     * @param writer
+     * @param beanName
+     * @param bean
+     */
     public static void writeBean(PluginComponentSpecification component, int indent, Writer writer,
             String beanName, PluginBeanSpecification bean)
     {
         writeBean(component, indent, writer, beanName, bean, true);
     }
 
+    /**
+     * @deprecated
+     * @param component
+     * @param indent
+     * @param writer
+     * @param beanName
+     * @param bean
+     * @param newLine
+     */
     public static void writeBean(PluginComponentSpecification component, int indent, Writer writer,
             String beanName, PluginBeanSpecification bean, boolean newLine)
     {

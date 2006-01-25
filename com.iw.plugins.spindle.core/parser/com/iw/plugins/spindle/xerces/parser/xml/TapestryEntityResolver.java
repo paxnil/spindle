@@ -27,16 +27,13 @@ package com.iw.plugins.spindle.xerces.parser.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.apache.xerces.xni.parser.XMLInputSource;
 
-import core.TapestryCore;
+import core.DTDRegistry;
 
 
 
@@ -49,73 +46,16 @@ import core.TapestryCore;
 public class TapestryEntityResolver implements XMLEntityResolver
 {
 
-  static
-  {
-    TapestryEntities = new HashMap();
-    registerTapestryDTD(
-        SpecificationParser.TAPESTRY_DTD_4_0_PUBLIC_ID,
-        "Tapestry_4_0.dtd");
-    registerTapestryDTD(
-        SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID,
-        "Tapestry_3_0.dtd");
-    ServletEntities = new HashMap();
-    registerServletDTD(TapestryCore.SERVLET_2_2_PUBLIC_ID, "web-app_2_2.dtd");
-    registerServletDTD(TapestryCore.SERVLET_2_3_PUBLIC_ID, "web-app_2_3.dtd");
-  }
-
-  static private Map TapestryEntities;
-  static private Map ServletEntities;
-
-  static public void registerTapestryDTD(String publicId, String entityPath)
-  {
-    TapestryEntities.put(publicId, entityPath);
-  }
-
-  static public void registerServletDTD(String publicId, String entityPath)
-  {
-    ServletEntities.put(publicId, entityPath);
-  }
-
   static public XMLInputSource doResolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException,
       IOException
   {
-    XMLInputSource result = getTapestryInputSource(resourceIdentifier);
-
-    if (result == null)
-      result = getServletInputSource(resourceIdentifier);
-
-    return result;
+    return getInputSource(resourceIdentifier);
   }
 
-  static private InputStream getTapestryDTDInputStream(String publicId)
-  {
-    String entityPath = (String) TapestryEntities.get(publicId);
-    if (entityPath != null)
-      return SpecificationParser.class.getResourceAsStream(entityPath);
-    return null;
-  }
-
-  static private InputStream getServletDTDInputStream(String publicId)
-  {
-    String entityPath = (String) ServletEntities.get(publicId);
-    if (entityPath != null)
-      return TapestryCore.class.getResourceAsStream(entityPath);
-    return null;
-  }
-
-  private static XMLInputSource getTapestryInputSource(
+  private static XMLInputSource getInputSource(
       XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException
   {
-    InputStream stream = getTapestryDTDInputStream(resourceIdentifier.getPublicId());
-    if (stream == null)
-      return null;
-    return getInputSource(resourceIdentifier, stream);
-  }
-
-  private static XMLInputSource getServletInputSource(
-      XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException
-  {
-    InputStream stream = getServletDTDInputStream(resourceIdentifier.getPublicId());
+    InputStream stream = DTDRegistry.getDTDInputStream(resourceIdentifier.getPublicId());
     if (stream == null)
       return null;
     return getInputSource(resourceIdentifier, stream);

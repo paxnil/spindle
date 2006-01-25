@@ -76,7 +76,7 @@ public class ApplicationResolver extends NamespaceResolver
      */
     protected String servletName;
 
-    private Set fDefinitelyNotSpeclessPages;
+    private Set<Resource> fDefinitelyNotSpeclessPages;
 
     /**
      * @param build
@@ -149,7 +149,7 @@ public class ApplicationResolver extends NamespaceResolver
      * @param componentTemplates
      *            a Set of template files we already know can't be specless pages.
      */
-    protected void resolveSpeclessPages(Set componentTemplates)
+    protected void resolveSpeclessPages(Set<Resource> componentTemplates)
     {
         if (!namespace.isApplicationNamespace())
             return;
@@ -165,9 +165,9 @@ public class ApplicationResolver extends NamespaceResolver
             templateExtension = DefaultProperties.getInstance().getPropertyValue("org.apache.tapestry.template-extension");
         }
         
-        final List allTemplates = new ArrayList(componentTemplates);
+        final List<Resource> allTemplates = new ArrayList<Resource>(componentTemplates);
         allTemplates.addAll(getAllPageSpecTemplates());
-        final List speclessPages = new ArrayList();
+        final List<Resource> speclessPages = new ArrayList<Resource>();
         final String speclessPageTemplateExtension = templateExtension;
         //now find all the html files in the application root
 

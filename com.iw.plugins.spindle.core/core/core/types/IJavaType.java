@@ -1,6 +1,5 @@
 package core.types;
 
-import org.eclipse.jdt.core.IMethod;
 
 
 /**

@@ -24,11 +24,11 @@ public class DefaultProperties implements IPropertySource
         return INSTANCE;
     }
 
-    private Map properties;
+    private Map<String, String> properties;
 
     private DefaultProperties()
     {
-        properties = new HashMap();
+        properties = new HashMap<String, String>();
         properties.put("org.apache.tapestry.engine-class", "org.apache.tapestry.engine.BaseEngine");
         properties.put("org.apache.tapestry.default-script-language", "jython");
         properties.put("org.apache.tapestry.visit-class", "java.util.HashMap");

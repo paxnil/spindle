@@ -57,7 +57,7 @@ public abstract class AbstractScanner implements IProblemCollector
 
     protected IProblemCollector fExternalProblemCollector;
 
-    protected List fProblems = new ArrayList();
+    protected List<IProblem> fProblems = new ArrayList<IProblem>();
 
     protected IScannerValidator fValidator;
 

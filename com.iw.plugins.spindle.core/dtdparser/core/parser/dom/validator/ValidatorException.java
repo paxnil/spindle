@@ -32,10 +32,11 @@ package core.parser.dom.validator;
  * @author glongman@gmail.com
  * 
  */
-public class ValidatorException extends Exception
-{
-  public ValidatorException(String s)
-  {
-    super(s);
-  }
+public class ValidatorException extends Exception {
+
+	private static final long serialVersionUID = 1L;
+
+	public ValidatorException(String s) {
+		super(s);
+	}
 }

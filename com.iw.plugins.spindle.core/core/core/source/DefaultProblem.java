@@ -26,7 +26,6 @@
 
 package core.source;
 
-import core.util.Assert;
 
 /**
  * Default impl of IProblem

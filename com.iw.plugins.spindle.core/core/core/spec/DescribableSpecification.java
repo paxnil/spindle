@@ -44,7 +44,7 @@ public class DescribableSpecification extends BaseSpecification
    * The locations and values of all description declarations in a spec.
    * Immutable after a parse/scan episode.
    */
-  private List fDescriptionDeclarations;
+  private List<PluginDescriptionDeclaration> fDescriptionDeclarations;
 
   private String fDescription;
 
@@ -69,15 +69,15 @@ public class DescribableSpecification extends BaseSpecification
   public void addDescriptionDeclaration(PluginDescriptionDeclaration decl)
   {
     if (fDescriptionDeclarations == null)
-      fDescriptionDeclarations = new ArrayList();
+      fDescriptionDeclarations = new ArrayList<PluginDescriptionDeclaration>();
 
     fDescriptionDeclarations.add(decl);
   }
 
-  public List getDescriptionDeclarations()
+  public List<PluginDescriptionDeclaration> getDescriptionDeclarations()
   {
     if (fDescriptionDeclarations == null)
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
 
     return fDescriptionDeclarations;
   }

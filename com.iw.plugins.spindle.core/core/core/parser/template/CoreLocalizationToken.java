@@ -42,7 +42,8 @@ import org.apache.tapestry.parse.LocalizationToken;
 public class CoreLocalizationToken extends LocalizationToken
 {
 
-    private TagEventInfo fEventInfo;
+    @SuppressWarnings("unused")
+	private TagEventInfo fEventInfo;
 
     /**
      * Creates a new token.

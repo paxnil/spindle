@@ -26,8 +26,8 @@
 
 package core.namespace;
 
+import org.apache.hivemind.ApplicationRuntimeException;
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.pageload.ComponentClassProvider;
 import org.apache.tapestry.spec.IComponentSpecification;
 
 import core.util.Assert;
@@ -51,7 +51,7 @@ public class ComponentSpecificationResolver
                 : true);
         fFrameworkNamespace = framework;
         Assert.isNotNull(containerNamespace);
-        containerNamespace = containerNamespace;
+        this.containerNamespace = containerNamespace;
     }
 
     /**
