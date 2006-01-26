@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id$ -->
+<!DOCTYPE page-specification PUBLIC 
+  "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+  "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
+	
+<page-specification class="org.apache.tapestry.vlib.pages.GiveAwayBooks">
+
+  <property-specification name="error" type="java.lang.String"/>
+	<property-specification name="booksModel" type="org.apache.tapestry.form.IPropertySelectionModel"/>
+	<property-specification name="personModel" type="org.apache.tapestry.form.IPropertySelectionModel"/>
+	<property-specification name="selectedBooks" type="java.util.List"/>
+
+	<property-specification name="targetUserId" type="java.lang.Integer"/>
+
+    <component id="selectBooks" type="contrib:Palette">
+      <binding name="sort">
+        @org.apache.tapestry.contrib.palette.SortMode@LABEL
+     	</binding>
+      <binding name="model" expression="booksModel"/>
+      <binding name="selected" expression="selectedBooks"/>
+      <binding name="selectedTitleBlock" expression="components.selectedTitleBlock"/>
+      <binding name="availableTitleBlock" expression="components.availableTitleBlock"/>
+    </component>
+    
+    <component id="selectTarget" type="PropertySelection">
+      <binding name="value" expression="targetUserId"/>
+      <binding name="model" expression="personModel"/>
+    </component>
+
+</page-specification>

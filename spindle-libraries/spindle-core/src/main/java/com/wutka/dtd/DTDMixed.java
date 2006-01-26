@@ -1,0 +1,72 @@
+package com.wutka.dtd;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+
+/**
+ * Represents a mixed Element content (PCDATA + choice/sequence). Mixed Element
+ * can contain #PCDATA, or it can contain #PCDATA followed by a list of
+ * pipe-separated names.
+ * 
+ * @author Mark Wutka
+ * 
+ */
+public class DTDMixed extends DTDContainer
+{
+  public DTDMixed()
+  {
+  }
+
+  /** Writes out a declaration for mixed content */
+  public void write(PrintWriter out) throws IOException
+  {
+    out.print("(");
+
+    Enumeration e = getItemsVec().elements();
+    boolean isFirst = true;
+
+    while (e.hasMoreElements())
+    {
+      if (!isFirst)
+        out.print(" | ");
+      isFirst = false;
+
+      DTDItem item = (DTDItem) e.nextElement();
+      item.write(out);
+    }
+    out.print(")");
+    cardinal.write(out);
+  }
+
+  public boolean equals(Object ob)
+  {
+    if (ob == this)
+      return true;
+    if (!(ob instanceof DTDMixed))
+      return false;
+
+    return super.equals(ob);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.wutka.dtd.DTDContainer#getContainerType()
+   */
+  public final DTDItemType getItemType()
+  {
+    return DTDItemType.DTD_MIXED;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.wutka.dtd.DTDItem#match(java.lang.String)
+   */
+  public boolean match(String match)
+  {
+    throw new Error("not supported");
+  }
+
+}

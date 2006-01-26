@@ -1,0 +1,6 @@
+-------------------------------------------------------------------------------
+Battery: net.sf.spindle.core.scanning.ApplicationScannerTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Time elapsed: 1.343 sec 
+
+
