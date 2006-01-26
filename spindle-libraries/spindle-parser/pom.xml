@@ -9,7 +9,7 @@
   <url>http://maven.apache.org</url>
   <parent>
         <groupId>net.sf.spindle</groupId>
-        <artifactId>spindle-projects</artifactId>
+        <artifactId>spindle-libraries</artifactId>
         <version>1.0-SNAPSHOT</version>
   </parent>
   <dependencies>

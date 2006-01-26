@@ -1,15 +1,15 @@
-<?xml version="1.0"?><project>
-  <parent>
-    <artifactId>spindle-projects</artifactId>
-    <groupId>net.sf.spindle</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
+<?xml version="1.0"?><project>  
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.sf.spindle</groupId>
   <artifactId>spindle-core</artifactId>
   <name>Maven Quick Start Archetype</name>
   <version>1.0-SNAPSHOT</version>
   <url>http://maven.apache.org</url>
+  <parent>
+    <artifactId>spindle-libraries</artifactId>
+    <groupId>net.sf.spindle</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
   <build>
   <plugins>
     <plugin>
