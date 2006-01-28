@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.sf.spindle</groupId>
   <artifactId>spindle-core</artifactId>
-  <name>Maven Quick Start Archetype</name>
+  <name>Spindle Core Library</name>
   <version>1.0-SNAPSHOT</version>
   <url>http://maven.apache.org</url>
   <parent>
