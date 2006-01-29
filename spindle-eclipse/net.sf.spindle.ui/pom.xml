@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<project> 
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.sf.spindle</groupId>
+  <artifactId>net.sf.spindle.ui</artifactId>
+  <name>Spindle Eclipse UI Plug-in</name>
+  <version>4.0.0-SNAPSHOT</version>
+  <url>http://spindle.sourceforge.net</url>
+   <parent>
+    <artifactId>spindle-eclipse</artifactId>
+    <groupId>net.sf.spindle</groupId>
+    <version>4.0.0-SNAPSHOT</version>
+  </parent>
+</project>
