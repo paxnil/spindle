@@ -1,14 +1,13 @@
 package net.sf.spindle.core.types;
 
-
-
 /**
  * Wrapper interface for things are Java types (classes ir interfaces).
  * <p>
  * Examples of underlying types would be {@link java.lang.Class} instances in a runtime
  * implementation or {@link org.eclipse.jdt.core.IType} instances in an Eclipse IDE.
  * <p>
- * Instances of IJavaType are created via calls to {@link core.types.IJavaTypeFinder#findType(String)}.
+ * Instances of IJavaType are created via calls to
+ * {@link core.types.IJavaTypeFinder#findType(String)}.
  * <p>
  * Clients should never directly instantiate instances of an implementation.
  * 
@@ -16,23 +15,28 @@ package net.sf.spindle.core.types;
  */
 public interface IJavaType
 {
+
     /**
-     * @return true iff the underlying type represented by this instance exists
+     * IJavaType's may be cached and if an instance if based on a source files it may become invalid
+     * if the file is deleted/renamed.
+     * <p>
+     * When this is the case this method should return false.
+     * 
+     * @return true if the underlying type still exists.
      */
     boolean exists();
 
     /**
-     * @return the FQN of the underlier represented by this instance
+     * The FQN of the underlier represented by this instance.
+     * 
+     * @return the FQN
      */
     String getFullyQualifiedName();
 
     /**
-     * @return the name minus the package parts
-     */
-    String getSimpleName();
-
-    /**
-     * @return the underlying type represented by this instance
+     * The underlying type represented by this instance
+     * 
+     * @return the underlying type
      */
     Object getUnderlier();
 
@@ -45,50 +49,25 @@ public interface IJavaType
     boolean isBinary();
 
     /**
+     * Answer true of the underlying type is an interface.
+     * 
      * @return true iff this instance represents an interface
      */
-    boolean isInterface() throws TypeModelException;
-
-    boolean isSuperTypeOf(IJavaType candidate) throws TypeModelException;
-
-    boolean isAnnotation() throws TypeModelException;
-
-    boolean isArray();
-
-    int getModifiers() throws TypeModelException;
-
-    IJavaType getArrayType();
-
-    IJavaType getSuperClass() throws TypeModelException;
-
-    /** following are Eclipse specific TODO break from Eclipse * */
+    boolean isInterface();
 
     /**
-     * Returns an array containing {@link org.eclipse.jdt.core.IMethod} objects reflecting all the
-     * public constructors of the class represented by this type.
+     * Answer true if the underlying type is a supertype of the candidate type.
+     * 
+     * @param candidate
+     * @return true iff the candidate is a subclass of <code>this</code>
      */
-    IMethod[] getConstructors() throws TypeModelException;
+    boolean isSuperTypeOf(IJavaType candidate);
 
     /**
-     * Returns an array of {@link org.eclipse.jdt.core.IMethod} objects reflecting all the
-     * constructors declared by the class represented by this type.
-     * <p>
-     * These are public, protected, default (package) access, and private constructors.
-     * <p>
-     * The elements in the array returned are not sorted and are not in any particular order.
+     * Answer true if this type represents and annotation type.
+     * 
+     * @return true iff this type is an Annotation type.
      */
-    IMethod[] getDeclaredConstructors() throws TypeModelException;
+    boolean isAnnotation();
 
-    /**
-     * Returns an array of {@link org.eclipse.jdt.core.IMethod} objects reflecting all the methods
-     * declared by the class or interface represented by this type.
-     * <p>
-     * This includes public, protected, default (package) access, and private methods, but excludes
-     * inherited methods.
-     * <p>
-     * The elements in the array returned are not sorted and are not in any particular order.
-     */
-    IMethod[] getDeclaredMethods() throws TypeModelException;
-
-    IMethod[] getMethods() throws TypeModelException;
 }

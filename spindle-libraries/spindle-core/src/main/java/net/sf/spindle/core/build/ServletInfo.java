@@ -32,22 +32,52 @@ import net.sf.spindle.core.resources.ICoreResource;
 public class ServletInfo
 {
 
-  String name;
-  String classname;
-  Map<String, String> parameters = new HashMap<String, String>();
-  boolean isServletSubclass;
-  ICoreResource applicationSpecLocation;
-  public String toString()
-  {
-    StringBuffer buffer = new StringBuffer("ServletInfo(");
-    buffer.append(name);
-    buffer.append(")::");
-    buffer.append("classname = ");
-    buffer.append(classname);
-    buffer.append(", params = ");
-    buffer.append(parameters);
-    buffer.append(" loc= ");
-    buffer.append(applicationSpecLocation);
-    return buffer.toString();
-  }
+    String name;
+
+    String classname;
+
+    Map<String, String> parameters = new HashMap<String, String>();
+
+    boolean isServletSubclass;
+
+    ICoreResource applicationSpecLocation;
+
+    public String toString()
+    {
+        StringBuffer buffer = new StringBuffer("ServletInfo(");
+        buffer.append(name);
+        buffer.append(")::");
+        buffer.append("classname = ");
+        buffer.append(classname);
+        buffer.append(", params = ");
+        buffer.append(parameters);
+        buffer.append(" loc= ");
+        buffer.append(applicationSpecLocation);
+        return buffer.toString();
+    }
+
+    public ICoreResource getApplicationSpecLocation()
+    {
+        return applicationSpecLocation;
+    }
+
+    public String getClassname()
+    {
+        return classname;
+    }
+
+    public boolean isServletSubclass()
+    {
+        return isServletSubclass;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public Map<String, String> getParameters()
+    {
+        return parameters;
+    }
 }

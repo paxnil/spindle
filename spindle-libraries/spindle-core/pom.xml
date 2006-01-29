@@ -1,26 +1,25 @@
-<?xml version="1.0"?><project>  
+<?xml version="1.0"?><project>
+  <parent>
+    <artifactId>spindle-libraries</artifactId>
+    <groupId>net.sf.spindle</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.sf.spindle</groupId>
   <artifactId>spindle-core</artifactId>
   <name>Spindle Core Library</name>
   <version>1.0-SNAPSHOT</version>
   <url>http://maven.apache.org</url>
-  <parent>
-    <artifactId>spindle-libraries</artifactId>
-    <groupId>net.sf.spindle</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
   <build>
-  <plugins>
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-compiler-plugin</artifactId>
-      <configuration>
-        <source>1.5</source>
-        <target>1.5</target>
-      </configuration>
-    </plugin>
-  </plugins>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
   <dependencies>
     <dependency>
@@ -105,6 +104,11 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
       <version>2.0</version>
-    </dependency>    
-  </dependencies>
+    </dependency>
+    <dependency>
+      <groupId>hivemind</groupId>
+      <artifactId>hivemind-lib</artifactId>
+      <version>1.1</version>
+    </dependency>
+  </dependencies> 
 </project>

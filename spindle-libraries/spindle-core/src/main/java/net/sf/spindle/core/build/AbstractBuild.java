@@ -72,7 +72,6 @@ import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
-
 /**
  * Abstract base class for full and incremental builds
  * <p>
@@ -135,7 +134,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected Map<Resource, BaseSpecification> fileSpecificationMap;
 
     protected Map<Resource, BaseSpecification> binarySpecificationMap; // binary specs (from jars)
-                                                                        // never change
+
+    // never change
 
     protected AbstractBuildInfrastructure infrastructure;
 
@@ -196,7 +196,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         this.tapestryServletType = tapestryProject.findType(CoreMessages
                 .format(AbstractBuildInfrastructure.STRING_KEY + "applicationServletClassname"));
 
-        if (tapestryServletType == null || !tapestryServletType.exists())
+        if (tapestryServletType == null)
             throw new BuilderException(
                     "FATAL ERROR: Tapestry servlet type not found in classpath: "
                             + CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
@@ -222,7 +222,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                     + "locating-artifacts"));
-            
+
             buildQueue.addAll(findAllTapestrySourceFiles().toArray());
 
             // we need to eliminate the mark as "processed" ns locations we already visited.
@@ -239,7 +239,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             notifier.updateProgressDelta(0.05f);
 
-            notifier.setProcessingProgressPer(0.9f / buildQueue.getWaitingCount());            
+            notifier.setProcessingProgressPer(0.9f / buildQueue.getWaitingCount());
 
             resolveFramework();
 

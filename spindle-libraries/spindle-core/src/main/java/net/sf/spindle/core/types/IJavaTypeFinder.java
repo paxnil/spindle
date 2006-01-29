@@ -13,7 +13,6 @@ package net.sf.spindle.core.types;
  */
 public interface IJavaTypeFinder
 {
-
     /**
      * Perform a lookup keyed on fully qualified name. Implementors may cache the result for
      * subsequent calls.
