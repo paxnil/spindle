@@ -1,31 +1,24 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Geoffrey Longman.
- * Portions created by the Initial Developer are Copyright (C) 2001-2005
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- * 
- *  glongman@gmail.com
- *
- * ***** END LICENSE BLOCK ***** */
-
 package net.sf.spindle.core.spec;
 
+/*
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
+
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
+
+ Contributor(s): __glongman@gmail.com___.
+ */
 import java.util.Collection;
 
 import net.sf.spindle.core.TapestryCore;
@@ -40,16 +33,14 @@ import net.sf.spindle.core.source.ISourceLocationInfo;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 
-
-
-//import core.TapestryCore;
-//import core.resources.ICoreResource;
-//import core.scanning.IScannerValidator;
-//import core.scanning.ScannerException;
-//import core.scanning.SpecificationScanner;
-//import core.source.IProblem;
-//import core.source.ISourceLocation;
-//import core.source.ISourceLocationInfo;
+// import core.TapestryCore;
+// import core.resources.ICoreResource;
+// import core.scanning.IScannerValidator;
+// import core.scanning.ScannerException;
+// import core.scanning.SpecificationScanner;
+// import core.source.IProblem;
+// import core.source.ISourceLocation;
+// import core.source.ISourceLocationInfo;
 
 /**
  * Spindle aware concrete implementation of ILibrarySpecification
@@ -70,7 +61,7 @@ public class PluginParameterSpecification extends DescribableSpecification imple
     /** @since 2.0.3 * */
     private String fPropertyName;
 
-    //  private Direction fDirection = Direction.CUSTOM;
+    // private Direction fDirection = Direction.CUSTOM;
 
     private String fDefaultValue;
 
@@ -139,26 +130,26 @@ public class PluginParameterSpecification extends DescribableSpecification imple
         return fPropertyName;
     }
 
-    //  /*
-    //   * (non-Javadoc)
-    //   *
-    //   * @see org.apache.tapestry.spec.IParameterSpecification#getDirection()
-    //   */
-    //  public Direction getDirection()
-    //  {
-    //    return fDirection;
-    //  }
+    // /*
+    // * (non-Javadoc)
+    // *
+    // * @see org.apache.tapestry.spec.IParameterSpecification#getDirection()
+    // */
+    // public Direction getDirection()
+    // {
+    // return fDirection;
+    // }
     //
-    //  /*
-    //   * (non-Javadoc)
-    //   *
-    //   * @see
+    // /*
+    // * (non-Javadoc)
+    // *
+    // * @see
     // org.apache.tapestry.spec.IParameterSpecification#setDirection(org.apache.tapestry.spec.Direction)
-    //   */
-    //  public void setDirection(Direction direction)
-    //  {
-    //    fDirection = direction;
-    //  }
+    // */
+    // public void setDirection(Direction direction)
+    // {
+    // fDirection = direction;
+    // }
 
     /**
      * @see org.apache.tapestry.spec.IParameterSpecification#getDefaultValue()
@@ -204,9 +195,8 @@ public class PluginParameterSpecification extends DescribableSpecification imple
         }
     }
 
-    private Object validateTypeSpecial(IScannerValidator validator,
-            ICoreResource dependant, String typeName, int severity,
-            ISourceLocation location) throws ScannerException
+    private Object validateTypeSpecial(IScannerValidator validator, ICoreResource dependant,
+            String typeName, int severity, ISourceLocation location) throws ScannerException
     {
         String useName = typeName;
         if (useName.indexOf(".") < 0)
@@ -250,33 +240,39 @@ public class PluginParameterSpecification extends DescribableSpecification imple
         this.fDefaultBindingType = defaultBindingType;
     }
 
-	public String getParameterName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public String getParameterName()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public void setParameterName(String arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+    public void setParameterName(String arg0)
+    {
+        // TODO Auto-generated method stub
 
-	public Collection getAliasNames() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    }
 
-	public void setAliases(String arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+    public Collection getAliasNames()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public boolean isDeprecated() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    public void setAliases(String arg0)
+    {
+        // TODO Auto-generated method stub
 
-	public void setDeprecated(boolean arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
+
+    public boolean isDeprecated()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public void setDeprecated(boolean arg0)
+    {
+        // TODO Auto-generated method stub
+
+    }
 }

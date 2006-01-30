@@ -1,30 +1,24 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Geoffrey Longman.
- * Portions created by the Initial Developer are Copyright (C) 2001-2005
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- * 
- *  glongman@gmail.com
- *
- * ***** END LICENSE BLOCK ***** */
 package net.sf.spindle.core.util;
 
+/*
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
+
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
+
+ Contributor(s): __glongman@gmail.com___.
+ */
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -58,8 +52,6 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.util.IPropertyHolder;
-
-
 
 /**
  * @deprecated
@@ -397,51 +389,52 @@ public class XMLUtil
         IndentingWriter indenter = checkWriter(writer);
 
         int DTDVersion = XMLPublicIDUtil.getDTDVersion(component.getPublicId());
-        if (DTDVersion < XMLPublicIDUtil.DTD_3_0 || component.getPropertySpecificationNames().isEmpty())
+        if (DTDVersion < XMLPublicIDUtil.DTD_3_0
+                || component.getPropertySpecificationNames().isEmpty())
             return;
-        //TODO does nothing!
+        // TODO does nothing!
     }
 
     public static void writeAssets(IComponentSpecification component, Writer writer, int indent)
     {
-//        IndentingWriter indenter = checkWriter(writer);
-//
-//        List assetNames = component.getAssetNames();
-//        if (assetNames != null && !assetNames.isEmpty())
-//        {
-//
-//            indenter.println();
-//            Iterator names = new TreeSet(assetNames).iterator();
-//
-//            while (names.hasNext())
-//            {
-//                String assetName = (String) names.next();
-//                IAssetSpecification asset = component.getAsset(assetName);
-//                indenter.printIndented(indent, "<");
-//                AssetType type = asset.getType();
-//                if (type == AssetType.PRIVATE)
-//                {
-//                    indenter.print("private-asset name=\"" + assetName);
-//                    indenter.print("\" resource-path=\"" + asset.getPath());
-//                    indenter.println("\"/>");
-//                    return;
-//                }
-//                else if (type == AssetType.EXTERNAL)
-//                {
-//                    indenter.print("external-asset name=\"" + assetName);
-//                    indenter.print("\" URL=\"" + asset.getPath());
-//                    indenter.println("\"/>");
-//                    return;
-//                }
-//                else if (type == AssetType.CONTEXT)
-//                {
-//                    indenter.print("context-asset name=\"" + assetName);
-//                    indenter.print("\" path=\"" + asset.getPath());
-//                    indenter.println("\"/>");
-//                    return;
-//                }
-//            }
-//        }
+        // IndentingWriter indenter = checkWriter(writer);
+        //
+        // List assetNames = component.getAssetNames();
+        // if (assetNames != null && !assetNames.isEmpty())
+        // {
+        //
+        // indenter.println();
+        // Iterator names = new TreeSet(assetNames).iterator();
+        //
+        // while (names.hasNext())
+        // {
+        // String assetName = (String) names.next();
+        // IAssetSpecification asset = component.getAsset(assetName);
+        // indenter.printIndented(indent, "<");
+        // AssetType type = asset.getType();
+        // if (type == AssetType.PRIVATE)
+        // {
+        // indenter.print("private-asset name=\"" + assetName);
+        // indenter.print("\" resource-path=\"" + asset.getPath());
+        // indenter.println("\"/>");
+        // return;
+        // }
+        // else if (type == AssetType.EXTERNAL)
+        // {
+        // indenter.print("external-asset name=\"" + assetName);
+        // indenter.print("\" URL=\"" + asset.getPath());
+        // indenter.println("\"/>");
+        // return;
+        // }
+        // else if (type == AssetType.CONTEXT)
+        // {
+        // indenter.print("context-asset name=\"" + assetName);
+        // indenter.print("\" path=\"" + asset.getPath());
+        // indenter.println("\"/>");
+        // return;
+        // }
+        // }
+        // }
     }
 
     public static void writeReservedParameters(IComponentSpecification component, Writer writer,
@@ -515,61 +508,62 @@ public class XMLUtil
     public static void writeParameter(String name, IParameterSpecification parameter,
             Writer writer, int indent, String publicId, boolean nextLine)
     {
-//        IndentingWriter indenter = checkWriter(writer);
-//        if (nextLine)
-//            indenter.println();
-//
-//        boolean isDTD13 = false; //XMLUtil.getDTDVersion(publicId) == XMLUtil.DTD_1_3;
-//        indenter.printlnIndented(indent, "<parameter");
-//        indenter.printIndented(indent + 1, "name=\"" + name);
-//        indenter.println("\"");
-//        String temp = isDTD13 ? "java-type=\"" : "type=\"";
-//        indenter.printIndented(indent + 1, temp + parameter.getType());
-//        indenter.println("\"");
-//
-//        String propertyName = parameter.getPropertyName();
-//
-//        if (propertyName != null && !"".equals(propertyName) && !propertyName.equals(name))
-//        {
-//
-//            indenter.printIndented(indent + 1, "property-name=\"" + parameter.getPropertyName());
-//            indenter.println("\"");
-//
-//        }
-//
-//        indenter.printIndented(indent + 1, "direction=\"");
-//        Direction direction = parameter.getDirection();
-//        String useDirection = "";
-//        if (direction != null)
-//        {
-//            if (direction == Direction.AUTO)
-//                useDirection = "auto";
-//            else if (direction == Direction.CUSTOM)
-//                useDirection = "custom";
-//            else if (direction == Direction.FORM)
-//                useDirection = "form";
-//            else if (direction == Direction.IN)
-//                useDirection = "in";
-//        }
-//
-//        indenter.print(useDirection);
-//        indenter.println("\"");
-//
-//        indenter.printIndented(indent + 1, "required=\"" + (parameter.isRequired() ? "yes" : "no"));
-//        indenter.print("\"");
-//
-//        String description = parameter.getDescription();
-//
-//        if (description == null || "".equals(description.trim()))
-//        {
-//            indenter.println("/>");
-//        }
-//        else
-//        {
-//            indenter.println(">");
-//            XMLUtil.writeDescription(indenter, indent + 1, description, false);
-//            indenter.printlnIndented(indent, "</parameter>");
-//        }
+        // IndentingWriter indenter = checkWriter(writer);
+        // if (nextLine)
+        // indenter.println();
+        //
+        // boolean isDTD13 = false; //XMLUtil.getDTDVersion(publicId) == XMLUtil.DTD_1_3;
+        // indenter.printlnIndented(indent, "<parameter");
+        // indenter.printIndented(indent + 1, "name=\"" + name);
+        // indenter.println("\"");
+        // String temp = isDTD13 ? "java-type=\"" : "type=\"";
+        // indenter.printIndented(indent + 1, temp + parameter.getType());
+        // indenter.println("\"");
+        //
+        // String propertyName = parameter.getPropertyName();
+        //
+        // if (propertyName != null && !"".equals(propertyName) && !propertyName.equals(name))
+        // {
+        //
+        // indenter.printIndented(indent + 1, "property-name=\"" + parameter.getPropertyName());
+        // indenter.println("\"");
+        //
+        // }
+        //
+        // indenter.printIndented(indent + 1, "direction=\"");
+        // Direction direction = parameter.getDirection();
+        // String useDirection = "";
+        // if (direction != null)
+        // {
+        // if (direction == Direction.AUTO)
+        // useDirection = "auto";
+        // else if (direction == Direction.CUSTOM)
+        // useDirection = "custom";
+        // else if (direction == Direction.FORM)
+        // useDirection = "form";
+        // else if (direction == Direction.IN)
+        // useDirection = "in";
+        // }
+        //
+        // indenter.print(useDirection);
+        // indenter.println("\"");
+        //
+        // indenter.printIndented(indent + 1, "required=\"" + (parameter.isRequired() ? "yes" :
+        // "no"));
+        // indenter.print("\"");
+        //
+        // String description = parameter.getDescription();
+        //
+        // if (description == null || "".equals(description.trim()))
+        // {
+        // indenter.println("/>");
+        // }
+        // else
+        // {
+        // indenter.println(">");
+        // XMLUtil.writeDescription(indenter, indent + 1, description, false);
+        // indenter.printlnIndented(indent, "</parameter>");
+        // }
     }
 
     /**
@@ -737,116 +731,117 @@ public class XMLUtil
     public static void writeBinding(String name, IBindingSpecification binding, Writer writer,
             int indent, String publicId)
     {
-//        IndentingWriter indenter = checkWriter(writer);
-//
-//        int currentDTD = XMLPublicIDUtil.getDTDVersion(publicId);
-//        if (currentDTD == XMLPublicIDUtil.UNKNOWN_DTD)
-//            currentDTD = XMLPublicIDUtil.DTD_3_0;
-//        boolean isDTD13 = false; //currentDTD == XMLUtil.DTD_1_3;
-//        boolean isDTD30OrBetter = currentDTD >= XMLPublicIDUtil.DTD_3_0;
-//
-//        char quot = '"';
-//
-//        indenter.printIndented(indent, "<");
-//
-//        BindingType type = binding.getType();
-//
-//        if (type == BindingType.FIELD)
-//        {
-//
-//            if (isDTD13)
-//            {
-//                indenter.print("field-binding name=\"" + name);
-//                indenter.print("\" field-name=\"");
-//            }
-//            else
-//            {
-//                //convert to an expression binding
-//                indenter.print("binding name=\"" + name);
-//                String value = binding.getValue();
-//                String lhs = value;
-//                String rhs = "";
-//                int index = value.lastIndexOf('.');
-//                if (index > 0 && index < value.length() - 1)
-//                {
-//                    lhs = value.substring(0, index - 1);
-//                    rhs = value.substring(index + 1);
-//                }
-//                if (lhs.indexOf('.') == 0)
-//                    lhs = "java.lang." + lhs;
-//                indenter.print("\" expression='");
-//                indenter.print("@" + lhs + "@" + rhs);
-//                indenter.print("'/>");
-//                return;
-//            }
-//
-//        }
-//        else if (type == BindingType.INHERITED)
-//        {
-//
-//            indenter.print("inherited-binding name=\"" + name);
-//            indenter.print("\" parameter-name=\"");
-//
-//        }
-//        else if (type == BindingType.STATIC)
-//        {
-//
-//            indenter.print("static-binding name=\"" + name);
-//            indenter.print("\">");
-//            indenter.print(binding.getValue());
-//            indenter.print("</static-binding>");
-//            return;
-//
-//        }
-//        else if (type == BindingType.DYNAMIC)
-//        {
-//
-//            String value = convert(binding.getValue());
-//            //does the expression contain a double quote?
-//            if (value.indexOf('"') >= 0)
-//                // use single quote
-//                quot = '\'';
-//
-//            // reset back to double quote if the expression contains a single quote!
-//            // not ideal but its all we can do.
-//            if (value.indexOf('\'') >= 0)
-//                quot = '"';
-//
-//            indenter.print("binding name=\"" + name);
-//
-//            indenter.print("\" expression=" + quot);
-//            indenter.print(convert(binding.getValue()));
-//            indenter.print(quot + "/>");
-//            return;
-//
-//        }
-//        else if (type == BindingType.STRING)
-//        {
-//            if (isDTD13)
-//            {
-//                indenter.print("string-binding name=\"" + name);
-//                indenter.print("\" key=\"");
-//            }
-//            else
-//            {
-//                indenter.print("message-binding name=\"" + name);
-//                indenter.print("\" key=\"");
-//            }
-//
-//        }
-//        else if (type == BindingType.LISTENER)
-//        {
-//            indenter.print("listener-binding name=\"" + name);
-//            PluginListenerBindingSpecification pbinding = (PluginListenerBindingSpecification) binding;
-//            indenter.println("\" language=\"" + pbinding.getLanguage() + "\">");
-//            indenter.printlnIndented(indent + 1, "<![CDATA[");
-//            indenter.printlnIndented(indent + 2, pbinding.getScript());
-//            indenter.printlnIndented(indent + 1, "]]>");
-//            indenter.printlnIndented(indent, "</listener-binding>");
-//            return;
-//        }
-//        indenter.print(binding.getValue());
-//        indenter.print("\"/>");
+        // IndentingWriter indenter = checkWriter(writer);
+        //
+        // int currentDTD = XMLPublicIDUtil.getDTDVersion(publicId);
+        // if (currentDTD == XMLPublicIDUtil.UNKNOWN_DTD)
+        // currentDTD = XMLPublicIDUtil.DTD_3_0;
+        // boolean isDTD13 = false; //currentDTD == XMLUtil.DTD_1_3;
+        // boolean isDTD30OrBetter = currentDTD >= XMLPublicIDUtil.DTD_3_0;
+        //
+        // char quot = '"';
+        //
+        // indenter.printIndented(indent, "<");
+        //
+        // BindingType type = binding.getType();
+        //
+        // if (type == BindingType.FIELD)
+        // {
+        //
+        // if (isDTD13)
+        // {
+        // indenter.print("field-binding name=\"" + name);
+        // indenter.print("\" field-name=\"");
+        // }
+        // else
+        // {
+        // //convert to an expression binding
+        // indenter.print("binding name=\"" + name);
+        // String value = binding.getValue();
+        // String lhs = value;
+        // String rhs = "";
+        // int index = value.lastIndexOf('.');
+        // if (index > 0 && index < value.length() - 1)
+        // {
+        // lhs = value.substring(0, index - 1);
+        // rhs = value.substring(index + 1);
+        // }
+        // if (lhs.indexOf('.') == 0)
+        // lhs = "java.lang." + lhs;
+        // indenter.print("\" expression='");
+        // indenter.print("@" + lhs + "@" + rhs);
+        // indenter.print("'/>");
+        // return;
+        // }
+        //
+        // }
+        // else if (type == BindingType.INHERITED)
+        // {
+        //
+        // indenter.print("inherited-binding name=\"" + name);
+        // indenter.print("\" parameter-name=\"");
+        //
+        // }
+        // else if (type == BindingType.STATIC)
+        // {
+        //
+        // indenter.print("static-binding name=\"" + name);
+        // indenter.print("\">");
+        // indenter.print(binding.getValue());
+        // indenter.print("</static-binding>");
+        // return;
+        //
+        // }
+        // else if (type == BindingType.DYNAMIC)
+        // {
+        //
+        // String value = convert(binding.getValue());
+        // //does the expression contain a double quote?
+        // if (value.indexOf('"') >= 0)
+        // // use single quote
+        // quot = '\'';
+        //
+        // // reset back to double quote if the expression contains a single quote!
+        // // not ideal but its all we can do.
+        // if (value.indexOf('\'') >= 0)
+        // quot = '"';
+        //
+        // indenter.print("binding name=\"" + name);
+        //
+        // indenter.print("\" expression=" + quot);
+        // indenter.print(convert(binding.getValue()));
+        // indenter.print(quot + "/>");
+        // return;
+        //
+        // }
+        // else if (type == BindingType.STRING)
+        // {
+        // if (isDTD13)
+        // {
+        // indenter.print("string-binding name=\"" + name);
+        // indenter.print("\" key=\"");
+        // }
+        // else
+        // {
+        // indenter.print("message-binding name=\"" + name);
+        // indenter.print("\" key=\"");
+        // }
+        //
+        // }
+        // else if (type == BindingType.LISTENER)
+        // {
+        // indenter.print("listener-binding name=\"" + name);
+        // PluginListenerBindingSpecification pbinding = (PluginListenerBindingSpecification)
+        // binding;
+        // indenter.println("\" language=\"" + pbinding.getLanguage() + "\">");
+        // indenter.printlnIndented(indent + 1, "<![CDATA[");
+        // indenter.printlnIndented(indent + 2, pbinding.getScript());
+        // indenter.printlnIndented(indent + 1, "]]>");
+        // indenter.printlnIndented(indent, "</listener-binding>");
+        // return;
+        // }
+        // indenter.print(binding.getValue());
+        // indenter.print("\"/>");
     }
 
     private static String convert(String string)
@@ -960,7 +955,7 @@ public class XMLUtil
         indenter.printlnIndented(1, "<display-name>" + servletName + "</display-name>");
 
         if (dtdId >= XMLPublicIDUtil.DTD_SERVLET_2_3 && writeFilter)
-            writeTapestryFilter("org.apache.tapestry.RedirectFilter", writer, 1); //TODO
+            writeTapestryFilter("org.apache.tapestry.RedirectFilter", writer, 1); // TODO
         // add filter classname to properties file
         writeServlet(servletName, indenter, 1);
         writeServletMapping(servletName, indenter, 1);
@@ -1309,24 +1304,26 @@ public class XMLUtil
 
         switch (DTDVersion)
         {
-            //      case XMLUtil.DTD_1_1 :
-            //        indenter.println(" \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
-            //        break;
+            // case XMLUtil.DTD_1_1 :
+            // indenter.println(" \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
+            // break;
             //
-            //      case XMLUtil.DTD_1_2 :
-            //        indenter.println(" \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
-            //        break;
+            // case XMLUtil.DTD_1_2 :
+            // indenter.println(" \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
+            // break;
             //
-            //      case XMLUtil.DTD_1_3 :
-            //        indenter.println(" \"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd\">");
-            //        break;
+            // case XMLUtil.DTD_1_3 :
+            // indenter.println(" \"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd\">");
+            // break;
 
             case XMLPublicIDUtil.DTD_3_0:
-                indenter.println("      \"" + XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_3_0) + "\">");
+                indenter.println("      \"" + XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_3_0)
+                        + "\">");
                 break;
 
             case XMLPublicIDUtil.DTD_4_0:
-                indenter.println("      \"" + XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_4_0) + "\">");
+                indenter.println("      \"" + XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_4_0)
+                        + "\">");
                 break;
 
             case XMLPublicIDUtil.DTD_SERVLET_2_2:

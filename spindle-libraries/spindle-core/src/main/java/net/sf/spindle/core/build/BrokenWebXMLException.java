@@ -1,27 +1,47 @@
 package net.sf.spindle.core.build;
 
-public class BrokenWebXMLException extends BuilderException {
+/*
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-	private static final long serialVersionUID = 1L;
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-	public BrokenWebXMLException() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-	public BrokenWebXMLException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-	public BrokenWebXMLException(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
+ Contributor(s): __glongman@gmail.com___.
+ */
+public class BrokenWebXMLException extends BuilderException
+{
 
-	public BrokenWebXMLException(Throwable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
+    private static final long serialVersionUID = 1L;
+
+    public BrokenWebXMLException()
+    {
+        super();
+    }
+
+    public BrokenWebXMLException(String arg0, Throwable arg1)
+    {
+        super(arg0, arg1);
+    }
+
+    public BrokenWebXMLException(String arg0)
+    {
+        super(arg0);
+    }
+
+    public BrokenWebXMLException(Throwable arg0)
+    {
+        super(arg0);
+    }
 
 }

@@ -1,5 +1,24 @@
 package net.sf.spindle.core.namespace;
 
+/*
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
+
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
+
+ Contributor(s): __glongman@gmail.com___.
+ */
 import junit.framework.Test;
 import net.sf.spindle.core.AbstractTestCase;
 import net.sf.spindle.core.SuiteOfTestCases;
@@ -27,7 +46,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
     public void setUp()
     {
         frameworkNamespace = createNamespace(new String[]
-            { "FRAMEWORK1", "FRAMEWORK2" }, INamespace.FRAMEWORK_NAMESPACE);
+        { "FRAMEWORK1", "FRAMEWORK2" }, INamespace.FRAMEWORK_NAMESPACE);
     }
 
     public void testConstructor() throws Exception
@@ -151,7 +170,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
     {
         INamespace testFramework = createNoAcccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
         INamespace namespace = createNamespace(new String[]
-            { "COMP1" }, "any");
+        { "COMP1" }, "any");
 
         mockContainer.replayControls();
 
@@ -162,7 +181,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
         // if the framework is consulted
 
         IComponentSpecification spec = resolver.resolve("COMP1");
-        
+
         assertNotNull(spec);
 
         mockContainer.verifyControls();
@@ -172,7 +191,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
     {
         INamespace testFramework = createNoAcccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
         INamespace namespace = createNamespace(new String[]
-            { "FRAMEWORK1" }, "any");
+        { "FRAMEWORK1" }, "any");
 
         mockContainer.replayControls();
 
@@ -242,7 +261,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
 
         // the child - has no components
         INamespace childNs = (INamespace) createNamespace(new String[]
-            { "COMP1" }, "child1");
+        { "COMP1" }, "child1");
         // the namespace that will contain the child
         MockControl namespaceControl = mockContainer.newControl(INamespace.class);
         INamespace namespace = (INamespace) namespaceControl.getMock();
@@ -268,7 +287,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
     public void testResolveStandard()
     {
         INamespace applicationNS = createNamespace(new String[]
-            { "Comp1" }, (String) null);
+        { "Comp1" }, (String) null);
 
         mockContainer.replayControls();
 
@@ -284,7 +303,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
     public void testResolveNullLibId()
     {
         INamespace applicationNS = createNamespace(new String[]
-            { "Comp1" }, (String) null);
+        { "Comp1" }, (String) null);
 
         mockContainer.replayControls();
 

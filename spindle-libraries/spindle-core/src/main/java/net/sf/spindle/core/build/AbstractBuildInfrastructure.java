@@ -1,30 +1,26 @@
 package net.sf.spindle.core.build;
 
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Geoffrey Longman.
- * Portions created by the Initial Developer are Copyright (C) 2001-2005
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- * 
- *  glongman@gmail.com
- *
- * ***** END LICENSE BLOCK ***** */
+/*
+The contents of this file are subject to the Mozilla Public License
+Version 1.1 (the "License"); you may not use this file except in
+compliance with the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+License for the specific language governing rights and limitations
+under the License.
+
+The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+
+The Initial Developer of the Original Code is _____Geoffrey Longman__.
+Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+__Geoffrey Longman____. All Rights Reserved.
+
+Contributor(s): __glongman@gmail.com___.
+import net.sf.spindle.core.resources.IResourceRoot;
+import net.sf.spindle.core.types.IJavaTypeFinder;
+*/
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,7 +104,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     }
 
     @SuppressWarnings("unchecked")
-	protected static Map getOrCreateCache(String key)
+    protected static Map getOrCreateCache(String key)
     {
         Map buildCache = getBuildCache();
         if (buildCache == null)
@@ -149,7 +145,6 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         super();
     }
 
-   
     public final void build(boolean requestIncremental, Map args)
     {
         BUILD_CACHE.set(new HashMap());
@@ -171,14 +166,14 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
      * 
      * @throws BuilderException
      */
-    
+
     protected abstract void initialize() throws BuilderException;
 
     /**
      * last check before a build occurs. Up to the platform IDE implementor to decide if the project
      * is in a state where a build should proceed.
      * <p>
-     * Fatal errors/state that need to be recorded against the project should result in a
+     * Fatal (errors/invalid state) that need to presented to end users must result in a
      * {@link BuilderException}.
      * 
      * @return true if the project is worth building
@@ -189,7 +184,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     private void executeBuild(boolean requestIncremental, Map args)
     {
-        Assert.isNotNull(notifier);
+        Assert.isNotNull(notifier, "notifier must not be null");
 
         notifier.begin();
 
@@ -203,11 +198,11 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
             if (isWorthBuilding())
             {
                 // at this point the infrastructure must be complete.
-                Assert.isNotNull(tapestryProject);
-                Assert.isNotNull(contextRoot);
-                Assert.isNotNull(classpathRoot);
-                Assert.isNotNull(domModelSource);
-                Assert.isNotNull(problemPersister);
+                Assert.isNotNull(tapestryProject, "tapestry project must not be null");
+                Assert.isNotNull(contextRoot, "context root must not be null");
+                Assert.isNotNull(classpathRoot, "classpath root must not be null");
+                Assert.isNotNull(domModelSource, "dom model source must not be null");
+                Assert.isNotNull(problemPersister, "problem persister must not be null");
 
                 notifier.checkCancel();
                 if (!requestIncremental)
@@ -293,7 +288,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                 + "full-build-starting"));
 
-        problemPersister.removeProblems(tapestryProject);
+        problemPersister.removeAllProblems(tapestryProject);
 
         this.build = createFullBuild();
 
@@ -302,18 +297,19 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     private void buildIncremental() throws BuilderException
     {
-        if (true) { //FIXME remove when incremental works again
+        if (true)
+        { // FIXME remove when incremental works again
             buildAll();
             return;
         }
-        
-        
+
         this.build = createIncrementalBuild();
-        
-        if (build == null) {
+
+        if (build == null)
+        {
             buildAll();
             return;
-        }            
+        }
 
         Assert.isLegal(build instanceof IIncrementalBuild);
 
@@ -398,8 +394,10 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     }
 
     public abstract boolean projectSupportsAnnotations();
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see core.IJavaTypeFinder#findType(java.lang.String)
      */
     @SuppressWarnings("unchecked")
@@ -427,6 +425,5 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     {
         return true;
     }
-
 
 }

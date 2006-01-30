@@ -1,19 +1,24 @@
-// Copyright 2004, 2005 The Apache Software Foundation
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package net.sf.spindle.core.messages;
 
+/*
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
+
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
+
+ Contributor(s): __glongman@gmail.com___.
+ */
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,10 +34,6 @@ import org.apache.tapestry.services.Infrastructure;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
-/**
- * @author Howard Lewis Ship
- * @since 4.0
- */
 public class ImplMessages
 {
     protected static MessageFormatter _formatter = new MessageFormatter(
@@ -43,10 +44,10 @@ public class ImplMessages
         return _formatter.getMessage("initializer-contribution");
     }
 
-//    public static String noApplicationSpecification(HttpServlet servlet)
-//    {
-//        return _formatter.format("no-application-specification", servlet.getServletName());
-//    }
+    // public static String noApplicationSpecification(HttpServlet servlet)
+    // {
+    // return _formatter.format("no-application-specification", servlet.getServletName());
+    // }
 
     public static String errorInstantiatingEngine(Class engineClass, Throwable cause)
     {
@@ -161,10 +162,10 @@ public class ImplMessages
         return _formatter.format("no-such-service", name);
     }
 
-    //    public static String dupeService(String name, EngineServiceContribution existing)
-    //    {
-    //        return _formatter.format("dupe-service", name, HiveMind.getLocationString(existing));
-    //    }
+    // public static String dupeService(String name, EngineServiceContribution existing)
+    // {
+    // return _formatter.format("dupe-service", name, HiveMind.getLocationString(existing));
+    // }
 
     public static String unableToParseExpression(String expression, Throwable cause)
     {
@@ -241,15 +242,15 @@ public class ImplMessages
         return _formatter.format("infrastructure-already-initialized", newMode, initializedMode);
     }
 
-    //    public static String duplicateInfrastructureContribution(InfrastructureContribution conflict,
-    //            Location existingLocation)
-    //    {
-    //        return _formatter.format(
-    //                "duplicate-infrastructure-contribution",
-    //                conflict.getProperty(),
-    //                conflict.getMode(),
-    //                existingLocation);
-    //    }
+    // public static String duplicateInfrastructureContribution(InfrastructureContribution conflict,
+    // Location existingLocation)
+    // {
+    // return _formatter.format(
+    // "duplicate-infrastructure-contribution",
+    // conflict.getProperty(),
+    // conflict.getMode(),
+    // existingLocation);
+    // }
 
     public static String infrastructureNotInitialized()
     {

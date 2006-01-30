@@ -1,31 +1,24 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Geoffrey Longman.
- * Portions created by the Initial Developer are Copyright (C) 2001-2005
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- * 
- *  glongman@gmail.com
- *
- * ***** END LICENSE BLOCK ***** */
-
 package net.sf.spindle.core.build;
 
+/*
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
+
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
+
+ Contributor(s): __glongman@gmail.com___.
+ */
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -84,8 +77,8 @@ public class ApplicationResolver extends NamespaceResolver
     public ApplicationResolver(AbstractBuild build, ICoreNamespace framework, String servletName)
     {
         super(build);
-        frameworkNamespace = framework;       
-    }    
+        frameworkNamespace = framework;
+    }
 
     /**
      * Every namespace has a Namespace resource lookup object for finding files according to
@@ -104,7 +97,6 @@ public class ApplicationResolver extends NamespaceResolver
         return lookup;
     }
 
-   
     /**
      * We adjust here to account for specless pages.
      * 
@@ -117,7 +109,9 @@ public class ApplicationResolver extends NamespaceResolver
             resolveComponents();
             fDefinitelyNotSpeclessPages = getAllComponentTemplates();
             resolvePages();
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             e.printStackTrace();
             TapestryCore.log(e);
         }
@@ -139,11 +133,11 @@ public class ApplicationResolver extends NamespaceResolver
     }
 
     /**
-     * Resolve all of the specless pages in the application. Only the application namespace can have specless
-     * pages. We find the specless pages by a process of elimination. By definition a specless page
-     * is a template file located in the context root. However, pages and components can have thier
-     * templates in the context root. So we find the specless page templates by excluding those
-     * files we know are page/component templates found in the context root.
+     * Resolve all of the specless pages in the application. Only the application namespace can have
+     * specless pages. We find the specless pages by a process of elimination. By definition a
+     * specless page is a template file located in the context root. However, pages and components
+     * can have thier templates in the context root. So we find the specless page templates by
+     * excluding those files we know are page/component templates found in the context root.
      * 
      * @param componentTemplates
      *            a Set of template files we already know can't be specless pages.
@@ -153,22 +147,25 @@ public class ApplicationResolver extends NamespaceResolver
         if (!namespace.isApplicationNamespace())
             return;
 
-        //now gather all the templates seen so far.
-        //they are definitely not spec-less pages!
-        
-        //we know that the application NS and the global properties will provide the
-        //template extension for specless pages.
-        
-        String templateExtension = namespace.getSpecification().getProperty("org.apache.tapestry.template-extension");
-        if (templateExtension == null) {
-            templateExtension = DefaultProperties.getInstance().getPropertyValue("org.apache.tapestry.template-extension");
+        // now gather all the templates seen so far.
+        // they are definitely not spec-less pages!
+
+        // we know that the application NS and the global properties will provide the
+        // template extension for specless pages.
+
+        String templateExtension = namespace.getSpecification().getProperty(
+                "org.apache.tapestry.template-extension");
+        if (templateExtension == null)
+        {
+            templateExtension = DefaultProperties.getInstance().getPropertyValue(
+                    "org.apache.tapestry.template-extension");
         }
-        
+
         final List<Resource> allTemplates = new ArrayList<Resource>(componentTemplates);
         allTemplates.addAll(getAllPageSpecTemplates());
         final List<Resource> speclessPages = new ArrayList<Resource>();
         final String speclessPageTemplateExtension = templateExtension;
-        //now find all the html files in the application root
+        // now find all the html files in the application root
 
         IResourceRoot appRoot = build.contextRoot;
 
@@ -176,7 +173,7 @@ public class ApplicationResolver extends NamespaceResolver
         {
             public boolean accept(ICoreResource location)
             {
-                String fullname = location.getName();              
+                String fullname = location.getName();
                 String extension = null;
 
                 if (fullname != null)
@@ -188,9 +185,9 @@ public class ApplicationResolver extends NamespaceResolver
                     }
                     else if (cut > 0)
                     {
-                        
+
                         extension = fullname.substring(cut + 1);
-                    } 
+                    }
                     if (speclessPageTemplateExtension.equals(extension)
                             && !allTemplates.contains(location))
                         speclessPages.add(location);
@@ -210,9 +207,7 @@ public class ApplicationResolver extends NamespaceResolver
         // need to filter out localized page templates. They will be picked up
         // again later.
 
-        List filtered = TemplateFinder.filterTemplateList(
-                speclessPages,
-                templateExtension);
+        List filtered = TemplateFinder.filterTemplateList(speclessPages, templateExtension);
         for (Iterator iter = filtered.iterator(); iter.hasNext();)
         {
             ICoreResource location = (ICoreResource) iter.next();
@@ -252,7 +247,8 @@ public class ApplicationResolver extends NamespaceResolver
     }
 
     /**
-     * @return List a list of all the templates for all components in this Namespace (that have specs)
+     * @return List a list of all the templates for all components in this Namespace (that have
+     *         specs)
      */
     protected Set<Resource> getAllComponentTemplates()
     {

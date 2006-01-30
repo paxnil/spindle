@@ -1,5 +1,24 @@
 package net.sf.spindle.core;
 
+/*
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
+
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
+
+ Contributor(s): __glongman@gmail.com___.
+ */
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -18,7 +37,6 @@ import org.apache.hivemind.Resource;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
-import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -53,20 +71,21 @@ public abstract class AbstractXMLTestCase extends AbstractTestCase
         }
     }
 
-    private static ArgumentsMatcher SRC_LOC_INFO_MATCHER = new ArgumentsMatcher() {
+    private static ArgumentsMatcher SRC_LOC_INFO_MATCHER = new ArgumentsMatcher()
+    {
 
         public boolean matches(Object[] expected, Object[] actual)
-        {            
+        {
             return actual.length == 1 && actual[0] != null;
         }
 
         public String toString(Object[] arg0)
-        {            
+        {
             return "SRC_LOC_INFO_MATCHER";
         }
-        
+
     };
-   
+
     public static final ISourceLocationInfo DUMMY_ISOURCE_LOCATION_INFO = new ISourceLocationInfo()
     {
 
@@ -153,18 +172,17 @@ public abstract class AbstractXMLTestCase extends AbstractTestCase
 
     };
 
-    
     public AbstractXMLTestCase(String name)
     {
         super(name);
     }
 
-    protected Document getDocument(InputStream in) throws Exception 
+    protected Document getDocument(InputStream in) throws Exception
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setIgnoringElementContentWhitespace(true);
         DocumentBuilder builder = factory.newDocumentBuilder();
-        builder.setEntityResolver(new EResolver());        
+        builder.setEntityResolver(new EResolver());
         return builder.parse(in);
     }
 
@@ -173,13 +191,13 @@ public abstract class AbstractXMLTestCase extends AbstractTestCase
         IDOMModel model = null;
         MockControl control = mockContainer.newControl(IDOMModel.class);
         model = (IDOMModel) control.getMock();
-    
+
         control.expectAndReturn(model.getDocument(), document, MockControl.ONE);
         control.expectAndReturn(
                 model.getSourceLocationInfo(null),
                 AbstractXMLTestCase.DUMMY_ISOURCE_LOCATION_INFO,
                 MockControl.ZERO_OR_MORE);
-        control.setMatcher(SRC_LOC_INFO_MATCHER); 
+        control.setMatcher(SRC_LOC_INFO_MATCHER);
         return model;
     }
 
