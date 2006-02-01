@@ -28,7 +28,6 @@ package net.sf.spindle.xerces.parser.xml.pull;
 
 import java.io.IOException;
 
-import net.sf.spindle.xerces.parser.ParserRuntimeException;
 import net.sf.spindle.xerces.parser.xml.dom.TapestryDOMParserConfiguration;
 
 import org.apache.xerces.xni.XNIException;
@@ -39,6 +38,7 @@ import org.apache.xerces.xni.parser.XMLParseException;
  * A configuration used by TapestryPullParser
  * 
  * @author glongman@gmail.com
+ * @deprecated PULL parser is OUT!
   */
 public class TapestryPullParserConfiguration extends TapestryDOMParserConfiguration
 {

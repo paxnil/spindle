@@ -49,7 +49,7 @@ public class TestBasicDOMParser extends DOMParserBase
         parserConfiguration.setDocumentHandler(domParser);
         parserConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
         parserConfiguration.setFeature("http://xml.org/sax/features/validation", true);
-        parserConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
+        parserConfiguration.setFeature(TapestryDOMParserConfiguration.AUGMENTATIONS, true);
         assertTrue("incorrect configuration: document handler", parserConfiguration.getDocumentHandler() == domParser);
         assertTrue(
             "incorrect configuration: continue-after-fatal-error",
@@ -59,7 +59,7 @@ public class TestBasicDOMParser extends DOMParserBase
             parserConfiguration.getFeature("http://xml.org/sax/features/validation"));
         assertTrue(
             "incorrect configuration: augmentations",
-            parserConfiguration.getFeature("http://intelligentworks.com/xml/features/augmentations-location"));
+            parserConfiguration.getFeature(TapestryDOMParserConfiguration.AUGMENTATIONS));
 
     }
 

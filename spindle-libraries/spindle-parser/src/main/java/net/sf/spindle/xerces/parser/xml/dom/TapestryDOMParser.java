@@ -1,4 +1,5 @@
 package net.sf.spindle.xerces.parser.xml.dom;
+
 /*******************************************************************************
  * ***** BEGIN LICENSE BLOCK Version: MPL 1.1
  * 
@@ -31,83 +32,52 @@ import net.sf.spindle.xerces.parser.xml.event.ElementXMLEventInfo;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLParserConfiguration;
-
 
 public class TapestryDOMParser extends DOMParser
 {
 
-  ISourceLocationResolver fResolver;
+    ISourceLocationResolver fResolver;
 
-  /**
-   * Constructor for MyDOMParser.
-   * 
-   * @param config
-   */
-  public TapestryDOMParser(XMLParserConfiguration config)
-  {
-    super(config);
-  }
-
-  public void setSourceResolver(ISourceLocationResolver resolver)
-  {
-    fResolver = resolver;
-  }
-
-  /**
-   * @see org.apache.xerces.xni.XMLDocumentHandler#endElement(QName,
-   *      Augmentations)
-   */
-  public void endElement(QName element, Augmentations augs) throws XNIException
-  {
-    ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs
-        .getItem(TapestryDOMParserConfiguration.AUGMENTATIONS);
-    if (eventInfo != null && fDocument != null)
+    /**
+     * Constructor for MyDOMParser.
+     * 
+     * @param config
+     */
+    public TapestryDOMParser(XMLParserConfiguration config)
     {
-      if (fResolver != null)
-      {
-        XercesDOMElementSourceLocationInfo resolvedInfo = new XercesDOMElementSourceLocationInfo(
-            element.rawname,
-            eventInfo,
-            fResolver);
-        fDocumentImpl.setUserData(
-            fCurrentNode,
-            TapestryCore.IDENTIFIER,
-            resolvedInfo,
-            null);
-      } else
-      {
-        fDocumentImpl.setUserData(fCurrentNode, TapestryCore.IDENTIFIER, eventInfo, null);
-      }
+        super(config);
     }
 
-    super.endElement(element, augs);
-  }
+    public void setSourceResolver(ISourceLocationResolver resolver)
+    {
+        fResolver = resolver;
+    }
 
-  /**
-   * @see org.apache.xerces.xni.XMLDocumentHandler#emptyElement(QName,
-   *      XMLAttributes, Augmentations)
-   */
-  //    public void emptyElement(QName element, XMLAttributes attributes,
-  // Augmentations augs) throws XNIException
-  //    {
-  //        ElementXMLEventInfo eventInfo = (ElementXMLEventInfo)
-  // augs.getItem(TapestryParserConfiguration.AUGMENTATIONS);
-  //        if (eventInfo != null)
-  //        {
-  //            if (resolver != null)
-  //            {
-  //                ElementSourceLocationInfo resolvedInfo = new
-  // ElementSourceLocationInfo(eventInfo, resolver);
-  //                fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID,
-  // resolvedInfo, null);
-  //            } else
-  //            {
-  //                fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, eventInfo,
-  // null);
-  //            }
-  //        }
-  //        super.emptyElement(element, attributes, augs);
-  //    }
+    /**
+     * @see org.apache.xerces.xni.XMLDocumentHandler#endElement(QName, Augmentations)
+     */
+    public void endElement(QName element, Augmentations augs) throws XNIException
+    {
+        ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs
+                .getItem(TapestryDOMParserConfiguration.AUGMENTATIONS);
+        if (eventInfo != null && fDocument != null)
+        {
+            if (fResolver != null)
+            {
+                XercesDOMElementSourceLocationInfo resolvedInfo = new XercesDOMElementSourceLocationInfo(
+                        element.rawname, eventInfo, fResolver);
+                fDocumentImpl
+                        .setUserData(fCurrentNode, TapestryCore.IDENTIFIER, resolvedInfo, null);
+            }
+            else
+            {
+                fDocumentImpl.setUserData(fCurrentNode, TapestryCore.IDENTIFIER, eventInfo, null);
+            }
+        }
+
+        super.endElement(element, augs);
+    }
 }

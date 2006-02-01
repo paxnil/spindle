@@ -61,15 +61,14 @@ public abstract class ConfiguredDOMParserBase extends DOMParserBase implements X
      */
     protected void setUp() throws Exception
     {
-        super.setUp();
-        parserConfiguration.setDocumentHandler(domParser);
+        super.setUp();        
         parserConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
         parserConfiguration.setFeature("http://xml.org/sax/features/validation", true);
-        parserConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
+        parserConfiguration.setFeature(TapestryDOMParserConfiguration.AUGMENTATIONS, true);
         parserConfiguration.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
         parserConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
         parserConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
-        parserConfiguration.setFeature("http://xml.org/sax/features/validation", true);
+        
         parserConfiguration.setDocumentHandler(domParser);
         parserConfiguration.setErrorHandler(this);
 

@@ -37,10 +37,15 @@ import net.sf.spindle.xerces.parser.xml.TapestryEntityResolver;
 
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.xerces.impl.Constants;
-import org.apache.xerces.impl.validation.XMLGrammarPoolImpl;
+import org.apache.xerces.impl.dtd.XMLDTDDescription;
+
+
+import org.apache.xerces.util.XMLGrammarPoolImpl;
 import org.apache.xerces.util.XMLResourceIdentifierImpl;
 import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.grammars.XMLGrammarDescription;
+import org.apache.xerces.xni.grammars.XMLGrammarPool;
 import org.apache.xerces.xni.parser.XMLConfigurationException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.apache.xerces.xni.parser.XMLInputSource;
@@ -185,10 +190,10 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
 
     public void testGrammarPool() throws IOException
     {
-        XMLGrammarPoolImpl pool = (XMLGrammarPoolImpl) parserConfiguration.getProperty(GRAMMAR_POOL);
+        XMLGrammarPool pool = (XMLGrammarPool) parserConfiguration.getProperty(GRAMMAR_POOL);
         assertNotNull("no pool configured!", pool);
-        assertNull("pool is not empty!", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
-
+        XMLGrammarDescription desc = new XMLDTDDescription(new XMLInputSource(TAPESTRY_3_0_PUBLIC_ID, null, null));
+        assertNull("grammar pool not empty!", pool.retrieveGrammar(desc));
         InputStream in = getClass().getResourceAsStream("basicTapestryComponent.jwc");
         assertNotNull(in);
         try
@@ -207,7 +212,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
             in.close();
         }
 
-        assertNull("pool shouldn't cache DTD until the parser is reset!", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
+        assertNotNull("pool should have cache DTD!", pool.retrieveGrammar(desc));
 
         // parseAll forces a reset, which triggers the caching
         Reader reader =
@@ -225,7 +230,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
         {
             reader.close();
         }
-        assertNotNull("pool didn't cache the DTD", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
+        assertNotNull("pool didn't cache the DTD", pool.retrieveGrammar(desc));
 
     }
 
@@ -233,9 +238,9 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
     {
 
         String J2EEPublicId = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
-        XMLGrammarPoolImpl grammarPool = TapestryDOMParserConfiguration.GRAMMAR_POOL;
-        assertSame(parserConfiguration.getProperty(GRAMMAR_POOL), grammarPool);
-        assertNull(grammarPool.getGrammar(J2EEPublicId));
+        XMLGrammarPool grammarPool = (XMLGrammarPool) parserConfiguration.getProperty(GRAMMAR_POOL);
+        XMLGrammarDescription desc = new XMLDTDDescription(new XMLInputSource(J2EEPublicId, null, null));
+        assertNull(grammarPool.retrieveGrammar(desc));
 
         Reader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("web.xml")));
         try
@@ -266,7 +271,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
         {
             reader.close();
         }
-        assertNotNull("pool didn't cache the DTD", grammarPool.getGrammar(J2EEPublicId));
+        assertNotNull("pool didn't cache the DTD", grammarPool.retrieveGrammar(desc));
 
     }
 

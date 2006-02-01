@@ -48,14 +48,11 @@ import net.sf.spindle.xerces.document.IDocument;
 import net.sf.spindle.xerces.document.IRegion;
 import net.sf.spindle.xerces.parser.xml.dom.TapestryDOMParser;
 import net.sf.spindle.xerces.parser.xml.dom.TapestryDOMParserConfiguration;
-import net.sf.spindle.xerces.parser.xml.pull.TapestryPullParser;
-import net.sf.spindle.xerces.parser.xml.pull.TapestryPullParserConfiguration;
 
 import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
-import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 
@@ -74,13 +71,13 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     private DocumentImpl fXmlDocument;
 
-    private TapestryPullParserConfiguration fPullParseConfiguration;
+    //private TapestryPullParserConfiguration fPullParseConfiguration;
 
     private TapestryDOMParserConfiguration fDomParseConfiguration;
 
     private TapestryDOMParser fDomParser = null;
 
-    private TapestryPullParser fPullParser = null;
+    //private TapestryPullParser fPullParser = null;
 
     private List fCollectedProblems = new ArrayList();
 
@@ -93,9 +90,13 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         this(false);
     }
 
+    /**
+     * @param usePullParser
+     * @deprecated use {@link #Parser()}
+     */
     public Parser(boolean usePullParser)
     {
-        fUsePullParser = usePullParser;
+        Assert.isLegal(usePullParser != true, "Pull parser is deprecated and about to be remove altogether. use the dom parser");
     }
 
     public boolean isDoValidation()
@@ -110,7 +111,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
      */
     public void setDoValidation(boolean flag)
     {
-        if (fDomParser != null || fPullParser != null)
+        if (fDomParser != null )//|| fPullParser != null)
             throw new IllegalStateException("can only set validation flag before the first parse!");
 
         fDoValidation = flag;
@@ -145,33 +146,33 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     // return null;
     // }
 
-    private void checkPullParser()
-    {
-        Assert.isTrue(fUsePullParser, "can't pull parse, I'm set to dom parse!");
-        if (fPullParser == null)
-        {
-
-            fPullParseConfiguration = new TapestryPullParserConfiguration();
-            fPullParser = new TapestryPullParser(fPullParseConfiguration);
-            fPullParser.setSourceResolver(this);
-            fPullParseConfiguration.setDocumentHandler(fPullParser);
-            fPullParseConfiguration.setErrorHandler(this);
-            fPullParseConfiguration.setFeature(
-                    "http://apache.org/xml/features/continue-after-fatal-error",
-                    false);
-            fPullParseConfiguration.setFeature(
-                    "http://xml.org/sax/features/validation",
-                    fDoValidation);
-            fPullParseConfiguration.setFeature(
-                    "http://intelligentworks.com/xml/features/augmentations-location",
-                    true);
-            if (fDoValidation)
-                fPullParseConfiguration.setProperty(
-                        "http://apache.org/xml/properties/internal/grammar-pool",
-                        TapestryDOMParserConfiguration.GRAMMAR_POOL);
-
-        }
-    }
+    // private void checkPullParser()
+    // {
+    // Assert.isTrue(fUsePullParser, "can't pull parse, I'm set to dom parse!");
+    // if (fPullParser == null)
+    // {
+    //
+    // fPullParseConfiguration = new TapestryPullParserConfiguration();
+    // fPullParser = new TapestryPullParser(fPullParseConfiguration);
+    // fPullParser.setSourceResolver(this);
+    // fPullParseConfiguration.setDocumentHandler(fPullParser);
+    // fPullParseConfiguration.setErrorHandler(this);
+    // fPullParseConfiguration.setFeature(
+    // "http://apache.org/xml/features/continue-after-fatal-error",
+    // false);
+    // fPullParseConfiguration.setFeature(
+    // "http://xml.org/sax/features/validation",
+    // fDoValidation);
+    // fPullParseConfiguration.setFeature(
+    // "http://intelligentworks.com/xml/features/augmentations-location",
+    // true);
+    // if (fDoValidation)
+    // fPullParseConfiguration.setProperty(
+    // "http://apache.org/xml/properties/internal/grammar-pool",
+    // TapestryDOMParserConfiguration.GRAMMAR_POOL);
+    //
+    //        }
+    //    }
 
     private void checkDomParser()
     {
@@ -179,8 +180,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         if (fDomParser == null)
         {
 
-            fDomParseConfiguration = new TapestryDOMParserConfiguration(
-                    TapestryDOMParserConfiguration.GRAMMAR_POOL);
+            fDomParseConfiguration = new TapestryDOMParserConfiguration();
 
             fDomParser = new TapestryDOMParser(fDomParseConfiguration);
             fDomParseConfiguration.setFeature(
@@ -196,7 +196,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
                     "http://xml.org/sax/features/validation",
                     fDoValidation);
             fDomParseConfiguration.setFeature(
-                    "http://intelligentworks.com/xml/features/augmentations-location",
+                    TapestryDOMParserConfiguration.AUGMENTATIONS,
                     true);
             fDomParser.setSourceResolver(this);
             fDomParseConfiguration.setDocumentHandler(fDomParser);
@@ -262,9 +262,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     protected DocumentImpl domParse(String content) throws IOException
     {
-        Assert.isTrue(!fUsePullParser, "can't dom parse, I'm set to pull parse!");
-        StringReader reader = new StringReader(content);
-        Node result = null;
+        //Assert.isTrue(!fUsePullParser, "can't dom parse, I'm set to pull parse!");
+        StringReader reader = new StringReader(content);       
 
         try
         {

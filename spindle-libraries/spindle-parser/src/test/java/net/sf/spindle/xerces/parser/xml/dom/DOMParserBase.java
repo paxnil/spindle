@@ -28,6 +28,7 @@ package net.sf.spindle.xerces.parser.xml.dom;
 
 import junit.framework.TestCase;
 
+import org.apache.xerces.util.XMLGrammarPoolImpl;
 import org.apache.xerces.xni.parser.XMLParserConfiguration;
 
 /**
@@ -52,7 +53,7 @@ public abstract class DOMParserBase extends TestCase
      */
     protected void setUp() throws Exception
     {
-        parserConfiguration = new TapestryDOMParserConfiguration(TapestryDOMParserConfiguration.GRAMMAR_POOL);
+        parserConfiguration = new TapestryDOMParserConfiguration(new TapestryDOMParserConfiguration.GrammarPoolImpl());
         domParser = new TapestryDOMParser(parserConfiguration);
     }
 

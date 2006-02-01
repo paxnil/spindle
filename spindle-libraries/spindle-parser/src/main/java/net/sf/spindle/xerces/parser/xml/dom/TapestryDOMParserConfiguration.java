@@ -1,4 +1,5 @@
 package net.sf.spindle.xerces.parser.xml.dom;
+
 /*******************************************************************************
  * ***** BEGIN LICENSE BLOCK Version: MPL 1.1
  * 
@@ -23,92 +24,104 @@ package net.sf.spindle.xerces.parser.xml.dom;
  * ***** END LICENSE BLOCK *****
  */
 
-import net.sf.spindle.xerces.parser.xml.StandardParserConfiguration;
+import java.util.HashMap;
+import java.util.Map;
+
+import net.sf.spindle.xerces.parser.xml.DTDConfiguration;
 import net.sf.spindle.xerces.parser.xml.TapestryEntityResolver;
-import net.sf.spindle.xerces.parser.xml.TapestryXMLDTDValidator;
-import net.sf.spindle.xerces.parser.xml.XMLDTDScannerImpl;
-import net.sf.spindle.xerces.parser.xml.XMLDocumentScannerImpl;
-import net.sf.spindle.xerces.parser.xml.XMLEntityManager;
 
-import org.apache.xerces.impl.dtd.XMLDTDValidator;
-import org.apache.xerces.impl.validation.XMLGrammarPoolImpl;
 import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.grammars.Grammar;
+import org.apache.xerces.xni.grammars.XMLGrammarDescription;
 import org.apache.xerces.xni.grammars.XMLGrammarPool;
-import org.apache.xerces.xni.parser.XMLDTDScanner;
-import org.apache.xerces.xni.parser.XMLDocumentScanner;
 
 
-public class TapestryDOMParserConfiguration extends StandardParserConfiguration
+public class TapestryDOMParserConfiguration extends DTDConfiguration
 {
-  /** custom Xerces Feature identifier */
-  public static final String AUGMENTATIONS = "http://intelligentworks.com/xml/features/augmentations-location";
+    /** custom Xerces Feature identifier */
+    public static final String AUGMENTATIONS = "http://net.sf.spindle/xml/features/augmentations-location";
 
-  public static XMLGrammarPoolImpl GRAMMAR_POOL = new XMLGrammarPoolImpl();
+    public static XMLGrammarPool GRAMMAR_POOL = new GrammarPoolImpl();
 
-  public static void clearCache()
-  {
-    GRAMMAR_POOL = new XMLGrammarPoolImpl();
-  }
+    public static void clearCache()
+    {
+        GRAMMAR_POOL.clear();
+    }
 
-  /**
-   * Constructor for MyConfiguration.
-   */
-  public TapestryDOMParserConfiguration()
-  {
-    super();
-    addRecognizedFeatures(new String[]{AUGMENTATIONS});
+    /**
+     * Constructor for MyConfiguration.
+     */
+    public TapestryDOMParserConfiguration()
+    {
+        this(GRAMMAR_POOL);        
+    }
 
-  }
+    public TapestryDOMParserConfiguration(XMLGrammarPool grammarPool)
+    {
+        super(null, grammarPool);
+        addRecognizedFeatures(new String[]
+        { AUGMENTATIONS });                
+    }
 
-  public TapestryDOMParserConfiguration(XMLGrammarPool grammarPool)
-  {
-    super(null, grammarPool);
-    addRecognizedFeatures(new String[]{AUGMENTATIONS});
-  }
-  /**
-   * @see org.apache.xerces.parsers.StandardParserConfiguration#createDocumentScanner()
-   */
-  protected XMLDocumentScanner createDocumentScanner()
-  {
-    return new XMLDocumentScannerImpl();
-  }
+    /**
+     * @see org.apache.xerces.parsers.BasicParserConfiguration#reset()
+     */
+    protected void reset() throws XNIException
+    {
+        super.reset();
 
-  /**
-   * @see org.apache.xerces.parsers.StandardParserConfiguration#createEntityManager()
-   */
-  protected XMLEntityManager createEntityManager()
-  {
-    return new XMLEntityManager();
-  }
+        setProperty(
+                "http://apache.org/xml/properties/internal/entity-resolver",
+                new TapestryEntityResolver());        
+    }
+    
+    public static class GrammarPoolImpl implements XMLGrammarPool {
+        
+        Map grammarsMap = new HashMap();
+        
+        private boolean locked = false;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see core.parser.xml.StandardParserConfiguration#createDTDValidator()
-   */
-  protected XMLDTDValidator createDTDValidator()
-  {
-    return new TapestryXMLDTDValidator();
-  }
+        public Grammar[] retrieveInitialGrammarSet(String grammarType)
+        {
+            return new Grammar [] {};
+        }
 
-  /**
-   * @see scanner.StandardParserConfiguration#createDTDScanner()
-   */
-  protected XMLDTDScanner createDTDScanner()
-  {
-    return new XMLDTDScannerImpl();
-  }
+        public void cacheGrammars(String grammarType, Grammar[] grammars)
+        {
+            if (locked)
+                return;
+           
+            for (int i = 0; i < grammars.length; i++)
+            {
+                XMLGrammarDescription grammarDescription = grammars[i].getGrammarDescription();
+                grammarsMap.put(grammarDescription.getPublicId(), grammars[i]);
+            }
+            
+        }
 
-  /**
-   * @see org.apache.xerces.parsers.BasicParserConfiguration#reset()
-   */
-  protected void reset() throws XNIException
-  {
-    super.reset();
+        public Grammar retrieveGrammar(XMLGrammarDescription desc)
+        {
+            return (Grammar) grammarsMap.get(desc.getPublicId());
+        }
 
-    setProperty(
-        "http://apache.org/xml/properties/internal/entity-resolver",
-        new TapestryEntityResolver());
-  }
+        public void lockPool()
+        {
+            locked = true;
+            
+        }
+
+        public void unlockPool()
+        {
+            locked  = false;
+            
+        }
+
+        public void clear()
+        {
+            grammarsMap.clear();
+            
+        }
+        
+    }
 
 }

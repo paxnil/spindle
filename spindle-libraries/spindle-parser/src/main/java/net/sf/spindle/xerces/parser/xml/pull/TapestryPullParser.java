@@ -30,8 +30,9 @@ import org.w3c.dom.Node;
  * An XML parser that builds a psuedo DOM tree in a pull fashion
  * 
  * @author glongman@gmail.com
- * 
+ * @deprecated Pull parser is OUT
  */
+
 public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHandler
 {
   static public boolean Debug = true;
@@ -305,7 +306,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
    */
   public void startDocument(XMLLocator locator, String encoding, Augmentations augs) throws XNIException
   {
-    super.startDocument(locator, encoding, augs);
+    //super.startDocument(locator, encoding, augs);
     reset();
     fDocumentStarted = true;
     if (Debug)

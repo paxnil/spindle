@@ -81,7 +81,7 @@ public class BasicParserDOMTest extends TestCase
     public void testVALID()
     {
 
-        Parser parser = new Parser(false);
+        Parser parser = new Parser();
         parser.setDoValidation(true);
 
         final String VALID = PROLOG + "<dog test='poo'>Hello, world!</dog>\n";
@@ -100,7 +100,7 @@ public class BasicParserDOMTest extends TestCase
 
     public void testINVALID()
     {
-        Parser parser = new Parser(false);
+        Parser parser = new Parser();
         parser.setDoValidation(true);
 
         final String INVALID = PROLOG + "<dog invalid='poo'>Hello, world!</dog>\n";
@@ -121,7 +121,7 @@ public class BasicParserDOMTest extends TestCase
 
     public void testMalformedProlog()
     {
-        Parser parser = new Parser(false);
+        Parser parser = new Parser();
         parser.setDoValidation(true);
         final String MALFORMED = MALFORMED_PROLOG + "<dog invalid='poo'>Hello, world!</dog>\n";
         Node node = null;
@@ -141,7 +141,7 @@ public class BasicParserDOMTest extends TestCase
 
     public void testMalformedContent()
     {
-        Parser parser = new Parser(false);
+        Parser parser = new Parser();
         parser.setDoValidation(true);
         final String MALFORMED = PROLOG + "<dog test='poo'>Hello, world!<dog>\n";
         Node node = null;
@@ -161,7 +161,7 @@ public class BasicParserDOMTest extends TestCase
 
     public void testString()
     {
-        Parser parser = new Parser(false);
+        Parser parser = new Parser();
         parser.setDoValidation(false);
         final String content = "<private-asset name='poo' path='moo'/>";
         Document document = null;

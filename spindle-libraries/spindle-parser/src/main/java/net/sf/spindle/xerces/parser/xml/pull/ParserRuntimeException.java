@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package net.sf.spindle.xerces.parser;
+package net.sf.spindle.xerces.parser.xml.pull;
 
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.parser.XMLParseException;
@@ -32,6 +32,7 @@ import org.apache.xerces.xni.parser.XMLParseException;
 /**
  * Runtime exception thrown by PullParser when a fatal error occurs
  * 
+ * @deprecated PULL parser is soon to be removed.
  * @author glongman@gmail.com
   */
 public class ParserRuntimeException extends XMLParseException
@@ -113,6 +114,21 @@ public class ParserRuntimeException extends XMLParseException
     public String getPublicId()
     {
       return fWrapped.getPublicId();
+    }
+    public int getCharacterOffset()
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+    public String getEncoding()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    public String getXMLVersion()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
   }

@@ -65,7 +65,10 @@ import org.w3c.dom.UserDataHandler;
  * 
  * @author bgarson@intelligentworks.com, glongman@gmail.com
  * 
+ * @deprecated PullParser is OUT!
+ * 
  */
+
 public class PullParserNode implements Node
 {
 
