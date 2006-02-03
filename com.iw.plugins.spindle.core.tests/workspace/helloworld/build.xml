@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<project name="Tutorial: HelloWorld" default="war">
-  
-	<property name="project.name" value="helloworld"/>
-	<import file="../tapestry-libraries/common.xml"/>
-	
-</project>

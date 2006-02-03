@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<toc
-	link_to="defaulttaskstoc.xml#extraTasks" 
-	label="requiredButIgnored">			
-	<topic label="Add/Remove Tapestry Project Nature" href="docs/tapestry_nature_work.html"></topic>
-</toc>
-	
