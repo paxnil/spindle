@@ -47,7 +47,7 @@ All Rights Reserved
    </url>
 
    <requires>
-      <import feature="com.iw.features.spindle" version="3.2.12" match="perfect"/>
+      <import feature="com.iw.features.spindle" version="3.2.13" match="perfect"/>
    </requires>
 
    <plugin
