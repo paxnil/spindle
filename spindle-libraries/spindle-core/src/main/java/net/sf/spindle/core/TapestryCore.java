@@ -55,7 +55,7 @@ public class TapestryCore implements IPreferenceConstants
         instance = this;
         Assert.isNotNull(logger, "logger must not be null");
         Assert.isNotNull(coreListeners, "coreListeners must not be null");
-        Assert.isNotNull(preferenceSource, "preferenceSource must not be null");
+        Assert.isNotNull(source, "preferenceSource must not be null");
         this.logger = logger;
         this.coreListeners = coreListeners;
         this.preferenceSource = source;
