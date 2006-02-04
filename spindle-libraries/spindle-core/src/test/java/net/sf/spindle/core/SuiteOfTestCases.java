@@ -120,4 +120,6 @@ public class SuiteOfTestCases extends TestCase {
 	 */
 	public void tearDownSuite() throws Exception {
 	}
+    
+    public void test() {}
 }
