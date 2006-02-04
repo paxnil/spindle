@@ -204,7 +204,7 @@ public class NamespaceResolver
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            TapestryCore.log(e);
         }
         finally
         {
