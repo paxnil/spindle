@@ -81,25 +81,60 @@ public class DomModelTest extends AbstractTestCase
         destroyTapestryCore();
         logger.clear();
     }
-    
-    public void testNPE() {
+
+    public void testNPE()
+    {
         ICoreResource resource = null;
-        
+
         IDOMModel model = modelSource.parseDocument(resource, false, this);
-        
+
         assertNull(model.getDocument());
         assertEquals(0, model.getProblems().length);
         assertFalse(model.hasFatalProblems());
         List<LoggingEvent> events = getInterceptedLogEvents();
         assertEquals(1, events.size());
-        assertEquals("java.lang.NullPointerException", events.get(0).getException().getClass().getName());
+        assertEquals("java.lang.NullPointerException", events.get(0).getException().getClass()
+                .getName());
     }
 
-    public void testStringBasic()
+    public void testWellFormed1()
     {
-        String content = "<private-asset name='poo' path='moo'/>";
+        doTestStringBasic(new String[]
+        { "<private-asset name='poo' path='moo'/>" });
+    }
 
-        ICoreResource resource = getResource(content);
+    public void testWellFormed2()
+    {
+        doTestStringBasic(new String[]
+        { "<dog></dog>" });
+    }
+
+    public void testWellFormed3()
+    {
+        doTestStringBasic(new String[]
+        { "<dog><foo fix='no'/></dog>" });
+    }
+    
+    public void testWellFormed4()
+    {
+        doTestStringBasic(new String[]
+        { "<dog><foo fix='no'>\n\n   \n <private-asset name='poo' path='moo'/> sfdkasjldkjsadlksjd \n\n </foo></dog>" });
+    }
+    
+    public void testWellFormed5()
+    {
+        doTestStringBasic(new String[]
+        { "<dog><foo fix='no'>\n\n  <!-- booo \n   \n   \n--> \n <private-asset name='poo' path='moo'/> sfdkasjldkjsadlksjd \n\n </foo></dog>" });
+    }
+
+    private void doTestStringBasic(String[] content)
+    {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < content.length; i++)
+            builder.append(content[i]);
+
+        String completeContent = builder.toString();
+        ICoreResource resource = getResource(completeContent);
 
         mockContainer.replayControls();
 
@@ -108,14 +143,14 @@ public class DomModelTest extends AbstractTestCase
         try
         {
             Document document = model.getDocument();
+
             assertNotNull(document);
             assertTrue(model.getProblems().length == 0);
 
             Node root = document.getDocumentElement();
 
-            assertEquals("private-asset", root.getNodeName());
+            visitAndAssert(model, root, resource, completeContent);
 
-            basicNodeSourceLocationInfoAssertions(model, root, resource, content);
         }
         finally
         {
@@ -125,6 +160,19 @@ public class DomModelTest extends AbstractTestCase
         assertEquals(0, logger.size());
 
         mockContainer.verifyControls();
+    }
+
+    private void visitAndAssert(IDOMModel model, Node node, Resource resource,
+            String completeContent)
+    {
+        basicNodeSourceLocationInfoAssertions(model, node, resource, completeContent);
+
+        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
+        {
+            if (child.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            visitAndAssert(model, child, resource, completeContent);
+        }
     }
 
     private void basicNodeSourceLocationInfoAssertions(IDOMModel model, Node node,
