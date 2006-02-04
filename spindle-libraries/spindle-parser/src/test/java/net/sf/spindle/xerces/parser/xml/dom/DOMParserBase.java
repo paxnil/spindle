@@ -26,10 +26,21 @@
 
 package net.sf.spindle.xerces.parser.xml.dom;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+
 import junit.framework.TestCase;
 
-import org.apache.xerces.util.XMLGrammarPoolImpl;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLErrorHandler;
+import org.apache.xerces.xni.parser.XMLParseException;
 import org.apache.xerces.xni.parser.XMLParserConfiguration;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  *  Base for PullParser tests
@@ -37,7 +48,7 @@ import org.apache.xerces.xni.parser.XMLParserConfiguration;
  * @author glongman@gmail.com
  * @version $Id$
  */
-public abstract class DOMParserBase extends TestCase
+public abstract class DOMParserBase extends TestCase implements XMLErrorHandler
 {
 
     protected XMLParserConfiguration parserConfiguration;
@@ -55,6 +66,41 @@ public abstract class DOMParserBase extends TestCase
     {
         parserConfiguration = new TapestryDOMParserConfiguration(new TapestryDOMParserConfiguration.GrammarPoolImpl());
         domParser = new TapestryDOMParser(parserConfiguration);
+    }
+
+    protected void parseAll(final String content) throws SAXException, IOException
+    {
+    
+        parseAll(new StringReader(content));
+    }
+
+    protected void parseAll(InputStream content) throws SAXException, IOException
+    {
+        parseAll(new BufferedReader(new InputStreamReader(content)));
+    
+    }
+
+    protected void parseAll(Reader reader) throws SAXException, IOException
+    {
+        InputSource source = new InputSource(reader);
+        domParser.parse(source);
+        assertNotNull("parse was succesful but no document!", domParser.getDocument());
+    
+    }
+
+    public void error(String domain, String key, XMLParseException exception) throws XNIException
+    {
+        // do nothing
+    }
+
+    public void fatalError(String domain, String key, XMLParseException exception) throws XNIException
+    {
+        // do nothing
+    }
+
+    public void warning(String domain, String key, XMLParseException exception) throws XNIException
+    {
+        // do nothing
     }
 
 }

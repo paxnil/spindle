@@ -38,9 +38,6 @@ import net.sf.spindle.xerces.parser.xml.TapestryEntityResolver;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.impl.dtd.XMLDTDDescription;
-
-
-import org.apache.xerces.util.XMLGrammarPoolImpl;
 import org.apache.xerces.util.XMLResourceIdentifierImpl;
 import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
@@ -58,7 +55,7 @@ import org.xml.sax.SAXException;
  * @author glongman@gmail.com
  * @version $Id$
  */
-public class SimpleDOMParserTests extends ConfiguredDOMParserBase
+public class SimpleDOMParserTests extends ValidatingDOMParserBase
 {
 
     final String PROLOG_1 =
