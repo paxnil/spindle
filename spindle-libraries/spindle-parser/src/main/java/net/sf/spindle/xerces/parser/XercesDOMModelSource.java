@@ -9,7 +9,6 @@ import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.source.ISourceLocationInfo;
 
-import org.apache.hivemind.Resource;
 import org.apache.xerces.dom.DocumentImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -22,19 +21,18 @@ import org.w3c.dom.Node;
  */
 public class XercesDOMModelSource implements IDOMModelSource
 {
-   
 
     public XercesDOMModelSource()
     {
         super();
     }
 
-    public IDOMModel parseDocument(Resource resource, boolean validate, Object requestor)
+    public IDOMModel parseDocument(ICoreResource resource, boolean validate, Object requestor)
     {
         return parseDocument(resource, null, validate, requestor);
     }
 
-    public IDOMModel parseDocument(Resource resource, String encoding, boolean validate,
+    public IDOMModel parseDocument(ICoreResource resource, String encoding, boolean validate,
             Object requestor)
     {
 
@@ -43,13 +41,13 @@ public class XercesDOMModelSource implements IDOMModelSource
         p.setDoValidation(validate);
         try
         {
-            document = p.parse(((ICoreResource)resource).getContents(), encoding);
+            document = p.parse(resource, encoding);
         }
         catch (IOException e)
         {
             TapestryCore.log(e);
         }
-        
+
         return new XercesDOMModel(this, requestor, document, p.getProblems(),
                 p.getHasFatalErrors(), validate);
 
@@ -157,5 +155,4 @@ public class XercesDOMModelSource implements IDOMModelSource
 
     }
 
-   
 }

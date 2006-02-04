@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.spindle.core.TapestryCore;
+import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.source.DefaultProblem;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.source.IProblemCollector;
@@ -55,7 +56,6 @@ import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
 import org.xml.sax.InputSource;
 
-
 /**
  * The xml parser used in the builds. can be used to dom-parse or pull-parse XML content Validates
  * by default
@@ -65,19 +65,19 @@ import org.xml.sax.InputSource;
 public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProblemCollector
 {
 
-    private boolean fUsePullParser = false;
+    // private boolean fUsePullParser = false;
 
     private IDocument fEclipseDocument;
 
     private DocumentImpl fXmlDocument;
 
-    //private TapestryPullParserConfiguration fPullParseConfiguration;
+    // private TapestryPullParserConfiguration fPullParseConfiguration;
 
     private TapestryDOMParserConfiguration fDomParseConfiguration;
 
     private TapestryDOMParser fDomParser = null;
 
-    //private TapestryPullParser fPullParser = null;
+    // private TapestryPullParser fPullParser = null;
 
     private List fCollectedProblems = new ArrayList();
 
@@ -96,7 +96,9 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
      */
     public Parser(boolean usePullParser)
     {
-        Assert.isLegal(usePullParser != true, "Pull parser is deprecated and about to be remove altogether. use the dom parser");
+        Assert.isLegal(
+                usePullParser != true,
+                "Pull parser is deprecated and about to be remove altogether. use the dom parser");
     }
 
     public boolean isDoValidation()
@@ -111,7 +113,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
      */
     public void setDoValidation(boolean flag)
     {
-        if (fDomParser != null )//|| fPullParser != null)
+        if (fDomParser != null)// || fPullParser != null)
             throw new IllegalStateException("can only set validation flag before the first parse!");
 
         fDoValidation = flag;
@@ -171,12 +173,12 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     // "http://apache.org/xml/properties/internal/grammar-pool",
     // TapestryDOMParserConfiguration.GRAMMAR_POOL);
     //
-    //        }
-    //    }
+    // }
+    // }
 
-    private void checkDomParser()
+    private void checkDomParser(ICoreResource resource)
     {
-        Assert.isTrue(!fUsePullParser, "can't dom parse, I'm set to pull parse!");
+        // Assert.isTrue(!fUsePullParser, "can't dom parse, I'm set to pull parse!");
         if (fDomParser == null)
         {
 
@@ -195,22 +197,31 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             fDomParseConfiguration.setFeature(
                     "http://xml.org/sax/features/validation",
                     fDoValidation);
-            fDomParseConfiguration.setFeature(
-                    TapestryDOMParserConfiguration.AUGMENTATIONS,
-                    true);
+            fDomParseConfiguration.setFeature(TapestryDOMParserConfiguration.AUGMENTATIONS, true);
             fDomParser.setSourceResolver(this);
             fDomParseConfiguration.setDocumentHandler(fDomParser);
             fDomParseConfiguration.setErrorHandler(this);
         }
+        fDomParser.setResource(resource);
     }
 
-    public DocumentImpl parse(InputStream input, String encoding) throws IOException
+    public DocumentImpl parse(ICoreResource resource, String encoding) throws IOException
     {
-        String content = Files.readFileToString(input, encoding);
-        return parse(content);
+       
+        InputStream in = null;
+        try
+        {
+            in = resource.getContents();
+        }
+        catch (NullPointerException e)
+        {
+            TapestryCore.log(e);
+            return null;
+        }       
+        return parse(Files.readFileToString(in, encoding), resource);
     }
 
-    public DocumentImpl parse(String content) throws IOException
+    public DocumentImpl parse(String content, ICoreResource resource) throws IOException
     {
         fXmlDocument = null;
         beginCollecting();
@@ -218,14 +229,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             getEclipseDocument(content);
             fHasFatalErrors = false;
-            if (fUsePullParser)
-            {
-                return pullParse(content);
-            }
-            else
-            {
-                return domParse(content);
-            }
+            // if (fUsePullParser)
+            // {
+            // return pullParse(content);
+            // }
+            // else
+            // {
+            return domParse(content, resource);
+            // }
         }
         finally
         {
@@ -233,41 +244,41 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
     }
 
-    protected DocumentImpl pullParse(String content) throws IOException
-    {
-        Assert.isTrue(false, "pull parser on the way out!");
-        // Node result = null;
-        // StringReader reader = new StringReader(content);
-        // try
-        // {
-        //
-        // checkPullParser();
-        // fPullParseConfiguration.setInputSource(new XMLInputSource(null, "", null,
-        // reader, null));
-        // fPullParseConfiguration.parse();
-        // if (!fHasFatalErrors)
-        // result = (Node) fPullParser.getRoot();
-        //
-        // } catch (ParserRuntimeException e1)
-        // {
-        // // this could happen while scanning the prolog
-        // createFatalProblem(e1, IProblem.ERROR);
-        // } catch (Exception e1)
-        // {
-        // e1.printStackTrace();
-        // }
-        // return result;
-        return null;
-    }
+    // protected DocumentImpl pullParse(String content, Object resource) throws IOException
+    // {
+    // Assert.isTrue(false, "pull parser on the way out!");
+    // // Node result = null;
+    // // StringReader reader = new StringReader(content);
+    // // try
+    // // {
+    // //
+    // // checkPullParser();
+    // // fPullParseConfiguration.setInputSource(new XMLInputSource(null, "", null,
+    // // reader, null));
+    // // fPullParseConfiguration.parse();
+    // // if (!fHasFatalErrors)
+    // // result = (Node) fPullParser.getRoot();
+    // //
+    // // } catch (ParserRuntimeException e1)
+    // // {
+    // // // this could happen while scanning the prolog
+    // // createFatalProblem(e1, IProblem.ERROR);
+    // // } catch (Exception e1)
+    // // {
+    // // e1.printStackTrace();
+    // // }
+    // // return result;
+    // return null;
+    // }
 
-    protected DocumentImpl domParse(String content) throws IOException
+    protected DocumentImpl domParse(String content, ICoreResource resource) throws IOException
     {
-        //Assert.isTrue(!fUsePullParser, "can't dom parse, I'm set to pull parse!");
-        StringReader reader = new StringReader(content);       
+        // Assert.isTrue(!fUsePullParser, "can't dom parse, I'm set to pull parse!");
+        StringReader reader = new StringReader(content);
 
         try
         {
-            checkDomParser();
+            checkDomParser(resource);
             fDomParser.parse(new InputSource(reader));
         }
         catch (Exception e)
@@ -300,7 +311,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     public DocumentImpl getParsedDocument()
     {
-        Assert.isTrue(!fUsePullParser, "can't get the document as we are using pull parsing!");
+        // Assert.isTrue(!fUsePullParser, "can't get the document as we are using pull parsing!");
         return fXmlDocument;
     }
 
@@ -384,7 +395,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     public int[] trim(int startOffset, int stopOffset)
     {
         int[] result = new int[]
-            { startOffset, stopOffset };
+        { startOffset, stopOffset };
         try
         {
             String content = fEclipseDocument.get(startOffset, stopOffset - startOffset + 1);
