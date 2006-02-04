@@ -10,6 +10,7 @@ import java.util.jar.JarFile;
 import net.sf.spindle.core.TapestryCoreException;
 import net.sf.spindle.core.resources.IResourceAcceptor;
 import net.sf.spindle.core.resources.IResourceRoot;
+import net.sf.spindle.core.resources.PathUtils;
 import net.sf.spindle.core.resources.search.ISearch;
 import net.sf.spindle.core.util.Assert;
 
@@ -20,8 +21,14 @@ public class JarClasspathRoot implements IResourceRoot
 
     private URL jarUrl;
 
-    public JarClasspathRoot(File jarFile) throws IOException, URISyntaxException
+    public JarClasspathRoot(String path) throws IOException, URISyntaxException
     {
+        PathUtils jarPath = new PathUtils(System.getProperty("basedir"));
+        jarPath = jarPath.append("testData");
+        jarPath = jarPath.append(path);
+
+        File jarFile = jarPath.toFile();
+
         Assert.isLegal(jarFile != null);
         Assert.isLegal(jarFile.exists());
         Assert.isLegal(jarFile.isFile());
