@@ -19,7 +19,23 @@
           <target>1.5</target>
         </configuration>
       </plugin>
-    </plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy file="${settings.localRepository}/tapestry/tapestry/4.0/tapestry-4.0.jar" tofile="${basedir}/testData/tapestryTest.jar"></copy>
+               </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>        
+    </plugins>    
   </build>
   <dependencies>
     <dependency>
