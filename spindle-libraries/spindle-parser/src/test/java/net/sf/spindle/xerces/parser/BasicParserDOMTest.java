@@ -88,7 +88,7 @@ public class BasicParserDOMTest extends TestCase
         Document document = null;
         try
         {
-            document = parser.parse(VALID);
+            document = parser.parse(VALID, null);
         } catch (IOException e)
         {
             fail("IOException: " + e.getMessage());
@@ -107,7 +107,7 @@ public class BasicParserDOMTest extends TestCase
         Node node = null;
         try
         {
-            node = parser.parse(INVALID);
+            node = parser.parse(INVALID, null);
         } catch (IOException e)
         {
             fail("IOException: " + e.getMessage());
@@ -127,7 +127,7 @@ public class BasicParserDOMTest extends TestCase
         Node node = null;
         try
         {
-            node = parser.parse(MALFORMED);
+            node = parser.parse(MALFORMED, null);
         } catch (IOException e)
         {
             fail("IOException: " + e.getMessage());
@@ -147,7 +147,7 @@ public class BasicParserDOMTest extends TestCase
         Node node = null;
         try
         {
-            node = parser.parse(MALFORMED);
+            node = parser.parse(MALFORMED, null);
         } catch (IOException e)
         {
             fail("IOException: " + e.getMessage());
@@ -167,7 +167,7 @@ public class BasicParserDOMTest extends TestCase
         Document document = null;
         try
         {
-            document = parser.parse(content);
+            document = parser.parse(content, null);
         } catch (IOException e)
         {
             fail("IOException: " + e.getMessage());

@@ -652,10 +652,10 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * If the IStorage is really a resource in the workspace, the problems are recorded as resource
      * markers. Otherwise, the problem is logged.
      */
-    protected IDOMModel getDOMModel(Resource location, String encoding, boolean validate)
+    protected IDOMModel getDOMModel(ICoreResource location, String encoding, boolean validate)
             throws IOException
     {
-        if (!((ICoreResource) location).exists())
+        if (!location.exists())
             throw new IOException(CoreMessages.format("core-resource-does-not-exist", location));
 
         IDOMModel result = domModelSource.parseDocument(location, encoding, validate, this);
@@ -710,7 +710,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected abstract void resolveApplication(String name, CoreNamespace namespace);
 
     protected IComponentSpecification parseComponentSpecification(ICoreNamespace namespace,
-            Resource location, String encoding)
+            ICoreResource location, String encoding)
 
     {
         // to avoid double parsing specs that are accessible
@@ -733,7 +733,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         PluginComponentSpecification result = null;
         IDOMModel model = null;
-        if (((ICoreResource) location).exists())
+        if (location.exists())
         {
             try
             {

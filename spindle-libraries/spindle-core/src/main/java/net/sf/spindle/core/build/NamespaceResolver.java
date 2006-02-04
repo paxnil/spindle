@@ -536,11 +536,11 @@ public class NamespaceResolver
     /**
      * @return Map a map of the names and file locations of all the .page files for the Namespace
      */
-    private Map<String, Resource> getAllPageFilesForNamespace()
+    private Map<String, ICoreResource> getAllPageFilesForNamespace()
     {
         ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
 
-        Map<String, Resource> result = new HashMap<String, Resource>();
+        Map<String, ICoreResource> result = new HashMap<String, ICoreResource>();
         ILibrarySpecification spec = namespace.getSpecification();
 
         // pull the ones that are defined in the spec.
@@ -548,7 +548,7 @@ public class NamespaceResolver
         for (Iterator iter = spec.getPageNames().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
-            Resource specLoc = location.getRelativeResource(spec.getPageSpecificationPath(type));
+            ICoreResource specLoc = (ICoreResource) location.getRelativeResource(spec.getPageSpecificationPath(type));
             result.put(type, specLoc);
         }
 
@@ -562,7 +562,7 @@ public class NamespaceResolver
             String name = new PathUtils(pages[i].getName()).removeFileExtension().toString();
             if (!result.containsKey(name))
             {
-                result.put(name, pages[i]);
+                result.put(name, (ICoreResource) pages[i]);
 
             }
             else if (!result.get(name).equals(pages[i]))
@@ -583,7 +583,7 @@ public class NamespaceResolver
      */
     protected void resolvePages()
     {
-        Map<String, Resource> dotPageFiles = getAllPageFilesForNamespace();
+        Map<String, ICoreResource> dotPageFiles = getAllPageFilesForNamespace();
         for (String name : dotPageFiles.keySet())
         {
             resolvePageFile(name, dotPageFiles.get(name));
@@ -594,7 +594,7 @@ public class NamespaceResolver
      * resolve a single .page file There could be recursive calls to resolveComponent() downstream
      * from this method But this method will never be called recursively.
      */
-    protected IComponentSpecification resolvePageFile(String name, Resource location)
+    protected IComponentSpecification resolvePageFile(String name, ICoreResource location)
     {
         IComponentSpecification result = namespace.getPageSpecification(name);
         if (result != null || location == null)
