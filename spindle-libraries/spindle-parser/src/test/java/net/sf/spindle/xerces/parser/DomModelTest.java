@@ -96,6 +96,32 @@ public class DomModelTest extends AbstractTestCase
         assertEquals("java.lang.NullPointerException", events.get(0).getException().getClass()
                 .getName());
     }
+    
+    public void testMalformed() {
+        String completeContent = "<foo/><foo/>";
+        ICoreResource resource = getResource(completeContent);
+
+        mockContainer.replayControls();
+
+        IDOMModel model = modelSource.parseDocument(resource, false, this);
+        assertNotNull(model);
+        try
+        {
+            Document document = model.getDocument();
+
+            assertNull(document);
+            assertTrue(model.getProblems().length == 1);
+
+        }
+        finally
+        {
+            model.release();
+        }
+
+        assertEquals(0, logger.size());
+        
+        mockContainer.verifyControls();
+    }
 
     public void testWellFormed1()
     {
