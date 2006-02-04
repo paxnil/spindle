@@ -23,9 +23,8 @@ public class JarClasspathRoot implements IResourceRoot
 
     public JarClasspathRoot(String path) throws IOException, URISyntaxException
     {
-        PathUtils jarPath = new PathUtils(System.getProperty("basedir"));
-        jarPath = jarPath.append("testData");
-        jarPath = jarPath.append(path);
+        PathUtils jarPath = new PathUtils(System.getProperty("basedir")).append("testData").append(
+                path);
 
         File jarFile = jarPath.toFile();
 
