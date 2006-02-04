@@ -26,18 +26,8 @@
 
 package net.sf.spindle.xerces.parser.xml.dom;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
 
-import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
-import org.apache.xerces.xni.parser.XMLParseException;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  *  Base class for test requiring a preconfigured parser!
@@ -45,13 +35,13 @@ import org.xml.sax.SAXException;
  * @author glongman@gmail.com
  * @version $Id$
  */
-public abstract class ConfiguredDOMParserBase extends DOMParserBase implements XMLErrorHandler
+public abstract class ValidatingDOMParserBase extends DOMParserBase implements XMLErrorHandler
 {
 
     /**
      * @param arg0
      */
-    public ConfiguredDOMParserBase(String arg0)
+    public ValidatingDOMParserBase(String arg0)
     {
         super(arg0);
     }
@@ -72,50 +62,6 @@ public abstract class ConfiguredDOMParserBase extends DOMParserBase implements X
         parserConfiguration.setDocumentHandler(domParser);
         parserConfiguration.setErrorHandler(this);
 
-    }
-
-    protected void parseAll(final String content) throws SAXException, IOException
-    {
-
-        parseAll(new StringReader(content));
-    }
-
-    protected void parseAll(InputStream content) throws SAXException, IOException
-    {
-        parseAll(new BufferedReader(new InputStreamReader(content)));
-
-    }
-
-    protected void parseAll(Reader reader) throws SAXException, IOException
-    {
-        InputSource source = new InputSource(reader);
-        domParser.parse(source);
-        assertNotNull("parse was succesful but no document!", domParser.getDocument());
-
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.xerces.xni.parser.XMLErrorHandler#error(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
-     */
-    public void error(String domain, String key, XMLParseException exception) throws XNIException
-    {
-        // do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.xerces.xni.parser.XMLErrorHandler#fatalError(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
-     */
-    public void fatalError(String domain, String key, XMLParseException exception) throws XNIException
-    {
-        // do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.xerces.xni.parser.XMLErrorHandler#warning(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
-     */
-    public void warning(String domain, String key, XMLParseException exception) throws XNIException
-    {
-        // do nothing
     }
 
 }
