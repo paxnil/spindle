@@ -35,8 +35,14 @@ import org.apache.hivemind.Resource;
 public interface ICoreResource extends Resource, ResourceExtension
 {
 
+    /**
+     * @return true iff this resource is located under a classpath root.
+     */
     public boolean isClasspathResource();
 
+    /**
+     * @return true iff the resource represents an entry in a jar file
+     */
     public boolean isBinaryResource();
 
     /**
@@ -45,8 +51,17 @@ public interface ICoreResource extends Resource, ResourceExtension
      */
     public InputStream getContents();
 
+    /**
+     * TODO decide is clashing is in or out.
+     * 
+     * @param resource
+     * @return
+     */
     public boolean clashesWith(ICoreResource resource);
 
+    /**
+     * @return true if this resource has only a path part and no name.
+     */
     public boolean isFolder();
 
 }

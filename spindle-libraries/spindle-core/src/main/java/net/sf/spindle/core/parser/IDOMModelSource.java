@@ -37,8 +37,8 @@ import org.apache.hivemind.Resource;
  * <p>
  * The thin
  * <p>
- * The custom Xerces parser ignores the requestor parameter and also ignores calls to
- * {@link #release(IDOMModel, Object)}
+ * The custom Xerces parser ignores the requestor parameter but uses calls to
+ * {@link #release(IDOMModel, Object)} to release internal resources.
  */
 public interface IDOMModelSource
 {
