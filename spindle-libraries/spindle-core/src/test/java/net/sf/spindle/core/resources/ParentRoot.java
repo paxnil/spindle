@@ -12,8 +12,6 @@ import org.apache.hivemind.Resource;
 import org.apache.hivemind.util.LocalizedNameGenerator;
 import org.apache.hivemind.util.LocalizedResource;
 
-import sun.security.x509.Extension;
-
 /*
  The contents of this file are subject to the Mozilla Public License
  Version 1.1 (the "License"); you may not use this file except in

@@ -32,7 +32,6 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.util.Assert;
 

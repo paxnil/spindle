@@ -24,8 +24,6 @@ import java.net.URL;
 import java.util.Locale;
 
 import net.sf.spindle.core.TapestryCoreException;
-import net.sf.spindle.core.resources.ICoreResource;
-import net.sf.spindle.core.resources.IResourceAcceptor;
 import net.sf.spindle.core.resources.search.ISearch;
 
 import org.apache.hivemind.Resource;
