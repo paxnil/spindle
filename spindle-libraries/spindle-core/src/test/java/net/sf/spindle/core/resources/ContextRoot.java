@@ -41,18 +41,27 @@ public class ContextRoot extends ParentRoot
         super(ParentRoot.CONTEXT);        
     }
 
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.ParentRoot#createSearch()
+     */
     @Override
     ISearch createSearch()
     {        
         return null; //TODO implement when needed.
     }
 
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.AbstractRoot#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
+     */
     @Override
     boolean isBinaryResource(ResourceImpl resource)
     {
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.AbstractRoot#isClasspathResource(net.sf.spindle.core.resources.ResourceImpl)
+     */
     @Override
     boolean isClasspathResource(ResourceImpl resource)
     {
