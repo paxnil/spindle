@@ -60,13 +60,13 @@ import org.apache.hivemind.util.LocalizedResource;
         };
     }
     
-    public void addSourceFolder(File sourceFolder)
+    public void addFolder(File folder)
     {
         try
         {
-            FolderRoot newRoot = new FolderRoot(this, sourceFolder);
+            FolderRoot newRoot = new FolderRoot(this, folder);
             if (ChildRoot.arrayContains(roots, newRoot))
-                TapestryCore.log("Classpath root already contains: " + sourceFolder.toString());
+                TapestryCore.log("Classpath root already contains: " + folder.toString());
             else
                 roots = ChildRoot.growAndAddToArray(roots, newRoot);
         }

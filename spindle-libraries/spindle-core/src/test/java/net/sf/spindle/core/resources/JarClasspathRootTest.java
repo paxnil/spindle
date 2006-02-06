@@ -54,7 +54,7 @@ public class JarClasspathRootTest extends TestCase
     private IResourceRoot getTapestryTestRoot() throws IOException, URISyntaxException
     {
         ClasspathRoot root = new ClasspathRoot();
-        root.addJarFile(getFile("tapestryTest.jar"));
+        root.addJar(getFile("tapestryTest.jar"));
         return root;
     }
 

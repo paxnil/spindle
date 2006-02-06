@@ -25,11 +25,11 @@ import net.sf.spindle.core.resources.search.ISearch;
  Contributor(s): __glongman@gmail.com___.
  */
 /**
- * An implementation of a {@link ParentRoot} for the classpath. You can add jarfiles and source folders to this root.
+ * An implementation of a {@link ParentRoot} for the classpath. You can add jarfiles and source
+ * folders to this root.
  * <p>
  * The order they are added is == to the order searches and lookups will occur so you should add
  * things in the same order as they appear in the classpath!
- *
  */
 public class ClasspathRoot extends ParentRoot
 {
@@ -46,7 +46,7 @@ public class ClasspathRoot extends ParentRoot
      * 
      * @param jarFile
      */
-    public void addJarFile(File jarFile)
+    public void addJar(File jarFile)
     {
         try
         {
@@ -60,7 +60,6 @@ public class ClasspathRoot extends ParentRoot
         {
             TapestryCore.log(e);
         }
-
     }
 
     /*
