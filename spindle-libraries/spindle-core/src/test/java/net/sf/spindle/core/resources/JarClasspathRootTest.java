@@ -19,6 +19,7 @@ package net.sf.spindle.core.resources;
 
  Contributor(s): __glongman@gmail.com___.
  */
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -33,17 +34,28 @@ import org.apache.hivemind.Resource;
 public class JarClasspathRootTest extends TestCase
 {
 
-    JarClasspathRoot root;
+    IResourceRoot root;
 
     @Override
     protected void setUp() throws Exception
     {
         root = getTapestryTestRoot();
     }
+    
+    private File getFile(String relativePath) {
+        PathUtils jarPath = new PathUtils(System.getProperty("basedir")).append("testData").append(
+                relativePath);
+        File file = new File(jarPath.toOSString());
+        assertTrue(file.exists());
+        assertFalse(file.isDirectory());
+        return file;
+    }
 
-    private JarClasspathRoot getTapestryTestRoot() throws IOException, URISyntaxException
+    private IResourceRoot getTapestryTestRoot() throws IOException, URISyntaxException
     {
-        return new JarClasspathRoot("tapestryTest.jar");
+        ClasspathRoot root = new ClasspathRoot();
+        root.addJarFile(getFile("tapestryTest.jar"));
+        return root;
     }
 
     public void test() throws IOException

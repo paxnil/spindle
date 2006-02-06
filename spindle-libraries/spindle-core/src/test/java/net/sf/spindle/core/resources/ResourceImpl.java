@@ -32,14 +32,14 @@ import org.apache.hivemind.Resource;
 import org.apache.hivemind.util.AbstractResource;
 
 /**
- * an implementation of {@link net.sf.spindle.core.resources.ICoreResource} for
+ * an implementation of {@link net.sf.spindle.core.resources.ICoreResource}
  */
-public class JarClasspathResource extends AbstractResource implements ICoreResource
+/* package */ class ResourceImpl extends AbstractResource implements ICoreResource
 {
 
-    private JarClasspathRoot root;
+    private AbstractRoot root;
 
-    /* package */JarClasspathResource(JarClasspathRoot root, String path)
+    ResourceImpl(AbstractRoot root, String path)
     {
         super(path);
         this.root = root;
@@ -114,7 +114,7 @@ public class JarClasspathResource extends AbstractResource implements ICoreResou
     public URL getResourceURL()
     {
         return root.getResourceURL(this);
-    }
+    }    
 
     /*
      * (non-Javadoc)
@@ -154,5 +154,19 @@ public class JarClasspathResource extends AbstractResource implements ICoreResou
     public ISearch getSearch() throws TapestryCoreException
     {
         return root.getSearch();
+    }
+
+    AbstractRoot getRoot()
+    {
+        return root;
+    }
+
+    /**
+     * The root would never change in a jar but it could in a folder if a resource was
+     * deleted.
+     */
+    void setRoot(AbstractRoot root)
+    {
+        this.root = root;
     }
 }
