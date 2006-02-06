@@ -12,6 +12,8 @@ import org.apache.hivemind.Resource;
 import org.apache.hivemind.util.LocalizedNameGenerator;
 import org.apache.hivemind.util.LocalizedResource;
 
+import sun.security.x509.Extension;
+
 /*
  The contents of this file are subject to the Mozilla Public License
  Version 1.1 (the "License"); you may not use this file except in
@@ -31,7 +33,7 @@ import org.apache.hivemind.util.LocalizedResource;
 
  Contributor(s): __glongman@gmail.com___.
  */
-/*package*/ abstract class ParentRoot extends AbstractRoot
+/*package*/abstract class ParentRoot extends AbstractRoot
 {
 
     public static final int CLASSPATH = 0;
@@ -59,7 +61,7 @@ import org.apache.hivemind.util.LocalizedResource;
             }
         };
     }
-    
+
     public void addFolder(File folder)
     {
         try
@@ -76,26 +78,33 @@ import org.apache.hivemind.util.LocalizedResource;
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.AbstractRoot#isClasspathResource(net.sf.spindle.core.resources.ResourceImpl)
      */
     @Override
     boolean isClasspathResource(ResourceImpl resource)
     {
         return type == CLASSPATH;
-    }    
+    }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.AbstractRoot#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
      */
     @Override
     boolean isBinaryResource(ResourceImpl resource)
-    {        
+    {
         return false;
     }
-    
-    /* (non-Javadoc)
-     * @see net.sf.spindle.core.resources.AbstractRoot#getLocalization(net.sf.spindle.core.resources.ResourceImpl, java.util.Locale)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.AbstractRoot#getLocalization(net.sf.spindle.core.resources.ResourceImpl,
+     *      java.util.Locale)
      */
     @Override
     ResourceImpl getLocalization(ResourceImpl resource, Locale locale)
@@ -165,11 +174,11 @@ import org.apache.hivemind.util.LocalizedResource;
     @Override
     boolean exists(ResourceImpl resource)
     {
-        
+
         ChildRoot root = findResourceRootFor(resource);
         if (root != null)
         {
-            ((ResourceImpl)resource).setRoot(root);
+            ((ResourceImpl) resource).setRoot(root);
             return true;
         }
         return false;
@@ -255,20 +264,15 @@ import org.apache.hivemind.util.LocalizedResource;
     {
         public LocalizedResource resolve(String path, Locale locale)
         {
-            int dotx = path.lastIndexOf('.');
-            String basePath;
-            String suffix;
-            if (dotx >= 0)
-            {
-                basePath = path.substring(0, dotx);
-                suffix = path.substring(dotx);
-            }
+            PathUtils utils = new PathUtils(path);
+            String extension = utils.getFileExtension();
+            if (extension != null)
+                utils = utils.removeFileExtension();
             else
-            {
-                // Resource without extension
-                basePath = path;
-                suffix = "";
-            }
+                extension = "";
+
+            String basePath = utils.toString();
+            String suffix = extension;          
 
             LocalizedNameGenerator generator = new LocalizedNameGenerator(basePath, locale, suffix);
 
