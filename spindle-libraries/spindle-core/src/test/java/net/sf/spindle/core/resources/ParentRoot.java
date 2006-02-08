@@ -1,12 +1,20 @@
 package net.sf.spindle.core.resources;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
 
+import net.sf.cglib.proxy.InvocationHandler;
+import net.sf.cglib.proxy.Proxy;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.TapestryCoreException;
 import net.sf.spindle.core.resources.search.ISearch;
+import net.sf.spindle.core.resources.search.ISearchAcceptor;
+import net.sf.spindle.core.util.Assert;
 
 import org.apache.hivemind.Resource;
 import org.apache.hivemind.util.LocalizedNameGenerator;
@@ -31,7 +39,7 @@ import org.apache.hivemind.util.LocalizedResource;
 
  Contributor(s): __glongman@gmail.com___.
  */
-/*package*/abstract class ParentRoot extends AbstractRoot
+/*package*/abstract class ParentRoot extends AbstractRoot implements IChildRoot
 {
 
     public static final int CLASSPATH = 0;
@@ -42,7 +50,7 @@ import org.apache.hivemind.util.LocalizedResource;
 
     private int type;
 
-    ChildRoot[] roots = new ChildRoot[] {};
+    ArrayList<IChildRoot> roots = new ArrayList<IChildRoot>();
 
     private ISearch search = null;
 
@@ -53,6 +61,7 @@ import org.apache.hivemind.util.LocalizedResource;
         defaultPackage = new ResourceImpl(this, "/")
         {
 
+            @SuppressWarnings("unused")
             public void setRoot(AbstractRoot root)
             {
                 // the root never changes!
@@ -60,15 +69,38 @@ import org.apache.hivemind.util.LocalizedResource;
         };
     }
 
+    public void removeChildRoot(File rootFile)
+    {
+        IChildRoot root = null;
+
+        for (Iterator iter = roots.iterator(); iter.hasNext();)
+        {
+            IChildRoot child = (IChildRoot) iter.next();
+            if (child.getRootFile().equals(rootFile))
+            {
+                iter.remove();
+                root = child;
+                break;
+            }
+        }
+
+        if (root == null)
+            return;
+
+        Invoker invoker = (Invoker) Proxy.getInvocationHandler(root);
+        invoker.setTarget(this);
+    }
+
     public void addFolder(File folder)
     {
         try
         {
-            FolderRoot newRoot = new FolderRoot(this, folder);
-            if (ChildRoot.arrayContains(roots, newRoot))
+            IChildRoot newRoot = createProxy(new FolderRoot(this, folder));
+
+            if (roots.contains(newRoot))
                 TapestryCore.log("Classpath root already contains: " + folder.toString());
             else
-                roots = ChildRoot.growAndAddToArray(roots, newRoot);
+                roots.add(newRoot);
         }
         catch (Exception e)
         {
@@ -79,10 +111,9 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractRoot#isClasspathResource(net.sf.spindle.core.resources.ResourceImpl)
+     * @see net.sf.spindle.core.resources.IRootImplementation#isClasspathResource(net.sf.spindle.core.resources.ResourceImpl)
      */
-    @Override
-    boolean isClasspathResource(ResourceImpl resource)
+    public boolean isClasspathResource(ResourceImpl resource)
     {
         return type == CLASSPATH;
     }
@@ -90,10 +121,9 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractRoot#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
+     * @see net.sf.spindle.core.resources.IRootImplementation#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
      */
-    @Override
-    boolean isBinaryResource(ResourceImpl resource)
+    public boolean isBinaryResource(ResourceImpl resource)
     {
         return false;
     }
@@ -101,11 +131,10 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractRoot#getLocalization(net.sf.spindle.core.resources.ResourceImpl,
+     * @see net.sf.spindle.core.resources.IRootImplementation#getLocalization(net.sf.spindle.core.resources.ResourceImpl,
      *      java.util.Locale)
      */
-    @Override
-    ResourceImpl getLocalization(ResourceImpl resource, Locale locale)
+    public ResourceImpl getLocalization(ResourceImpl resource, Locale locale)
     {
         LocalizedResourceFinder finder = new LocalizedResourceFinder();
 
@@ -129,13 +158,12 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#getResourceURL(net.sf.spindle.core.resources.ClasspathResource)
+     * @see net.sf.spindle.core.resources.IRootImplementation#getResourceURL(net.sf.spindle.core.resources.ResourceImpl)
      */
-    @Override
-    URL getResourceURL(ResourceImpl resource)
+    public URL getResourceURL(ResourceImpl resource)
     {
         if (exists(resource))
-            return ((ChildRoot) resource.getRoot()).buildResourceURL(resource);
+            return ((IChildRoot) resource.getRoot()).buildResourceURL(resource);
 
         return null;
     }
@@ -143,11 +171,10 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#clashCkeck(net.sf.spindle.core.resources.ClasspathResource,
+     * @see net.sf.spindle.core.resources.IRootImplementation#clashCkeck(net.sf.spindle.core.resources.ResourceImpl,
      *      net.sf.spindle.core.resources.ICoreResource)
      */
-    @Override
-    boolean clashCkeck(ResourceImpl resource, ICoreResource resource2)
+    public boolean clashCkeck(ResourceImpl resource, ICoreResource resource2)
     {
         // TODO in or out ? - not sure yet
         return false;
@@ -156,10 +183,9 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#newResource(java.lang.String)
+     * @see net.sf.spindle.core.resources.IRootImplementation#newResource(java.lang.String)
      */
-    @Override
-    ResourceImpl newResource(String path)
+    public ResourceImpl newResource(String path)
     {
         return new ResourceImpl(this, path);
     }
@@ -167,13 +193,11 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#exists(net.sf.spindle.core.resources.ClasspathResource)
+     * @see net.sf.spindle.core.resources.IRootImplementation#exists(net.sf.spindle.core.resources.ResourceImpl)
      */
-    @Override
-    boolean exists(ResourceImpl resource)
+    public boolean exists(ResourceImpl resource)
     {
-
-        ChildRoot root = findResourceRootFor(resource);
+        IChildRoot root = findResourceRootFor(resource);
         if (root != null)
         {
             ((ResourceImpl) resource).setRoot(root);
@@ -182,17 +206,17 @@ import org.apache.hivemind.util.LocalizedResource;
         return false;
     }
 
-    protected ChildRoot findResourceRootFor(ResourceImpl resource)
+    protected IChildRoot findResourceRootFor(ResourceImpl resource)
     {
-        return findResourceFor(resource.getPath());
+        return findResourceRootFor(resource.getPath());
     }
 
-    protected ChildRoot findResourceFor(String path)
+    protected IChildRoot findResourceRootFor(String path)
     {
-        for (int i = 0; i < roots.length; i++)
+        for (IChildRoot child : roots)
         {
-            if (roots[i].existsInThisRoot(path))
-                return roots[i];
+            if (child.existsInThisRoot(path))
+                return child;
         }
         return null;
     }
@@ -221,6 +245,19 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
+     * @see net.sf.spindle.core.resources.IRootImplementation#getUnderlier(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public Object getUnderlier(ResourceImpl resource)
+    {
+        IChildRoot root = findResourceRootFor(resource);
+        if (root == null)
+            return null;
+        return root.findUnderlier(resource);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor)
      */
     public void lookup(IResourceAcceptor requestor)
@@ -231,15 +268,15 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#lookup(net.sf.spindle.core.resources.ClasspathResource,
+     * @see net.sf.spindle.core.resources.IRootImplementation#lookup(net.sf.spindle.core.resources.ResourceImpl,
      *      net.sf.spindle.core.resources.IResourceAcceptor)
      */
-    @Override
-    void lookup(ResourceImpl resource, IResourceAcceptor requestor)
+    public void lookup(ResourceImpl resource, IResourceAcceptor requestor)
     {
-        for (int i = 0; i < roots.length; i++)
+        ArrayList<ICoreResource> seenResources = new ArrayList<ICoreResource>();
+        for (IChildRoot child : roots)
         {
-            if (!roots[i].performlookup(resource, requestor))
+            if (!child.performlookup(resource, requestor, seenResources))
                 return;
         }
     }
@@ -258,6 +295,86 @@ import org.apache.hivemind.util.LocalizedResource;
 
     abstract ISearch createSearch();
 
+    int getKind()
+    {
+        return type;
+    }
+
+    IChildRoot createProxy(IChildRoot toBeProxied)
+    {
+        Invoker invoker = new Invoker();
+        invoker.setTarget(toBeProxied);
+        return (IChildRoot) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]
+        { IChildRoot.class }, invoker);
+    }
+
+    class Invoker implements InvocationHandler
+    {
+        IChildRoot target;
+
+        public Object invoke(Object proxy, Method m, Object[] args) throws Throwable
+        {
+            if (target != null)
+                return invoke(proxy, m, args, target);
+            else
+                return invoke(proxy, m, args, ParentRoot.this);
+        }
+
+        private Object invoke(Object proxy, Method m, Object[] args, Object target)
+                throws Throwable
+        {
+            try
+            {
+                return m.invoke(target, args);
+            }
+            catch (InvocationTargetException e)
+            {
+                throw e.getCause();
+            }
+        }
+
+        IRootImplementation getTarget()
+        {
+            return target;
+        }
+
+        void setTarget(IChildRoot target)
+        {
+            this.target = target;
+        }
+    }
+
+    /**
+     * a filter that enforces classpath lookup semantics for lookups.
+     */
+    class HiddenFileFilter implements IResourceAcceptor
+    {
+
+        IResourceAcceptor wrapped;
+
+        ArrayList<ICoreResource> seenResources;
+
+        public HiddenFileFilter(IResourceAcceptor wrapped)
+        {
+            this.wrapped = wrapped;
+            this.seenResources = new ArrayList<ICoreResource>();
+        }
+
+        public boolean accept(ICoreResource location)
+        {
+            if (seenResources.contains(location))
+                return true;
+
+            seenResources.add(location);
+            return wrapped.accept(location);
+        }
+
+        public ICoreResource[] getResults()
+        {
+            return wrapped.getResults();
+        }
+    }
+
     class LocalizedResourceFinder
     {
         public LocalizedResource resolve(String path, Locale locale)
@@ -270,7 +387,7 @@ import org.apache.hivemind.util.LocalizedResource;
                 extension = "";
 
             String basePath = utils.toString();
-            String suffix = extension;          
+            String suffix = "."+extension;
 
             LocalizedNameGenerator generator = new LocalizedNameGenerator(basePath, locale, suffix);
 
@@ -287,12 +404,100 @@ import org.apache.hivemind.util.LocalizedResource;
 
         private boolean isExistingResource(String path)
         {
-            return findResourceFor(path) != null;
+            return findResourceRootFor(path) != null;
         }
     }
 
-    int getType()
+    /* for the proxy replacement - must never called */
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#buildResourceURL(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public URL buildResourceURL(ResourceImpl resource)
     {
-        return type;
+        Assert.isLegal(false);
+        return null;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#existsInThisRoot(java.lang.String)
+     */
+    public boolean existsInThisRoot(String path)
+    {
+        Assert.isLegal(false);
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#findUnderlier(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public Object findUnderlier(ResourceImpl resource)
+    {
+        Assert.isLegal(false);
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#getNonJavaResources(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public ICoreResource[] getNonJavaResources(ResourceImpl resource)
+    {
+        Assert.isLegal(false);
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#getRootFile()
+     */
+    public File getRootFile()
+    {
+        Assert.isLegal(false);
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#performlookup(net.sf.spindle.core.resources.ResourceImpl,
+     *      net.sf.spindle.core.resources.IResourceAcceptor, java.util.ArrayList)
+     */
+    public boolean performlookup(ResourceImpl resource, IResourceAcceptor requestor,
+            ArrayList<ICoreResource> seenResources)
+    {
+        Assert.isLegal(false);
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#performSearch(net.sf.spindle.core.resources.search.ISearchAcceptor)
+     */
+    public void performSearch(ISearchAcceptor acceptor)
+    {
+        Assert.isLegal(false);
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#getType()
+     */
+    public int getType()
+    {
+        Assert.isLegal(false);
+        return 0;
+    }
+
 }

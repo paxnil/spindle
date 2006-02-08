@@ -33,11 +33,9 @@ import net.sf.spindle.core.resources.search.ISearch;
  */
 public class ClasspathRoot extends ParentRoot
 {
-
     public ClasspathRoot()
     {
         super(ParentRoot.CLASSPATH);
-
     }
 
     /**
@@ -50,11 +48,11 @@ public class ClasspathRoot extends ParentRoot
     {
         try
         {
-            JarRoot newRoot = new JarRoot(this, jarFile);
-            if (ChildRoot.arrayContains(roots, newRoot))
+            IChildRoot newRoot = createProxy(new JarRoot(this, jarFile));
+            if (roots.contains(newRoot))
                 TapestryCore.log("Classpath root already contains: " + jarFile.toString());
             else
-                roots = ChildRoot.growAndAddToArray(roots, newRoot);
+                roots.add(newRoot);
         }
         catch (Exception e)
         {
@@ -65,17 +63,21 @@ public class ClasspathRoot extends ParentRoot
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractRoot#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
+     * @see net.sf.spindle.core.resources.IRootImplementation#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
      */
-    @Override
-    boolean isBinaryResource(ResourceImpl resource)
+    public boolean isBinaryResource(ResourceImpl resource)
     {
-        ChildRoot childRoot = findResourceRootFor(resource);
+        IChildRoot childRoot = findResourceRootFor(resource);
         if (childRoot != null)
-            return childRoot.getType() == ChildRoot.BINARY;
+            return childRoot.getType() == IChildRoot.BINARY;
         return false; // hmm, maybe an exception would be better, the resource does not exist!
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.ParentRoot#createSearch()
+     */
     @Override
     ISearch createSearch()
     {

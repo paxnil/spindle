@@ -32,12 +32,12 @@ import org.apache.hivemind.util.AbstractResource;
 /**
  * an implementation of {@link net.sf.spindle.core.resources.ICoreResource}
  */
-/* package */ class ResourceImpl extends AbstractResource implements ICoreResource
+/* package */class ResourceImpl extends AbstractResource implements ICoreResource
 {
 
-    private AbstractRoot root;
+    private IRootImplementation root;
 
-    ResourceImpl(AbstractRoot root, String path)
+    ResourceImpl(IRootImplementation root, String path)
     {
         super(path);
         this.root = root;
@@ -112,7 +112,7 @@ import org.apache.hivemind.util.AbstractResource;
     public URL getResourceURL()
     {
         return root.getResourceURL(this);
-    }    
+    }
 
     /*
      * (non-Javadoc)
@@ -154,17 +154,38 @@ import org.apache.hivemind.util.AbstractResource;
         return root.getSearch();
     }
 
-    AbstractRoot getRoot()
+    IRootImplementation getRoot()
     {
         return root;
     }
 
-    /**
-     * The root would never change in a jar but it could in a folder if a resource was
-     * deleted.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.ICoreResource#getUnderlier()
      */
-    void setRoot(AbstractRoot root)
+    public Object getUnderlier()
+    {
+        return root.getUnderlier(this);
+    }
+
+    /**
+     * The root would never change in a jar but it could in a folder if a resource was deleted.
+     */
+    void setRoot(IRootImplementation root)
     {
         this.root = root;
     }
+
+    @Override
+    public boolean equals(Object arg0)
+    {
+        if (!super.equals(arg0))
+            return false;
+        if (!(arg0 instanceof ResourceImpl))
+            return false;
+        ResourceImpl other = (ResourceImpl) arg0;
+        return getUnderlier().equals(other.getUnderlier());
+    }
+
 }

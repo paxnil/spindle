@@ -29,7 +29,7 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="${settings.localRepository}/tapestry/tapestry/4.0/tapestry-4.0.jar" tofile="${basedir}/testData/tapestryTest.jar"></copy>
+                <copy file="${settings.localRepository}/tapestry/tapestry/4.0/tapestry-4.0.jar" tofile="${basedir}/testData/jars/tapestryTest.jar"></copy>
                </tasks>
             </configuration>
           </execution>

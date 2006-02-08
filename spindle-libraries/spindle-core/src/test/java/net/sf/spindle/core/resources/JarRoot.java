@@ -33,6 +33,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import net.sf.spindle.core.TapestryCore;
+import net.sf.spindle.core.resources.search.ISearchAcceptor;
 import net.sf.spindle.core.util.Assert;
 
 /**
@@ -43,12 +44,11 @@ import net.sf.spindle.core.util.Assert;
 
     private Map<String, ResourceImpl[]> nonJavaResources;
 
-    JarRoot(ParentRoot parentRoot, File jarFile) throws IOException,
-            URISyntaxException
+    JarRoot(ParentRoot parentRoot, File jarFile) throws IOException, URISyntaxException
     {
-        super(ChildRoot.BINARY, parentRoot, jarFile);
+        super(IChildRoot.BINARY, parentRoot, jarFile);
 
-        Assert.isLegal(parentRoot.getType() == ParentRoot.CLASSPATH);
+        Assert.isLegal(parentRoot.getKind() == ParentRoot.CLASSPATH);
         Assert.isLegal(jarFile != null);
         Assert.isLegal(jarFile.exists());
         Assert.isLegal(jarFile.isFile());
@@ -57,6 +57,9 @@ import net.sf.spindle.core.util.Assert;
 
     }
 
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.ChildRoot#intitializeUrl(java.io.File)
+     */
     @Override
     protected URL intitializeUrl(File file) throws MalformedURLException
     {
@@ -100,7 +103,7 @@ import net.sf.spindle.core.util.Assert;
                 int lastSeparator = entryName.lastIndexOf('/');
                 String fileName = entryName.substring(lastSeparator + 1);
                 // skip classfiles
-                if (fileName.endsWith(".class"))
+                if (isJavaName(fileName))
                     continue;
                 String packagepath = initPackage(entryName, lastSeparator);
 
@@ -138,6 +141,9 @@ import net.sf.spindle.core.util.Assert;
     {
         String path = candidatePath;
         PathUtils pathUtil = new PathUtils(path).makeRelative();
+        int count = pathUtil.segmentCount();
+        if (count == 1)
+            return "";
         if (!isFolder(candidatePath))
         {
             path = pathUtil.removeLastSegments(1).toString();
@@ -149,13 +155,27 @@ import net.sf.spindle.core.util.Assert;
         return path;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see net.sf.spindle.core.resources.ChildClasspathRoot#getNonJavaResources(net.sf.spindle.core.resources.ICoreResource)
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.IChildRoot#performSearch(net.sf.spindle.core.resources.search.ISearchAcceptor)
      */
-    @Override
-    ICoreResource[] getNonJavaResources(ResourceImpl resource)
+    public void performSearch(ISearchAcceptor acceptor)
+    {
+        populateNonJavaResourceInfo();
+        for (Map.Entry<String, ResourceImpl[]> resources : nonJavaResources.entrySet())
+        {
+            ResourceImpl[] resourceArray = resources.getValue();
+            for (int i = 0; i < resourceArray.length; i++)
+            {
+                acceptor.accept(this, internalGetUnderlier(resourceArray[i]));
+            }
+        }
+    }
+
+   
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.IChildRoot#getNonJavaResources(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public ICoreResource[] getNonJavaResources(ResourceImpl resource)
     {
         populateNonJavaResourceInfo();
         ICoreResource[] result = nonJavaResources.get(getLookupPath(resource.getPath()));
@@ -164,13 +184,11 @@ import net.sf.spindle.core.util.Assert;
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#getResourceURL(net.sf.spindle.core.resources.ClasspathResource)
+   
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.IRootImplementation#getResourceURL(net.sf.spindle.core.resources.ResourceImpl)
      */
-    @Override
-    URL getResourceURL(ResourceImpl resource)
+    public URL getResourceURL(ResourceImpl resource)
     {
         if (!existsInThisRoot(resource.getPath()))
             return parentRoot.getResourceURL(resource);
@@ -180,23 +198,21 @@ import net.sf.spindle.core.util.Assert;
 
    
     /* (non-Javadoc)
-     * @see net.sf.spindle.core.resources.AbstractRoot#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
+     * @see net.sf.spindle.core.resources.IRootImplementation#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
      */
-    @Override
-    boolean isBinaryResource(ResourceImpl resource)
+    public boolean isBinaryResource(ResourceImpl resource)
     {
         if (existsInThisRoot(resource.getPath()))
             return true;
         return parentRoot.isBinaryResource(resource);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see net.sf.spindle.core.resources.ChildClasspathRoot#existsInThisRoot(java.lang.String)
+    
+     
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.IChildRoot#existsInThisRoot(java.lang.String)
      */
-    @Override
-    boolean existsInThisRoot(String path)
+    public boolean existsInThisRoot(String path)
     {
         populateNonJavaResourceInfo();
 
@@ -216,4 +232,33 @@ import net.sf.spindle.core.util.Assert;
         }
         return false;
     }
+
+    private Object internalGetUnderlier(ResourceImpl impl)
+    {
+        return buildResourceURL(impl);
+    }
+
+   
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.IChildRoot#findUnderlier(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public Object findUnderlier(ResourceImpl resource)
+    {
+        populateNonJavaResourceInfo();
+        if (!existsInThisRoot(resource.getPath()))
+            return null;
+        return buildResourceURL(resource);
+    }
+
+   
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.IRootImplementation#getUnderlier(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public Object getUnderlier(ResourceImpl resource)
+    {
+        if (existsInThisRoot(resource.getPath()))
+            return internalGetUnderlier(resource);
+        return parentRoot.getUnderlier(resource);
+    }
+
 }

@@ -64,4 +64,14 @@ public interface ICoreResource extends Resource, ResourceExtension
      */
     public boolean isFolder();
 
+    /**
+     * Return the underlying IDE platform specific object that this resource refers to.
+     * <p>
+     * ie. in Eclipse it might be an IFile or a JarEntryFile but in another implementation if might
+     * be a {@link java.io.File} or a {@link java.util.jar.JarEntry}
+     * 
+     * @return the IDE platform specific object
+     */
+    public Object getUnderlier();
+
 }

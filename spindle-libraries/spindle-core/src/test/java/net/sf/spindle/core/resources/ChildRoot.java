@@ -3,6 +3,7 @@ package net.sf.spindle.core.resources;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import net.sf.spindle.core.TapestryCoreException;
@@ -32,31 +33,8 @@ import org.apache.hivemind.Resource;
 /**
  * Base class for all child roots in an {@link net.sf.spindle.core.resources.ParentRoot}
  */
-/* package */abstract class ChildRoot extends AbstractRoot
+/* package */abstract class ChildRoot extends AbstractRoot implements IChildRoot
 {
-
-    protected static final int BINARY = 0;
-
-    protected static final int SOURCE = 1;
-
-    static ChildRoot[] growAndAddToArray(ChildRoot[] array, ChildRoot addition)
-    {
-        ChildRoot[] old = array;
-        array = new ChildRoot[old.length + 1];
-        System.arraycopy(old, 0, array, 0, old.length);
-        array[old.length] = addition;
-        return array;
-    }
-
-    static boolean arrayContains(ChildRoot[] array, ChildRoot possible)
-    {
-        for (int i = 0; i < array.length; i++)
-        {
-            if (array[i].equals(possible))
-                return true;
-        }
-        return false;
-    }
 
     protected ParentRoot parentRoot;
 
@@ -76,7 +54,12 @@ import org.apache.hivemind.Resource;
 
     protected abstract URL intitializeUrl(File file) throws MalformedURLException;
 
-    Resource newResource(String path)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IRootImplementation#newResource(java.lang.String)
+     */
+    public Resource newResource(String path)
     {
         return parentRoot.newResource(path);
     }
@@ -94,23 +77,31 @@ import org.apache.hivemind.Resource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#exists(net.sf.spindle.core.resources.ClasspathResource)
+     * @see net.sf.spindle.core.resources.IRootImplementation#exists(net.sf.spindle.core.resources.ResourceImpl)
      */
-    boolean exists(ResourceImpl resource)
+    public boolean exists(ResourceImpl resource)
     {
         if (existsInThisRoot(resource.getPath()))
             return true;
         return parentRoot.exists(resource);
     }
 
-    @Override
-    boolean isBinaryResource(ResourceImpl resource)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IRootImplementation#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public boolean isBinaryResource(ResourceImpl resource)
     {
         return parentRoot.isBinaryResource(resource);
     }
 
-    @Override
-    boolean isClasspathResource(ResourceImpl resource)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IRootImplementation#isClasspathResource(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public boolean isClasspathResource(ResourceImpl resource)
     {
         return parentRoot.isClasspathResource(resource);
     }
@@ -125,17 +116,26 @@ import org.apache.hivemind.Resource;
         parentRoot.lookup(requestor);
     }
 
-    void lookup(ResourceImpl resource, IResourceAcceptor requestor)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IRootImplementation#lookup(net.sf.spindle.core.resources.ResourceImpl,
+     *      net.sf.spindle.core.resources.IResourceAcceptor)
+     */
+    public void lookup(ResourceImpl resource, IResourceAcceptor requestor)
     {
         parentRoot.lookup(resource, requestor);
     }
 
-    
-    final boolean performlookup(ResourceImpl resource, IResourceAcceptor requestor)
+    // called by parent root
+    public final boolean performlookup(ResourceImpl resource, IResourceAcceptor requestor,
+            ArrayList<ICoreResource> seenResources)
     {
         ICoreResource[] nonJavaResources = getNonJavaResources(resource);
         for (int i = 0; i < nonJavaResources.length; i++)
         {
+            if (seenResources != null && seenResources.contains(nonJavaResources[i]))
+                continue;
             if (!requestor.accept(nonJavaResources[i]))
                 return false;
         }
@@ -155,10 +155,9 @@ import org.apache.hivemind.Resource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#getResourceURL(net.sf.spindle.core.resources.ClasspathResource)
+     * @see net.sf.spindle.core.resources.IRootImplementation#getResourceURL(net.sf.spindle.core.resources.ResourceImpl)
      */
-    @Override
-    URL getResourceURL(ResourceImpl resource)
+    public URL getResourceURL(ResourceImpl resource)
     {
         if (!existsInThisRoot(resource.getPath()))
             return parentRoot.getResourceURL(resource);
@@ -166,7 +165,12 @@ import org.apache.hivemind.Resource;
         return buildResourceURL(resource);
     }
 
-    URL buildResourceURL(ResourceImpl resource)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#buildResourceURL(net.sf.spindle.core.resources.ResourceImpl)
+     */
+    public URL buildResourceURL(ResourceImpl resource)
     {
         try
         {
@@ -181,10 +185,10 @@ import org.apache.hivemind.Resource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#getLocalization(net.sf.spindle.core.resources.ClasspathResource,
+     * @see net.sf.spindle.core.resources.IRootImplementation#getLocalization(net.sf.spindle.core.resources.ResourceImpl,
      *      java.util.Locale)
      */
-    Resource getLocalization(ResourceImpl resource, Locale locale)
+    public Resource getLocalization(ResourceImpl resource, Locale locale)
     {
         return parentRoot.getLocalization(resource, locale);
     }
@@ -202,24 +206,30 @@ import org.apache.hivemind.Resource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.AbstractClasspathRoot#clashCkeck(net.sf.spindle.core.resources.ClasspathResource,
+     * @see net.sf.spindle.core.resources.IRootImplementation#clashCkeck(net.sf.spindle.core.resources.ResourceImpl,
      *      net.sf.spindle.core.resources.ICoreResource)
      */
-    boolean clashCkeck(ResourceImpl resource, ICoreResource resource2)
+    public boolean clashCkeck(ResourceImpl resource, ICoreResource resource2)
     {
         return parentRoot.clashCkeck(resource, resource2);
     }
 
-    abstract boolean existsInThisRoot(String path);
-
-    abstract ICoreResource[] getNonJavaResources(ResourceImpl resource);
-
-    int getType()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#getType()
+     */
+    public int getType()
     {
         return type;
     }
-    
-    File getRootFile()
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#getRootFile()
+     */
+    public File getRootFile()
     {
         return rootFile;
     }

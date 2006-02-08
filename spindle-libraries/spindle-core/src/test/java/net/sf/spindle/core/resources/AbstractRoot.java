@@ -31,21 +31,39 @@ import org.apache.hivemind.Resource;
 /**
  * Common behaviour for all classpath roots (the main and the children)
  */
-/* package */abstract class AbstractRoot implements IResourceRoot
+/* package */abstract class AbstractRoot implements IRootImplementation
 {
+    static final String EXTENSION_class = "class";
+
+    static final String EXTENSION_java = "java";
+
+    static final String SUFFIX_STRING_class = "." + EXTENSION_class;
+
+    static final String SUFFIX_STRING_java = "." + EXTENSION_java;
+
+    static boolean isJavaName(String name)
+    {
+        if (name == null)
+            return false;
+        if (name.trim().endsWith(SUFFIX_STRING_class))
+            return true;
+        if (name.trim().endsWith(SUFFIX_STRING_java))
+            return true;
+        return false;
+    }
 
     static final ResourceImpl[] EMPTY = new ResourceImpl[] {};
-    
-    static AbstractRoot[] growAndAddToArray(AbstractRoot[] array,
-            AbstractRoot addition)
+
+    static IRootImplementation[] growAndAddToArray(IRootImplementation[] array,
+            IRootImplementation addition)
     {
-        AbstractRoot[] old = array;
-        array = new AbstractRoot[old.length + 1];
+        IRootImplementation[] old = array;
+        array = new IRootImplementation[old.length + 1];
         System.arraycopy(old, 0, array, 0, old.length);
         array[old.length] = addition;
         return array;
     }
-    
+
     static ResourceImpl[] growAndAddToArray(ResourceImpl[] array, ResourceImpl addition)
     {
         ResourceImpl[] old = array;
@@ -55,7 +73,7 @@ import org.apache.hivemind.Resource;
         return array;
     }
 
-    static boolean arrayContains(AbstractRoot[] array, AbstractRoot possible)
+    static boolean arrayContains(IRootImplementation[] array, IRootImplementation possible)
     {
         for (int i = 0; i < array.length; i++)
         {
@@ -65,28 +83,18 @@ import org.apache.hivemind.Resource;
         return false;
     }
 
-    abstract boolean isClasspathResource(ResourceImpl resource);
-
-    abstract boolean isBinaryResource(ResourceImpl resource);
-
-    abstract Resource getLocalization(ResourceImpl resource, Locale locale);
-
-    boolean isFolder(String path)
+    public boolean isFolder(String path)
     {
         return path.endsWith("/");
     }
 
-    boolean isFolder(ResourceImpl resource)
+    public boolean isFolder(ResourceImpl resource)
     {
         return TapestryCore.isNull(resource.getName());
 
     }
 
-    abstract URL getResourceURL(ResourceImpl resource);
-
-    abstract boolean clashCkeck(ResourceImpl resource, ICoreResource resource2);
-
-    InputStream getContents(ResourceImpl resource)
+    public InputStream getContents(ResourceImpl resource)
     {
         try
         {
@@ -101,10 +109,4 @@ import org.apache.hivemind.Resource;
             return null;
         }
     }
-
-    abstract Resource newResource(String path);
-
-    abstract boolean exists(ResourceImpl resource);
-
-    abstract void lookup(ResourceImpl resource, IResourceAcceptor requestor);
 }

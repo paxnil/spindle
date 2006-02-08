@@ -20,47 +20,79 @@ package net.sf.spindle.core.resources;
  Contributor(s): __glongman@gmail.com___.
  */
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import junit.framework.TestCase;
-import net.sf.spindle.core.util.Files;
 
 import org.apache.hivemind.Resource;
 
 public class JarClasspathRootTest extends TestCase
 {
 
-    IResourceRoot root;
+    private static final String RESOURCES_ROOT2 = "resources/root2";
 
-    @Override
-    protected void setUp() throws Exception
+    private static final String RESOURCES_ROOT1 = "resources/root1";
+
+    private static final String JARS_TAPESTRY_TEST_JAR = "jars/tapestryTest.jar";
+
+    private static final String JARS_FOO_JAR = "jars/foo.jar";
+
+    private static final String[] EMPTY = new String[] {};
+
+    private File getFile(String relativePath)
     {
-        root = getTapestryTestRoot();
-    }
-    
-    private File getFile(String relativePath) {
         PathUtils jarPath = new PathUtils(System.getProperty("basedir")).append("testData").append(
                 relativePath);
         File file = new File(jarPath.toOSString());
         assertTrue(file.exists());
-        assertFalse(file.isDirectory());
         return file;
     }
 
-    private IResourceRoot getTapestryTestRoot() throws IOException, URISyntaxException
+    private IResourceRoot getTestRoot(String[] jars, String[] folders, boolean flipOrder)
+            throws Exception
     {
         ClasspathRoot root = new ClasspathRoot();
-        root.addJar(getFile("tapestryTest.jar"));
+        if (flipOrder)
+        {
+            addSourceFolders(folders, root);
+            addJars(jars, root);
+        }
+        else
+        {
+            addJars(jars, root);
+            addSourceFolders(folders, root);
+        }        
         return root;
     }
 
-    public void test() throws IOException
+    private void addSourceFolders(String[] folders, ClasspathRoot root)
     {
-        Resource framework = root.getRelativeResource("org/apache/tapestry/Framework.library");
+        for (int i = 0; i < folders.length; i++)
+        {
+            root.addFolder(getFile(folders[i]));
+        }
+    }
+
+    private void addJars(String[] jars, ClasspathRoot root)
+    {
+        for (int i = 0; i < jars.length; i++)
+        {
+            root.addJar(getFile(jars[i]));
+        }
+    }
+
+    public void test() throws Exception
+    {
+        IResourceRoot root = getTestRoot(new String[]
+        { JARS_TAPESTRY_TEST_JAR }, EMPTY, false);
+
+        ICoreResource framework = (ICoreResource) root
+                .getRelativeResource("org/apache/tapestry/Framework.library");
+
+        assertTrue(framework.isClasspathResource() && framework.isBinaryResource());
 
         URL url = framework.getResourceURL();
 
@@ -68,37 +100,148 @@ public class JarClasspathRootTest extends TestCase
 
         InputStream input = url.openStream();
 
-        String all = Files.readFileToString(input, null);
+        assertNotNull(input);
 
-        // TODO remove
-        System.out.println(all);
     }
 
-    public void testLookup()
+    public void testLookupOnejar() throws Exception
     {
+        IResourceRoot root = getTestRoot(new String[]
+        { JARS_TAPESTRY_TEST_JAR }, EMPTY, false);
+
         ICoreResource framework = (ICoreResource) root
                 .getRelativeResource("org/apache/tapestry/Framework.library");
         assertTrue(framework.exists());
 
-        IResourceAcceptor acceptor = new IResourceAcceptor()
-        {
+        assertTrue(framework.isClasspathResource() && framework.isBinaryResource());
 
-            private ArrayList<ICoreResource> results = new ArrayList<ICoreResource>();
+        IResourceAcceptor acceptor = new Acceptor();
 
-            public boolean accept(ICoreResource location)
-            {
-                results.add(location);
-                return true;
-            }
-
-            public ICoreResource[] getResults()
-            {
-                return results.toArray(new ICoreResource[] {});
-            }
-        };
         framework.lookup(acceptor);
 
         assertEquals(5, acceptor.getResults().length);
     }
 
+    public void testFindLibrary() throws Exception
+    {
+
+        IResourceRoot root = getTestRoot(new String[]
+        { JARS_TAPESTRY_TEST_JAR }, new String[]
+        { RESOURCES_ROOT1 }, false);
+
+        ICoreResource framework = (ICoreResource) root
+                .getRelativeResource("org/apache/tapestry/Framework.library");
+
+        assertTrue(framework.exists());
+
+        assertTrue(framework.isClasspathResource() && framework.isBinaryResource());
+
+        assertTrue(framework.getUnderlier() instanceof URL);
+
+        File jar = getFile(JARS_TAPESTRY_TEST_JAR);
+
+        ((ParentRoot) root).removeChildRoot(jar);
+
+        assertTrue(framework.isClasspathResource() && !framework.isBinaryResource());
+
+        assertTrue(framework.exists());
+
+        assertTrue(framework.getUnderlier() instanceof File);
+    }
+
+    public void testFindLibrary2() throws Exception
+    {
+
+        IResourceRoot root = getTestRoot(new String[]
+        { JARS_TAPESTRY_TEST_JAR }, new String[]
+        { RESOURCES_ROOT1 }, false);
+
+        ICoreResource framework = (ICoreResource) root
+                .getRelativeResource("org/apache/tapestry/Framework.library");
+
+        assertTrue(framework.exists());
+
+        assertTrue(framework.isClasspathResource() && framework.isBinaryResource());
+
+        Object underlier = framework.getUnderlier();
+        assertTrue(underlier instanceof URL);
+
+        File folder = getFile(RESOURCES_ROOT1);
+
+        ((ParentRoot) root).removeChildRoot(folder);
+
+        assertTrue(framework.isClasspathResource() && framework.isBinaryResource());
+
+        assertTrue(framework.exists());
+
+        Object secondUnderlier = framework.getUnderlier();
+
+        assertTrue(secondUnderlier instanceof URL);
+
+        assertEquals(underlier, secondUnderlier);
+    }
+
+    public void testDefaultPackage() throws Exception
+    {
+        IResourceRoot root = getTestRoot(new String[]
+        { JARS_FOO_JAR }, new String[]
+        { RESOURCES_ROOT1 }, false);
+
+        ICoreResource foo = (ICoreResource) root.getRelativeResource("foo.html");
+
+        assertTrue(foo.exists());
+
+        assertTrue(foo.isClasspathResource() && foo.isBinaryResource());
+
+        assertTrue(foo.getUnderlier() instanceof URL);
+
+        File jar = getFile(JARS_FOO_JAR);
+
+        ((ParentRoot) root).removeChildRoot(jar);
+
+        assertTrue(foo.exists());
+
+        assertTrue(foo.isClasspathResource() && !foo.isBinaryResource());
+
+        assertTrue(foo.getUnderlier() instanceof File);
+    }
+
+    public void testGetLocalization() throws Exception
+    {
+        IResourceRoot root = getTestRoot(new String[]
+        { JARS_FOO_JAR }, new String[]
+        { RESOURCES_ROOT1 }, false);
+
+        ICoreResource foo = (ICoreResource) root.getRelativeResource("foo.html");
+
+        assertTrue(foo.exists());
+
+        assertTrue(foo.isClasspathResource() && foo.isBinaryResource());
+
+        assertTrue(foo.getUnderlier() instanceof URL);
+
+        ICoreResource localized = (ICoreResource) foo.getLocalization(Locale.CANADA);
+
+        assertNotNull(localized);
+
+        assertTrue(localized.exists());
+
+        assertTrue(localized.isClasspathResource() && localized.isBinaryResource());
+    }
+
+    class Acceptor implements IResourceAcceptor
+    {
+        private ArrayList<ICoreResource> results = new ArrayList<ICoreResource>();
+
+        public boolean accept(ICoreResource location)
+        {
+            results.add(location);
+            return true;
+        }
+
+        public ICoreResource[] getResults()
+        {
+            return results.toArray(new ICoreResource[] {});
+        }
+    }
 }
