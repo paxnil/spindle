@@ -21,7 +21,6 @@ package net.sf.spindle.core.build;
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,39 +50,89 @@ import net.sf.spindle.core.util.Assert;
 
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
+import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 /**
- * Resolver for a Namespace To resolve a namespace you need: Given, the framework namespace, or null
- * if this is the framework
+ * Resolve a Library Namespace in the application.
+ * <p>
+ * Subclasses tweak the behviour for special cases (the Framework Namespace and the Application
+ * Namespace).
+ * <p>
+ * Here I describe the lookup rules in general for all types of Namespace.
+ * <p>
+ * From {@link org.apache.tapestry.resolver.ComponentSpecificationResolverImpl}:
+ * <p>
+ * Application Namespace: <br>
+ * if the component is not defined explicitly in the namespace, a search may occur: Performs the
+ * tricky work of resolving a page name to a page specification. The search for components in the
+ * application namespace is the most complicated, since Tapestry searches for components that aren't
+ * explicitly defined in the application specification. The search, based on the <i>simple-name</i>
+ * of the page, goes as follows:
  * <ul>
- * <li>As declared in the library specification</li>
- * <li>*.jwc in the same folder as the library specification</li>
+ * <li>As declared in the application specification
+ * <li><i>type</i>.jwc in the same folder as the application specification
+ * <li><i>type</i>.jwc in the WEB-INF/ <i>servlet-name </i> directory of the context root
+ * <li><i>type</i>.jwc in WEB-INF
+ * <li><i>type</i>.jwc in the application root (within the context root)
+ * <li>By searching the framework namespace
+ * <li>By searching for a named class file within the org.apache.tapestry.component-class-packages
+ * property (defined within the namespace)
  * </ul>
- * page resolve rules (ordinary library)
- * <ul>
- * <li>As declared in the library specification</li>
- * <li>*.page in the same folder as the library specification</li>
+ * Library Namespace<br>
+ * <li>As declared in the library specification
+ * <li><i>type </i>.jwc in the same folder as the library specification
+ * <li>By searching the framework namespace
  * </ul>
- * template lookup rules:
+ * From (@link org.apache.tapestry.resolver.PageSpecificationResolverImpl}
+ * <p>
+ * Application Namespace:<br>
+ * The search for pages in the application namespace is the most complicated, since Tapestry
+ * searches for pages that aren't explicitly defined in the application specification. The search,
+ * based on the <i>simple-name </i> of the page, goes as follows:
  * <ul>
- * <li>If the component has a $template asset, use that</li>
- * <li>Look for a template in the same folder as the component</li>
- * <li>If a page in the application namespace, search in the application root</li>
+ * <li>As declared in the application specification
+ * <li><i>simple-name </i>.page in the same folder as the application specification
+ * <li><i>simple-name </i> page in the WEB-INF/ <i>servlet-name </i> directory of the context root
+ * <li><i>simple-name </i>.page in WEB-INF
+ * <li><i>simple-name </i>.page in the application root (within the context root)
+ * <li><i>simple-name </i>.html as a template in the application root, for which an implicit
+ * specification is generated
+ * <li>By searching the framework namespace
+ * <li>By invoking
+ * {@link org.apache.tapestry.resolver.ISpecificationResolverDelegate#findPageSpecification(IRequestCycle, INamespace, String)}
+ * </ul>
+ * <p>
+ * Library Namespace<br>
+ * <ul>
+ * <li>As declared in the library specification
+ * <li><i>simple-name </i>.page in the same folder as the library specification
+ * <li>By searching the framework namespace
+ * <li><b>NOT SUPPORTED IN SPINDLE</b>By invoking
+ * {@link org.apache.tapestry.resolver.ISpecificationResolverDelegate#findPageSpecification(IRequestCycle, INamespace, String)}
+ * </ul>
+ * <p>
+ * Templates ({@link net.sf.spindle.core.build.templates.TemplateFinder})
+ * <p>
+ * from (@link org.apache.tapestry.services.impl.TemplateSourceImpl}<br>
+ * Finds the template for the given component, using the following rules:
+ * <ul>
+ * <li>If the component has a $template asset, use that
+ * <li>Look for a template in the same folder as the component
+ * <li>If a page in the application namespace, search in the application root
+ * <li>Fail!
  * </ul>
  * 
+ * @see net.sf.spindle.core.build.ApplicationResolver
+ * @see net.sf.spindle.core.build.FrameworkResolver Resolver for a Namespace To resolve a namespace
  * @author glongman@gmail.com
  */
 public class NamespaceResolver
 {
     /**
-     * collector for any problems not handled by the AbstractBuild
-     */
-    // private ProblemCollector fProblemCollector = new ProblemCollector();
-    /**
-     * the instance of IBuild that instantiated the first Resolver
+     * the the current build.
      */
     protected AbstractBuild build;
 
@@ -98,16 +147,6 @@ public class NamespaceResolver
      * the Tapestry framwork Namespace
      */
     protected ICoreNamespace frameworkNamespace;
-
-    /**
-     * the location of the library spec that defines the Namespace being resolved
-     */
-    protected ICoreResource namespaceSpecLocation;
-
-    /**
-     * The id of the Namespace being resolved
-     */
-    protected String namespaceId;
 
     /**
      * A map of all component names -> locations in the Namespace being resolved
@@ -151,8 +190,6 @@ public class NamespaceResolver
     {
         componentStack.clear();
         frameworkNamespace = null;
-        namespaceId = null;
-        namespaceSpecLocation = null;
         working = false;
         jwcFiles = null;
     }
@@ -176,7 +213,7 @@ public class NamespaceResolver
 
             namespace.setResourceLookup(lookup);
 
-            // set a special component resolver that will prompt recursive
+            // set a special component resolver that will allow recursive
             // component/page resolution
             namespace.setComponentResolver(new BuilderComponentResolver(frameworkNamespace));
 
@@ -184,21 +221,16 @@ public class NamespaceResolver
             namespace.setPageResolver(new PageSpecificationResolver(frameworkNamespace, namespace));
 
             // do any work needed before we go ahead and resolve the pages and
-            // components
-            // for libraries other than the framework, child libraries are
-            // resolved
-            // here.
+            // components.
+            // For libraries other than the framework, child libraries are resolved here.
             namespaceConfigured();
 
             // resolve the pages/components in the Namespace
             resolveNamespaceContents();
 
             // now that we have resolved the pages/components, we need to
-            // replace the
-            // special ComponentResolver
-            // with a regular one. Also gives subclasses the opportunity to do
-            // some
-            // final adjustments.
+            // replace the special ComponentResolver with a regular one. Also gives subclasses the
+            // opportunity to do some final adjustments.
             namespaceResolved();
 
         }
@@ -301,13 +333,13 @@ public class NamespaceResolver
             ICoreResource location = (ICoreResource) jwcFiles.get(name);
             resolveComponent(name, location);
         }
-
-        Map<String, Resource> specless = resolveAllAnnotatedSpeclessComponentsForNamespace();
-        for (Iterator iter = specless.keySet().iterator(); iter.hasNext();)
-        {
-            String name = (String) iter.next();
-            jwcFiles.put(name, specless.get(name));
-        }
+        // Not needed, there are no specless
+        // Map<String, Resource> specless = resolveAllAnnotatedSpeclessComponentsForNamespace();
+        // for (Iterator iter = specless.keySet().iterator(); iter.hasNext();)
+        // {
+        // String name = (String) iter.next();
+        // jwcFiles.put(name, specless.get(name));
+        // }
     }
 
     /**
@@ -432,7 +464,7 @@ public class NamespaceResolver
      * 
      * @return a Map of Component Type name -> location
      */
-    private Map<String, Resource> getAllJWCFilesForNamespace()
+    protected Map<String, Resource> getAllJWCFilesForNamespace()
     {
         ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
 
@@ -468,12 +500,26 @@ public class NamespaceResolver
                         IProblem.SPINDLE_BUILDER_HIDDEN_JWC_FILE));
 
         }
-        return result;
+        
+        return resolveAllAnnotatedSpeclessComponentsForNamespace(result);
     }
 
-    private Map<String, Resource> resolveAllAnnotatedSpeclessComponentsForNamespace()
+    private Map<String, Resource> resolveAllAnnotatedSpeclessComponentsForNamespace(Map<String, Resource> jwcFiles)
     {
-        return Collections.emptyMap();
+        return jwcFiles;
+        
+        // find all the annotated classes under the {packages}
+        // for each one:
+        // create a spec for each one.
+        // shit we have to do a search under each package, a type based search.
+        // Tapestry at runtime has a path /foo/MyComponent and can take a package like
+        // org.moo and make org.moo.foo.MyComponent and check.
+        // we don't have a path, we have to search.
+        
+        // I dunno, there could be easy and hard cases.
+        
+        
+        
         // Map<String, Resource> result = new HashMap<String, Resource>();
         // if (build.infrastructure.projectSupportsAnnotations())
         // {
@@ -536,7 +582,7 @@ public class NamespaceResolver
     /**
      * @return Map a map of the names and file locations of all the .page files for the Namespace
      */
-    private Map<String, ICoreResource> getAllPageFilesForNamespace()
+    protected Map<String, ICoreResource> getAllPageFilesForNamespace()
     {
         ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
 
@@ -548,7 +594,8 @@ public class NamespaceResolver
         for (Iterator iter = spec.getPageNames().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
-            ICoreResource specLoc = (ICoreResource) location.getRelativeResource(spec.getPageSpecificationPath(type));
+            ICoreResource specLoc = (ICoreResource) location.getRelativeResource(spec
+                    .getPageSpecificationPath(type));
             result.put(type, specLoc);
         }
 

@@ -33,6 +33,7 @@ import net.sf.spindle.core.properties.DefaultProperties;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceAcceptor;
 import net.sf.spindle.core.resources.IResourceRoot;
+import net.sf.spindle.core.resources.LookupDepth;
 import net.sf.spindle.core.spec.PluginApplicationSpecification;
 import net.sf.spindle.core.spec.PluginComponentSpecification;
 
@@ -202,7 +203,7 @@ public class ApplicationResolver extends NamespaceResolver
             }
         };
 
-        appRoot.lookup(acceptor);
+        appRoot.lookup(acceptor, LookupDepth.ZERO);
 
         // need to filter out localized page templates. They will be picked up
         // again later.

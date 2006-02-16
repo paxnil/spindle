@@ -81,7 +81,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
                     location == null ? "no location found" : location.toString()), false,
                     IProblem.NOT_QUICK_FIXABLE);
 
-        PathUtils ws_path = new PathUtils(location.getName());
+        PathUtils ws_path = new PathUtils(location);
         String extension = ws_path.getFileExtension();
         if (extension == null
                 || !extension.equals(AbstractBuildInfrastructure.APPLICATION_EXTENSION))

@@ -28,6 +28,7 @@ import net.sf.spindle.core.PicassoMigration;
 import net.sf.spindle.core.messages.ImplMessages;
 import net.sf.spindle.core.resources.I18NResourceAcceptor;
 import net.sf.spindle.core.resources.ICoreResource;
+import net.sf.spindle.core.resources.LookupDepth;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.source.IProblemCollector;
 import net.sf.spindle.core.source.ISourceLocation;
@@ -44,7 +45,16 @@ import org.apache.tapestry.spec.IComponentSpecification;
 
 /**
  * A utility class used to find all the templates for a component
- * 
+ * Templates
+ * <p>
+ * from (@link org.apache.tapestry.services.impl.TemplateSourceImpl}<br>
+ * Finds the template for the given component, using the following rules:
+ * <ul>
+ * <li>If the component has a $template asset, use that
+ * <li>Look for a template in the same folder as the component
+ * <li>If a page in the application namespace, search in the application root
+ * <li>Fail!
+ * </ul>
  * @author glongman@gmail.com
  */
 public class TemplateFinder
@@ -268,7 +278,7 @@ public class TemplateFinder
         if (baseLocation.exists())
         {
             fAcceptor.configure(fTemplateBaseName, fExtension);
-            location.lookup(fAcceptor);
+            location.lookup(fAcceptor, LookupDepth.ZERO);
             fFindResults.addAll(Arrays.asList(fAcceptor.getResults()));
         }
     }

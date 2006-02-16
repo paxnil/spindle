@@ -32,6 +32,7 @@ import net.sf.spindle.core.messages.DefaultTapestryMessages;
 import net.sf.spindle.core.messages.PageloadMessages;
 import net.sf.spindle.core.namespace.ComponentSpecificationResolver;
 import net.sf.spindle.core.namespace.ICoreNamespace;
+import net.sf.spindle.core.resources.LookupDepth;
 import net.sf.spindle.core.resources.I18NResourceAcceptor;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceRoot;
@@ -416,7 +417,7 @@ public class SpecificationValidator extends BaseValidator {
 
 		try {
 			fI18NAcceptor.configure(name);
-			baseLocation.lookup(fI18NAcceptor);
+			baseLocation.lookup(fI18NAcceptor, LookupDepth.INFINITE);
 			return fI18NAcceptor.getResults();
 		} catch (RuntimeException e) {
 			TapestryCore.log(e);

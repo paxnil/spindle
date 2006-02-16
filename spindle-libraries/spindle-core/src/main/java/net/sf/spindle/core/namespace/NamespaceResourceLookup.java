@@ -24,6 +24,7 @@ import java.util.List;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceAcceptor;
 import net.sf.spindle.core.resources.IResourceRoot;
+import net.sf.spindle.core.resources.LookupDepth;
 import net.sf.spindle.core.spec.PluginApplicationSpecification;
 import net.sf.spindle.core.spec.PluginLibrarySpecification;
 
@@ -64,7 +65,7 @@ public class NamespaceResourceLookup {
 
 		for (Resource resource : fLocations) {
 			ICoreResource location = (ICoreResource) resource;
-			location.lookup(acceptor);
+			location.lookup(acceptor, LookupDepth.ZERO);
 		}
 		return acceptor.getResults();
 	}
