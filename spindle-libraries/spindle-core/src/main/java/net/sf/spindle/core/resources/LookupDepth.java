@@ -1,5 +1,7 @@
+/**
+ * 
+ */
 package net.sf.spindle.core.resources;
-
 /*
  The contents of this file are subject to the Mozilla Public License
  Version 1.1 (the "License"); you may not use this file except in
@@ -19,22 +21,6 @@ package net.sf.spindle.core.resources;
 
  Contributor(s): __glongman@gmail.com___.
  */
-import net.sf.spindle.core.TapestryCoreException;
-import net.sf.spindle.core.resources.search.ISearch;
-
-/**
- * Roots need to be able to do some "Resource"ee things on the roots since the generic core code can
- * not call the ICoreResource implementer constructors directly.
- * 
- * @author gwl
- */
-public interface IResourceRoot extends ResourceExtension
-{
-    /**
-     * @return an {@link ISearch} a modified visitor that will search over all the resources in this
-     *         resources root.
-     * @throws TapestryCoreException
-     *             if the search can't be configured properly
-     */
-    ISearch getSearch() throws TapestryCoreException;
+public enum LookupDepth {
+    ZERO, INFINITE;
 }

@@ -19,38 +19,35 @@ package net.sf.spindle.core.resources;
 
  Contributor(s): __glongman@gmail.com___.
  */
-import net.sf.spindle.core.TapestryCoreException;
-import net.sf.spindle.core.resources.search.ISearch;
-
 import org.apache.hivemind.Resource;
 
 public interface ResourceExtension
 {
-
     /**
      * this is here for the benefit of {@link IResourceRoot}
      */
     Resource getRelativeResource(String path);
 
     /**
-     * @return true iff this resource points to a real file.
+     * @return true iff this resource points to a real file or folder.
      */
     boolean exists();
 
     /**
      * pass all the non java resources (non .class files) in the same package/folder as this
      * resource to the requestor.
+     * <p>
+     * Callers must indicate if this is a folder or tree search by specifing the depth.
+     * <ul>
+     * <li>(@link DEPTH#ZERO} - look in this folder only</li>
+     * <li>(@link DEPTH#INFINITE} - look in this folder and all subfolders of this folder</li>
+     * </ul>
      * 
      * @param requestor
+     *            the requestor
+     * @param depth
+     *            one of (@link DEPTH#ZERO} or (@link DEPTH#INFINITE}
      */
-    void lookup(IResourceAcceptor requestor);
-
-    /**
-     * @return an {@link ISearch} a modified visitor that will search over all the resources in this
-     *         resources root.
-     * @throws TapestryCoreException
-     *             if the search can't be configured properly
-     */
-    ISearch getSearch() throws TapestryCoreException;
+    void lookup(IResourceAcceptor requestor, LookupDepth depth);
 
 }
