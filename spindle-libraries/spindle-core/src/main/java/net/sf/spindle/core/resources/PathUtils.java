@@ -123,6 +123,10 @@ public class PathUtils implements Cloneable
         // hashcode is cached in all but the bottom three bits of the separators field
         this.separators = (computeHashCode() << 3) | (_separators & ALL_SEPARATORS);
     }
+    
+    public PathUtils(Resource resource) {
+        this(resource.getPath());
+    }
 
     /**
      * Constructs a new path from the given string path. The given string path must be valid. The
