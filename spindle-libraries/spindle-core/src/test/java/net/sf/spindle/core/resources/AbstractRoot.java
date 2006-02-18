@@ -3,11 +3,8 @@ package net.sf.spindle.core.resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Locale;
 
 import net.sf.spindle.core.TapestryCore;
-
-import org.apache.hivemind.Resource;
 
 /*
  The contents of this file are subject to the Mozilla Public License
@@ -29,7 +26,7 @@ import org.apache.hivemind.Resource;
  Contributor(s): __glongman@gmail.com___.
  */
 /**
- * Common behaviour for all classpath roots (the main and the children)
+ * Common behaviour for all roots (the main and the children)
  */
 /* package */abstract class AbstractRoot implements IRootImplementation
 {
@@ -52,7 +49,7 @@ import org.apache.hivemind.Resource;
         return false;
     }
 
-    static final ResourceImpl[] EMPTY = new ResourceImpl[] {};
+    static final ResourceImpl[] RESOURCE_EMPTY = new ResourceImpl[] {};
 
     static IRootImplementation[] growAndAddToArray(IRootImplementation[] array,
             IRootImplementation addition)
@@ -70,6 +67,15 @@ import org.apache.hivemind.Resource;
         array = new ResourceImpl[old.length + 1];
         System.arraycopy(old, 0, array, 0, old.length);
         array[old.length] = addition;
+        return array;
+    }
+
+    static ResourceImpl[] growAndAddToArray(ResourceImpl[] array, ResourceImpl[] addition)
+    {
+        ResourceImpl[] old = array;
+        array = new ResourceImpl[old.length + addition.length];
+        System.arraycopy(old, 0, array, 0, old.length);
+        System.arraycopy(addition, 0, array, old.length, addition.length);
         return array;
     }
 

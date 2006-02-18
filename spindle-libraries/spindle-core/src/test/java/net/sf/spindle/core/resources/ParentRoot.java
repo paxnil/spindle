@@ -69,14 +69,14 @@ import org.apache.hivemind.util.LocalizedResource;
         };
     }
 
-    public void removeChildRoot(File rootFile)
+    public void removeChildRoot(Object rootObject)
     {
         IChildRoot root = null;
 
         for (Iterator iter = roots.iterator(); iter.hasNext();)
         {
             IChildRoot child = (IChildRoot) iter.next();
-            if (child.getRootFile().equals(rootFile))
+            if (child.getRootObject().equals(rootObject))
             {
                 iter.remove();
                 root = child;
@@ -254,32 +254,29 @@ import org.apache.hivemind.util.LocalizedResource;
             return null;
         return root.findUnderlier(resource);
     }
+    
+    
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor)
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.IRootImplementation#lookup(net.sf.spindle.core.resources.ResourceImpl, net.sf.spindle.core.resources.IResourceAcceptor, net.sf.spindle.core.resources.ResourceExtension.DEPTH)
      */
-    public void lookup(IResourceAcceptor requestor)
-    {
-        lookup(defaultPackage, requestor);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see net.sf.spindle.core.resources.IRootImplementation#lookup(net.sf.spindle.core.resources.ResourceImpl,
-     *      net.sf.spindle.core.resources.IResourceAcceptor)
-     */
-    public void lookup(ResourceImpl resource, IResourceAcceptor requestor)
-    {
+    public void lookup(ResourceImpl resource, IResourceAcceptor requestor, LookupDepth depth)
+    {        
         ArrayList<ICoreResource> seenResources = new ArrayList<ICoreResource>();
         for (IChildRoot child : roots)
         {
-            if (!child.performlookup(resource, requestor, seenResources))
+            if (!child.performlookup(resource, requestor, seenResources, depth))
                 return;
         }
     }
+
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor, net.sf.spindle.core.resources.ResourceExtension.DEPTH)
+     */
+    public void lookup(IResourceAcceptor requestor, LookupDepth depth)
+    {
+        lookup(defaultPackage, requestor, depth);        
+    }    
 
     /*
      * (non-Javadoc)
@@ -448,7 +445,7 @@ import org.apache.hivemind.util.LocalizedResource;
      * 
      * @see net.sf.spindle.core.resources.IChildRoot#getNonJavaResources(net.sf.spindle.core.resources.ResourceImpl)
      */
-    public ICoreResource[] getNonJavaResources(ResourceImpl resource)
+    public ResourceImpl[] getNonJavaResources(ResourceImpl resource, LookupDepth depth)
     {
         Assert.isLegal(false);
         return null;
@@ -459,7 +456,7 @@ import org.apache.hivemind.util.LocalizedResource;
      * 
      * @see net.sf.spindle.core.resources.IChildRoot#getRootFile()
      */
-    public File getRootFile()
+    public Object getRootObject()
     {
         Assert.isLegal(false);
         return null;
@@ -472,7 +469,7 @@ import org.apache.hivemind.util.LocalizedResource;
      *      net.sf.spindle.core.resources.IResourceAcceptor, java.util.ArrayList)
      */
     public boolean performlookup(ResourceImpl resource, IResourceAcceptor requestor,
-            ArrayList<ICoreResource> seenResources)
+            ArrayList<ICoreResource> seenResources, LookupDepth depth)
     {
         Assert.isLegal(false);
         return false;
@@ -499,5 +496,4 @@ import org.apache.hivemind.util.LocalizedResource;
         Assert.isLegal(false);
         return 0;
     }
-
 }

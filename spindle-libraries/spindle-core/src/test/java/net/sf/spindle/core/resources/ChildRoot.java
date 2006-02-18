@@ -1,16 +1,5 @@
 package net.sf.spindle.core.resources;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Locale;
-
-import net.sf.spindle.core.TapestryCoreException;
-import net.sf.spindle.core.resources.search.ISearch;
-
-import org.apache.hivemind.Resource;
-
 /*
  The contents of this file are subject to the Mozilla Public License
  Version 1.1 (the "License"); you may not use this file except in
@@ -30,6 +19,17 @@ import org.apache.hivemind.Resource;
 
  Contributor(s): __glongman@gmail.com___.
  */
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Locale;
+
+import net.sf.spindle.core.TapestryCoreException;
+import net.sf.spindle.core.resources.search.ISearch;
+
+import org.apache.hivemind.Resource;
+
 /**
  * Base class for all child roots in an {@link net.sf.spindle.core.resources.ParentRoot}
  */
@@ -40,19 +40,19 @@ import org.apache.hivemind.Resource;
 
     private int type;
 
-    protected File rootFile;
+    protected Object rootObject;
 
     protected URL rootUrl;
 
-    ChildRoot(int type, ParentRoot parentRoot, File rootFile) throws MalformedURLException
+    ChildRoot(int type, ParentRoot parentRoot, Object rootObject) throws MalformedURLException
     {
         this.type = type;
         this.parentRoot = parentRoot;
-        this.rootFile = rootFile;
-        this.rootUrl = intitializeUrl(rootFile);
+        this.rootObject = rootObject;
+        this.rootUrl = intitializeUrl();
     }
 
-    protected abstract URL intitializeUrl(File file) throws MalformedURLException;
+    protected abstract URL intitializeUrl() throws MalformedURLException;
 
     /*
      * (non-Javadoc)
@@ -109,33 +109,41 @@ import org.apache.hivemind.Resource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor)
+     * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor,
+     *      net.sf.spindle.core.resources.ResourceExtension.DEPTH)
      */
-    public void lookup(IResourceAcceptor requestor)
+    public void lookup(IResourceAcceptor requestor, LookupDepth depth)
     {
-        parentRoot.lookup(requestor);
+        parentRoot.lookup(requestor, depth);
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see net.sf.spindle.core.resources.IRootImplementation#lookup(net.sf.spindle.core.resources.ResourceImpl,
-     *      net.sf.spindle.core.resources.IResourceAcceptor)
+     *      net.sf.spindle.core.resources.IResourceAcceptor,
+     *      net.sf.spindle.core.resources.ResourceExtension.DEPTH)
      */
-    public void lookup(ResourceImpl resource, IResourceAcceptor requestor)
+    public void lookup(ResourceImpl resource, IResourceAcceptor requestor, LookupDepth depth)
     {
-        parentRoot.lookup(resource, requestor);
+        parentRoot.lookup(resource, requestor, depth);
     }
-
-    // called by parent root
+    
+    /*
+     * (non-Javadoc) called by parent root
+     * 
+     * @see net.sf.spindle.core.resources.IChildRoot#performlookup(net.sf.spindle.core.resources.ResourceImpl,
+     *      net.sf.spindle.core.resources.IResourceAcceptor, java.util.ArrayList)
+     */
     public final boolean performlookup(ResourceImpl resource, IResourceAcceptor requestor,
-            ArrayList<ICoreResource> seenResources)
+            ArrayList<ICoreResource> seenResources, LookupDepth depth)
     {
-        ICoreResource[] nonJavaResources = getNonJavaResources(resource);
+        ICoreResource[] nonJavaResources = getNonJavaResources(resource, depth);
         for (int i = 0; i < nonJavaResources.length; i++)
         {
             if (seenResources != null && seenResources.contains(nonJavaResources[i]))
                 continue;
+            seenResources.add(nonJavaResources[i]);
             if (!requestor.accept(nonJavaResources[i]))
                 return false;
         }
@@ -229,9 +237,24 @@ import org.apache.hivemind.Resource;
      * 
      * @see net.sf.spindle.core.resources.IChildRoot#getRootFile()
      */
-    public File getRootFile()
+    public Object getRootObject()
     {
-        return rootFile;
+        return rootObject;
+    }
+    
+    
+
+    public String getToStringPrefix()
+    {       
+        return parentRoot.getToStringPrefix();
+    }
+    
+    
+
+    @Override
+    public String toString()
+    {        
+        return "childRoot:"+getToStringPrefix()+":"+rootObject.toString();
     }
 
     @Override
@@ -242,6 +265,6 @@ import org.apache.hivemind.Resource;
         if (!(obj instanceof ChildRoot))
             return false;
         ChildRoot other = (ChildRoot) obj;
-        return this.rootFile.equals(other.rootFile);
+        return this.rootObject.equals(other.rootObject);
     }
 }

@@ -1,6 +1,5 @@
 package net.sf.spindle.core.resources;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -39,15 +38,15 @@ public interface IChildRoot extends IRootImplementation
     Object findUnderlier(ResourceImpl resource);
 
     boolean performlookup(ResourceImpl resource, IResourceAcceptor requestor,
-            ArrayList<ICoreResource> seenResources);
+            ArrayList<ICoreResource> seenResources, LookupDepth depth);
 
     URL buildResourceURL(ResourceImpl resource);
 
     abstract boolean existsInThisRoot(String path);
 
-    ICoreResource[] getNonJavaResources(ResourceImpl resource);
+    ResourceImpl[] getNonJavaResources(ResourceImpl resource, LookupDepth depth);
 
     int getType();
 
-    File getRootFile();
+    Object getRootObject();
 }

@@ -48,7 +48,9 @@ import org.apache.hivemind.Resource;
 
     boolean exists(ResourceImpl resource);
 
-    void lookup(ResourceImpl resource, IResourceAcceptor requestor);
+    void lookup(ResourceImpl resource, IResourceAcceptor requestor, LookupDepth depth);   
 
     Object getUnderlier(ResourceImpl resource);
+
+    String getToStringPrefix();
 }

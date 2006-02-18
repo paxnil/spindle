@@ -20,11 +20,11 @@ package net.sf.spindle.core.resources;
  Contributor(s): __glongman@gmail.com___.
  */
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import net.sf.spindle.core.resources.search.ISearchAcceptor;
 import net.sf.spindle.core.util.Assert;
@@ -34,7 +34,9 @@ import net.sf.spindle.core.util.Assert;
  */
 /* package */class FolderRoot extends ChildRoot
 {
-    FolderRoot(ParentRoot parentRoot, File rootFolder) throws IOException, URISyntaxException
+
+    FolderRoot(ParentRoot parentRoot, File rootFolder)
+            throws IOException, URISyntaxException
     {
         super(IChildRoot.SOURCE, parentRoot, rootFolder);
 
@@ -43,55 +45,74 @@ import net.sf.spindle.core.util.Assert;
         Assert.isLegal(rootFolder.isDirectory());
     }
 
-    /* (non-Javadoc)
+    private File getRootFile()
+    {
+        return (File) rootObject;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.ChildRoot#intitializeUrl(java.io.File)
      */
     @Override
-    protected URL intitializeUrl(File file) throws MalformedURLException
+    protected URL intitializeUrl() throws MalformedURLException
     {
-        return file.toURL();
+        return getRootFile().toURL();
     }
 
-   
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.IChildRoot#getNonJavaResources(net.sf.spindle.core.resources.ResourceImpl)
      */
-    public ICoreResource[] getNonJavaResources(ResourceImpl resource)
+    public ResourceImpl[] getNonJavaResources(ResourceImpl resource, final LookupDepth depth)
     {
-        final File root = rootFile;
-        File[] children = rootFile.listFiles(new FilenameFilter()
+        PathUtils utils = new PathUtils(resource);
+        if (!resource.isFolder())
+            utils = utils.removeLastSegments(1);
+
+        utils = utils.addTrailingSeparator().makeRelative();
+
+        final File lookupRoot = new File((File) rootObject, utils.toString());
+
+        if (!lookupRoot.exists() || !lookupRoot.isDirectory())
+            return RESOURCE_EMPTY;
+
+        final ArrayList<ResourceImpl> result = new ArrayList<ResourceImpl>(25);
+
+        new DirectoryVisitor()
         {
-            public boolean accept(File dir, String name)
+            @Override
+            public void visitFile(File file)
             {
-                if (!dir.equals(root))
-                    return false;
-                if (isJavaName(name))
-                    return false;
-                return true;
+                if (!isJavaName(file.getName()))
+                    result.add(new ResourceImpl(FolderRoot.this, getResourcePath(file)));
             }
-        });
-        PathUtils rootpath = new PathUtils(root.getPath());
-        ResourceImpl[] result = new ResourceImpl[] {};
-        for (int i = 0; i < children.length; i++)
-        {
-            PathUtils childPath = new PathUtils(children[i].getPath());
-            String resourcePath = childPath.removeFirstSegments(
-                    rootpath.matchingFirstSegments(childPath)).makeAbsolute().toString();
-            growAndAddToArray(result, new ResourceImpl(this, resourcePath));
-        }
-        return result;
+
+            @Override
+            public void visitDirectory(File directory)
+            {
+                if (depth == LookupDepth.ZERO && !directory.equals(lookupRoot))
+                    return;
+
+                super.visitDirectory(directory);
+            }
+        }.visitDirectory(lookupRoot);
+        return result.toArray(new ResourceImpl[] {});
     }
 
     private String getResourcePath(File child)
     {
-        PathUtils rootpath = new PathUtils(getRootFile().getPath());
-        PathUtils childPath = new PathUtils(child.getPath());
+        PathUtils rootpath = new PathUtils(getRootFile().getPath()).setDevice("");
+        PathUtils childPath = new PathUtils(child.getPath()).setDevice("");
         return childPath.removeFirstSegments(rootpath.matchingFirstSegments(childPath))
                 .makeAbsolute().toString();
     }
 
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.IChildRoot#performSearch(net.sf.spindle.core.resources.search.ISearchAcceptor)
      */
     public void performSearch(final ISearchAcceptor acceptor)
@@ -110,8 +131,9 @@ import net.sf.spindle.core.util.Assert;
         visitor.visitDirectory(getRootFile());
     }
 
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.IChildRoot#findUnderlier(net.sf.spindle.core.resources.ResourceImpl)
      */
     public Object findUnderlier(ResourceImpl resource)
@@ -122,8 +144,9 @@ import net.sf.spindle.core.util.Assert;
         return null;
     }
 
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.IRootImplementation#getUnderlier(net.sf.spindle.core.resources.ResourceImpl)
      */
     public Object getUnderlier(ResourceImpl resource)
@@ -131,13 +154,14 @@ import net.sf.spindle.core.util.Assert;
         return parentRoot.getUnderlier(resource);
     }
 
-   
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.IChildRoot#existsInThisRoot(java.lang.String)
      */
     public boolean existsInThisRoot(String path)
     {
-        File check = new File(rootFile, path);
+        File check = new File(getRootFile(), path);
         return check.exists();
     }
 
@@ -149,7 +173,7 @@ import net.sf.spindle.core.util.Assert;
         if (!(obj instanceof FolderRoot))
             return false;
         FolderRoot other = (FolderRoot) obj;
-        return this.rootFile.equals(other.rootFile);
+        return this.rootObject.equals(other.rootObject);
     }
 
     abstract class DirectoryVisitor
@@ -163,13 +187,32 @@ import net.sf.spindle.core.util.Assert;
             {
                 File child = new File(directory, children[i]);
                 if (child.isDirectory())
-                    visitDirectory(child);
+                {
+                    if (isVisitableDirectory(child))
+                        visitDirectory(child);
+                }
                 else
+                {
                     visitFile(child);
+                }
             }
         }
 
         public abstract void visitFile(File file);
+
+        // TODO - this is a kludge.
+        public boolean isVisitableDirectory(File file)
+        {
+            if (file.isDirectory())
+            {
+                if ("CVS".equals(file.getName()))
+                    return false;
+                if (".svn".equals(file.getName()))
+                    return false;
+                return true;
+            }
+            return false;
+        }
     }
 
 }

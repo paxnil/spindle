@@ -22,36 +22,42 @@ import net.sf.spindle.core.resources.search.ISearch;
  Contributor(s): __glongman@gmail.com___.
  */
 /**
- * An implementation of a {@link ParentRoot} for the classpath. You can only add folders to this root.
+ * An implementation of a {@link ParentRoot} for the classpath. You can only add folders to this
+ * root.
  * <p>
- * If you require projects to be in exploded war format then you would add only one folder to this root.
+ * If you require projects to be in exploded war format then you would add only one folder to this
+ * root.
  * <p>
- * However you can add as many folders as you like. Lookups and Searches occur in the order you add the folders.
+ * However you can add as many folders as you like. Lookups and Searches occur in the order you add
+ * the folders.
  * <p>
- * In Eclipse everyone wants the Project to be the root of the exploded war *and* the root of the classpath.
- * This can't be done with this impl, but I could see it being possible if the ContextRoot had a reference to the
- * ClasspathRoot. Then the ContextRoot could exclude paths into the ClasspathRoot's source folders.
- *
+ * In Eclipse everyone wants the Project to be the root of the exploded war *and* the root of the
+ * classpath. This can't be done with this impl, but I could see it being possible if the
+ * ContextRoot had a reference to the ClasspathRoot. Then the ContextRoot could exclude paths into
+ * the ClasspathRoot's source folders.
  */
 public class ContextRoot extends ParentRoot
 {
 
     public ContextRoot()
     {
-        super(ParentRoot.CONTEXT);        
+        super(ParentRoot.CONTEXT);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.ParentRoot#createSearch()
      */
     @Override
     ISearch createSearch()
-    {        
-        return null; //TODO implement when needed.
+    {
+        return null; // TODO implement when needed.
     }
 
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.IRootImplementation#isBinaryResource(net.sf.spindle.core.resources.ResourceImpl)
      */
     public boolean isBinaryResource(ResourceImpl resource)
@@ -59,12 +65,18 @@ public class ContextRoot extends ParentRoot
         return false;
     }
 
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.sf.spindle.core.resources.IRootImplementation#isClasspathResource(net.sf.spindle.core.resources.ResourceImpl)
      */
     public boolean isClasspathResource(ResourceImpl resource)
     {
         return false;
+    }
+
+    public String getToStringPrefix()
+    {
+        return "context:";
     }
 }

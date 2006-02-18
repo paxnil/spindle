@@ -132,16 +132,14 @@ import org.apache.hivemind.util.AbstractResource;
     public boolean exists()
     {
         return root.exists(this);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor)
+    }   
+    
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor, net.sf.spindle.core.resources.ResourceExtension.DEPTH)
      */
-    public void lookup(IResourceAcceptor requestor)
+    public void lookup(IResourceAcceptor requestor, LookupDepth depth)
     {
-        root.lookup(this, requestor);
+        root.lookup(this, requestor, depth);
     }
 
     /*
@@ -178,14 +176,10 @@ import org.apache.hivemind.util.AbstractResource;
     }
 
     @Override
-    public boolean equals(Object arg0)
+    public String toString()
     {
-        if (!super.equals(arg0))
-            return false;
-        if (!(arg0 instanceof ResourceImpl))
-            return false;
-        ResourceImpl other = (ResourceImpl) arg0;
-        return getUnderlier().equals(other.getUnderlier());
+       return this.root.getToStringPrefix() + getPath();
     }
-
+    
+    
 }

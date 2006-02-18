@@ -25,68 +25,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import junit.framework.TestCase;
-
-import org.apache.hivemind.Resource;
-
-public class JarClasspathRootTest extends TestCase
+public class JarClasspathRootTest extends AbstractTestRoot
 {
 
-    private static final String RESOURCES_ROOT2 = "resources/root2";
-
-    private static final String RESOURCES_ROOT1 = "resources/root1";
-
-    private static final String JARS_TAPESTRY_TEST_JAR = "jars/tapestryTest.jar";
-
-    private static final String JARS_FOO_JAR = "jars/foo.jar";
-
-    private static final String[] EMPTY = new String[] {};
-
-    private File getFile(String relativePath)
+    public JarClasspathRootTest()
     {
-        PathUtils jarPath = new PathUtils(System.getProperty("basedir")).append("testData").append(
-                relativePath);
-        File file = new File(jarPath.toOSString());
-        assertTrue(file.exists());
-        return file;
+        super();
     }
 
-    private IResourceRoot getTestRoot(String[] jars, String[] folders, boolean flipOrder)
-            throws Exception
+    public JarClasspathRootTest(String name)
     {
-        ClasspathRoot root = new ClasspathRoot();
-        if (flipOrder)
-        {
-            addSourceFolders(folders, root);
-            addJars(jars, root);
-        }
-        else
-        {
-            addJars(jars, root);
-            addSourceFolders(folders, root);
-        }        
-        return root;
-    }
-
-    private void addSourceFolders(String[] folders, ClasspathRoot root)
-    {
-        for (int i = 0; i < folders.length; i++)
-        {
-            root.addFolder(getFile(folders[i]));
-        }
-    }
-
-    private void addJars(String[] jars, ClasspathRoot root)
-    {
-        for (int i = 0; i < jars.length; i++)
-        {
-            root.addJar(getFile(jars[i]));
-        }
+        super(name);
     }
 
     public void test() throws Exception
     {
-        IResourceRoot root = getTestRoot(new String[]
+        IResourceRoot root = getTestClasspathRoot(new String[]
         { JARS_TAPESTRY_TEST_JAR }, EMPTY, false);
 
         ICoreResource framework = (ICoreResource) root
@@ -106,7 +60,7 @@ public class JarClasspathRootTest extends TestCase
 
     public void testLookupOnejar() throws Exception
     {
-        IResourceRoot root = getTestRoot(new String[]
+        IResourceRoot root = getTestClasspathRoot(new String[]
         { JARS_TAPESTRY_TEST_JAR }, EMPTY, false);
 
         ICoreResource framework = (ICoreResource) root
@@ -117,7 +71,7 @@ public class JarClasspathRootTest extends TestCase
 
         IResourceAcceptor acceptor = new Acceptor();
 
-        framework.lookup(acceptor);
+        framework.lookup(acceptor, LookupDepth.ZERO);
 
         assertEquals(5, acceptor.getResults().length);
     }
@@ -125,7 +79,7 @@ public class JarClasspathRootTest extends TestCase
     public void testFindLibrary() throws Exception
     {
 
-        IResourceRoot root = getTestRoot(new String[]
+        IResourceRoot root = getTestClasspathRoot(new String[]
         { JARS_TAPESTRY_TEST_JAR }, new String[]
         { RESOURCES_ROOT1 }, false);
 
@@ -152,7 +106,7 @@ public class JarClasspathRootTest extends TestCase
     public void testFindLibrary2() throws Exception
     {
 
-        IResourceRoot root = getTestRoot(new String[]
+        IResourceRoot root = getTestClasspathRoot(new String[]
         { JARS_TAPESTRY_TEST_JAR }, new String[]
         { RESOURCES_ROOT1 }, false);
 
@@ -183,7 +137,7 @@ public class JarClasspathRootTest extends TestCase
 
     public void testDefaultPackage() throws Exception
     {
-        IResourceRoot root = getTestRoot(new String[]
+        IResourceRoot root = getTestClasspathRoot(new String[]
         { JARS_FOO_JAR }, new String[]
         { RESOURCES_ROOT1 }, false);
 
@@ -208,7 +162,7 @@ public class JarClasspathRootTest extends TestCase
 
     public void testGetLocalization() throws Exception
     {
-        IResourceRoot root = getTestRoot(new String[]
+        IResourceRoot root = getTestClasspathRoot(new String[]
         { JARS_FOO_JAR }, new String[]
         { RESOURCES_ROOT1 }, false);
 
@@ -226,7 +180,65 @@ public class JarClasspathRootTest extends TestCase
 
         assertTrue(localized.exists());
 
+        assertEquals("foo_en_CA.html", localized.getName());
+
         assertTrue(localized.isClasspathResource() && localized.isBinaryResource());
+    }
+    
+    public void testGetLocalization2() throws Exception
+    {
+        ClasspathRoot root = getTestClasspathRoot();
+        
+        addSourceFolder(RESOURCES_ROOT2, root);
+        addJar(JARS_FOO_JAR, root);
+
+        ICoreResource foo = (ICoreResource) root.getRelativeResource("foo.html");
+
+        assertTrue(foo.exists());
+
+        assertTrue(foo.isClasspathResource() && !foo.isBinaryResource());
+
+        assertTrue(foo.getUnderlier() instanceof File);
+
+        ICoreResource localized = (ICoreResource) foo.getLocalization(Locale.CANADA);
+
+        assertNotNull(localized);
+
+        assertTrue(localized.exists());
+
+        assertEquals("foo_en_CA.html", localized.getName());
+
+        assertTrue(localized.isClasspathResource() && !localized.isBinaryResource());
+        
+        assertTrue(localized.getUnderlier() instanceof File);
+    }
+    
+    public void testGetLocalization3() throws Exception
+    {
+        ClasspathRoot root = getTestClasspathRoot();
+        
+        addSourceFolder(RESOURCES_ROOT1, root);
+        addJar(JARS_FOO_JAR, root);
+
+        ICoreResource foo = (ICoreResource) root.getRelativeResource("foo.html");
+
+        assertTrue(foo.exists());
+
+        assertTrue(foo.isClasspathResource() && !foo.isBinaryResource());
+
+        assertTrue(foo.getUnderlier() instanceof File);
+
+        ICoreResource localized = (ICoreResource) foo.getLocalization(Locale.CANADA);
+
+        assertNotNull(localized);
+
+        assertTrue(localized.exists());
+
+        assertEquals("foo_en_CA.html", localized.getName());
+
+        assertTrue(localized.isClasspathResource() && localized.isBinaryResource());
+        
+        assertTrue(localized.getUnderlier() instanceof URL);
     }
 
     class Acceptor implements IResourceAcceptor

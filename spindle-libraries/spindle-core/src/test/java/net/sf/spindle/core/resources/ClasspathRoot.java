@@ -84,4 +84,11 @@ public class ClasspathRoot extends ParentRoot
         // TODO Auto-generated method stub
         return null;
     }
+
+    public String getToStringPrefix()
+    {        
+        return "classpath:";
+    }
+    
+    
 }
