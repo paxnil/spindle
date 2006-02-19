@@ -3,6 +3,10 @@ package net.sf.spindle.core.resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.Test;
+
+import net.sf.spindle.core.SuiteOfTestCases;
+
 import org.apache.hivemind.Resource;
 
 /*
@@ -24,15 +28,15 @@ import org.apache.hivemind.Resource;
 
  Contributor(s): __glongman@gmail.com___.
  */
-public class RelativeResourceTest extends AbstractTestRoot
+public class ResourceTest extends AbstractTestRoot
 {
 
-    public RelativeResourceTest()
+    public static Test suite()
     {
-        super();
+        return new SuiteOfTestCases.Suite(LookupTest.class);
     }
 
-    public RelativeResourceTest(String name)
+    public ResourceTest(String name)
     {
         super(name);
     }
@@ -59,4 +63,6 @@ public class RelativeResourceTest extends AbstractTestRoot
         assertFalse(resource.isBinaryResource());
         assertFalse(resource.exists());
     }
+    
+   
 }

@@ -210,18 +210,7 @@ import org.apache.hivemind.Resource;
     {
         return parentRoot.getSearch();
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see net.sf.spindle.core.resources.IRootImplementation#clashCkeck(net.sf.spindle.core.resources.ResourceImpl,
-     *      net.sf.spindle.core.resources.ICoreResource)
-     */
-    public boolean clashCkeck(ResourceImpl resource, ICoreResource resource2)
-    {
-        return parentRoot.clashCkeck(resource, resource2);
-    }
-
+    
     /*
      * (non-Javadoc)
      * 

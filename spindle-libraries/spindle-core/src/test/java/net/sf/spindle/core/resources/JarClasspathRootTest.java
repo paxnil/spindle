@@ -25,20 +25,23 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import junit.framework.Test;
+import net.sf.spindle.core.SuiteOfTestCases;
+
 public class JarClasspathRootTest extends AbstractTestRoot
 {
 
-    public JarClasspathRootTest()
+    public static Test suite()
     {
-        super();
+        return new SuiteOfTestCases.Suite(JarClasspathRootTest.class);
     }
-
+    
     public JarClasspathRootTest(String name)
     {
         super(name);
     }
 
-    public void test() throws Exception
+    public void testBase() throws Exception
     {
         IResourceRoot root = getTestClasspathRoot(new String[]
         { JARS_TAPESTRY_TEST_JAR }, EMPTY, false);

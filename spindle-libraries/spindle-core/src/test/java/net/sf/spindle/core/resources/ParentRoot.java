@@ -171,18 +171,6 @@ import org.apache.hivemind.util.LocalizedResource;
     /*
      * (non-Javadoc)
      * 
-     * @see net.sf.spindle.core.resources.IRootImplementation#clashCkeck(net.sf.spindle.core.resources.ResourceImpl,
-     *      net.sf.spindle.core.resources.ICoreResource)
-     */
-    public boolean clashCkeck(ResourceImpl resource, ICoreResource resource2)
-    {
-        // TODO in or out ? - not sure yet
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see net.sf.spindle.core.resources.IRootImplementation#newResource(java.lang.String)
      */
     public ResourceImpl newResource(String path)

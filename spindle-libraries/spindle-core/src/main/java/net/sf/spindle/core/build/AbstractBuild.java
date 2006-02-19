@@ -1,24 +1,24 @@
 package net.sf.spindle.core.build;
 
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
+ Contributor(s): __glongman@gmail.com___.
+ */
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,9 +95,16 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return (IDependencyListener) DEPENDENCY_LISTENER_HOLDER.get();
     }
 
-    protected List<ICoreNamespace> appNamespace;
+    // the sole app ns allowed in a Spindle project
+    protected ICoreNamespace appNamespace;
 
-    protected List<ICoreNamespace> libNamespace;
+    // all the namespaces rooted in the context.
+    // will inclide appNamespace and any libraries in the context
+    protected List<ICoreNamespace> contextNamespaces;
+
+    // all the namespaces rooted in the classpath
+    // will only be libraries.
+    protected List<ICoreNamespace> classpathNamespaces;
 
     protected BuilderQueue buildQueue;
 
@@ -182,7 +189,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         this.templateMap = new HashMap<Resource, BaseSpecification>();
         this.fileSpecificationMap = new HashMap<Resource, BaseSpecification>();
         this.binarySpecificationMap = new HashMap<Resource, BaseSpecification>();
-        this.libNamespace = new ArrayList<ICoreNamespace>();
+        this.contextNamespaces = new ArrayList<ICoreNamespace>();
+        this.classpathNamespaces = new ArrayList<ICoreNamespace>();
         this.cleanTemplates = new ArrayList<Resource>();
         this.clashDetector = new ClashDetector();
         this.problemPersister = infrastructure.problemPersister;
@@ -208,7 +216,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             frameworkNamespace = getFrameworkNamespace();
 
-            appNamespace = getApplicationNamespaces();
+            appNamespace = getApplicationNamespace();
 
             checkForNamspaceClashes();
 
@@ -219,15 +227,15 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             buildQueue.addAll(findAllTapestrySourceFiles().toArray());
 
-            // we need to eliminate the mark as "processed" ns locations we already visited.
-            for (Iterator iter = appNamespace.iterator(); iter.hasNext();)
+            // we need to eliminate - mark as "processed" ns locations we already visited.
+
+            for (ICoreNamespace ns : contextNamespaces)
             {
-                INamespace ns = (INamespace) iter.next();
                 buildQueue.finished(ns.getSpecificationLocation());
             }
-            for (Iterator iter = libNamespace.iterator(); iter.hasNext();)
+
+            for (ICoreNamespace ns : classpathNamespaces)
             {
-                INamespace ns = (INamespace) iter.next();
                 buildQueue.finished(ns.getSpecificationLocation());
             }
 
@@ -237,11 +245,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             resolveFramework();
 
-            for (Iterator iter = appNamespace.iterator(); iter.hasNext();)
-            {
-                CoreNamespace application = (CoreNamespace) iter.next();
-                resolveApplication(application.getAppNameFromWebXML(), application);
-            }
+            CoreNamespace application = (CoreNamespace) appNamespace;
+            resolveApplication(application.getAppNameFromWebXML(), application);
 
             notifier.updateProgressDelta(0.05f);
 
@@ -286,24 +291,15 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected void checkForNamspaceClashes()
     {
-        // first the application namespaces.
-        for (Iterator iter = appNamespace.iterator(); iter.hasNext();)
+        for (ICoreNamespace ns : contextNamespaces)
         {
-            ICoreNamespace candidate = (ICoreNamespace) iter.next();
-
-            ClashDetector.checkNamspaceClash(candidate, appNamespace, "appNSKey");
-
+            ClashDetector.checkNamspaceClash(ns, contextNamespaces, "appNSKey");
         }
 
-        // then all Libraries.
-        for (Iterator iter = libNamespace.iterator(); iter.hasNext();)
+        for (ICoreNamespace ns : classpathNamespaces)
         {
-            ICoreNamespace candidate = (ICoreNamespace) iter.next();
-
-            ClashDetector.checkNamspaceClash(candidate, libNamespace, "libNSKey");
-
+            ClashDetector.checkNamspaceClash(ns, classpathNamespaces, "libNSKey");
         }
-
     }
 
     protected void recordBuildMiss(int missPriority, Resource resource)
@@ -332,7 +328,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         processedLocations = null;
         seenTemplateExtensions = null;
         appNamespace = null;
-        libNamespace = null;
+        contextNamespaces = null;
+        classpathNamespaces = null;
         frameworkNamespace = null;
         buildQueue = null;
         notifier = null;
@@ -361,9 +358,9 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return null;
     }
 
-    protected ICoreNamespace createNamespace(String id, Resource location, String encoding)
+    // assumes id is valid and location exists.
+    protected ICoreNamespace createNamespace(String id, ICoreResource location, String encoding)
     {
-
         ICoreNamespace result = null;
 
         PluginLibrarySpecification lib = null;
@@ -376,14 +373,14 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             lib = (PluginLibrarySpecification) parseLibrarySpecification(location, encoding);
 
         if (lib != null)
-        {
             result = new CoreNamespace(id, lib);
-        }
 
         lib.setNamespace(result);
 
-        if (lib.getSpecificationType() == BaseSpecification.LIBRARY_SPEC)
-            libNamespace.add(result);
+        if (location.isClasspathResource())
+            classpathNamespaces.add(result);
+        else
+            contextNamespaces.add(result);
 
         return result;
     }
@@ -1021,13 +1018,12 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return result;
     }
 
-    protected List<ICoreNamespace> getApplicationNamespaces()
+    protected ICoreNamespace getApplicationNamespace()
     {
-        List<ICoreNamespace> result = doGetApplicationNamespaces();
+        CoreNamespace ns = doGetApplicationNamespace();
 
-        for (Iterator iter = result.iterator(); iter.hasNext();)
+        if (ns != null)
         {
-            CoreNamespace ns = (CoreNamespace) iter.next();
 
             ns.installBasePropertySource(projectPropertySource);
 
@@ -1041,26 +1037,25 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                         "org.apache.tapestry.template-extension"), false);
         }
 
-        return result;
+        return ns;
     }
 
-    protected abstract List<ICoreNamespace> doGetApplicationNamespaces();
+    protected abstract CoreNamespace doGetApplicationNamespace();
 
     // returns unresolved namespace tree assumes id is valid and location exists.
-    protected CoreNamespace getNamespaceTree(String namespaceId, Resource location, String encoding)
+    protected CoreNamespace getNamespaceTree(String namespaceId, ICoreResource location,
+            String encoding)
     {
         CoreNamespace result = (CoreNamespace) createNamespace(namespaceId, location, encoding);
 
         if (result == null)
             return null;
 
-        ICoreResource nsLocation = (ICoreResource) result.getSpecificationLocation();
-
         ILibrarySpecification nsSpec = result.getSpecification();
 
         templateExtensionDeclared(
                 nsSpec.getProperty("org.apache.tapestry.template-extension"),
-                nsLocation.isClasspathResource());
+                location.isClasspathResource());
 
         for (Iterator iter = nsSpec.getLibraryIds().iterator(); iter.hasNext();)
         {
@@ -1068,8 +1063,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             ICoreResource childLocation;
 
-            if (nsLocation.isClasspathResource())
-                childLocation = (ICoreResource) nsLocation.getRelativeResource(nsSpec
+            if (location.isClasspathResource())
+                childLocation = (ICoreResource) location.getRelativeResource(nsSpec
                         .getLibrarySpecificationPath(childId));
             else
                 childLocation = (ICoreResource) classpathRoot.getRelativeResource(nsSpec

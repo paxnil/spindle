@@ -38,9 +38,7 @@ import org.apache.hivemind.Resource;
 
     boolean isFolder(ResourceImpl resource);
 
-    URL getResourceURL(ResourceImpl resource);
-
-    boolean clashCkeck(ResourceImpl resource, ICoreResource resource2);
+    URL getResourceURL(ResourceImpl resource);    
 
     InputStream getContents(ResourceImpl resource);
 

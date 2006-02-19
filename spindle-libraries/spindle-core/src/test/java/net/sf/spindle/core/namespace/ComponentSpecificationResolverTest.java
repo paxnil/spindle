@@ -168,7 +168,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
 
     public void testResolve()
     {
-        INamespace testFramework = createNoAcccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
+        INamespace testFramework = createNoAccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
         INamespace namespace = createNamespace(new String[]
         { "COMP1" }, "any");
 
@@ -189,7 +189,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
 
     public void testResolveOverride()
     {
-        INamespace testFramework = createNoAcccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
+        INamespace testFramework = createNoAccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
         INamespace namespace = createNamespace(new String[]
         { "FRAMEWORK1" }, "any");
 
@@ -243,7 +243,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
         namespaceControl.expectAndReturn(namespace.getChildNamespace("child1"), childNs, 1);
 
         // ensure that no access is made to the framework
-        INamespace framework = createNoAcccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
+        INamespace framework = createNoAccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
 
         mockContainer.replayControls();
 
@@ -271,7 +271,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
         namespaceControl.expectAndReturn(namespace.getChildNamespace("child1"), childNs, 1);
 
         // ensure that no access is made to the framework
-        INamespace framework = createNoAcccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
+        INamespace framework = createNoAccessNamespace(INamespace.FRAMEWORK_NAMESPACE);
 
         mockContainer.replayControls();
 
@@ -331,7 +331,7 @@ public class ComponentSpecificationResolverTest extends AbstractTestCase
     }
 
     // should puke if any calls are made to find anything other than the id
-    private INamespace createNoAcccessNamespace(String namespaceId)
+    private INamespace createNoAccessNamespace(String namespaceId)
     {
         MockControl nsControl = mockContainer.newControl(INamespace.class);
         INamespace result = (INamespace) nsControl.getMock();

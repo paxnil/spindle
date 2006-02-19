@@ -2,6 +2,8 @@ package net.sf.spindle.core.resources;
 
 import java.io.File;
 
+import net.sf.spindle.core.AbstractTestCase;
+
 import junit.framework.TestCase;
 
 /*
@@ -23,7 +25,7 @@ import junit.framework.TestCase;
 
  Contributor(s): __glongman@gmail.com___.
  */
-public abstract class AbstractTestRoot extends TestCase
+public abstract class AbstractTestRoot extends AbstractTestCase
 {
 
     protected static final String RESOURCES_ROOT2 = "resources/root2";
@@ -35,12 +37,6 @@ public abstract class AbstractTestRoot extends TestCase
     protected static final String JARS_FOO_JAR = "jars/foo.jar";
 
     protected static final String[] EMPTY = new String[] {};
-
-    public AbstractTestRoot()
-    {
-        super();
-        // TODO Auto-generated constructor stub
-    }
 
     public AbstractTestRoot(String name)
     {

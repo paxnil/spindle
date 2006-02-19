@@ -3,6 +3,9 @@ package net.sf.spindle.core.resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.Test;
+import net.sf.spindle.core.SuiteOfTestCases;
+
 /*
  The contents of this file are subject to the Mozilla Public License
  Version 1.1 (the "License"); you may not use this file except in
@@ -25,9 +28,9 @@ import java.util.List;
 public class LookupTest extends AbstractTestRoot
 {
 
-    public LookupTest()
+    public static Test suite()
     {
-        super();
+        return new SuiteOfTestCases.Suite(LookupTest.class);
     }
 
     public LookupTest(String name)

@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.Locale;
 
 import net.sf.spindle.core.TapestryCoreException;
+import net.sf.spindle.core.build.ClashDetector;
 import net.sf.spindle.core.resources.search.ISearch;
 
 import org.apache.hivemind.Resource;
@@ -32,12 +33,12 @@ import org.apache.hivemind.util.AbstractResource;
 /**
  * an implementation of {@link net.sf.spindle.core.resources.ICoreResource}
  */
-/* package */class ResourceImpl extends AbstractResource implements ICoreResource
+public class ResourceImpl extends AbstractResource implements ICoreResource
 {
 
     private IRootImplementation root;
 
-    ResourceImpl(IRootImplementation root, String path)
+    public ResourceImpl(IRootImplementation root, String path)
     {
         super(path);
         this.root = root;
@@ -91,7 +92,7 @@ import org.apache.hivemind.util.AbstractResource;
      */
     public boolean clashesWith(ICoreResource resource)
     {
-        return root.clashCkeck(this, resource);
+        return (ClashDetector.clashesWith(this, resource));
     }
 
     /*
@@ -132,10 +133,13 @@ import org.apache.hivemind.util.AbstractResource;
     public boolean exists()
     {
         return root.exists(this);
-    }   
-    
-    /* (non-Javadoc)
-     * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor, net.sf.spindle.core.resources.ResourceExtension.DEPTH)
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.resources.ResourceExtension#lookup(net.sf.spindle.core.resources.IResourceAcceptor,
+     *      net.sf.spindle.core.resources.ResourceExtension.DEPTH)
      */
     public void lookup(IResourceAcceptor requestor, LookupDepth depth)
     {
@@ -178,8 +182,7 @@ import org.apache.hivemind.util.AbstractResource;
     @Override
     public String toString()
     {
-       return this.root.getToStringPrefix() + getPath();
+        return this.root.getToStringPrefix() + getPath();
     }
-    
-    
+
 }

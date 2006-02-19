@@ -52,10 +52,18 @@ public interface ICoreResource extends Resource, ResourceExtension
     public InputStream getContents();
 
     /**
-     * TODO decide is clashing is in or out.
+     * Does the path of the passed resource clash (overlap) with my path
+     * <p>
+     * The name of either resource is not considered in the check.
+     * <p>
+     * a classpath resource never clashes with a context resource and vice versa.
+     * <p>
+     * Recommend that implementors defer this in thier implentations with a call to
+     * {@link net.sf.spindle.core.build.ClashDetector#clashesWith(ICoreResource, ICoreResource).
      * 
      * @param resource
-     * @return
+     *            ther resource to check
+     * @return true if the path's clash
      */
     public boolean clashesWith(ICoreResource resource);
 
