@@ -1,24 +1,24 @@
 package net.sf.spindle.core;
 
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
+ Contributor(s): __glongman@gmail.com___.
+ */
 import net.sf.spindle.core.util.Assert;
 
 /**
@@ -169,17 +169,14 @@ public class TapestryCore implements IPreferenceConstants
      * Retrieve the priority the core should lend to build 'misses'.
      * <p>
      * If the preference store does not return a valid result, use
-     * {@link IPreferenceConstants#CORE_STATUS_ERROR}
+     * {@link CoreStatus#IGNORE}
      * 
      * @see IPreferenceConstants
      * @return priority integer
      */
-    public int getBuildMissPriority()
+    public CoreStatus getBuildMissPriority()
     {
-        String pref = preferenceSource.getString(BUILDER_MARKER_MISSES);
-        if (pref == null)
-            pref = CORE_STATUS_ERROR;
-        return convertCoreStatusToPriority(pref);
+        return getStatus(BUILDER_MARKER_MISSES, CoreStatus.IGNORE);
     }
 
     /**
@@ -187,52 +184,37 @@ public class TapestryCore implements IPreferenceConstants
      * detection is in or out.
      * <p>
      * If the preference store does not return a valid result, use
-     * {@link IPreferenceConstants#CORE_STATUS_ERROR}
+     * {@link CoreStatus#ERROR}
      * 
      * @see IPreferenceConstants
      * @return priority integer
      */
-    public int getNamespaceClashPriority()
+    public CoreStatus getNamespaceClashPriority()
     {
-        String pref = preferenceSource.getString(NAMESPACE_CLASH_SEVERITY);
-        if (pref == null)
-            pref = CORE_STATUS_ERROR;
-        return convertCoreStatusToPriority(pref);
-    }
-
-    public boolean isMissPriorityIgnore()
-    {
-        return getBuildMissPriority() == convertCoreStatusToPriority(CORE_STATUS_IGNORE);
+        return getStatus(NAMESPACE_CLASH_SEVERITY, CoreStatus.ERROR);
     }
 
     /**
      * Retrieve the priority the core should lend to asset problems.
      * <p>
      * If the preference store does not return a valid result, use
-     * {@link IPreferenceConstants#CORE_STATUS_ERROR}
+     * {@link CoreStatus#ERROR}
      * 
      * @see IPreferenceConstants
      * @return priority integer
      */
-    public int getHandleAssetProblemPriority()
+    public CoreStatus getHandleAssetProblemPriority()
     {
-        String pref = preferenceSource.getString(BUILDER_HANDLE_ASSETS);
-        if (pref == null)
-            pref = CORE_STATUS_ERROR;
-        return convertCoreStatusToPriority(pref);
+        return getStatus(BUILDER_HANDLE_ASSETS, CoreStatus.ERROR);
     }
 
-    private int convertCoreStatusToPriority(String pref)
+    private CoreStatus getStatus(String preferenceKey, CoreStatus defaultStatus)
     {
-        if (pref.equals(CORE_STATUS_IGNORE))
-            return -1;
+        CoreStatus coreStatus = CoreStatus.getCoreStatus(preferenceSource.getString(preferenceKey));
 
-        for (int i = 0; i < CORE_STATUS_ARRAY.length; i++)
-        {
-            if (pref.equals(CORE_STATUS_ARRAY[i]))
-                return i;
-        }
-        return 0;
+        if (coreStatus == null)
+            coreStatus = CoreStatus.ERROR;
+
+        return coreStatus;
     }
-
 }

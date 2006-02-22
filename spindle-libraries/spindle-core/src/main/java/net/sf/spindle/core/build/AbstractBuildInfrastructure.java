@@ -1,26 +1,26 @@
 package net.sf.spindle.core.build;
 
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-import net.sf.spindle.core.resources.IResourceRoot;
-import net.sf.spindle.core.types.IJavaTypeFinder;
-*/
+ Contributor(s): __glongman@gmail.com___.
+ import net.sf.spindle.core.resources.IResourceRoot;
+ import net.sf.spindle.core.types.IJavaTypeFinder;
+ */
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.IProblemPeristManager;
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.TapestryCore;
@@ -55,8 +54,6 @@ import org.apache.tapestry.engine.IPropertySource;
  */
 public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 {
-
-    public static final String STRING_KEY = "builder-";
 
     public static final String APPLICATION_EXTENSION = "application";
 
@@ -285,9 +282,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         if (AbstractBuildInfrastructure.DEBUG)
             System.out.println("FULL Tapestry build");
 
-        notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                + "full-build-starting"));
-
+        notifier.subTask(BuilderMessages.fullBuildStarting());
         problemPersister.removeAllProblems(tapestryProject);
 
         this.build = createFullBuild();
@@ -323,7 +318,8 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
             if (DEBUG)
                 System.out.println("Incremental Tapestry build");
 
-            notifier.subTask(CoreMessages.format(STRING_KEY + "incremental-build-starting"));
+            notifier.subTask(BuilderMessages.incrementalBuildStarting());
+
             incBuild.build();
         }
         else

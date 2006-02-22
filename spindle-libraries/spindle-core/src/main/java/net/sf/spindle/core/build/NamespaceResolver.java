@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.build.templates.TemplateFinder;
 import net.sf.spindle.core.namespace.ComponentSpecificationResolver;
@@ -362,9 +361,8 @@ public class NamespaceResolver
 
         if (componentStack.contains(location))
         {
-            throw new BuilderException(CoreMessages.format(
-                    "build-failed-circular-component-reference",
-                    getCircularErrorMessage(location)));
+            throw new BuilderException(BuilderMessages
+                    .circularError(getCircularErrorMessage(location)));
         }
 
         // we must test to ensure that this location is not already claimed by
@@ -394,8 +392,8 @@ public class NamespaceResolver
         }
         catch (ClashException e)
         {
-            build.problemPersister.recordProblem(location, clashProblem(e.getMessage()));
-            e.printStackTrace();
+            // TODO build.problemPersister.recordProblem(location, clashProblem(e.getMessage()));
+            // e.printStackTrace();
         }
         return result;
     }
@@ -414,21 +412,21 @@ public class NamespaceResolver
 
                 // FIXME this is wrong, no message comes in the exception.
                 // need to add markers with a message!
-                build.problemPersister.recordProblem(
-                        template,
-                        clashProblem("PUT CLASH MESSAGE HERE"));
-                e.printStackTrace();
-                iter.remove();
+                // build.problemPersister.recordProblem(
+                // template,
+                // clashProblem("PUT CLASH MESSAGE HERE"));
+                // e.printStackTrace();
+                // iter.remove();
             }
         }
     }
 
-    private IProblem clashProblem(String message)
-    {
-        int severity = TapestryCore.getDefault().getNamespaceClashPriority();
-        return new DefaultProblem(IProblem.TAPESTRY_CLASH_PROBLEM, severity, message,
-                SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE);
-    }
+    // private IProblem clashProblem(String message)
+    // {
+    // int severity = TapestryCore.getDefault().getNamespaceClashPriority();
+    // return new DefaultProblem(IProblem.TAPESTRY_CLASH_PROBLEM, severity, message,
+    // SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE);
+    // }
 
     /**
      * build an error message for circular component references
@@ -494,20 +492,22 @@ public class NamespaceResolver
                 result.put(type, jwcs[i]);
             else if (!jwcs[i].equals(result.get(type)))
 
-                build.problemPersister.recordProblem(jwcs[i], new DefaultProblem(IProblem.ERROR,
-                        CoreMessages.format("builder-hidden-jwc-file", jwcs[i], result.get(type)),
-                        SourceLocation.FILE_LOCATION, false,
+                build.problemPersister.recordProblem(jwcs[i],
+
+                new DefaultProblem(IProblem.ERROR, BuilderMessages.hiddenJWCFile(jwcs[i], result
+                        .get(type)), SourceLocation.FILE_LOCATION, false,
                         IProblem.SPINDLE_BUILDER_HIDDEN_JWC_FILE));
 
         }
-        
+
         return resolveAllAnnotatedSpeclessComponentsForNamespace(result);
     }
 
-    private Map<String, Resource> resolveAllAnnotatedSpeclessComponentsForNamespace(Map<String, Resource> jwcFiles)
+    private Map<String, Resource> resolveAllAnnotatedSpeclessComponentsForNamespace(
+            Map<String, Resource> jwcFiles)
     {
         return jwcFiles;
-        
+
         // find all the annotated classes under the {packages}
         // for each one:
         // create a spec for each one.
@@ -515,11 +515,9 @@ public class NamespaceResolver
         // Tapestry at runtime has a path /foo/MyComponent and can take a package like
         // org.moo and make org.moo.foo.MyComponent and check.
         // we don't have a path, we have to search.
-        
+
         // I dunno, there could be easy and hard cases.
-        
-        
-        
+
         // Map<String, Resource> result = new HashMap<String, Resource>();
         // if (build.infrastructure.projectSupportsAnnotations())
         // {
@@ -613,13 +611,11 @@ public class NamespaceResolver
 
             }
             else if (!result.get(name).equals(pages[i]))
-                build.problemPersister.recordProblem(
-                        pages[i],
-                        new DefaultProblem(IProblem.ERROR, CoreMessages.format(
-                                "builder-hidden-page-file",
-                                pages[i],
-                                result.get(name)), SourceLocation.FILE_LOCATION, false,
-                                IProblem.SPINDLE_BUILDER_HIDDEN_PAGE_FILE));
+                build.problemPersister.recordProblem(pages[i], new DefaultProblem(IProblem.ERROR,
+
+                BuilderMessages.hiddenPageFile(pages[i], result.get(name)),
+                        SourceLocation.FILE_LOCATION, false,
+                        IProblem.SPINDLE_BUILDER_HIDDEN_PAGE_FILE));
 
         }
         return result;

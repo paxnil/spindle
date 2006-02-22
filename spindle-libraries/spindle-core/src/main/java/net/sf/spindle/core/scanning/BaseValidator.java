@@ -28,6 +28,7 @@ import java.util.Map;
 import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.build.AbstractBuild;
+import net.sf.spindle.core.build.BuilderMessages;
 import net.sf.spindle.core.build.IDependencyListener;
 import net.sf.spindle.core.messages.DefaultTapestryMessages;
 import net.sf.spindle.core.messages.ParseMessages;
@@ -442,7 +443,7 @@ public class BaseValidator implements IScannerValidator
             addProblem(
                     IProblem.ERROR,
                     source,
-                    CoreMessages.format(errorKey, relative.toString()),
+                    BuilderMessages.format(errorKey, relative.toString()),
                     true,
                     IProblem.SPINDLE_RESOURCE_LOCATION_DOES_NOT_EXIST);
 

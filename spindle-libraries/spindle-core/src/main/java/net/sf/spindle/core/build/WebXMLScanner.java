@@ -1,23 +1,24 @@
 package net.sf.spindle.core.build;
+
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
+ Contributor(s): __glongman@gmail.com___.
+ */
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,17 +77,15 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
             return;
 
         if (!location.exists())
-            throw new ScannerException(CoreMessages.format(
-                    "web-xml-ignore-application-path-not-found",
-                    location == null ? "no location found" : location.toString()), false,
+            throw new ScannerException(BuilderMessages.webXMLIgnorepathNotFound(location), false,
                     IProblem.NOT_QUICK_FIXABLE);
 
         PathUtils ws_path = new PathUtils(location);
         String extension = ws_path.getFileExtension();
         if (extension == null
                 || !extension.equals(AbstractBuildInfrastructure.APPLICATION_EXTENSION))
-            throw new ScannerException(CoreMessages.format("web-xml-wrong-file-extension", location
-                    .toString()), false, IProblem.NOT_QUICK_FIXABLE);
+            throw new ScannerException(BuilderMessages.webXMLWrongFileExtension(location), false,
+                    IProblem.NOT_QUICK_FIXABLE);
 
     }
 
@@ -95,26 +94,35 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
     {
         if (currentInfo.isServletSubclass && currentInfo.applicationSpecLocation != null)
         {
-            addProblem(IProblem.WARNING, location, CoreMessages.format(
-                    "web-xml-application-path-param-but-servlet-defines",
-                    currentInfo.classname), false, IProblem.NOT_QUICK_FIXABLE);
+            addProblem(
+                    IProblem.WARNING,
+                    location,
+                    BuilderMessages.webXMLPathParamButServletDefines(currentInfo.classname),
+                    false,
+                    IProblem.NOT_QUICK_FIXABLE);
             return;
         }
 
         if (!value.endsWith(".application"))
         {
-            addProblem(IProblem.ERROR, location, CoreMessages.format(
-                    "web-xml-wrong-file-extension",
-                    value), false, IProblem.NOT_QUICK_FIXABLE);
+            addProblem(
+                    IProblem.ERROR,
+                    location,
+                    BuilderMessages.webXMLWrongFileExtension(value),
+                    false,
+                    IProblem.NOT_QUICK_FIXABLE);
             return;
         }
 
         ICoreResource ws_location = getApplicationLocation(currentInfo, value);
         if (ws_location == null)
         {
-            addProblem(IProblem.ERROR, location, CoreMessages.format(
-                    "web-xml-ignore-application-path-not-found",
-                    value), false, IProblem.NOT_QUICK_FIXABLE);
+            addProblem(
+                    IProblem.ERROR,
+                    location,
+                    BuilderMessages.webXMLIgnorepathNotFound(value),
+                    false,
+                    IProblem.NOT_QUICK_FIXABLE);
             return;
         }
         currentInfo.applicationSpecLocation = ws_location;
@@ -131,7 +139,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
             addProblem(
                     IProblem.ERROR,
                     location,
-                    "web-xml-must-be-class-not-interface",
+                    BuilderMessages.mustBeClassNotInterface(candidate),
                     false,
                     IProblem.WEB_XML_INCORRECT_APPLICATION_SERVLET_CLASS);
             return false;
@@ -147,18 +155,20 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
         builder.typeChecked(className, found);
 
         if (found == null)
-            addProblem(IProblem.ERROR, location, DefaultTapestryMessages.format(
-                    "unable-to-resolve-class",
-                    className), false, IProblem.NOT_QUICK_FIXABLE);
+            addProblem(
+                    IProblem.ERROR,
+                    location,
+                    BuilderMessages.typeDoesNotExist(className),
+                    false,
+                    IProblem.NOT_QUICK_FIXABLE);
 
         return found;
-    }
+    } /*
+         * (non-Javadoc)
+         * 
+         * @see core.processing.AbstractProcessor#doProcessing(org.w3c.dom.Node)
+         */
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see core.processing.AbstractProcessor#doProcessing(org.w3c.dom.Node)
-     */
     protected void doScan()
     {
         Document d = getDOMModel().getDocument();
@@ -203,16 +213,15 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
                     addProblem(
                             IProblem.ERROR,
                             keyLoc,
-                            CoreMessages.format("web-xml-context-param-null-key"),
+                            BuilderMessages.webXMLContextParamNullKey(),
                             false,
                             IProblem.NOT_QUICK_FIXABLE);
                     return;
                 }
                 else if (target.containsKey(key))
                 {
-                    addProblem(IProblem.ERROR, keyLoc, CoreMessages.format(
-                            "web-xml-context-param-duplicate-key",
-                            key), false, IProblem.NOT_QUICK_FIXABLE);
+                    addProblem(IProblem.ERROR, keyLoc, BuilderMessages
+                            .webXMLContextParamDuplicateKey(key), false, IProblem.NOT_QUICK_FIXABLE);
                     return;
                 }
             }
@@ -222,12 +231,8 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
                 value = getValue(node);
                 valueLoc = getBestGuessSourceLocation(node, true);
                 if (value == null)
-                    addProblem(
-                            IProblem.ERROR,
-                            valueLoc,
-                            CoreMessages.format("web-xml-context-param-null-value"),
-                            false,
-                            IProblem.NOT_QUICK_FIXABLE);
+                    addProblem(IProblem.ERROR, valueLoc, BuilderMessages
+                            .webXMLContextParamNullValue(), false, IProblem.NOT_QUICK_FIXABLE);
             }
         }
         if (key != null && value != null)
@@ -369,16 +374,15 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
                     addProblem(
                             IProblem.ERROR,
                             keyLoc,
-                            CoreMessages.format("web-xml-init-param-null-key"),
+                            BuilderMessages.webXMLInitParamNullKey(),
                             false,
                             IProblem.NOT_QUICK_FIXABLE);
                     return false;
                 }
                 else if (currentInfo.parameters.containsKey(key))
                 {
-                    addProblem(IProblem.ERROR, keyLoc, CoreMessages.format(
-                            "web-xml-init-param-duplicate-key",
-                            key), false, IProblem.NOT_QUICK_FIXABLE);
+                    addProblem(IProblem.ERROR, keyLoc, BuilderMessages
+                            .webXMLInitParamDuplicateKey(key), false, IProblem.NOT_QUICK_FIXABLE);
                     return false;
                 }
             }
@@ -391,7 +395,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
                     addProblem(
                             IProblem.ERROR,
                             valueLoc,
-                            CoreMessages.format("web-xml-init-param-null-value"),
+                            BuilderMessages.webXMLInitParamNullValue(),
                             false,
                             IProblem.NOT_QUICK_FIXABLE);
 
@@ -426,11 +430,10 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
 
         if (newInfo.classname == null)
         {
-            String message = CoreMessages.format("web-xml-servlet-null-classname", newInfo.name);
             addProblem(
                     IProblem.WARNING,
                     nodeLocation,
-                    message,
+                    BuilderMessages.webXMLServletNullClassname(newInfo.name),
                     false,
                     IProblem.WEB_XML_MISSING_APPLICATION_SERVLET_CLASS);
             return false;
@@ -455,10 +458,14 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
                         }
                         catch (ScannerException e)
                         {
-                            addProblem(IProblem.ERROR, nodeLocation, CoreMessages.format(
-                                    "web-xml-ignore-invalid-application-path",
-                                    servletType.getFullyQualifiedName(),
-                                    path.toString()), false, IProblem.NOT_QUICK_FIXABLE);
+                            addProblem(
+                                    IProblem.ERROR,
+                                    nodeLocation,
+                                    BuilderMessages.webXMLIgnoreInvalidApplicationPath(
+                                            servletType,
+                                            path),
+                                    false,
+                                    IProblem.NOT_QUICK_FIXABLE);
                         }
                     }
                     catch (ScannerException e)
@@ -481,10 +488,14 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
                     }
                     catch (ScannerException e)
                     {
-                        addProblem(IProblem.ERROR, nodeLocation, CoreMessages.format(
-                                "web-xml-ignore-invalid-application-path",
-                                servletType.getFullyQualifiedName(),
-                                null), false, IProblem.NOT_QUICK_FIXABLE);
+                        addProblem(
+                                IProblem.ERROR,
+                                nodeLocation,
+                                BuilderMessages.webXMLIgnoreInvalidApplicationPath(
+                                        servletType,
+                                        null),
+                                false,
+                                IProblem.NOT_QUICK_FIXABLE);
                     }
                 }
             }
@@ -513,17 +524,20 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
         ISourceLocation bestGuessSourceLocation = getBestGuessSourceLocation(node, true);
         if (servletName == null)
         {
-            addProblem(IProblem.WARNING, bestGuessSourceLocation, CoreMessages
-                    .format("web-xml-servlet-has-null-name"), false, IProblem.NOT_QUICK_FIXABLE);
+            addProblem(IProblem.WARNING, bestGuessSourceLocation, BuilderMessages
+                    .webXMLServletHasNoName(), false, IProblem.NOT_QUICK_FIXABLE);
 
         }
         else
         {
             if (seenServletNames.contains(servletName))
             {
-                addProblem(IProblem.WARNING, bestGuessSourceLocation, CoreMessages.format(
-                        "web-xml-servlet-duplicate-name",
-                        newInfo.name), false, IProblem.NOT_QUICK_FIXABLE);
+                addProblem(
+                        IProblem.WARNING,
+                        bestGuessSourceLocation,
+                        BuilderMessages.webXMLDuplicateServletName(newInfo.name),
+                        false,
+                        IProblem.NOT_QUICK_FIXABLE);
             }
             else
             {

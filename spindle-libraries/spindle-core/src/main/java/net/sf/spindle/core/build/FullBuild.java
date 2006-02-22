@@ -146,9 +146,7 @@ public class FullBuild extends AbstractBuild
         if (nsLocation != null)
         {
             if (!nsLocation.exists())
-                throw new BuilderException(CoreMessages.format(
-                        "build-failed-missing-application-spec",
-                        nsLocation.toString()));
+                throw new BuilderException(BuilderMessages.missingApplicationSpec(nsLocation));
 
             result = getNamespaceTree(null, nsLocation, null);
         }
@@ -184,9 +182,7 @@ public class FullBuild extends AbstractBuild
             IDOMModel model = null;
             try
             {
-                notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                        + "scanning", webXML.toString()));
-                problemPersister.removeAllProblemsFor(webXML);
+                notifier.subTask(BuilderMessages.scanning(webXML));
 
                 try
                 {
@@ -198,12 +194,8 @@ public class FullBuild extends AbstractBuild
                 }
 
                 if (model == null)
-                {
-                    // fInfrastructure.fProblemPersister.recordProblems(webXML,
-                    // model.getProblems());
-                    throw new BrokenWebXMLException(
-                            "Tapestry AbstractBuild failed: could not parse web.xml. ");
-                }
+                    throw new BrokenWebXMLException(BuilderMessages
+                            .fatalErrorCouldNotParseWebXML(webXML));
 
                 WebAppDescriptor descriptor = null;
 
@@ -219,21 +211,18 @@ public class FullBuild extends AbstractBuild
                 problemPersister.recordProblems(webXML, wscanner.getProblems());
 
                 if (descriptor == null)
-                    throw new BrokenWebXMLException(CoreMessages
-                            .format(AbstractBuildInfrastructure.STRING_KEY
-                                    + "abort-no-valid-application-servlets-found"));
+                    throw new BrokenWebXMLException(BuilderMessages
+                            .fatalErrorNoValidTapestryServlets());
 
-                ServletInfo [] applicationServlets = descriptor.getServletInfos();
+                ServletInfo[] applicationServlets = descriptor.getServletInfos();
                 if (applicationServlets == null || applicationServlets.length == 0)
 
-                    throw new BrokenWebXMLException(CoreMessages
-                            .format(AbstractBuildInfrastructure.STRING_KEY
-                                    + "abort-no-valid-application-servlets-found"));
+                    throw new BrokenWebXMLException(BuilderMessages
+                            .fatalErrorNoValidTapestryServlets());
 
                 if (applicationServlets.length > 1)
-                    throw new BrokenWebXMLException(CoreMessages
-                            .format(AbstractBuildInfrastructure.STRING_KEY
-                                    + "abort-too-many-valid-servlets-found"));
+                    throw new BrokenWebXMLException(BuilderMessages
+                            .fatalErrorTooManyValidTapestryServlets());
 
                 applicationServlet = applicationServlets[0];
 
@@ -252,10 +241,8 @@ public class FullBuild extends AbstractBuild
             if (definedWebRoot != null || !definedWebRoot.exists())
             {
                 problemPersister.recordProblem(tapestryProject, new DefaultProblem(
-                        IProblem.WARNING, CoreMessages.format(
-                                AbstractBuildInfrastructure.STRING_KEY + "missing-context",
-                                definedWebRoot.toString()), SourceLocation.FOLDER_LOCATION, false,
-                        IProblem.NOT_QUICK_FIXABLE));
+                        IProblem.WARNING, BuilderMessages.missingContext(definedWebRoot),
+                        SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
             }
         }
     }

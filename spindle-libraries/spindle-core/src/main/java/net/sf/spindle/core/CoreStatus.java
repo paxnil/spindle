@@ -1,5 +1,7 @@
+/**
+ * 
+ */
 package net.sf.spindle.core;
-
 /*
  The contents of this file are subject to the Mozilla Public License
  Version 1.1 (the "License"); you may not use this file except in
@@ -19,36 +21,47 @@ package net.sf.spindle.core;
 
  Contributor(s): __glongman@gmail.com___.
  */
-import net.sf.spindle.core.messages.MessageFormatter;
+public enum CoreStatus {
+    INFO("info", 0), 
+    WARN("warn", 1), 
+    ERROR("error", 2), 
+    IGNORE("ignore", -1);
 
-import org.apache.hivemind.Resource;
+    String label;
 
-/**
- * @author gwl
- */
-public class CoreMessages
-{
-    private static MessageFormatter FORMATTER = new MessageFormatter(CoreMessages.class,
-            "CoreMessages");
+    int priority;
 
-    public static String resourceDoesNotExist(Resource location)
+    private CoreStatus(String label, int priority)
     {
-        return FORMATTER.format("core-resource-does-not-exist", location.toString());
+        this.label = label;
+        this.priority = priority;
     }
 
-    public static Object getXMLComment()
+    public String getLabel()
     {
-        return FORMATTER.getMessage("TAPESTRY.xmlComment");
+        return label;
     }
 
-    public static String invalidPublicID()
+    public int getPriority()
     {
-        return FORMATTER.getMessage("error-invalid-spec-public-id");
+        return priority;
     }
 
-    public static String projectNamespace()
-    {
-        return FORMATTER.getMessage("project-namespace");
-    }
+    public static final CoreStatus[] CORE_STATUS_ARRAY = new CoreStatus[]
+    { 
+        CoreStatus.INFO, 
+        CoreStatus.WARN, 
+        CoreStatus.ERROR,
+        CoreStatus.IGNORE 
+    };
 
+    public static CoreStatus getCoreStatus(String label)
+    {
+        for (int i = 0; i < CORE_STATUS_ARRAY.length; i++)
+        {
+            if (CORE_STATUS_ARRAY[i].label.equals(label))
+                return CORE_STATUS_ARRAY[i];
+        }
+        return null;
+    }
 }

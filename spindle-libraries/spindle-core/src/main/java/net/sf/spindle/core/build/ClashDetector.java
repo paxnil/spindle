@@ -19,13 +19,18 @@ package net.sf.spindle.core.build;
 
  Contributor(s): __glongman@gmail.com___.
  */
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.spindle.core.CoreStatus;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.namespace.ICoreNamespace;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.PathUtils;
+import net.sf.spindle.core.source.DefaultProblem;
+import net.sf.spindle.core.source.IProblem;
+import net.sf.spindle.core.source.SourceLocation;
 import net.sf.spindle.core.util.Assert;
 
 import org.apache.hivemind.Resource;
@@ -43,14 +48,18 @@ public class ClashDetector
      * @throws ClashException
      *             if ns is nested in the child locations of any of the extisting.
      */
-    public static void checkNamspaceClash(ICoreNamespace ns, List<ICoreNamespace> existingNS,
-            String errorKey) throws ClashException
+    public static IProblem[] checkNamspaceClash(ICoreNamespace ns, List<ICoreNamespace> existingNS,
+            String errorKey, CoreStatus clashPriority)
     {
+        if (clashPriority == CoreStatus.IGNORE)
+            return IProblem.EMPTY_ARRAY;
+
         Assert.isLegal(ns != null);
         Assert.isLegal(existingNS != null);
 
         ICoreResource candidate = (ICoreResource) ns.getSpecificationLocation();
 
+        List<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : existingNS)
         {
             // while resources clash with other resources with the same path
@@ -61,8 +70,17 @@ public class ClashDetector
             ICoreResource existing = (ICoreResource) namespace.getSpecificationLocation();
 
             if (existing.clashesWith(candidate))
-                throw new ClashException(candidate, existing, null);
+            {
+                problems
+                        .add(
+
+                        new DefaultProblem(clashPriority.getPriority(), BuilderMessages
+                                .namespaceClash(ns, namespace), SourceLocation.FILE_LOCATION,
+                                false, IProblem.NOT_QUICK_FIXABLE));
+
+            }
         }
+        return (IProblem[]) problems.toArray(new IProblem[] {});
     }
 
     public static boolean clashesWith(ICoreResource lhs, ICoreResource rhs)

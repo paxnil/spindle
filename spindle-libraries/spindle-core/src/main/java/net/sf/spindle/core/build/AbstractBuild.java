@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sf.spindle.core.CoreMessages;
+import net.sf.spindle.core.CoreStatus;
 import net.sf.spindle.core.IProblemPeristManager;
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.TapestryCore;
@@ -195,14 +196,11 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         this.clashDetector = new ClashDetector();
         this.problemPersister = infrastructure.problemPersister;
         this.buildQueue = new BuilderQueue();
-        this.tapestryServletType = tapestryProject.findType(CoreMessages
-                .format(AbstractBuildInfrastructure.STRING_KEY + "applicationServletClassname"));
+        this.tapestryServletType = tapestryProject.findType(BuilderMessages
+                .getApplicationServletClassname());
 
         if (tapestryServletType == null)
-            throw new BuilderException(
-                    "FATAL ERROR: Tapestry servlet type not found in classpath: "
-                            + CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                                    + "applicationServletClassname"));
+            throw new BuilderException(BuilderMessages.noTapestryServlet());
     }
 
     public void build() throws BuilderException
@@ -211,8 +209,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         {
             preBuild();
 
-            notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                    + "locating-namespaces"));
+            notifier.subTask(BuilderMessages.locatingNamespaces());
 
             frameworkNamespace = getFrameworkNamespace();
 
@@ -222,8 +219,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             notifier.updateProgressDelta(0.05f);
 
-            notifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                    + "locating-artifacts"));
+            notifier.subTask(BuilderMessages.locatingArtifacts());
 
             buildQueue.addAll(findAllTapestrySourceFiles().toArray());
 
@@ -259,9 +255,11 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         notifier.updateProgressDelta(0.15f);
 
-        if (buildQueue.hasWaiting() && !TapestryCore.getDefault().isMissPriorityIgnore())
+        CoreStatus missPreference = TapestryCore.getDefault().getBuildMissPriority();
+
+        if (buildQueue.hasWaiting() && missPreference != CoreStatus.IGNORE)
         {
-            int missPriority = TapestryCore.getDefault().getBuildMissPriority();
+            int missPriority = missPreference.getPriority();
             while (buildQueue.getWaitingCount() > 0)
             {
 
@@ -291,14 +289,31 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected void checkForNamspaceClashes()
     {
+        CoreStatus namespaceClashPriority = TapestryCore.getDefault().getNamespaceClashPriority();
+        if (namespaceClashPriority == CoreStatus.IGNORE)
+            return;
+        IProblem[] problems;
         for (ICoreNamespace ns : contextNamespaces)
         {
-            ClashDetector.checkNamspaceClash(ns, contextNamespaces, "appNSKey");
+            problems = ClashDetector.checkNamspaceClash(
+                    ns,
+                    contextNamespaces,
+                    "contextNSKey",
+                    namespaceClashPriority);
+
+            problemPersister.recordProblems(ns.getSpecificationLocation(), problems);
+
         }
 
         for (ICoreNamespace ns : classpathNamespaces)
         {
-            ClashDetector.checkNamspaceClash(ns, classpathNamespaces, "libNSKey");
+            problems = ClashDetector.checkNamspaceClash(
+                    ns,
+                    classpathNamespaces,
+                    "classpathNSKey",
+                    namespaceClashPriority);
+
+            problemPersister.recordProblems(ns.getSpecificationLocation(), problems);
         }
     }
 
@@ -308,8 +323,9 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             // capability.
             return;
 
-        problemPersister.recordProblem(resource, new DefaultProblem(missPriority, CoreMessages
-                .format("builder-missed-file-message", resource.getName()),
+        problemPersister.recordProblem(resource,
+
+        new DefaultProblem(missPriority, BuilderMessages.buildMissMessage(resource),
                 SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
     }
 
@@ -653,7 +669,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             throws IOException
     {
         if (!location.exists())
-            throw new IOException(CoreMessages.format("core-resource-does-not-exist", location));
+            throw new IOException(CoreMessages.resourceDoesNotExist(location));
 
         IDOMModel result = domModelSource.parseDocument(location, encoding, validate, this);
 

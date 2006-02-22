@@ -1339,7 +1339,7 @@ public class XMLUtil
                 break;
         }
 
-        indenter.println(CoreMessages.format("TAPESTRY.xmlComment"));
+        indenter.println(CoreMessages.getXMLComment());
     }
 
     public static void writeLibraryServices(Map serviceMap, Writer writer, int indent)

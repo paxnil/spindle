@@ -1,23 +1,24 @@
 package net.sf.spindle.core;
+
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
+ Contributor(s): __glongman@gmail.com___.
+ */
 /**
  * Preference contstants for the Core plugin.
  * <p>
@@ -35,8 +36,8 @@ Contributor(s): __glongman@gmail.com___.
  * {@link org.apache.hivemind.ApplicationRuntimeException}.
  * </p>
  * <p>
- * for allowed values see {@link #CORE_STATUS_ERROR}, {@link #CORE_STATUS_WARN},
- * {@link #CORE_STATUS_INFO}, {@link #CORE_STATUS_IGNORE}
+ * for allowed values see {@link #ERROR}, {@link #WARN},
+ * {@link #INFO}, {@link #IGNORE}
  * <p>
  * </li>
  * <li>{@link #BUILDER_HANDLE_ASSETS}
@@ -53,16 +54,16 @@ Contributor(s): __glongman@gmail.com___.
  * not exist.
  * </p>
  * <p>
- * for allowed values see {@link #CORE_STATUS_ERROR}, {@link #CORE_STATUS_WARN},
- * {@link #CORE_STATUS_INFO}, {@link #CORE_STATUS_IGNORE}
+ * for allowed values see {@link #ERROR}, {@link #WARN},
+ * {@link #INFO}, {@link #IGNORE}
  * <p>
  * </li>
  * <li>{@link #NAMESPACE_CLASH_SEVERITY}
  * <p>
  * TODO Decide once an for all if clash detection is in or out.
  * <p>
- * for allowed values see {@link #CORE_STATUS_ERROR}, {@link #CORE_STATUS_WARN},
- * {@link #CORE_STATUS_INFO}, {@link #CORE_STATUS_IGNORE}
+ * for allowed values see {@link #ERROR}, {@link #WARN},
+ * {@link #INFO}, {@link #IGNORE}
  * <p>
  * </li>
  * </ul>
@@ -82,16 +83,4 @@ public interface IPreferenceConstants
     String BUILDER_HANDLE_ASSETS = TapestryCore.IDENTIFIER + ".BUILDER_HANDLE_ASSETS";
 
     String NAMESPACE_CLASH_SEVERITY = TapestryCore.IDENTIFIER + ".namespaceClashSeverity";
-
-    String CORE_STATUS_INFO = "info";
-
-    String CORE_STATUS_WARN = "warn";
-
-    String CORE_STATUS_ERROR = "error";
-
-    String CORE_STATUS_IGNORE = "ignore";
-
-    String[] CORE_STATUS_ARRAY = new String[]
-    { CORE_STATUS_INFO, CORE_STATUS_WARN, CORE_STATUS_ERROR };
-
 }

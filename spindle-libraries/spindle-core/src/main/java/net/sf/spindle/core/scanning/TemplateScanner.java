@@ -880,7 +880,7 @@ public class TemplateScanner extends AbstractScanner
                 throw new ApplicationRuntimeException(DefaultTapestryMessages.format(
                         "Namespace.no-such-component-type",
                         type,
-                        libraryId == null ? CoreMessages.format("project-namespace") : libraryId));
+                        libraryId == null ? CoreMessages.projectNamespace() : libraryId));
 
             return spec.getAllowBody();
         }

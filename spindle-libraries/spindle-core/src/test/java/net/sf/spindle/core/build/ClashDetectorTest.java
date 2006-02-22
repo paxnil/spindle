@@ -20,14 +20,17 @@ package net.sf.spindle.core.build;
  Contributor(s): __glongman@gmail.com___.
  */
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.Test;
+import net.sf.spindle.core.CoreStatus;
 import net.sf.spindle.core.SuiteOfTestCases;
 import net.sf.spindle.core.namespace.ICoreNamespace;
 import net.sf.spindle.core.resources.AbstractTestRoot;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.ResourceImpl;
+import net.sf.spindle.core.source.IProblem;
 
 import org.easymock.MockControl;
 
@@ -43,7 +46,7 @@ public class ClashDetectorTest extends AbstractTestRoot
     {
         super(name);
     }
-    
+
     public void testClashesWithNot()
     {
         ICoreResource one = createMockResource("/WEB-INF/app1/app1.application", false);
@@ -101,8 +104,7 @@ public class ClashDetectorTest extends AbstractTestRoot
         assertFalse(one.clashesWith(two));
         assertFalse(two.clashesWith(one));
     }
-    
-    
+
     public void testClashesWith5()
     {
         ICoreResource one = createMockResource("/", false);
@@ -129,7 +131,7 @@ public class ClashDetectorTest extends AbstractTestRoot
         assertFalse(one.clashesWith(two));
         assertFalse(two.clashesWith(one));
     }
-    
+
     public void testClashesWith8()
     {
         ICoreResource one = createMockResource("/org/apache/tapestry/fun.library", true);
@@ -138,7 +140,7 @@ public class ClashDetectorTest extends AbstractTestRoot
         assertTrue(one.clashesWith(two));
         assertTrue(two.clashesWith(one));
     }
-    
+
     public void testClashesWith9()
     {
         ICoreResource one = createMockResource("/com/foo/mylib/fun.library", true);
@@ -147,9 +149,6 @@ public class ClashDetectorTest extends AbstractTestRoot
         assertFalse(one.clashesWith(two));
         assertFalse(two.clashesWith(one));
     }
-    
-   
-
 
     public void testNoNamespaceClash()
     {
@@ -161,290 +160,226 @@ public class ClashDetectorTest extends AbstractTestRoot
 
         mockContainer.replayControls();
 
-        try
-        {
-            ClashDetector.checkNamspaceClash(testSubject, namespaces, "");
-        }
-        catch (ClashException e)
-        {
-            fail();
-        } finally {
-            mockContainer.verifyControls();
-        }        
+        IProblem[] problems = ClashDetector.checkNamspaceClash(
+                testSubject,
+                namespaces,
+                "",
+                CoreStatus.ERROR);
+
+        mockContainer.verifyControls();
+
+        assertEquals(0, problems.length);
     }
 
     public void testNoNamespaceClash2()
     {
         String[] ns = new String[]
-        { 
-                "/WEB-INF/foo/foo.application", 
-                "/bar/bar.libary"                 
-        };
+        { "/WEB-INF/foo/foo.application", "/bar/bar.libary" };
         List<ICoreNamespace> namespaces = getNamespaces(ns, false);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
         }
-        
-        mockContainer.verifyControls();
-        
-        assertEquals(0, failCount);
 
-       
+        mockContainer.verifyControls();
+
+        assertEquals(0, problems.size());
+
     }
-    
+
     public void testNoNamespaceClash3()
     {
         String[] ns = new String[]
-        { 
-                "/WEB-INF/foo/foo.application", 
-                "/WEB-INF/bar/bar.libary", 
-                "/WEB-INF/cat/cat.libary" 
-        };
+        { "/WEB-INF/foo/foo.application", "/WEB-INF/bar/bar.libary", "/WEB-INF/cat/cat.libary" };
         List<ICoreNamespace> namespaces = getNamespaces(ns, false);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
         }
-        
 
         mockContainer.verifyControls();
-        
-        assertEquals(0, failCount);
+
+        assertEquals(0, problems.size());
     }
 
     public void testNamespaceClash()
     {
         String[] ns = new String[]
-        {
-                "/WEB-INF/foo/foo.application", 
-                "/WEB-INF/foo/foo.application"
-        };
+        { "/WEB-INF/foo/foo.application", "/WEB-INF/foo/foo.application" };
         List<ICoreNamespace> namespaces = getNamespaces(ns, false);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-                fail(namespace.getSpecificationLocation().toString());
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
-        }       
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
+        }
 
         mockContainer.verifyControls();
-        
-        assertEquals(2, failCount);
+
+        assertEquals(2, problems.size());
     }
-    
+
     public void testNamespaceClash1()
     {
         String[] ns = new String[]
-        {
-                "/WEB-INF/foo.application", 
-                "/WEB-INF/bar.application"
-        };
+        { "/WEB-INF/foo.application", "/WEB-INF/bar.application" };
         List<ICoreNamespace> namespaces = getNamespaces(ns, true);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-                fail(namespace.getSpecificationLocation().toString());
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
         }
-        
+
         mockContainer.verifyControls();
-        
-        assertEquals(2, failCount);
+
+        assertEquals(2, problems.size());
     }
-    
+
     public void testNamespaceClash3()
     {
         String[] ns = new String[]
-        {
-                "/WEB-INF/foo/foo.application", 
-                "/WEB-INF/dog.application"
-        };
+        { "/WEB-INF/foo/foo.application", "/WEB-INF/dog.application" };
         List<ICoreNamespace> namespaces = getNamespaces(ns, true);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-                fail(namespace.getSpecificationLocation().toString());
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
         }
-        
+
         mockContainer.verifyControls();
-        
-        assertEquals(2, failCount);
+
+        assertEquals(2, problems.size());
     }
-    
+
     public void testNamespaceClash4()
     {
         String[] ns = new String[]
-        { 
-                "/WEB-INF/foo/foo.application", 
-                "/bar.libary",  
-                "/dog/dog.libary",  
-        };
+        { "/WEB-INF/foo/foo.application", "/bar.libary", "/dog/dog.libary", };
         List<ICoreNamespace> namespaces = getNamespaces(ns, false);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
         }
-        
+
         mockContainer.verifyControls();
-        
-        assertEquals(3, failCount);
+
+        assertEquals(4, problems.size());
     }
-    
+
     public void testNamespaceClash5()
     {
         String[] ns = new String[]
-        { 
-                "/WEB-INF/foo/foo.application", 
-                "/bar.libary"                 
-        };
+        { "/WEB-INF/foo/foo.application", "/bar.libary" };
         List<ICoreNamespace> namespaces = getNamespaces(ns, false);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
         }
-        
+
         mockContainer.verifyControls();
-        
-        assertEquals(2, failCount);       
+
+        assertEquals(2, problems.size());
     }
-    
+
     public void testNamespaceClash6()
     {
         String[] ns = new String[]
-        { 
-                "/WEB-INF/foo.application", 
-                "/bar.libary"                 
-        };
+        { "/WEB-INF/foo.application", "/bar.libary" };
         List<ICoreNamespace> namespaces = getNamespaces(ns, false);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
         }
-        
-        mockContainer.verifyControls();
-        
-        assertEquals(2, failCount);
 
-       
+        mockContainer.verifyControls();
+
+        assertEquals(2, problems.size());
+
     }
-    
+
     public void testNamespaceClash7()
     {
         String[] ns = new String[]
-        { 
-                "/org/apache/tapestry/Framework.library", 
-                "/org/apache/tapestry/contrib/Contrib.library" ,
-                "/org/apache/tapestry/contrib/inspector/Inspector.library" 
-        };
+        { "/org/apache/tapestry/Framework.library", "/org/apache/tapestry/contrib/Contrib.library",
+                "/org/apache/tapestry/contrib/inspector/Inspector.library" };
         List<ICoreNamespace> namespaces = getNamespaces(ns, true);
 
         mockContainer.replayControls();
 
-        int failCount = 0;
+        ArrayList<IProblem> problems = new ArrayList<IProblem>();
         for (ICoreNamespace namespace : namespaces)
         {
-            try
-            {
-                ClashDetector.checkNamspaceClash(namespace, namespaces, "");
-            }
-            catch (ClashException e)
-            {
-                failCount++;
-            }
+            problems.addAll(Arrays.asList(ClashDetector.checkNamspaceClash(
+                    namespace,
+                    namespaces,
+                    "",
+                    CoreStatus.ERROR)));
         }
-        
-        mockContainer.verifyControls();
-        
-        assertEquals(3, failCount);
 
-       
+        mockContainer.verifyControls();
+
+        assertEquals(6, problems.size());
+
     }
 
     public List<ICoreNamespace> getNamespaces(String[] paths, boolean isClasspath)
@@ -488,6 +423,11 @@ public class ClashDetectorTest extends AbstractTestRoot
         public boolean isClasspathResource()
         {
             return classpath;
+        }
+        
+        public String toString()
+        {
+            return getPath();
         }
 
     }
