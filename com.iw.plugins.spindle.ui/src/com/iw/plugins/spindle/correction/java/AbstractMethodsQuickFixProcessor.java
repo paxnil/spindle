@@ -319,10 +319,7 @@ public class AbstractMethodsQuickFixProcessor implements IQuickFixProcessor
             else
             {
                 isInDifferentCU = true;
-                ASTParser astParser = ASTParser.newParser(ASTProvider.AST_LEVEL);
-                astParser.setSource(getCompilationUnit());
-                astParser.setResolveBindings(true);
-                astRoot = (CompilationUnit) astParser.createAST(null);
+                astRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
                 newTypeDecl = astRoot.findDeclaringNode(senderBinding.getKey());
             }
             if (newTypeDecl != null)
@@ -366,7 +363,7 @@ public class AbstractMethodsQuickFixProcessor implements IQuickFixProcessor
                     ASTNodeFactory.newModifiers(ast, evaluateModifiers(targetTypeDecl)));
 
             ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, decl
-                    .modifiers());
+                    .modifiers(), getSenderBinding().isInterface());
 
             if (returnType != null)
                 decl.setReturnType2(returnType);
