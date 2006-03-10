@@ -1122,4 +1122,16 @@ public class PathUtils implements Cloneable
         System.arraycopy(segments, 0, newSegments, 0, count);
         return new PathUtils(device, newSegments, separators);
     }
+
+    /**
+     * Checks if the path is a vcs directory.
+     *
+     * @return <code>true</code> if the path is a vcs directory, <code>false<code> otherwise.
+     */
+
+    public boolean isVcsDirectory()
+    {
+        String lastSegment = lastSegment();
+        return lastSegment().equals(".svn") || lastSegment.equals("CVS");
+    }
 }
