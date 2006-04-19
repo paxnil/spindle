@@ -310,15 +310,15 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     return newStatus;
   }
 
-  private boolean pathExists(IResourceLocation base, String path)
-  {
-    if (path == null || path.trim().length() == 0)
-      return false;
-    IResourceWorkspaceLocation checkLocation = (IResourceWorkspaceLocation) ((IResourceWorkspaceLocation) base)
-        .getRelativeLocation(path);
-    return checkLocation.getStorage() != null;
-
-  }
+//  private boolean pathExists(IResourceLocation base, String path)
+//  {
+//    if (path == null || path.trim().length() == 0)
+//      return false;
+//    IResourceWorkspaceLocation checkLocation = (IResourceWorkspaceLocation) ((IResourceWorkspaceLocation) base)
+//        .getRelativeLocation(path);
+//    return checkLocation.getStorage() != null;
+//
+//  }
 
   public void setSelectedNamespace(INamespace namespace)
   {
