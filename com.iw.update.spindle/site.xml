@@ -12,9 +12,12 @@
    <feature url="features/com.iw.features.spindle.groovy_3.2.13.jar" id="com.iw.features.spindle.groovy" version="3.2.13">
       <category name="add ons"/>
    </feature>
+   <feature url="features/com.iw.features.spindle_3.3.0.jar" id="com.iw.features.spindle" version="3.3.0">
+      <category name="spindle_3_3"/>
+   </feature>
    <category-def name="spindle_3_1" label="Spindle 3.1 - Eclipse 3.0">
       <description>
-         Here are the latest Spindle 3.1 builds. They are targeted towards Eclipse 3.0
+         Tapestry 3 supported
       </description>
    </category-def>
    <category-def name="add ons" label="Various add ons for Spindle">
@@ -26,9 +29,14 @@ An example is the groovy feature that adds integration for the Goovestry librari
 Add Ons are always located in the unstable update site.
       </description>
    </category-def>
-   <category-def name="spindle_3_2" label="Spindle 3.2  - for Eclipse 3.1">
+   <category-def name="spindle_3_2" label="Spindle 3.2  - for Eclipse 3.1.X">
       <description>
-         Builds of Spindle targeted for Eclipse 3.1.X
+         Tapestry 3 supported
+      </description>
+   </category-def>
+   <category-def name="spindle_3_3" label="Spindle 3.3 for Eclipse 3.2">
+      <description>
+         Tapestry 3 supported
       </description>
    </category-def>
 </site>

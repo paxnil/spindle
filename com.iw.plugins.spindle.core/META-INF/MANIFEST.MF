@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spindle Core Plugin
 Bundle-SymbolicName: com.iw.plugins.spindle.core; singleton:=true
-Bundle-Version: 3.2.13
+Bundle-Version: 3.3.0
 Bundle-ClassPath: core.jar,
  dtdparser.jar,
  lib/tapestry-3.0.3.jar,
@@ -180,4 +180,4 @@ Require-Bundle: org.eclipse.ui.ide;visibility:=reexport,
  org.eclipse.jface.text,
  org.eclipse.core.runtime;visibility:=reexport,
  org.apache.xerces.spindle;visibility:=reexport
-Eclipse-AutoStart: true
+Eclipse-LazyStart: true
