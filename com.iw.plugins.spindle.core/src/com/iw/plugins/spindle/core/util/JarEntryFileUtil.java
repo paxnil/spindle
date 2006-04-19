@@ -46,6 +46,8 @@ import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.ui.IStorageEditorInput;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+
 /**
  * TODO Add Type comment
  * 
@@ -63,14 +65,14 @@ public class JarEntryFileUtil
 
     public static IStorage wrap(IStorage storage)
     {
-       return wrap(storage, false);
+        return wrap(storage, false);
     }
-    
+
     public static IStorage wrap(IStorage storage, boolean mustBeJarEntryFile)
     {
         if (storage instanceof JarEntryFileWrapper)
             return storage;
-        
+
         if (storage instanceof JarEntryFile)
             return wrap((JarEntryFile) storage);
         if (mustBeJarEntryFile)
@@ -80,14 +82,41 @@ public class JarEntryFileUtil
 
     public static Object[] getNonJavaResources(IPackageFragment fragment) throws JavaModelException
     {
-        Assert.isTrue(fragment.getKind() == IPackageFragmentRoot.K_BINARY);
-        Object[] resources = fragment.getNonJavaResources();
-        ArrayList result = new ArrayList();
-        for (int i = 0; i < resources.length; i++)
+        try
         {
-            result.add(new JarEntryFileWrapper((JarEntryFile) resources[i]));
+            Assert.isTrue(fragment.getKind() == IPackageFragmentRoot.K_BINARY);
+            Object[] resources = fragment.getNonJavaResources();
+            ArrayList result = new ArrayList();
+            for (int i = 0; i < resources.length; i++)
+            {
+                result.add(new JarEntryFileWrapper((JarEntryFile) resources[i]));
+            }
+            return result.toArray();
         }
-        return result.toArray();
+        catch (ClassCastException e)
+        {
+            StringBuffer buffer = new StringBuffer();
+            buffer
+                    .append("Class cast occured trying to cast to JarEntryFile. Exception message was: "
+                            + e.getMessage());
+            buffer.append("/n");
+            buffer.append("The IPackageFragment was:\n" + fragment.getElementName());
+            buffer.append("/n");
+            buffer.append("The IPackageFragment toString():\n" + fragment.toString());
+            buffer.append("/n");
+            buffer.append("The non java resources of the frgament were:\n");
+            Object[] resources = fragment.getNonJavaResources();
+            for (int i = 0; i < resources.length; i++)
+            {
+                buffer.append("\t");
+                buffer.append(resources[i].toString());
+                buffer.append(", ");
+                buffer.append(resources[i].getClass().getSimpleName());
+                buffer.append("\n");
+            }
+            TapestryCore.log(buffer.toString(), e);
+            throw e;
+        }
     }
 
     public static class JarEntryFileWrapper implements IStorage
