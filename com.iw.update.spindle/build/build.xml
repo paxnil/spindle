@@ -101,11 +101,12 @@
                         destination="${export.dest}"
                         exportType="update"
                         exportSource="false" usejarformat="true" />
-  	 <pde.exportFeatures features="com.iw.features.spindle.groovy"
+  	 <!--<pde.exportFeatures features="com.iw.features.spindle.groovy"
   	                        destination="${export.dest}"
   	                        exportType="update"
   	                        exportSource="false" 
   	 						usejarformat="true"/>
+  	 						-->
   </target>
 
   <target name="clean" depends="init" description="Delete all derived files.">

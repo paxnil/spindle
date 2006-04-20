@@ -192,7 +192,7 @@ public class SpecEditor extends Editor
 
         super.createPartControl(parent);
 
-        pingProjectState();
+        pingProjectState(parent);
 
         Control[] children = parent.getChildren();
         fControl = children[children.length - 1];
@@ -234,13 +234,26 @@ public class SpecEditor extends Editor
 
     }
 
-    private void pingProjectState()
+    private void pingProjectState(Control control)
     {
-        IStorage storage = getStorage(getEditorInput());
-        IProject project = (IProject) storage.getAdapter(IProject.class);
-        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        if (!storage.isReadOnly())
-            manager.pingProjectState(project);
+
+        final IStorage storage = getStorage(getEditorInput());
+        final IProject project = (IProject) storage.getAdapter(IProject.class);
+        final TapestryArtifactManager manager = TapestryArtifactManager
+                .getTapestryArtifactManager();
+
+        if (storage != null && !storage.isReadOnly())
+        {
+            control.getDisplay().asyncExec(new Runnable()
+            {
+
+                public void run()
+                {
+                    manager.pingProjectState(project);
+
+                }
+            });
+        }
     }
 
     public void openTo(Object obj)

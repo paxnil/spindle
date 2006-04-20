@@ -24,7 +24,10 @@
       <description>
          Here are features that one can install that augment Spindle with functionality ouside the realm of the core feature set.
 
-An example is the groovy feature that adds integration for the Goovestry libraries.
+An example is the groovy feature that adds integration for the Goovestry libraries. 
+
+Groovestry support is limited to Spindle 3.2.X. If there is demand to see this feature ported to Eclipse 3.2 pls add a feature request.
+
 
 Add Ons are always located in the unstable update site.
       </description>

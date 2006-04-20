@@ -162,6 +162,11 @@ public class SpindleStatus implements IStatus
         statusMessage = errorMessage;
         severity = IStatus.ERROR;
     }
+    
+    public void setCancelled() {
+        statusMessage = "";
+        severity = IStatus.CANCEL;
+    }
 
     /**
      * Sets the status to WARNING.

@@ -331,6 +331,8 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
     {
         if (TapestryCore.getDefault().getBuildMissPriority() == -1)
             return;
+        
+        fTapestryBuilder.fNotifier.checkCancel();
 
         ISearch searcher = null;
         try
@@ -341,12 +343,16 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
         {
             TapestryCore.log(e);
         }
+        
+        fTapestryBuilder.fNotifier.checkCancel();
+        
         if (searcher != null)
         {
             searcher.search(new ArtifactCollector()
             {
                 public boolean acceptTapestry(Object parent, IStorage storage)
                 {
+                    fTapestryBuilder.fNotifier.checkCancel();
                     IPackageFragment fragment = (IPackageFragment) parent;
                     IResourceWorkspaceLocation location = fTapestryBuilder.fClasspathRoot
                             .getRelativeLocation(fragment, storage);
@@ -356,6 +362,8 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
                 }
             });
         }
+        
+        fTapestryBuilder.fNotifier.checkCancel();
     }
 
     /**
@@ -363,6 +371,9 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
      */
     protected void findAllArtifactsInWebContext(final ArrayList found)
     {
+        
+        fTapestryBuilder.fNotifier.checkCancel();
+        
         ISearch searcher = null;
         try
         {
@@ -372,13 +383,16 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
         {
             TapestryCore.log(e);
         }
+        
+        fTapestryBuilder.fNotifier.checkCancel();
+        
         if (searcher != null)
         {
             searcher.search(new ArtifactCollector()
             {
                 public boolean acceptTapestry(Object parent, IStorage storage)
                 {
-
+                    fTapestryBuilder.fNotifier.checkCancel();
                     IResource resource = (IResource) storage;
                     IResourceWorkspaceLocation location = fTapestryBuilder.fContextRoot
                             .getRelativeLocation(resource);
@@ -436,6 +450,8 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
                     storage,
                     useLocation,
                     encoding == null ? "UTF-8" : encoding);
+            
+            fTapestryBuilder.fNotifier.checkCancel();
             // Node node = parseToNode(location);
             if (document != null)
             {
@@ -453,6 +469,7 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
                 }
                 finally
                 {
+                    fTapestryBuilder.fNotifier.checkCancel();
                     useValidator.removeListener(this);
                 }
 
@@ -534,8 +551,10 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
         if (fProcessedLocations.containsKey(useLocation))
             return (ILibrarySpecification) fProcessedLocations.get(useLocation);
 
-        if (storage instanceof IFile)
+        if (storage instanceof IFile) {
             Markers.removeProblemsFor((IFile) storage);
+            fTapestryBuilder.fNotifier.checkCancel();
+        }
 
         try
         {
@@ -544,6 +563,8 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
                     storage,
                     location,
                     encoding == null ? "UTF-8" : encoding);
+            
+            fTapestryBuilder.fNotifier.checkCancel();
             // Node node = parseToNode(location);
             if (document != null)
             {
@@ -560,6 +581,7 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
                 }
                 finally
                 {
+                    fTapestryBuilder.fNotifier.checkCancel();
                     useValidator.removeListener(this);
                 }
                 rememberSpecification(storage, (BaseSpecification) result);
@@ -592,6 +614,9 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
         {
             finished(useLocation);
         }
+        
+        fTapestryBuilder.fNotifier.checkCancel();
+        
         if (result != null)
             fProcessedLocations.put(useLocation, result);
 
@@ -785,10 +810,11 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
             System.out.println("parsing: " + location);
 
         PluginComponentSpecification result = null;
-        if (storage != null)
-
+        if (storage != null) {
+            fTapestryBuilder.fNotifier.checkCancel();
             if (storage instanceof IFile)
                 Markers.removeProblemsFor((IFile) storage);
+        }
 
         try
         {
@@ -800,6 +826,9 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
             // while editor reconcilers can re-use the scanner, we can't here
             // because scanning may invoke the scanning of another, nested,
             // component.
+            
+            fTapestryBuilder.fNotifier.checkCancel();
+            
             ComponentScanner scanner = new ComponentScanner();
 
             if (document != null)
@@ -821,6 +850,7 @@ public abstract class Build implements IBuild, IScannerValidatorListener, ITempl
                 }
                 finally
                 {
+                    fTapestryBuilder.fNotifier.checkCancel();
                     useValidator.removeListener(this);
                 }
 

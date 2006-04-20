@@ -3,7 +3,7 @@
 <plugin
    id="net.sf.solareclipse.xml.ui"
    name="XML Development Tools UI"
-   version="0.4.0.spindle-dep-6"
+   version="0.4.0.spindle-dep-7"
    provider-name="SolarEclipse Project"
    class="net.sf.solareclipse.xml.ui.XMLPlugin">
 

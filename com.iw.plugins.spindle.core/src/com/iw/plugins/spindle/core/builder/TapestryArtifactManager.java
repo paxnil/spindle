@@ -168,7 +168,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     // will block if a build is indicated
     public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired)
     {
-        return getLastBuildState(project, buildIfRequired, true);
+        return getLastBuildState(project, buildIfRequired, false);
     }
 
     // may block if a build is indicated
@@ -228,7 +228,8 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         Job buildJob = findBuildJob(project);
         try
         {
-            if (block)
+              if (false)
+//            if (block)
                 buildJob.join();
         }
         catch (InterruptedException e)
@@ -372,7 +373,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         Assert.isNotNull(project);
         if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.trim().length() == 0)
             return Collections.EMPTY_LIST;
-        State buildState = (State) getLastBuildState(project, false);
+        State buildState = (State) getLastBuildState(project, false, false);
         if (buildState == null)
             return Collections.EMPTY_LIST;
         List result = new ArrayList();
