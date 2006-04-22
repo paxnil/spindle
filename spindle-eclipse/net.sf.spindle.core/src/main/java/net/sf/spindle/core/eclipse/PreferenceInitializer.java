@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package net.sf.spindle.core.eclipse;
 
+import net.sf.spindle.core.CoreStatus;
 import net.sf.spindle.core.IPreferenceConstants;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -53,9 +54,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer impleme
     {
         IPreferenceStore store = TapestryCorePlugin.getDefault().getPreferenceStore();
         store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
-        store.setDefault(BUILDER_MARKER_MISSES, CORE_STATUS_WARN);
-        store.setDefault(BUILDER_HANDLE_ASSETS, CORE_STATUS_WARN);
-        store.setDefault(NAMESPACE_CLASH_SEVERITY, CORE_STATUS_ERROR);
+        store.setDefault(BUILDER_MARKER_MISSES, CoreStatus.IGNORE.getLabel());
+        store.setDefault(BUILDER_HANDLE_ASSETS, CoreStatus.WARN.getLabel());
+        store.setDefault(NAMESPACE_CLASH_SEVERITY, CoreStatus.ERROR.getLabel());
         // store.addPropertyChangeListener((IPropertyChangeListener)
         // TapestryCorePlugin.getDefault());
     }

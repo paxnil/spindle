@@ -208,6 +208,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         try
         {
             preBuild();
+            
+            notifier.checkCancel();
 
             notifier.subTask(BuilderMessages.locatingNamespaces());
 
@@ -216,6 +218,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             appNamespace = getApplicationNamespace();
 
             checkForNamspaceClashes();
+            
+            notifier.checkCancel();
 
             notifier.updateProgressDelta(0.05f);
 
@@ -234,19 +238,27 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             {
                 buildQueue.finished(ns.getSpecificationLocation());
             }
+            
+            notifier.checkCancel();
 
             notifier.updateProgressDelta(0.05f);
 
             notifier.setProcessingProgressPer(0.9f / buildQueue.getWaitingCount());
 
             resolveFramework();
+            
+            notifier.checkCancel();
 
             CoreNamespace application = (CoreNamespace) appNamespace;
             resolveApplication(application.getAppNameFromWebXML(), application);
+            
+            notifier.checkCancel();
 
             notifier.updateProgressDelta(0.05f);
 
             postBuild();
+            
+            notifier.checkCancel();
         }
         finally
         {

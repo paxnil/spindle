@@ -26,10 +26,10 @@ package net.sf.spindle.core.util.eclipse;
  *
  * ***** END LICENSE BLOCK ***** */
 
-import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.IProblemPeristManager;
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.TapestryCore;
+import net.sf.spindle.core.eclipse.EclipseMessages;
 import net.sf.spindle.core.eclipse.TapestryProject;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.eclipse.IEclipseResource;
@@ -104,10 +104,9 @@ public class Markers implements IProblemPeristManager
 
     static void logProblem(IStorage storage, IProblem problem)
     {
-        TapestryCore.log(CoreMessages.format(
-                "core-non-resource-problem",
-                storage.toString(),
-                problem.toString()));
+        TapestryCore.log(EclipseMessages.logProblemMessage(
+                storage,
+                problem));
     }
 
     /**

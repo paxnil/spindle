@@ -197,4 +197,23 @@ public class DefaultProblem implements IProblem
         return fCode;
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+            return false;
+        if (!(obj instanceof DefaultProblem))
+            return false;
+        DefaultProblem other = (DefaultProblem)obj;
+        return this.fTemporary == other.fTemporary
+        && this.fCharStart == other.fCharStart
+        && this.fLineNumber == other.fLineNumber
+        && this.fType == other.fType
+        && this.fCode == other.fCode
+        && this.fSeverity == other.fSeverity
+        && (this.fMessage == null ? other.fMessage == null : this.fMessage.equals(other.fMessage));
+    }
+    
+    
+
 }

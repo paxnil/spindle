@@ -8,6 +8,7 @@ package net.sf.spindle.core.metadata;
 
 import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.TapestryCore;
+import net.sf.spindle.core.eclipse.EclipseMessages;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -35,8 +36,8 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
         result.fElement = element;
         if ("metadataLocator".equals(element.getName())) //$NON-NLS-1$
             return result;
-        TapestryCore.log(CoreMessages.format("project-metadata-unexpected-element", element
-                .getDeclaringExtension().getNamespace(), element.getName()));
+        TapestryCore.log(EclipseMessages.projectMetaDataUnexpectedElement( element
+                .getContributor().getName(), element.getName()));
         return null;
     }
 
@@ -72,7 +73,7 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
         {
             if (fLocator != null || fLoaded)
                 return fLocator;
-            String bundleId = fElement.getDeclaringExtension().getNamespace();
+            // String bundleId = fElement.getDeclaringExtension().getNamespaceIdentifier();
             //set to true to prevent repeated attempts to load a broken locator
             fLoaded = true;
         }
@@ -103,10 +104,9 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
         String result = fElement.getAttribute("natureId"); //$NON-NLS-1$
         if (result != null)
             return result;
-        TapestryCore.log(CoreMessages.format(CoreMessages.format(
-                "project-metadata-missing-natureId",
-                fElement.getDeclaringExtension().getNamespace(),
-                fElement.getName())));
+        TapestryCore.log(CoreMessages.projectMetaDataMissingNatureId(               
+                fElement.getDeclaringExtension().getNamespaceIdentifier(),
+                fElement.getName()));
         return ""; //$NON-NLS-1$
     }
 }

@@ -1,9 +1,9 @@
 package net.sf.spindle.core.builder;
 
-import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.build.AbstractBuild;
 import net.sf.spindle.core.build.WebXMLScanner;
+import net.sf.spindle.core.eclipse.EclipseMessages;
 import net.sf.spindle.core.scanning.ScannerException;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.types.IJavaType;
@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * @author gwl
- * 
  */
 public class EclipseWebXMLScanner extends WebXMLScanner
 {
@@ -23,17 +22,18 @@ public class EclipseWebXMLScanner extends WebXMLScanner
     {
         super(fullBuilder);
     }
-    
-    
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see core.builder.WebXMLScanner#getApplicationPathFromServlet(core.IJavaType)
      */
-    protected String getApplicationPathFromServletSubclassOverride(IJavaType servletType) throws ScannerException
+    protected String getApplicationPathFromServletSubclassOverride(IJavaType servletType)
+            throws ScannerException
     {
-       String result = null;
-       
-       IType eServletType = (IType)servletType.getUnderlier();
+        String result = null;
+
+        IType eServletType = (IType) servletType.getUnderlier();
 
         try
         {
@@ -46,9 +46,9 @@ public class EclipseWebXMLScanner extends WebXMLScanner
                 if (methodSource == null)
                 {
                     if (servletType.isBinary())
-                        throw new ScannerException(CoreMessages.format(
-                                "builder-error-servlet-subclass-is-binary-attach-source",
-                                servletType.getFullyQualifiedName()), false,
+                        throw new ScannerException(EclipseMessages
+                                .servletSubclassIsBinaryAttachSource(servletType
+                                        .getFullyQualifiedName()), false,
                                 IProblem.NOT_QUICK_FIXABLE);
 
                 }
@@ -83,7 +83,11 @@ public class EclipseWebXMLScanner extends WebXMLScanner
         }
         catch (JavaModelException e)
         {
-            TapestryCore.log("Not a valid Tapestry ApplicationServlet subclass", e);
+            String message = EclipseMessages.errorOccuredAccessingStructureOfServlet(servletType
+                    .getFullyQualifiedName());
+            TapestryCore.log(message, e);
+            throw new ScannerException(message, false, IProblem.NOT_QUICK_FIXABLE);
+
         }
 
         return result;

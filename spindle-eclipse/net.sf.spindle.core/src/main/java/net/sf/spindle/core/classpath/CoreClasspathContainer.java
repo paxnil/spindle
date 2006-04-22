@@ -35,6 +35,7 @@ import java.util.List;
 
 import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.TapestryCore;
+import net.sf.spindle.core.eclipse.EclipseMessages;
 import net.sf.spindle.core.eclipse.TapestryCorePlugin;
 
 import org.eclipse.core.runtime.IPath;
@@ -225,7 +226,7 @@ public class CoreClasspathContainer implements IClasspathContainer
      */
     public String getDescription()
     {
-        return CoreMessages.format("core-classpath-container-label");
+        return EclipseMessages.coreClasspathContainerLabel();
     }
 
     /**

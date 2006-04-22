@@ -77,7 +77,7 @@ public class ClasspathRoot implements IResourceRoot
      */
     public void lookup(IResourceAcceptor acceptor)
     {
-        // TODO
+        // TODO - never called but I guess this would be the same as a lookup on the default package.
         throw new Error("not implemented yet");
     }
 

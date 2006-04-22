@@ -42,6 +42,7 @@ import net.sf.spindle.core.build.AbstractBuildInfrastructure;
 import net.sf.spindle.core.build.BuilderException;
 import net.sf.spindle.core.build.State;
 import net.sf.spindle.core.build.WebXMLScanner;
+import net.sf.spindle.core.eclipse.EclipseMessages;
 import net.sf.spindle.core.eclipse.TapestryCorePlugin;
 import net.sf.spindle.core.eclipse.TapestryProject;
 import net.sf.spindle.core.parser.IDOMModelSource;
@@ -68,7 +69,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
-
 
 /**
  * The Tapestry Builder, kicks off full and incremental builds.
@@ -345,7 +345,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         catch (CoreException e)
         {
             TapestryCore.log(e);
-            throw new BuilderException("could not obtain the Java Project!");
+            throw new BuilderException(EclipseMessages.mustBeAJavaProject());
         }
 
         // is it a Tapestry project?
@@ -359,18 +359,18 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         catch (CoreException e)
         {
             TapestryCore.log(e);
-            throw new BuilderException("could not obtain the Tapestry Project!");
+            throw new BuilderException(EclipseMessages.tapestryProjectNotExist());
         }
 
         // better have a context root
         contextRoot = tapestryProject.getWebContextLocation();
         if (contextRoot == null || !contextRoot.exists())
-            throw new BuilderException("could not obtain the servlet context root folder");
+            throw new BuilderException(CoreMessages.contextRootNotExist(contextRoot));
 
         // better have a classpath root!
         classpathRoot = tapestryProject.getClasspathRoot();
         if (classpathRoot == null || !classpathRoot.exists())
-            throw new BuilderException("could not obtain the Classpath Root!");
+            throw new BuilderException(CoreMessages.classpathRootNotExist(classpathRoot));
 
         validateWebXML = tapestryProject.isValidatingWebXML();
     }
@@ -384,7 +384,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     {
         // project must exist
         if (javaProject == null || !javaProject.exists())
-            throw new BuilderException(CoreMessages.format(STRING_KEY + "non-java-projects"));
+            throw new BuilderException(EclipseMessages.mustBeAJavaProject());
 
         // must have a vlid classpath
         try
@@ -393,7 +393,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         }
         catch (JavaModelException e3)
         {
-            throw new BuilderException(CoreMessages.format(STRING_KEY + "classpath-not-determined"));
+            throw new BuilderException(EclipseMessages.unableToDetermineClasspath());
         }
 
         // must not have fatal compiler problems
@@ -407,7 +407,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
                         false,
                         IResource.DEPTH_ZERO);
             if (jprojectMarkers.length > 0)
-                throw new BuilderException(CoreMessages.format(STRING_KEY + "java-builder-failed"));
+                throw new BuilderException(EclipseMessages.javaBuilderFailed());
 
         }
         catch (CoreException e)
@@ -422,13 +422,12 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             IPath projectPath = javaProject.getPath();
 
             if (projectPath.equals(outputPath))
-                throw new BuilderException(CoreMessages.format(STRING_KEY
-                        + "abort-invalid-output-location", outputPath.toString()));
-
+                throw new BuilderException(EclipseMessages.invalidCompilerOutputPath(outputPath
+                        .toString()));
         }
         catch (JavaModelException e1)
         {
-            throw new BuilderException(CoreMessages.format(STRING_KEY + "abort-no-output-location"));
+            throw new BuilderException(EclipseMessages.unableToDetermineCompilerOutputPath());
         }
 
         // make sure all prereq projects have valid build states...
@@ -438,30 +437,27 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             IProject p = requiredProjects[i];
             if (getLastState() == null)
             {
+                String message = EclipseMessages.prerequisiteProjectNotBuilt(p);
                 if (DEBUG)
-                    System.out.println(CoreMessages.format(STRING_KEY + "abort-prereq-not-built", p
-                            .getName()));
-                throw new BuilderException(CoreMessages.format(STRING_KEY
-                        + "abort-prereq-not-built", p.getName()));
+                    System.out.println(message);
+                throw new BuilderException(message);
             }
         }
 
         // tapestry must be on the classpath!
-        if (tapestryProject.findType(CoreMessages
-                .format(STRING_KEY + "applicationServletClassname")) == null)
-            throw new BuilderException(CoreMessages.format(STRING_KEY + "tapestry-jar-missing"));
+        if (tapestryProject.findType(CoreMessages.getTapestryServletClassname())== null)
+            throw new BuilderException(CoreMessages.tapestryJarsMissing());
 
         // the context root must exist
         if (contextRoot == null || !contextRoot.exists())
-            throw new BuilderException(CoreMessages.format(STRING_KEY + "missing-context"));
+            throw new BuilderException(CoreMessages.contextRootNotExist(contextRoot));
 
         ICoreResource webXML = (ICoreResource) contextRoot.getRelativeResource("WEB-INF/web.xml");
 
         // web.xml must exist in the context at the expected place.
         if (!webXML.exists())
-            throw new BuilderException(CoreMessages.format(
-                    STRING_KEY + "abort-missing-web-xml",
-                    webXML.toString()));
+            throw new BuilderException(CoreMessages.missingWebXMLFile(
+                    webXML));
 
         return true;
     }
@@ -507,7 +503,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     }
 
     /**
-     * A search acceptor that is used to find all the Tapestry artifacts in the web context 
+     * A search acceptor that is used to find all the Tapestry artifacts in the web context
      */
     abstract class ArtifactCollector extends AbstractEclipseSearchAcceptor
     {

@@ -177,11 +177,13 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
      * @exception BuilderException
      *                for fatal errors that should be recorded against the project.
      */
-    protected abstract boolean isWorthBuilding() throws BuilderException;
+    protected abstract boolean isWorthBuilding() throws BuilderException, BrokenWebXMLException;
 
     private void executeBuild(boolean requestIncremental, Map args)
     {
         Assert.isNotNull(notifier, "notifier must not be null");
+        Assert.isNotNull(tapestryProject, "tapestry project must not be null");
+        Assert.isNotNull(problemPersister, "problem persister must not be null");
 
         notifier.begin();
 
@@ -190,16 +192,18 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         try
         {
             initialize();
+
             notifier.checkCancel();
 
             if (isWorthBuilding())
             {
                 // at this point the infrastructure must be complete.
-                Assert.isNotNull(tapestryProject, "tapestry project must not be null");
+                // Asserts here because BuilderExceptions should have been thrown in either
+                // the initialize() or isWorthBuildingMethods() already!
+
                 Assert.isNotNull(contextRoot, "context root must not be null");
                 Assert.isNotNull(classpathRoot, "classpath root must not be null");
                 Assert.isNotNull(domModelSource, "dom model source must not be null");
-                Assert.isNotNull(problemPersister, "problem persister must not be null");
 
                 notifier.checkCancel();
                 if (!requestIncremental)
@@ -210,6 +214,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
                 {
                     buildIncremental();
                 }
+
                 ok = true;
             }
         }
@@ -217,30 +222,31 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         {
             problemPersister.recordProblem(tapestryProject, new DefaultProblem(
                     IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
-                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
             if (AbstractBuildInfrastructure.DEBUG)
                 System.err.println("Tapestry build aborted: " + e.getMessage());
         }
         catch (ClashException e)
         {
-            problemPersister.removeAllProblems(tapestryProject);
-            ICoreResource requestor = e.getRequestor();
-            problemPersister.recordProblem(requestor, new DefaultProblem(
-                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-REQUESTOR",
-                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-
-            ICoreResource owner = e.getOwner();
-            problemPersister.recordProblem(owner, new DefaultProblem(
-                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-OWNER",
-                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-
-            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
-                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR,
-                    "Tapestry Build can't proceed due to namespace clashes",
-                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-
-            if (AbstractBuildInfrastructure.DEBUG)
-                System.err.println("Tapestry build aborted: " + e.getMessage());
+            throw new BuilderException("Clash detection should not be occuring - give Geoff a punch in the back of the head!");
+//            problemPersister.removeAllProblems(tapestryProject);
+//            ICoreResource requestor = e.getRequestor();
+//            problemPersister.recordProblem(requestor, new DefaultProblem(
+//                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-REQUESTOR",
+//                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+//
+//            ICoreResource owner = e.getOwner();
+//            problemPersister.recordProblem(owner, new DefaultProblem(
+//                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-OWNER",
+//                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+//
+//            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
+//                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR,
+//                    "Tapestry Build can't proceed due to namespace clashes",
+//                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+//
+//            if (AbstractBuildInfrastructure.DEBUG)
+//                System.err.println("Tapestry build aborted: " + e.getMessage());
         }
         catch (BuilderException e)
         {
@@ -252,23 +258,14 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
                 System.err.println("Tapestry build aborted: " + e.getMessage());
 
         }
-        catch (NullPointerException e)
-        {
-            TapestryCore.log(e);
-            throw e;
-        }
-        catch (RuntimeException e)
-        {
-            TapestryCore.log(e);
-            throw e;
-        }
         finally
         {
             if (!ok)
                 // If the build failed, clear the previously built state,
                 // forcing a full build next time.
                 clearLastState();
-            build.cleanUp();
+            if (build != null)
+                build.cleanUp();
             notifier.done();
             TapestryCore.buildOccurred();
         }
@@ -287,7 +284,10 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
         this.build = createFullBuild();
 
+        notifier.checkCancel();
+
         build.build();
+
     }
 
     private void buildIncremental() throws BuilderException

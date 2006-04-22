@@ -20,6 +20,8 @@ package net.sf.spindle.core;
  Contributor(s): __glongman@gmail.com___.
  */
 import net.sf.spindle.core.messages.MessageFormatter;
+import net.sf.spindle.core.resources.ICoreResource;
+import net.sf.spindle.core.resources.IResourceRoot;
 
 import org.apache.hivemind.Resource;
 
@@ -33,7 +35,7 @@ public class CoreMessages
 
     public static String resourceDoesNotExist(Resource location)
     {
-        return FORMATTER.format("core-resource-does-not-exist", location.toString());
+        return FORMATTER.format("core_resource_does_not_exist", location.toString());
     }
 
     public static Object getXMLComment()
@@ -43,12 +45,46 @@ public class CoreMessages
 
     public static String invalidPublicID()
     {
-        return FORMATTER.getMessage("error-invalid-spec-public-id");
+        return FORMATTER.getMessage("error_invalid_spec_public_id");
     }
 
     public static String projectNamespace()
     {
-        return FORMATTER.getMessage("project-namespace");
+        return FORMATTER.getMessage("project_namespace");
     }
+
+    public static String contextRootNotExist(IResourceRoot contextRoot)
+    {
+        return FORMATTER.format("context_root_not_exist", (contextRoot == null ? FORMATTER
+                .getMessage("was_null") : ""));
+    }
+
+    public static String classpathRootNotExist(IResourceRoot classpathRoot)
+    {
+        return FORMATTER.format("classpath_root_not_exist", (classpathRoot == null ? FORMATTER
+                .getMessage("was_null") : ""));
+    }
+
+    public static String getTapestryServletClassname()
+    {
+        return FORMATTER.getMessage("tapestry_servlet_classname");
+    }
+
+    public static String tapestryJarsMissing()
+    {
+        return FORMATTER.getMessage("tapestry_servlet_not_found_on_classpath");
+    }
+
+    public static String missingWebXMLFile(ICoreResource webXML)
+    {
+        return FORMATTER.format("missing_web_XML_file", webXML.toString()); 
+    }
+
+    public static String projectMetaDataMissingNatureId(String namespaceIdentifier, String name)
+    {
+        return FORMATTER.format("project-metadata-missing-natureId", namespaceIdentifier, name);
+    }
+
+    
 
 }

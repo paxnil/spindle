@@ -168,18 +168,11 @@ public class TapestryArtifactManager
     public synchronized void pingProjectState(IProject project)
     {
         Assert.isLegal(project != null);
-        getLastBuildState(project, true, false);
-    }
-
-    //will block if a build is indicated
-    public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired)
-    {
-        return getLastBuildState(project, buildIfRequired, true);
+        getLastBuildState(project, true);
     }
 
     //may block if a build is indicated
-    public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired,
-            boolean block)
+    public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired)
     {
         if (project == null)
             return null;
@@ -192,7 +185,7 @@ public class TapestryArtifactManager
         {
             try
             {
-                buildStateIfPossible(project, block);
+                buildStateIfPossible(project);
                 state = getProjectState(project);
             }
             catch (CoreException e)
@@ -228,7 +221,7 @@ public class TapestryArtifactManager
         fProjectBuildStates.remove(project.getFullPath());
     }
 
-    private void buildStateIfPossible(final IProject project, boolean block) throws CoreException
+    private void buildStateIfPossible(final IProject project) throws CoreException
     {
 
         if (project == null || !project.isAccessible())
@@ -240,8 +233,7 @@ public class TapestryArtifactManager
 
         Job buildJob = findBuildJob(project);
         try
-        {
-            if (block)
+        {            
                 buildJob.join();
         }
         catch (InterruptedException e)

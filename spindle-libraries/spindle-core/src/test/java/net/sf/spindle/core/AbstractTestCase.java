@@ -220,7 +220,7 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
     /**
      * setup TapestryCore with a TestLogger and dumb mocks for listeners and preferences called by
      * {@link #setUpSuite()}. NOTE: This is for use outside of Eclipse only, subclasses that run
-     * inside of Eclipse should override. infact
+     * inside of Eclipse should override. 
      */
     protected void setUpTapestryCore()
     {
