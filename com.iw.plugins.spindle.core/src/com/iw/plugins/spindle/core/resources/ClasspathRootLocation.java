@@ -40,6 +40,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -64,7 +65,7 @@ public class ClasspathRootLocation extends AbstractRootLocation
     public static Object[] getNonJavaResources(IPackageFragment pkg) throws CoreException
     {
         Object[] result = new Object[0];
-        IPackageFragmentRoot parent = (IPackageFragmentRoot)pkg.getParent();
+        IPackageFragmentRoot parent = (IPackageFragmentRoot)pkg.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
         if (pkg.getKind() == IPackageFragmentRoot.K_BINARY && parent.isArchive())
         {
             result = JarEntryFileUtil.getNonJavaResources(pkg);
