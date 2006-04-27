@@ -64,7 +64,8 @@ public class ClasspathRootLocation extends AbstractRootLocation
     public static Object[] getNonJavaResources(IPackageFragment pkg) throws CoreException
     {
         Object[] result = new Object[0];
-        if (pkg.getKind() == IPackageFragmentRoot.K_BINARY)
+        IPackageFragmentRoot parent = (IPackageFragmentRoot)pkg.getParent();
+        if (pkg.getKind() == IPackageFragmentRoot.K_BINARY && parent.isArchive())
         {
             result = JarEntryFileUtil.getNonJavaResources(pkg);
         }
