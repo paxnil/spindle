@@ -1,5 +1,7 @@
 package net.sf.spindle.core.messages;
 
+import org.apache.tapestry.INamespace;
+
 /*
  The contents of this file are subject to the Mozilla Public License
  Version 1.1 (the "License"); you may not use this file except in
@@ -19,6 +21,7 @@ package net.sf.spindle.core.messages;
 
  Contributor(s): __glongman@gmail.com___.
  */
+
 public class DefaultTapestryMessages
 {
     protected static MessageFormatter _formatter = new MessageFormatter(
@@ -50,5 +53,15 @@ public class DefaultTapestryMessages
     {
         return format(key, new Object[]
         { arg1, arg2, arg3 });
+    }
+
+    public static String libraryNotFoundIn(INamespace lib, INamespace parent)
+    {
+        return format("Namespace.library-id-not-found", lib, parent);
+    }
+
+    public static String unableToResolveNamespace(INamespace namespace)
+    {
+        return "Unable to resolve " + format("Namespace.nested-namespace", namespace);
     }
 }

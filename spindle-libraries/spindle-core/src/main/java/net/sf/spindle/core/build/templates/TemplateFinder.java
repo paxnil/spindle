@@ -1,34 +1,35 @@
 package net.sf.spindle.core.build.templates;
+
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
+ Contributor(s): __glongman@gmail.com___.
+ */
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import net.sf.spindle.core.ITapestryProject;
-import net.sf.spindle.core.PicassoMigration;
 import net.sf.spindle.core.messages.ImplMessages;
 import net.sf.spindle.core.resources.I18NResourceAcceptor;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.LookupDepth;
+import net.sf.spindle.core.scanning.AssetType;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.source.IProblemCollector;
 import net.sf.spindle.core.source.ISourceLocation;
@@ -41,11 +42,8 @@ import org.apache.tapestry.services.TemplateSource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 
-
-
 /**
- * A utility class used to find all the templates for a component
- * Templates
+ * A utility class used to find all the templates for a component Templates
  * <p>
  * from (@link org.apache.tapestry.services.impl.TemplateSourceImpl}<br>
  * Finds the template for the given component, using the following rules:
@@ -55,6 +53,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
  * <li>If a page in the application namespace, search in the application root
  * <li>Fail!
  * </ul>
+ * 
  * @author glongman@gmail.com
  */
 public class TemplateFinder
@@ -69,7 +68,8 @@ public class TemplateFinder
      * @param namespace
      * @return List a list with any non templates or localized templates removed.
      */
-    public static List<Resource> filterTemplateList(List<Resource> locations, String expectedTemplateExtension)
+    public static List<Resource> filterTemplateList(List<Resource> locations,
+            String expectedTemplateExtension)
     {
         List<Resource> result = new ArrayList<Resource>();
 
@@ -115,19 +115,24 @@ public class TemplateFinder
 
     private String fTemplateBaseName;
 
+    public static final String TEMPLATE_ASSET_NAME = "$template";
+
     /**
      * Obtain all the template locations for a component specification
      * 
-     * @param specification the IComponentSpecification we want to find templates for
-     * @param project the Tapestry project containing the component specF
-     * @param collector an IProblemCollector to collect any problems encountered.
+     * @param specification
+     *            the IComponentSpecification we want to find templates for
+     * @param project
+     *            the Tapestry project containing the component specF
+     * @param collector
+     *            an IProblemCollector to collect any problems encountered.
      * @return an array of ICoreResource - the template locations.
      */
     public static ICoreResource[] scanForTemplates(IComponentSpecification specification,
             String templateExtension, ITapestryProject project, IProblemCollector collector)
     {
         TemplateFinder finder = new TemplateFinder();
-            
+
         return finder.getTemplates(specification, project, templateExtension, collector);
     }
 
@@ -193,11 +198,11 @@ public class TemplateFinder
             return;
         }
 
-        int assetType = PicassoMigration.getAssetType(path.substring(0, colonx));
+        AssetType assetType = AssetType.get(path.substring(0, colonx));
         String truePath = path.substring(colonx + 1);
         switch (assetType)
         {
-            case PicassoMigration.CONTEXT_ASSET:
+            case CONTEXT:
 
                 ICoreResource contextRoot = (ICoreResource) fTapestryProject
                         .getWebContextLocation();
@@ -215,7 +220,7 @@ public class TemplateFinder
                     return;
                 }
                 break;
-            case PicassoMigration.CLASSPATH_ASSET:
+            case CLASSPATH:
 
                 ICoreResource cpRoot = (ICoreResource) fTapestryProject.getClasspathRoot();
                 if (cpRoot != null)
@@ -238,22 +243,25 @@ public class TemplateFinder
 
     }
 
-    private ISourceLocation getAssetSourceLocation(ISourceLocationInfo sourceInfo, int assetType,
-            boolean isDTD_4_0)
+    private ISourceLocation getAssetSourceLocation(ISourceLocationInfo sourceInfo,
+            AssetType assetType, boolean isDTD_4_0)
     {
         if (isDTD_4_0)
             return sourceInfo.getAttributeSourceLocation("path");
 
         switch (assetType)
         {
-            case PicassoMigration.CONTEXT_ASSET:
+            case CONTEXT:
                 return sourceInfo.getAttributeSourceLocation("path");
 
-            case PicassoMigration.CLASSPATH_ASSET:
+            case CLASSPATH:
                 return sourceInfo.getAttributeSourceLocation("resource-path");
 
-            default:
+            case DEFAULT:
                 return sourceInfo.getAttributeSourceLocation("URL");
+
+            default:
+                return sourceInfo.getTagNameLocation();
         }
     }
 
@@ -289,11 +297,11 @@ public class TemplateFinder
             fProblemCollector.addProblem(severity, location, message, true, code);
 
     }
-    
-//    public ICoreResource[] getResults()
-//    {
-//        ICoreResource[] results = new ICoreResource[fFindResults.size()];
-//        return (ICoreResource[]) fFindResults.toArray(results);
-//    }
+
+    // public ICoreResource[] getResults()
+    // {
+    // ICoreResource[] results = new ICoreResource[fFindResults.size()];
+    // return (ICoreResource[]) fFindResults.toArray(results);
+    // }
 
 }

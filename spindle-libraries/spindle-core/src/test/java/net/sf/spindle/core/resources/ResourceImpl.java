@@ -33,7 +33,7 @@ import org.apache.hivemind.util.AbstractResource;
 /**
  * an implementation of {@link net.sf.spindle.core.resources.ICoreResource}
  */
-public class ResourceImpl extends AbstractResource implements ICoreResource
+public class ResourceImpl extends AbstractResource implements ICoreResource<Object>
 {
 
     private IRootImplementation root;

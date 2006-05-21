@@ -30,8 +30,6 @@ import net.sf.spindle.core.types.IJavaTypeFinder;
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
 
-
-
 /**
  * Borrowed from Hivemind (HivemindTestCase) and modified.
  * 
@@ -50,7 +48,7 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
 
     interface MockControlFactory
     {
-        public MockControl newControl(Class mockClass);
+        public MockControl newControl(Class mockClass, boolean strict);
     }
 
     protected static class MockContainer
@@ -85,14 +83,20 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
          */
         public MockControl newControl(Class mockClass)
         {
+            return newControl(mockClass, true);
+        }
+
+        public MockControl newControl(Class mockClass, boolean strict)
+        {
             MockControlFactory factory = mockClass.isInterface() ? interfaceMockControlFactory
                     : classMockControlFactory;
 
-            MockControl result = factory.newControl(mockClass);
+            MockControl result = factory.newControl(mockClass, strict);
 
             addControl(result);
 
             return result;
+
         }
 
         /**
@@ -109,6 +113,16 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
          * {@link MockControl#getMock()}on the result.
          */
         public Object newMock(Class mockClass)
+        {
+            return newMock(mockClass, true);
+        }
+
+        /**
+         * Convienience for invoking {@link #newControl(Class)}and then invoking
+         * {@link MockControl#getMock()}on the result.
+         * @param strict TODO
+         */
+        public Object newMock(Class mockClass, boolean strict)
         {
             return newControl(mockClass).getMock();
         }
@@ -170,6 +184,13 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
         {
             return MockControl.createStrictControl(mockClass);
         }
+
+        public MockControl newControl(Class mockClass, boolean strict)
+        {
+            if (strict)
+                return newControl(mockClass);
+            return MockControl.createControl(mockClass);
+        }
     }
 
     private static class ClassMockControlFactory implements MockControlFactory
@@ -177,6 +198,13 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
         public MockControl newControl(Class mockClass)
         {
             return MockClassControl.createStrictControl(mockClass);
+        }
+
+        public MockControl newControl(Class mockClass, boolean strict)
+        {
+            if (strict)
+                return newControl(mockClass);
+            return MockClassControl.createControl(mockClass);
         }
     }
 
@@ -189,12 +217,17 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
                             + mockClass
                             + "; ensure that easymockclassextension-1.1.jar and cglib-full-2.0.1.jar are on the classpath.");
         }
+
+        public MockControl newControl(Class mockClass, boolean notStrict)
+        {
+            return newControl(mockClass);
+        }
     }
 
     protected interface TestAsserter
-        {
-            void makeAssertions(Object result);
-        }
+    {
+        void makeAssertions(Object result);
+    }
 
     private static final MockControlFactory interfaceMockControlFactory = new InterfaceMockControlFactory();
 
@@ -220,18 +253,50 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
     /**
      * setup TapestryCore with a TestLogger and dumb mocks for listeners and preferences called by
      * {@link #setUpSuite()}. NOTE: This is for use outside of Eclipse only, subclasses that run
-     * inside of Eclipse should override. 
+     * inside of Eclipse should override.
      */
     protected void setUpTapestryCore()
     {
-        ICoreListeners listeners = (ICoreListeners) mockContainer.newMock(ICoreListeners.class);
-        IPreferenceSource preferenceSource = (IPreferenceSource) mockContainer
-                .newMock(IPreferenceSource.class);
+        ICoreListeners listeners = (ICoreListeners) mockContainer.newMock(ICoreListeners.class, true);        
+        IPreferenceSource preferenceSource = new IPreferenceSource() {
+
+            public double getDouble(String name)
+            {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            public float getFloat(String name)
+            {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            public int getInt(String name)
+            {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            public long getLong(String name)
+            {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            public String getString(String name)
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+        };
 
         new TapestryCore(logger, listeners, preferenceSource);
     }
-    
-    protected void destroyTapestryCore() {
+
+    protected void destroyTapestryCore()
+    {
         TapestryCore.destroy();
     }
 
@@ -281,14 +346,12 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
 
     public void setUpSuite() throws Exception
     {
-        super.setUpSuite();       
+        super.setUpSuite();
         setUpTapestryCore();
     }
-    
-    
 
     public void tearDownSuite() throws Exception
-    {        
+    {
         super.tearDownSuite();
         destroyTapestryCore();
     }
@@ -310,15 +373,15 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
             throw new AssertionFailedError("expected problem code " + expected + "but got " + code
                     + " : " + problem.toString());
     }
-        
+
     /**
      * Checks that there is only one problem and the code matches
      */
     protected void assertSingleProblemCode(int expectedProblemCode)
     {
-        IProblem [] found = getProblems();
+        IProblem[] found = getProblems();
         assertEquals("expecting exactly one problem!", 1, found.length);
-        assertProblemCode(found[0], expectedProblemCode);      
+        assertProblemCode(found[0], expectedProblemCode);
     }
 
     /**
@@ -426,11 +489,12 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
         return problems.getProblems();
     }
 
-    protected IJavaTypeFinder createTypeFinder(MockContainer container, String[] knownTypes, String[] unknownTypes, boolean isCaching)
+    protected IJavaTypeFinder createTypeFinder(MockContainer container, String[] knownTypes,
+            String[] unknownTypes, boolean isCaching)
     {
         MockControl control = container.newControl(IJavaTypeFinder.class);
         IJavaTypeFinder finder = (IJavaTypeFinder) control.getMock();
-    
+
         control.expectAndReturn(finder.isCachingJavaTypes(), isCaching, MockControl.ZERO_OR_MORE);
         for (int i = 0; i < knownTypes.length; i++)
         {
@@ -446,16 +510,17 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
                     unknownTypes[i],
                     false));
         }
-    
+
         return finder;
-    
+
     }
 
-    protected IJavaType createJavaType(MockContainer container, String fullyQualifiedName, boolean exists)
+    protected IJavaType createJavaType(MockContainer container, String fullyQualifiedName,
+            boolean exists)
     {
         MockControl control = container.newControl(IJavaType.class);
         IJavaType type = (IJavaType) control.getMock();
-    
+
         control.expectAndReturn(
                 type.getFullyQualifiedName(),
                 fullyQualifiedName,
@@ -468,17 +533,17 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
     {
         MockControl control = container.newControl(ITapestryProject.class);
         ITapestryProject project = (ITapestryProject) control.getMock();
-    
+
         control.expectAndReturn(project.getWebContextLocation(), container
-                .newMock(IResourceRoot.class), MockControl.ZERO_OR_MORE);
-    
+                .newMock(IResourceRoot.class, true), MockControl.ZERO_OR_MORE);
+
         control.expectAndReturn(
                 project.getClasspathRoot(),
-                container.newMock(IResourceRoot.class),
+                container.newMock(IResourceRoot.class, true),
                 MockControl.ZERO_OR_MORE);
-    
+
         return project;
-    
+
     }
 
 }

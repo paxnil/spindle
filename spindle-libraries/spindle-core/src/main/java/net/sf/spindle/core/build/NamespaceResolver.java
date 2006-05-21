@@ -77,8 +77,8 @@ import org.apache.tapestry.spec.ILibrarySpecification;
  * <li><i>type</i>.jwc in WEB-INF
  * <li><i>type</i>.jwc in the application root (within the context root)
  * <li>By searching the framework namespace
- * <li>By searching for a named class file within the org.apache.tapestry.component-class-packages
- * property (defined within the namespace)
+ * <li><b>NO! Spindle doe NOT support this :-( </b>By searching for a named class file within the
+ * org.apache.tapestry.component-class-packages property (defined within the namespace)
  * </ul>
  * Library Namespace<br>
  * <li>As declared in the library specification
@@ -332,13 +332,6 @@ public class NamespaceResolver
             ICoreResource location = (ICoreResource) jwcFiles.get(name);
             resolveComponent(name, location);
         }
-        // Not needed, there are no specless
-        // Map<String, Resource> specless = resolveAllAnnotatedSpeclessComponentsForNamespace();
-        // for (Iterator iter = specless.keySet().iterator(); iter.hasNext();)
-        // {
-        // String name = (String) iter.next();
-        // jwcFiles.put(name, specless.get(name));
-        // }
     }
 
     /**
@@ -400,25 +393,28 @@ public class NamespaceResolver
 
     private void claimTemplates(ICoreResource specLocation, List templates)
     {
-        for (Iterator iter = templates.iterator(); iter.hasNext();)
-        {
-            ICoreResource template = (ICoreResource) iter.next();
-            try
-            {
-                build.clashDetector.claimTemplateForComponent(specLocation, template);
-            }
-            catch (ClashException e)
-            {
 
-                // FIXME this is wrong, no message comes in the exception.
-                // need to add markers with a message!
-                // build.problemPersister.recordProblem(
-                // template,
-                // clashProblem("PUT CLASH MESSAGE HERE"));
-                // e.printStackTrace();
-                // iter.remove();
-            }
-        }
+        // ClashDetector is off for the forseable future.
+
+        // for (Iterator iter = templates.iterator(); iter.hasNext();)
+        // {
+        // ICoreResource template = (ICoreResource) iter.next();
+        // try
+        // {
+        // build.clashDetector.claimTemplateForComponent(specLocation, template);
+        // }
+        // catch (ClashException e)
+        // {
+        //
+        // // FIXME this is wrong, no message comes in the exception.
+        // // need to add markers with a message!
+        // // build.problemPersister.recordProblem(
+        // // template,
+        // // clashProblem("PUT CLASH MESSAGE HERE"));
+        // // e.printStackTrace();
+        // // iter.remove();
+        // }
+        // }
     }
 
     // private IProblem clashProblem(String message)
@@ -506,6 +502,7 @@ public class NamespaceResolver
     private Map<String, Resource> resolveAllAnnotatedSpeclessComponentsForNamespace(
             Map<String, Resource> jwcFiles)
     {
+        // Not supported by Spindle.
         return jwcFiles;
 
         // find all the annotated classes under the {packages}

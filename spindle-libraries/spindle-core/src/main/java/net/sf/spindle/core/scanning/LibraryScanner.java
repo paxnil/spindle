@@ -1,26 +1,30 @@
 package net.sf.spindle.core.scanning;
+
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
+ Contributor(s): __glongman@gmail.com___.
+ */
+import java.util.List;
+
 import net.sf.spindle.core.messages.DefaultTapestryMessages;
 import net.sf.spindle.core.messages.ParseMessages;
 import net.sf.spindle.core.source.IProblem;
+import net.sf.spindle.core.source.ISourceLocation;
 import net.sf.spindle.core.source.ISourceLocationInfo;
 import net.sf.spindle.core.spec.IPluginDescribable;
 import net.sf.spindle.core.spec.IPluginPropertyHolder;
@@ -30,7 +34,9 @@ import net.sf.spindle.core.spec.PluginExtensionSpecification;
 import net.sf.spindle.core.spec.PluginLibraryDeclaration;
 import net.sf.spindle.core.spec.PluginLibrarySpecification;
 import net.sf.spindle.core.spec.PluginPageDeclaration;
+import net.sf.spindle.core.spec.PluginPropertyDeclaration;
 
+import org.apache.hivemind.HiveMind;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IExtensionSpecification;
@@ -128,29 +134,41 @@ public class LibraryScanner extends SpecificationScanner
     protected boolean scanComponentType(ILibrarySpecification specification, Node node)
             throws ScannerException
     {
-        if (!isElement(node, "component-type"))
+        if (fIsTapestry_4_0)
+        {
+            if (!isElement(node, "component-type"))
+                return false;
+        }
+        else if (!isElement(node, "component-alias"))
+        {
             return false;
+        }
+        return doScanComponentType40(specification, node);
+    }
+
+    protected boolean doScanComponentType40(ILibrarySpecification specification, Node node)
+            throws ScannerException
+    {
 
         String type = getAttribute(node, "type", true);
 
+        ISourceLocation typeAttrLocation = getAttributeSourceLocation(node, "type");
         fValidator.validatePattern(
                 type,
                 SpecificationParser.COMPONENT_ALIAS_PATTERN,
                 "invalid-component-type",
                 IProblem.ERROR,
-                getAttributeSourceLocation(node, "type"),
+                typeAttrLocation,
                 IProblem.LIBRARY_INVALID_COMPONENT_TYPE);
+
+        // Spindle don't like names with path parts!
+        fValidator.checkForIncompatibleComponentName(type, typeAttrLocation);
 
         if (specification.getComponentTypes().contains(type))
         {
-            addProblem(
-                    IProblem.ERROR,
-                    getAttributeSourceLocation(node, "type"),
-                    DefaultTapestryMessages.format(
-                            "LibrarySpecification.duplicate-component-alias",
-                            type),
-                    false,
-                    IProblem.LIBRARY_DUPLICATE_COMPONENT_TYPE);
+            addProblem(IProblem.ERROR, typeAttrLocation, DefaultTapestryMessages.format(
+                    "LibrarySpecification.duplicate-component-alias",
+                    type), false, IProblem.LIBRARY_DUPLICATE_COMPONENT_TYPE);
         }
 
         String path = getAttribute(node, "specification-path");
@@ -164,6 +182,19 @@ public class LibraryScanner extends SpecificationScanner
 
         return true;
 
+    }
+
+    @Override
+    protected boolean scanMeta(IPluginPropertyHolder holder, Node node) throws ScannerException
+    {
+        TempPropertyHolder tempHolder = new TempPropertyHolder();
+        if (!super.scanMeta(tempHolder, node))
+            return false;
+        String key = tempHolder.declaration.getKey();
+        if (!HiveMind.isBlank(key))
+            fValidator.validateLibraryMetaKey(key, getNodeStartSourceLocation(node));
+        holder.addPropertyDeclaration(tempHolder.declaration);
+        return true;
     }
 
     /** @since 2.2 * */
@@ -229,7 +260,7 @@ public class LibraryScanner extends SpecificationScanner
     {
         if (!isElement(node, "extension"))
             return false;
-        
+
         String name = getAttribute(node, "name", true);
 
         fValidator.validatePattern(
@@ -323,23 +354,23 @@ public class LibraryScanner extends SpecificationScanner
 
         String name = getAttribute(node, "name", false);
 
+        ISourceLocation nameAttrLocation = getAttributeSourceLocation(node, "name");
         fValidator.validatePattern(
                 name,
                 SpecificationParser.PAGE_NAME_PATTERN,
                 "invalid-page-name",
                 IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"),
+                nameAttrLocation,
                 IProblem.LIBRARY_INVALID_PAGE_NAME);
 
-        //must be validated here
+        // Spindle don't like names with path parts
+        fValidator.checkForIncompatiblePageName(name, nameAttrLocation);
+
+        // must be validated here
         if (specification.getPageNames().contains(name))
-            addProblem(
-                    IProblem.ERROR,
-                    getAttributeSourceLocation(node, "name"),
-                    DefaultTapestryMessages
-                            .format("LibrarySpecification.duplicate-page-name", name),
-                    false,
-                    IProblem.LIBRARY_DUPLICATE_PAGE_NAME);
+            addProblem(IProblem.ERROR, nameAttrLocation, DefaultTapestryMessages.format(
+                    "LibrarySpecification.duplicate-page-name",
+                    name), false, IProblem.LIBRARY_DUPLICATE_PAGE_NAME);
 
         String specificationPath = getAttribute(node, "specification-path");
 
@@ -364,4 +395,45 @@ public class LibraryScanner extends SpecificationScanner
         return true;
     }
 
+    class TempPropertyHolder implements IPluginPropertyHolder
+    {
+
+        PluginPropertyDeclaration declaration;
+
+        public void addPropertyDeclaration(PluginPropertyDeclaration declaration)
+        {
+            this.declaration = declaration;
+        }
+
+        public List getPropertyDeclarations()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public String getProperty(String arg0)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public List getPropertyNames()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public void removeProperty(String arg0)
+        {
+            // TODO Auto-generated method stub
+
+        }
+
+        public void setProperty(String arg0, String arg1)
+        {
+            // TODO Auto-generated method stub
+
+        }
+
+    }
 }

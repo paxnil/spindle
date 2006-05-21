@@ -112,7 +112,7 @@ public class LookupTest extends AbstractTestRoot
     
     public void testLookupInfiniteJarThenFolder() throws Exception
     {
-        doTestLookupJarThenFolder(LookupDepth.INFINITE, 150 /* tap jar - I counted - really! */);
+        doTestLookupJarThenFolder(LookupDepth.INFINITE, 152 /* tap jar - I counted - really! */);
     }
 
     private void doTestLookupJarThenFolder(LookupDepth depth, int expectedCount)

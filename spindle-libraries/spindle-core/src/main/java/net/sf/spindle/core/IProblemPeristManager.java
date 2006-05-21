@@ -28,9 +28,9 @@ import org.apache.hivemind.Resource;
  * <p>
  * IDE implementors need to implement this interface.
  * <p>
- * The core works on the assumption that problems are peristed (presented to end users) during (or right after a
- * build) and are available during the next build. A subsequent full or incremental build may clear
- * some or all problems by calling the 'remove' methods in this interface.
+ * The core works on the assumption that problems are peristed (presented to end users) during (or
+ * right after a build) and are available during the next build. A subsequent full or incremental
+ * build may clear some or all problems by calling the 'remove' methods in this interface.
  * </p>
  * <p>
  * The core does not check to see if the {@link org.apache.hivemind.Resource} a problem is being
@@ -43,7 +43,7 @@ import org.apache.hivemind.Resource;
  * @see net.sf.spindle.core.ITapestryProject
  * @see org.apache.hivemind.Resource
  */
-public interface IProblemPeristManager
+public interface IProblemPeristManager<E extends Object>
 {
     /**
      * Record a problem against the project.
@@ -79,7 +79,7 @@ public interface IProblemPeristManager
      * @param problems
      *            the problem to record.
      */
-    void recordProblem(Resource resource, IProblem problem);
+    void recordProblem(E underlier, IProblem problem);
 
     /**
      * Record an array of problems against the project.
@@ -91,7 +91,7 @@ public interface IProblemPeristManager
      * @param problems
      *            the problems to record.
      */
-    void recordProblems(Resource resource, IProblem[] problems);
+    void recordProblems(E underlier, IProblem[] problems);
 
     /**
      * If this method returns true, then a problem with type
@@ -110,20 +110,20 @@ public interface IProblemPeristManager
     boolean hasBrokenBuildProblems(ITapestryProject project);
 
     /**
-     * Remove problems of all problem types persisted against the {@link ITapestryProject} and also all
-     * problems persisted against any {@link Resource} in the project.
+     * Remove problems of all problem types persisted against the {@link ITapestryProject} and also
+     * all problems persisted against any {@link Resource} in the project.
      */
     void removeAllProblems(ITapestryProject project);
 
     /**
-     * Remove all problems persisted against an {@link Resource} where {@link IProblem#isTemporary()}
-     * returns true.
+     * Remove all problems persisted against an {@link Resource} where
+     * {@link IProblem#isTemporary()} returns true.
      * <p>
      * 
      * @param resource
      *            the resource.
      */
-    void removeTemporaryProblemsForResource(Resource resource);
+    void removeTemporaryProblemsFor(E underlier);
 
     /**
      * Remove any and all problems recorded against a {@link Resource}.
@@ -131,6 +131,5 @@ public interface IProblemPeristManager
      * @param resource
      *            the resource.
      */
-    void removeAllProblemsFor(Resource resource);
-
+    void removeAllProblemsFor(E underlier);    
 }

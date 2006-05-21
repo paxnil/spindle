@@ -33,7 +33,7 @@ public class ResourceTest extends AbstractTestRoot
 
     public static Test suite()
     {
-        return new SuiteOfTestCases.Suite(LookupTest.class);
+        return new SuiteOfTestCases.Suite(ResourceTest.class);
     }
 
     public ResourceTest(String name)

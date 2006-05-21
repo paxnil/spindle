@@ -46,6 +46,15 @@ public class ClashDetectorTest extends AbstractTestRoot
     {
         super(name);
     }
+    
+    
+
+    @Override
+    public void setUpSuite() throws Exception
+    {        
+        super.setUpSuite();
+        ClashDetector.SWITCHED_ON = true;
+    }
 
     public void testClashesWithNot()
     {

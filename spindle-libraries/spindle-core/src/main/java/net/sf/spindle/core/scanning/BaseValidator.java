@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.spindle.core.CoreMessages;
+import net.sf.spindle.core.CoreStatus;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.build.AbstractBuild;
 import net.sf.spindle.core.build.BuilderMessages;
@@ -33,15 +34,19 @@ import net.sf.spindle.core.build.IDependencyListener;
 import net.sf.spindle.core.messages.DefaultTapestryMessages;
 import net.sf.spindle.core.messages.ParseMessages;
 import net.sf.spindle.core.resources.ICoreResource;
+import net.sf.spindle.core.resources.PathUtils;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.source.IProblemCollector;
 import net.sf.spindle.core.source.ISourceLocation;
 import net.sf.spindle.core.source.ISourceLocationInfo;
+import net.sf.spindle.core.spec.PluginComponentSpecification;
+import net.sf.spindle.core.spec.PluginInjectSpecification;
 import net.sf.spindle.core.types.IJavaType;
 import net.sf.spindle.core.types.IJavaTypeFinder;
 import ognl.Ognl;
 import ognl.OgnlException;
 
+import org.apache.hivemind.HiveMind;
 import org.apache.hivemind.Resource;
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
@@ -125,6 +130,10 @@ public class BaseValidator implements IScannerValidator
     private List<IScannerValidatorListener> fListeners;
 
     private IJavaTypeFinder fJavaTypeFinder;
+
+    public static final String NamespaceClassSearchPageClassProvider="org.apache.tapestry.page-class-packages";
+
+    public static final String NamespaceClassSearchComponentClassProvider="org.apache.tapestry.component-class-packages";
 
     public BaseValidator(IJavaTypeFinder finder)
     {
@@ -250,7 +259,7 @@ public class BaseValidator implements IScannerValidator
      * @param fullyQualifiedName
      * @return
      */
-    public Object findType(Resource dependant, String fullyQualifiedName)
+    public IJavaType findType(Resource dependant, String fullyQualifiedName)
     {
         IJavaType result = getJavaTypeFinder().findType(fullyQualifiedName);
         fireTypeDependency(dependant, fullyQualifiedName, result);
@@ -475,8 +484,8 @@ public class BaseValidator implements IScannerValidator
             return null;
         }
 
-        Object type = findType(dependant, fullyQualifiedType);
-        if (type == null)
+        IJavaType type = findType(dependant, fullyQualifiedType);
+        if (!type.exists())
         {
             addProblem(severity, location, DefaultTapestryMessages.format(
                     "unable-to-resolve-class",
@@ -505,4 +514,77 @@ public class BaseValidator implements IScannerValidator
                     sourceLocation);
 
     }
+
+    public void validateLibraryMetaKey(String key, ISourceLocation location)
+            throws ScannerException
+    {
+        CoreStatus priority = TapestryCore.getDefault().getIncompatabilityPriority();
+        if (priority == CoreStatus.IGNORE)
+            return;
+        if (NamespaceClassSearchComponentClassProvider.equals(key.trim()))
+            addProblem(
+                    priority.getPriority(),
+                    location,
+                    CoreMessages.componentClassMetaIncompatability(),
+                    false,
+                    IProblem.SPINDLE_UNSUPPORTED_COMPONENT_CLASS_META);
+        else if (NamespaceClassSearchPageClassProvider.equals(key.trim()))
+            addProblem(
+                    priority.getPriority(),
+                    location,
+                    CoreMessages.pageClassMetaIncompatability(),
+                    false,
+                    IProblem.SPINDLE_UNSUPPORTED_PAGE_CLASS_META);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.scanning.IScannerValidator#checkForIncompatiblePageName(java.lang.String,
+     *      net.sf.spindle.core.source.ISourceLocation)
+     */
+    public void checkForIncompatiblePageName(String name, ISourceLocation location)
+            throws ScannerException
+    {
+        checkNameForPathParts(
+                name,
+                location,
+                CoreMessages.unsupportedPageName(name),
+                IProblem.SPINDLE_UNSUPPORTED_PAGE_NAME);
+    }
+
+    public void checkForIncompatibleComponentName(String name, ISourceLocation location)
+            throws ScannerException
+    {
+        checkNameForPathParts(
+                name,
+                location,
+                CoreMessages.unsupportedComponentName(name),
+                IProblem.SPINDLE_UNSUPPORTED_COMPONENT_NAME);
+    }
+
+    private void checkNameForPathParts(String name, ISourceLocation location, String message,
+            int problemCode) throws ScannerException
+    {
+        if (HiveMind.isBlank(name))
+            return;
+        CoreStatus priority = TapestryCore.getDefault().getIncompatabilityPriority();
+        if (priority == CoreStatus.IGNORE)
+            return;
+        PathUtils path = new PathUtils(name);
+        if (path.segmentCount() > 1)
+            addProblem(priority.getPriority(), location, message, false, problemCode);
+    }
+
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.scanning.IScannerValidator#validateXMLInject(net.sf.spindle.core.spec.PluginComponentSpecification, net.sf.spindle.core.spec.PluginInjectSpecification)
+     */
+    public void validateXMLInject(PluginComponentSpecification spec, PluginInjectSpecification inject, ISourceLocationInfo sourceInfo) throws ScannerException
+    {
+        //The base implementation does nothing
+        
+    }
+    
+    
+
 }

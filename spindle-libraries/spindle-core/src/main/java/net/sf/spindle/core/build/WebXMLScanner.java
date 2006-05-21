@@ -154,7 +154,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
         IJavaType found = builder.findType(className);
         builder.typeChecked(className, found);
 
-        if (found == null)
+        if (!found.exists())
             addProblem(
                     IProblem.ERROR,
                     location,
@@ -349,7 +349,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
         return newInfo;
     }
 
-    private boolean isTapestryServletOrSubclass(IJavaType candidate, ISourceLocation location)
+    protected boolean isTapestryServletOrSubclass(IJavaType candidate, ISourceLocation location)
     {
         if (candidate.equals(builder.tapestryServletType))
             return true;
@@ -441,7 +441,7 @@ public abstract class WebXMLScanner extends AbstractDOMScanner
         else
         {
             IJavaType servletType = checkJavaType(newInfo.classname, nodeLocation);
-            if (servletType != null && isTapestryServletOrSubclass(servletType, nodeLocation))
+            if (servletType.exists() && isTapestryServletOrSubclass(servletType, nodeLocation))
             {
                 newInfo.isServletSubclass = !builder.tapestryServletType.equals(servletType);
 

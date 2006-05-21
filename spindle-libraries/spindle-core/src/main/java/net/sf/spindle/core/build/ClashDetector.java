@@ -37,6 +37,8 @@ import org.apache.hivemind.Resource;
 
 public class ClashDetector
 {
+    
+    public static boolean SWITCHED_ON = false;
 
     /**
      * @param ns
@@ -51,6 +53,10 @@ public class ClashDetector
     public static IProblem[] checkNamspaceClash(ICoreNamespace ns, List<ICoreNamespace> existingNS,
             String errorKey, CoreStatus clashPriority)
     {
+        if (!SWITCHED_ON)
+            return new IProblem [] {};
+        
+        
         if (clashPriority == CoreStatus.IGNORE)
             return IProblem.EMPTY_ARRAY;
 
@@ -85,6 +91,9 @@ public class ClashDetector
 
     public static boolean clashesWith(ICoreResource lhs, ICoreResource rhs)
     {
+        if (!SWITCHED_ON)
+            return false;
+        
         Assert.isNotNull(lhs);
         Assert.isNotNull(rhs);
 
@@ -131,6 +140,8 @@ public class ClashDetector
     public void claimResourceForNamespace(ICoreResource resource, ICoreNamespace namespace,
             String errorKey) throws ClashException
     {
+        if (!SWITCHED_ON)
+            return;
         // Assert.isNotNull(resource);
         // Assert.isNotNull(namespace);
         //
@@ -164,6 +175,8 @@ public class ClashDetector
     public void claimTemplateForComponent(ICoreResource component, ICoreResource template)
             throws ClashException
     {
+        if (!SWITCHED_ON)
+            return;
         // Assert.isNotNull(component);
         // Assert.isNotNull(template);
         //

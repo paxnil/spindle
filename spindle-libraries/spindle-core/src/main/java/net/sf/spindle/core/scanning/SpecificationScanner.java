@@ -345,6 +345,9 @@ public abstract class SpecificationScanner extends AbstractDOMScanner
         if (!fIsTapestry_4_0)
             return scanProperty_3_0(holder, node);
 
+        if (!isElement(node, "meta"))
+            return false;
+        
         return scanProperty(holder, node, "key", "value");
 
     }
@@ -361,8 +364,6 @@ public abstract class SpecificationScanner extends AbstractDOMScanner
     private boolean scanProperty(IPluginPropertyHolder holder, Node node, String keyAttribute,
             String valueAttribute) throws ScannerException
     {
-        if (!isElement(node, "meta"))
-            return false;
 
         String name = getAttribute(node, keyAttribute, false);
 

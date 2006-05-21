@@ -157,10 +157,8 @@ public class ApplicationResolver extends NamespaceResolver
         String templateExtension = namespace.getSpecification().getProperty(
                 "org.apache.tapestry.template-extension");
         if (templateExtension == null)
-        {
             templateExtension = DefaultProperties.getInstance().getPropertyValue(
                     "org.apache.tapestry.template-extension");
-        }
 
         final List<Resource> allTemplates = new ArrayList<Resource>(componentTemplates);
         allTemplates.addAll(getAllPageSpecTemplates());

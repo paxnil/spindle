@@ -182,7 +182,8 @@ import org.apache.hivemind.Resource;
     {
         try
         {
-            return new URL(rootUrl, resource.getPath());
+            PathUtils rpath = new PathUtils(resource.getPath());
+            return new URL(rootUrl, rpath.makeRelative().toString());
         }
         catch (MalformedURLException e)
         {

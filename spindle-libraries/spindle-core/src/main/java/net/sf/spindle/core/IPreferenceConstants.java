@@ -83,4 +83,6 @@ public interface IPreferenceConstants
     String BUILDER_HANDLE_ASSETS = TapestryCore.IDENTIFIER + ".BUILDER_HANDLE_ASSETS";
 
     String NAMESPACE_CLASH_SEVERITY = TapestryCore.IDENTIFIER + ".namespaceClashSeverity";
+    
+    String INCOMPATABILITY_SERVERITY = TapestryCore.IDENTIFIER + ".incompatabilitySeverity";
 }

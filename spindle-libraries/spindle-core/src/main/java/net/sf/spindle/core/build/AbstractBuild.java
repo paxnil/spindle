@@ -59,6 +59,7 @@ import net.sf.spindle.core.spec.PluginApplicationSpecification;
 import net.sf.spindle.core.spec.PluginComponentSpecification;
 import net.sf.spindle.core.spec.PluginLibrarySpecification;
 import net.sf.spindle.core.types.IJavaType;
+import net.sf.spindle.core.util.Assert;
 
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
@@ -208,7 +209,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         try
         {
             preBuild();
-            
+
             notifier.checkCancel();
 
             notifier.subTask(BuilderMessages.locatingNamespaces());
@@ -218,7 +219,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             appNamespace = getApplicationNamespace();
 
             checkForNamspaceClashes();
-            
+
             notifier.checkCancel();
 
             notifier.updateProgressDelta(0.05f);
@@ -238,7 +239,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             {
                 buildQueue.finished(ns.getSpecificationLocation());
             }
-            
+
             notifier.checkCancel();
 
             notifier.updateProgressDelta(0.05f);
@@ -246,18 +247,18 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             notifier.setProcessingProgressPer(0.9f / buildQueue.getWaitingCount());
 
             resolveFramework();
-            
+
             notifier.checkCancel();
 
             CoreNamespace application = (CoreNamespace) appNamespace;
             resolveApplication(application.getAppNameFromWebXML(), application);
-            
+
             notifier.checkCancel();
 
             notifier.updateProgressDelta(0.05f);
 
             postBuild();
-            
+
             notifier.checkCancel();
         }
         finally
@@ -275,12 +276,11 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             while (buildQueue.getWaitingCount() > 0)
             {
 
-                ICoreResource location = (ICoreResource) buildQueue.peekWaiting();
-                notifier.processed(location);
-                buildQueue.finished(location);
+                Object missed = buildQueue.peekWaiting();
+                buildQueue.finished(missed);
 
-                if (missPriority >= 0 && location.exists() && !location.isBinaryResource())
-                    recordBuildMiss(missPriority, location);
+                if (missPriority >= 0)
+                    recordBuildMiss(missPriority, missed);
 
             }
         }
@@ -313,7 +313,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                     "contextNSKey",
                     namespaceClashPriority);
 
-            problemPersister.recordProblems(ns.getSpecificationLocation(), problems);
+            recordProblems(((ICoreResource) ns.getSpecificationLocation()), problems);
 
         }
 
@@ -325,20 +325,30 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                     "classpathNSKey",
                     namespaceClashPriority);
 
-            problemPersister.recordProblems(ns.getSpecificationLocation(), problems);
+            recordProblems((ICoreResource) ns.getSpecificationLocation(), problems);
         }
     }
 
-    protected void recordBuildMiss(int missPriority, Resource resource)
+    @SuppressWarnings("unchecked")
+    protected void recordBuildMiss(int missPriority, Object missed)
     {
-        if ("package.html".equals(resource.getName())) // TODO add real filter
-            // capability.
-            return;
 
-        problemPersister.recordProblem(resource,
+        problemPersister.recordProblem(missed, new DefaultProblem(missPriority, BuilderMessages
+                .buildMissMessage(missed.toString()), SourceLocation.FOLDER_LOCATION, false,
+                IProblem.NOT_QUICK_FIXABLE));
+    }
 
-        new DefaultProblem(missPriority, BuilderMessages.buildMissMessage(resource),
-                SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+    protected void recordProblem(ICoreResource resource, IProblem problem)
+    {
+        recordProblems(resource, new IProblem[]
+        { problem });
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void recordProblems(ICoreResource resource, IProblem[] problems)
+    {
+        Assert.isNotNull(problems);
+        problemPersister.recordProblems(resource.getUnderlier(), problems);
     }
 
     protected abstract void saveState();
@@ -432,6 +442,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * If the entity referred to by the location is really a file in the workspace, the problems are
      * recorded as resource markers. Otherwise, the problem is logged.
      */
+
     protected IApplicationSpecification parseApplicationSpecification(Resource location,
             String encoding)
     {
@@ -440,6 +451,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         IDOMModel model = null;
         try
         {
+            aboutToProcess(location);
+
             model = getDOMModel(useLocation, encoding == null ? "UTF-8" : encoding, false);
             // Node node = parseToNode(location);
             if (model != null)
@@ -454,7 +467,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                 try
                 {
                     result = (IApplicationSpecification) scanner.scan(model, useValidator);
-                    problemPersister.recordProblems(useLocation, scanner.getProblems());
+                    recordProblems(useLocation, scanner.getProblems());
                 }
                 finally
                 {
@@ -481,7 +494,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         // }
         catch (ScannerException e)
         {
-            recordFatalProblem(location, e);
+            recordFatalProblem(useLocation, e);
         }
         finally
         {
@@ -494,6 +507,9 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected void rememberSpecification(Resource location, BaseSpecification result)
     {
+        if (AbstractBuildInfrastructure.DEBUG)
+            System.out.println(location);
+        
         ICoreResource coreResource = (ICoreResource) location;
         if (!coreResource.exists())
         {
@@ -509,9 +525,10 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     }
 
-    protected void recordFatalProblem(Resource location, ScannerException e)
+    @SuppressWarnings("unchecked")
+    protected void recordFatalProblem(ICoreResource location, ScannerException e)
     {
-        problemPersister.recordProblem(location, new DefaultProblem(
+        problemPersister.recordProblem(location.getUnderlier(), new DefaultProblem(
                 IProblem.TAPESTRY_FATAL_PROBLEM_MARKER, IProblem.ERROR, e.getMessage(),
                 SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
     }
@@ -528,6 +545,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         ILibrarySpecification result = null;
         if (processedLocations.containsKey(useLocation))
             return (ILibrarySpecification) processedLocations.get(useLocation);
+
+        aboutToProcess(location);
 
         IDOMModel model = null;
         try
@@ -550,9 +569,9 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                 {
                     useValidator.removeListener(this);
                 }
-                rememberSpecification(useLocation, (BaseSpecification) result);
+                
 
-                problemPersister.recordProblems(useLocation, scanner.getProblems());
+                recordProblems(useLocation, scanner.getProblems());
 
             }
             else
@@ -570,7 +589,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         }
         catch (ScannerException e)
         {
-            recordFatalProblem(location, e);
+            recordFatalProblem(useLocation, e);
         }
         finally
         {
@@ -593,6 +612,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * If the entity referred to by the specification location is really a resource in the
      * workspace, the problems are recorded as resource markers. Otherwise, the problem is logged.
      */
+
     protected void parseTemplates(PluginComponentSpecification spec)
     {
 
@@ -605,6 +625,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             if (processedLocations.containsKey(templateLocation))
                 continue;
+
+            aboutToProcess(templateLocation);
             try
             {
                 if (!templateLocation.exists())
@@ -614,7 +636,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
                 if (shouldParseTemplate(spec.getSpecificationLocation(), templateLocation))
                 {
-                    IScannerValidator validator = new SpecificationValidator(this, tapestryProject);
+                    SpecificationValidator validator = new SpecificationValidator(this, tapestryProject);
                     try
                     {
                         validator.addListener(this);
@@ -625,7 +647,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                         validator.removeListener(this);
                     }
 
-                    problemPersister.recordProblems(templateLocation, scanner.getProblems());
+                    recordProblems(templateLocation, scanner.getProblems());
 
                     if (!scanner.containsImplicitComponents()
                             && !templateLocation.isBinaryResource())
@@ -677,6 +699,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * If the IStorage is really a resource in the workspace, the problems are recorded as resource
      * markers. Otherwise, the problem is logged.
      */
+
     protected IDOMModel getDOMModel(ICoreResource location, String encoding, boolean validate)
             throws IOException
     {
@@ -685,7 +708,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         IDOMModel result = domModelSource.parseDocument(location, encoding, validate, this);
 
-        problemPersister.recordProblems(location, result.getProblems());
+        recordProblems(location, result.getProblems());
 
         if (result.getDocument() == null)
         {
@@ -738,6 +761,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             ICoreResource location, String encoding)
 
     {
+
         // to avoid double parsing specs that are accessible
         // by multiple means in Tapestry
         if (processedLocations.containsKey(location))
@@ -747,7 +771,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             INamespace claimer = existing.getNamespace();
             if (!claimer.equals(namespace))
             {
-                problemPersister.recordProblem(location, new DefaultProblem(IProblem.WARNING,
+                recordProblem(location, new DefaultProblem(IProblem.WARNING,
                         "namespace clash: already claimed by "
                                 + claimer.getSpecificationLocation().toString(),
                         SourceLocation.FILE_LOCATION, true, IProblem.NOT_QUICK_FIXABLE));
@@ -760,6 +784,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         IDOMModel model = null;
         if (location.exists())
         {
+            aboutToProcess(location);
+
             try
             {
                 model = getDOMModel(location, encoding == null ? "UTF-8" : encoding, false);
@@ -772,6 +798,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                     ComponentScanner scanner = new ComponentScanner();
                     scanner.setResourceLocation(location);
                     scanner.setNamespace(namespace);
+                    scanner.setPropertySource((IPropertySource) namespace.getSpecification());
 
                     IScannerValidator scanValidator = new SpecificationValidator(this,
                             tapestryProject);
@@ -785,7 +812,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                         scanValidator.removeListener(this);
                     }
 
-                    problemPersister.recordProblems(location, scanner.getProblems());
+                    recordProblems(location, scanner.getProblems());
 
                     rememberSpecification(location, result);
                 }
@@ -867,9 +894,14 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return result;
     }
 
-    protected void finished(Resource location)
+    protected void aboutToProcess(Resource location)
     {
-        buildQueue.finished(location);
+        notifier.aboutToProcess(location);
+    }
+
+    protected void finished(ICoreResource location)
+    {
+        buildQueue.finished(location.getUnderlier());
         notifier.processed(location);
     }
 
@@ -899,7 +931,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      */
     public void typeChecked(String fullyQualifiedName, IJavaType result)
     {
-        if (result == null)
+        if (!result.exists())
         {
             if (!missingTypes.contains(fullyQualifiedName))
                 missingTypes.add(fullyQualifiedName);

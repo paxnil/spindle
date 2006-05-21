@@ -1,26 +1,29 @@
 package net.sf.spindle.core.scanning;
+
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
+ Contributor(s): __glongman@gmail.com___.
+ */
 import net.sf.spindle.core.source.IProblemCollector;
 import net.sf.spindle.core.source.ISourceLocation;
 import net.sf.spindle.core.source.ISourceLocationInfo;
+import net.sf.spindle.core.spec.PluginComponentSpecification;
+import net.sf.spindle.core.spec.PluginInjectSpecification;
 
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IAssetSpecification;
@@ -174,8 +177,8 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateResource(Resource location, String relativePath,
-            String errorKey, ISourceLocation source) throws ScannerException;
+    public boolean validateResource(Resource location, String relativePath, String errorKey,
+            ISourceLocation source) throws ScannerException;
 
     /**
      * A Scanner calls this to determine if the location of a Tapestry library exists in the project
@@ -194,8 +197,8 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateLibraryResource(Resource specLocation, String path,
-            String errorKey, ISourceLocation source) throws ScannerException;
+    public boolean validateLibraryResource(Resource specLocation, String path, String errorKey,
+            ISourceLocation source) throws ScannerException;
 
     /**
      * A Scanner calls this method to determine if a type exists in the project
@@ -210,8 +213,8 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public Object validateTypeName(Resource dependant, String fullyQualifiedType,
-            int severity) throws ScannerException;
+    public Object validateTypeName(Resource dependant, String fullyQualifiedType, int severity)
+            throws ScannerException;
 
     /**
      * A Scanner calls this method to determine if a type exists in the project
@@ -227,8 +230,8 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public Object validateTypeName(Resource dependant, String fullyQualifiedType,
-            int severity, ISourceLocation location) throws ScannerException;
+    public Object validateTypeName(Resource dependant, String fullyQualifiedType, int severity,
+            ISourceLocation location) throws ScannerException;
 
     public Object findType(Resource dependant, String fullyQualifiedName);
 
@@ -249,9 +252,33 @@ public interface IScannerValidator
      */
     public void addProblem(int severity, ISourceLocation sourceLocation, String message,
             boolean isTemporary, int code) throws ScannerException;
-    
 
     public void validateBindingReference(int severity, ISourceLocation sourceLocation,
             String reference) throws ScannerException;
+
+    /**
+     * Spindle doesn't like some meta keys. Here's the hook to check all keys as they are
+     * encountered.
+     * 
+     * @param key
+     *            a meta key found during a scan
+     * @param location
+     *            TODO
+     */
+    public void validateLibraryMetaKey(String key, ISourceLocation location)
+            throws ScannerException;
+    
+    /**
+     * Spindle does not like page names containing path parts.
+     * This method checks only for path parts.
+     * @param name the name to check
+     * @param location the location to mark an error against
+     * @throws ScannerException 
+     */
+    public void checkForIncompatiblePageName(String name, ISourceLocation location) throws ScannerException;
+    
+    public void checkForIncompatibleComponentName(String name, ISourceLocation location) throws ScannerException;
+    
+    public void validateXMLInject(PluginComponentSpecification spec, PluginInjectSpecification inject, ISourceLocationInfo sourceInfo) throws ScannerException;
 
 }

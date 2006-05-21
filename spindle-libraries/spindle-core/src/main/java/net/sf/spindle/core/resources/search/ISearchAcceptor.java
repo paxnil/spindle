@@ -25,10 +25,9 @@ package net.sf.spindle.core.resources.search;
  * 
  * @author glongman@gmail.com
  */
-public interface ISearchAcceptor
+public interface ISearchAcceptor<E>
 {
-
     /** return false to stop the search! * */
-    public boolean accept(Object parent, Object leaf);
+    public boolean accept(Object parent, E leaf);
 
 }

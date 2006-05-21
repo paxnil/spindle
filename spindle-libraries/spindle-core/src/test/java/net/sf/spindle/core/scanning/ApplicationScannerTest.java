@@ -25,8 +25,10 @@ import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.SuiteOfTestCases;
 import net.sf.spindle.core.parser.IDOMModel;
 import net.sf.spindle.core.source.IProblem;
+import net.sf.spindle.core.source.ISourceLocation;
 import net.sf.spindle.core.types.IJavaTypeFinder;
 
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.w3c.dom.Document;
 
@@ -130,6 +132,121 @@ public class ApplicationScannerTest extends AbstractXMLTestCase
         });
     }
 
+    public void testUnsupportedPageClassPackageMeta() throws Exception, ScannerException
+    {
+        readScanAssertApplication("AppScan_UnsupportedPageClassMeta.xml", new TestAsserter()
+        {
+            public void makeAssertions(Object result)
+            {
+                assertNotNull(result);
+                assertTrue(logger.isEmpty());
+
+                assertSingleProblemCode(IProblem.SPINDLE_UNSUPPORTED_PAGE_CLASS_META);
+            }
+        });
+
+    }
+
+    public void testUnsupportedPageClassPackageMeta30() throws Exception, ScannerException
+    {
+
+        readScanAssertApplication("AppScan_UnsupportedPageClassMeta30.xml", new TestAsserter()
+        {
+            public void makeAssertions(Object result)
+            {
+                assertNotNull(result);
+                assertTrue(logger.isEmpty());
+
+                assertSingleProblemCode(IProblem.SPINDLE_UNSUPPORTED_PAGE_CLASS_META);
+            }
+        });
+    }
+
+    public void testUnsupportedComponentClassPackageMeta() throws Exception, ScannerException
+    {
+        readScanAssertApplication("AppScan_UnsupportedComponentClassMeta.xml", new TestAsserter()
+        {
+            public void makeAssertions(Object result)
+            {
+                assertNotNull(result);
+                assertTrue(logger.isEmpty());
+
+                assertSingleProblemCode(IProblem.SPINDLE_UNSUPPORTED_COMPONENT_CLASS_META);
+            }
+        });
+
+    }
+
+    public void testUnsupportedComponentClassPackageMeta30() throws Exception, ScannerException
+    {
+        readScanAssertApplication("AppScan_UnsupportedComponentClassMeta30.xml", new TestAsserter()
+        {
+            public void makeAssertions(Object result)
+            {
+                assertNotNull(result);
+                assertTrue(logger.isEmpty());
+
+                assertSingleProblemCode(IProblem.SPINDLE_UNSUPPORTED_COMPONENT_CLASS_META);
+            }
+        });
+    }
+
+    public void testUnsupportedPageNames() throws Exception, ScannerException
+    {
+        readScanAssertApplication("AppScan_UnsupportedPageName.xml", new TestAsserter()
+        {
+            public void makeAssertions(Object result)
+            {
+                assertNotNull(result);
+                assertTrue(logger.isEmpty());
+
+                assertSingleProblemCode(IProblem.SPINDLE_UNSUPPORTED_PAGE_NAME);
+            }
+        });
+    }
+
+    public void testUnsupportedPageNames30() throws Exception, ScannerException
+    {
+        readScanAssertApplication("AppScan_UnsupportedPageName30.xml", new TestAsserter()
+        {
+            public void makeAssertions(Object result)
+            {
+                assertNotNull(result);
+                assertTrue(logger.isEmpty());
+
+                assertSingleProblemCode(IProblem.SPINDLE_UNSUPPORTED_PAGE_NAME);
+            }
+        });
+    }
+    
+    public void testUnsupportedComponentNames() throws Exception, ScannerException
+    {
+        readScanAssertApplication("AppScan_UnsupportedComponentName.xml", new TestAsserter()
+        {
+            public void makeAssertions(Object result)
+            {
+                assertNotNull(result);
+                assertTrue(logger.isEmpty());
+
+                assertSingleProblemCode(IProblem.SPINDLE_UNSUPPORTED_COMPONENT_NAME);
+            }
+        });
+    }
+
+    public void testUnsupportedComponentNames30() throws Exception, ScannerException
+    {
+        readScanAssertApplication("AppScan_UnsupportedComponentName30.xml", new TestAsserter()
+        {
+            public void makeAssertions(Object result)
+            {
+                assertNotNull(result);
+                assertTrue(logger.isEmpty());
+
+                assertSingleProblemCode(IProblem.SPINDLE_UNSUPPORTED_COMPONENT_NAME);
+            }
+        });
+    }
+
     private void readScanAssertApplication(String file, TestAsserter asserter) throws Exception
     {
         assertNotNull(asserter);
@@ -151,7 +268,24 @@ public class ApplicationScannerTest extends AbstractXMLTestCase
 
         mockContainer.replayControls();
 
-        SpecificationValidator validator = new SpecificationValidator(mockFinder, mockProject);
+        //none of the tests in here care about valid resource locations
+        SpecificationValidator validator = new SpecificationValidator(mockFinder, mockProject) {
+
+            @Override
+            public boolean validateResource(Resource location, String relativePath, String errorKey, ISourceLocation source) throws ScannerException
+            {
+                // TODO Auto-generated method stub
+                return true;
+            }
+
+            @Override
+            public boolean validateResourceLocation(Resource location, String relativePath, String errorKey, ISourceLocation source, boolean accountForI18N) throws ScannerException
+            {
+               
+                return true;
+            }
+            
+        };
 
         IApplicationSpecification result = (IApplicationSpecification) scanner.scan(
                 model,

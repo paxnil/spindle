@@ -1,24 +1,26 @@
 package net.sf.spindle.core.messages;
+
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
+ Contributor(s): __glongman@gmail.com___.
+ */
 import org.apache.tapestry.IComponent;
+import org.apache.tapestry.spec.IComponentSpecification;
 
 public class PageloadMessages
 {
@@ -49,29 +51,22 @@ public class PageloadMessages
         return _formatter.format("required-parameter-not-bound", name, containedName);
     }
 
-    public static String inheritInformalInvalidComponentFormalOnly(IComponent component)
+    public static String inheritInformalInvalidComponentFormalOnly(String containedName)
     {
-        return _formatter.format("inherit-informal-invalid-component-formal-only", component
-                .getExtendedId());
+        return _formatter.format("inherit-informal-invalid-component-formal-only", containedName);
     }
 
-    public static String inheritInformalInvalidContainerFormalOnly(IComponent container,
-            IComponent component)
+    public static String inheritInformalInvalidContainerFormalOnly(
+            IComponentSpecification container, IComponentSpecification component)
     {
         return _formatter.format("inherit-informal-invalid-container-formal-only", container
-                .getExtendedId(), component.getExtendedId());
+                .getSpecificationLocation().getName(), component.getSpecificationLocation()
+                .getName());
     }
 
-//    public static String formalParametersOnly(IComponent component, String parameterName)
-//    {
-//        return _formatter
-//                .format("formal-parameters-only", component.getExtendedId(), parameterName);
-//    }
-    
     public static String formalParametersOnly(String containedName, String parameterName)
     {
-        return _formatter
-                .format("formal-parameters-only", containedName, parameterName);
+        return _formatter.format("formal-parameters-only", containedName, parameterName);
     }
 
     public static String unableToInstantiateComponent(IComponent container, Throwable cause)

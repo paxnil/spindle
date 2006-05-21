@@ -20,6 +20,20 @@
         </configuration>
       </plugin>
       <plugin>
+      	<artifactId>maven-war-plugin</artifactId>
+        	<executions>
+            	<execution>
+                	<phase>process-resources</phase>
+               			<configuration>
+							<webappDirectory>${project.build.directory}/exploded</webappDirectory>
+                       </configuration>
+                       <goals>
+                           <goal>exploded</goal>
+                       </goals>
+                   </execution>
+               </executions>
+           </plugin>  
+      <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
@@ -29,15 +43,35 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="${settings.localRepository}/tapestry/tapestry/4.0/tapestry-4.0.jar" tofile="${basedir}/testData/jars/tapestryTest.jar"></copy>
+                <property name="tversion" value="4.0.2"/>
+                <copy file="${settings.localRepository}/tapestry/tapestry/${tversion}/tapestry-${tversion}.jar" tofile="${basedir}/testData/jars/tapestryTest.jar"></copy>
+                <echo message="${tversion}"/>
+                <!-- copy files from ${project.build.directory}/exploded/lib -->
+                <copy toDir="${basedir}/testData/jars/build-test-jars">
+					<fileset dir="${project.build.directory}/exploded/WEB-INF/lib">
+						<include name="tapestry-${tversion}.jar"/>
+						<include name="tapestry-contrib-${tversion}.jar"/>
+					</fileset>
+				</copy>                              
+				<!-- delete them after if you like -->
+				<delete includeemptydirs="true">
+					<fileset dir="${project.build.directory}/exploded"/>
+				</delete>
                </tasks>
             </configuration>
           </execution>
         </executions>
-      </plugin>        
+      </plugin> 
+      
     </plugins>    
   </build>
   <dependencies>
+  	<dependency>
+      <groupId>net.sf.spindle</groupId>
+      <artifactId>spindle-parser</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -57,29 +91,35 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.7.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>tapestry</groupId>
       <artifactId>tapestry</artifactId>
-      <version>4.0</version>
+      <version>4.0.2</version>
     </dependency>
     <dependency>
       <groupId>hivemind</groupId>
       <artifactId>hivemind</artifactId>
-      <version>1.1</version>
+      <version>1.1.1</version>
     </dependency>
     <dependency>
       <groupId>tapestry</groupId>
       <artifactId>tapestry-annotations</artifactId>
-      <version>4.0</version>
+      <version>4.0.2</version>
     </dependency>
     <dependency>
       <groupId>tapestry</groupId>
       <artifactId>tapestry-contrib</artifactId>
-      <version>4.0</version>
+      <version>4.0.2</version>
     </dependency>
     <dependency>
       <groupId>tapestry</groupId>
       <artifactId>tapestry-portlet</artifactId>
-      <version>4.0</version>
+      <version>4.0.2</version>
     </dependency>
     <dependency>
       <groupId>ognl</groupId>
@@ -104,7 +144,12 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.0</version>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -124,7 +169,7 @@
     <dependency>
       <groupId>hivemind</groupId>
       <artifactId>hivemind-lib</artifactId>
-      <version>1.1</version>
+      <version>1.1.1</version>
     </dependency>
   </dependencies> 
 </project>

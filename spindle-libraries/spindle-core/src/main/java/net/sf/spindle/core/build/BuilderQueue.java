@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 /**
- * Helper class used by the Full AbstractBuild
+ * Helper class used by the AbstractBuild
  * 
  * 
  * @author glongman@gmail.com

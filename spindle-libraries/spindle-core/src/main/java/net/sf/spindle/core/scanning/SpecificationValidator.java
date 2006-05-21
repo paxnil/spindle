@@ -26,32 +26,39 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.spindle.core.ITapestryProject;
-import net.sf.spindle.core.PicassoMigration;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.build.BuilderMessages;
+import net.sf.spindle.core.build.templates.TemplateFinder;
 import net.sf.spindle.core.messages.DefaultTapestryMessages;
 import net.sf.spindle.core.messages.PageloadMessages;
+import net.sf.spindle.core.messages.ResolverMessages;
 import net.sf.spindle.core.namespace.ComponentSpecificationResolver;
 import net.sf.spindle.core.namespace.ICoreNamespace;
 import net.sf.spindle.core.resources.I18NResourceAcceptor;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceRoot;
 import net.sf.spindle.core.resources.LookupDepth;
+import net.sf.spindle.core.resources.PathUtils;
 import net.sf.spindle.core.resources.ResourceExtension;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.source.ISourceLocation;
 import net.sf.spindle.core.source.ISourceLocationInfo;
 import net.sf.spindle.core.spec.PluginAssetSpecification;
+import net.sf.spindle.core.spec.PluginBindingSpecification;
 import net.sf.spindle.core.spec.PluginComponentSpecification;
+import net.sf.spindle.core.spec.PluginContainedComponent;
+import net.sf.spindle.core.spec.PluginInjectSpecification;
 import net.sf.spindle.core.types.IJavaType;
 import net.sf.spindle.core.types.IJavaTypeFinder;
 import net.sf.spindle.core.util.Assert;
 
 import org.apache.hivemind.Resource;
+import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
+import org.apache.tapestry.spec.IParameterSpecification;
 
 /**
  * A completely functional validator for scanning Tapestry specs.
@@ -91,7 +98,7 @@ public class SpecificationValidator extends BaseValidator
      * 
      * @see core.scanning.BaseValidator#findType(java.lang.String)
      */
-    public Object findType(Resource dependant, String fullyQualifiedName)
+    public IJavaType findType(Resource dependant, String fullyQualifiedName)
     {
         IJavaType result = getJavaTypeFinder().findType(fullyQualifiedName);
         fireTypeDependency(dependant, fullyQualifiedName, result);
@@ -118,17 +125,12 @@ public class SpecificationValidator extends BaseValidator
         if (type.startsWith(getDummyStringPrefix()))
             return true;
 
+        checkForIncompatibleComponentName(type, info.getAttributeSourceLocation("type"));
+
         if (use_namespace == null)
         {
-            addProblem(
-                    IProblem.ERROR,
-                    info.getAttributeSourceLocation("type"),
-                    DefaultTapestryMessages.format(
-                            "Namespace.no-such-component-type",
-                            type,
-                            "unknown"),
-                    true,
-                    IProblem.COMPONENT_TYPE_DOES_NOT_EXIST);
+            addProblem(IProblem.ERROR, info.getAttributeSourceLocation("type"), ResolverMessages
+                    .noSuchComponentTypeUnknown(type), true, IProblem.COMPONENT_TYPE_DOES_NOT_EXIST);
 
             return false;
         }
@@ -156,10 +158,7 @@ public class SpecificationValidator extends BaseValidator
                     addProblem(
                             IProblem.ERROR,
                             info.getAttributeSourceLocation("type"),
-                            "Unable to resolve "
-                                    + DefaultTapestryMessages.format(
-                                            "Namespace.nested-namespace",
-                                            namespaceId),
+                            DefaultTapestryMessages.unableToResolveNamespace(sub_namespace),
                             true,
                             IProblem.COMPONENT_TYPE_DOES_NOT_EXIST);
 
@@ -169,10 +168,7 @@ public class SpecificationValidator extends BaseValidator
                     addProblem(
                             IProblem.ERROR,
                             info.getAttributeSourceLocation("type"),
-                            DefaultTapestryMessages.format(
-                                    "Namespace.no-such-component-type",
-                                    type,
-                                    namespaceId),
+                            ResolverMessages.noSuchComponentType(type, sub_namespace),
                             true,
                             IProblem.COMPONENT_TYPE_DOES_NOT_EXIST);
                 }
@@ -184,10 +180,7 @@ public class SpecificationValidator extends BaseValidator
                 addProblem(
                         IProblem.ERROR,
                         info.getAttributeSourceLocation("type"),
-                        DefaultTapestryMessages.format(
-                                "Namespace.no-such-component-type",
-                                type,
-                                use_namespace.getNamespaceId()),
+                        ResolverMessages.noSuchComponentTypeUnknown(type),
                         true,
                         IProblem.COMPONENT_TYPE_DOES_NOT_EXIST);
 
@@ -237,35 +230,35 @@ public class SpecificationValidator extends BaseValidator
 
         boolean containerFormalOnly = !containerSpecification.getAllowInformalParameters();
 
-        String containerName = containerSpecification.getSpecificationLocation().getName();
         String containedName = containedSpecification.getSpecificationLocation().getName();
 
-        // if (contained.getInheritInformalParameters())
-        // {
-        // if (formalOnly)
-        // {
-        //
-        // reportProblem(
-        // IProblem.ERROR,
-        // location,
-        // DefaultTapestryMessages.format(
-        // "PageLoader.inherit-informal-invalid-component-formal-only",
-        // containedName));
-        // return false;
-        // }
-        //
-        // if (containerFormalOnly)
-        // {
-        // reportProblem(
-        // IProblem.ERROR,
-        // location,
-        // DefaultTapestryMessages.format(
-        // "PageLoader.inherit-informal-invalid-container-formal-only",
-        // containerName,
-        // containedName));
-        // return false;
-        // }
-        // }
+        PluginContainedComponent useContainedComponent = ((PluginContainedComponent) component);
+        ISourceLocation location = ((ISourceLocationInfo) useContainedComponent.getLocation())
+                .getStartTagSourceLocation();
+        if (useContainedComponent.getInheritInformalParameters())
+        {
+            if (formalOnly)
+            {
+                addProblem(
+                        IProblem.ERROR,
+                        location,
+                        PageloadMessages.inheritInformalInvalidComponentFormalOnly(containedName),
+                        false,
+                        IProblem.NOT_QUICK_FIXABLE);
+                return;
+            }
+
+            if (containerFormalOnly)
+            {
+                addProblem(IProblem.ERROR, location, PageloadMessages
+                        .inheritInformalInvalidContainerFormalOnly(
+                                containerSpecification,
+                                containedSpecification)
+
+                , false, IProblem.NOT_QUICK_FIXABLE);
+                return;
+            }
+        }
 
         Iterator i = bindingNames.iterator();
 
@@ -275,14 +268,14 @@ public class SpecificationValidator extends BaseValidator
 
             boolean isFormal = containedSpecification.getParameter(name) != null;
 
-            IBindingSpecification bspec = component.getBinding(name);
+            PluginBindingSpecification bspec = (PluginBindingSpecification) component
+                    .getBinding(name);
 
             ISourceLocationInfo bindingSrcInfo = (ISourceLocationInfo) bspec.getLocation();
-            ISourceLocation location = name.startsWith(getDummyStringPrefix()) ? bindingSrcInfo
+            location = name.startsWith(getDummyStringPrefix()) ? bindingSrcInfo
                     .getTagNameLocation() : bindingSrcInfo.getAttributeSourceLocation("name");
 
-            name = name.startsWith(getDummyStringPrefix()) ? "'name not found'" : name;
-
+            name = name.startsWith(getDummyStringPrefix()) ? null : name;
             // If not allowing informal parameters, check that each binding
             // matches
             // a formal parameter.
@@ -306,15 +299,215 @@ public class SpecificationValidator extends BaseValidator
                 addProblem(
                         IProblem.WARNING,
                         location,
-                        "ignoring binding '" + name + "'. trying to bind to reserved parameter.",
+                        "ignoring binding '" + (name == null ? "'name not found'" : name)
+                                + "'. trying to bind to reserved parameter.",
                         true,
                         IProblem.NOT_QUICK_FIXABLE);
 
                 continue;
             }
 
+            if (name == null)
+                continue;
+
+            doValidateBinding(containedSpecification, bspec, location);
+
         }
 
+    }
+
+    public void doValidateBinding(IComponentSpecification containedSpecification,
+            PluginBindingSpecification bspec, ISourceLocation location) throws ScannerException
+    {
+        String name = bspec.getIdentifier();
+        String value = bspec.getUnprefixedValue();
+
+        BindingType type = bspec.getType();
+
+        if (type == BindingType.PREFIXED)
+        {
+
+            BuiltInBindingType bindingType = BuiltInBindingType.get(bspec.getPrefix());
+
+            switch (bindingType)
+            {
+                case MESSAGE:
+                case LISTENER:
+                case HIVEMIND:
+                case TRANSLATOR:
+                case STATE:
+                case VALIDATOR:
+                case VALIDATORS: // all the above have no true validator yet - use the
+                    // static one
+                case LITERAL:
+                    validateStaticBinding(containedSpecification, name, value, location);
+                    break;
+                case ASSET:
+                    validateAssetBinding(containedSpecification, name, value, location);
+                    break;
+                case BEAN:
+                    validateBeanBinding(containedSpecification, name, value, location);
+                    break;
+                case COMPONENT:
+                    validateComponentBinding(containedSpecification, name, value, location);
+                    break;
+                case EXPRESSION:
+                    validateExpression(bspec.getValue(), IProblem.ERROR, location);
+                    break;
+                case UNKNOWN:
+                    // Most often this is a custom prefix a dev has
+                    // added via Hivemind. what to do?
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void validateComponentBinding(IComponentSpecification containedSpecification,
+            String bindingName, String value, ISourceLocation location) throws ScannerException
+    {
+        if (containedSpecification.getComponent(value) == null)
+        {
+            addProblem(
+                    IProblem.ERROR,
+                    location,
+                    "TODO FILL IN MESSAGE",
+                    true,
+                    IProblem.IMPLICIT_COMPONENT_BINDING_MISSING_COMPONENT);
+        }
+    }
+
+    public void validateBeanBinding(IComponentSpecification containedSpecification,
+            String bindingName, String value, ISourceLocation location) throws ScannerException
+    {
+        if (containedSpecification.getBeanSpecification(value) == null)
+        {
+            addProblem(
+                    IProblem.ERROR,
+                    location,
+                    "TODO FILL IN MESSAGE",
+                    true,
+                    IProblem.IMPLICIT_BEAN_BINDING_MISSING_BEAN);
+        }
+    }
+
+    public void validateAssetBinding(IComponentSpecification containedSpecification,
+            String bindingName, String value, ISourceLocation location) throws ScannerException
+    {
+
+        if (containedSpecification.getAsset(value) == null)
+        {
+            addProblem(
+                    IProblem.ERROR,
+                    location,
+                    "TODO FILL IN MESSAGE",
+                    true,
+                    IProblem.IMPLICIT_ASSET_BINDING_MISSING_ASSET);
+        }
+    }
+
+    public void validateStaticBinding(IComponentSpecification containedSpecification,
+            String bindingName, String value, ISourceLocation location) throws ScannerException
+    {
+        IParameterSpecification parameter = containedSpecification.getParameter(bindingName);
+
+        if (parameter != null) // must be a formal parameter
+        {
+            String pType = parameter.getType();
+            boolean allowed = true;
+            if (pType != null)
+            {
+                if ("int".equals(pType))
+                {
+                    try
+                    {
+                        new Integer(value);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                }
+                else if ("short".equals(pType))
+                {
+                    try
+                    {
+                        new Short(value);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                }
+                else if ("boolean".equals(pType))
+                {
+                    allowed = "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value);
+                }
+                else if ("long".equals(pType))
+                {
+                    try
+                    {
+                        new Long(value);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+
+                }
+                else if ("float".equals(pType))
+                {
+                    try
+                    {
+                        new Float(value);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                }
+                else if ("double".equals(pType))
+                {
+                    try
+                    {
+                        new Double(value);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                }
+                else if ("char".equals(pType))
+                {
+                }
+                else if ("byte".equals(pType))
+                {
+                    try
+                    {
+                        new Byte(value);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                }
+                else
+                {
+                    allowed = "String".equalsIgnoreCase(pType) || "java.lang.String".equals(pType)
+                            || "Object".equalsIgnoreCase(pType) || "java.lang.Object".equals(pType);
+                }
+
+            }
+            if (!allowed)
+                addProblem(
+                        IProblem.WARNING,
+                        location,
+                        "Parameter '" + bindingName + "' of '"
+                                + containedSpecification.getSpecificationLocation().getName()
+                                + "' expects bindings to be of type '" + pType + "'",
+                        false,
+                        IProblem.TEMPLATE_SCANNER_CHANGE_TO_EXPRESSION);
+        }
     }
 
     private List<String> findRequiredParameterNames(IComponentSpecification spec)
@@ -392,7 +585,7 @@ public class SpecificationValidator extends BaseValidator
         if (errorLoc == null)
             errorLoc = sourceLocation.getTagNameLocation();
 
-        if (PicassoMigration.TEMPLATE_ASSET_NAME.equals(pAsset.getIdentifier()))
+        if (TemplateFinder.TEMPLATE_ASSET_NAME.equals(pAsset.getIdentifier()))
             return checkTemplateAsset(specification, asset, prefix, truePath);
 
         ICoreResource relative = (ICoreResource) root.getRelativeResource(truePath);
@@ -519,5 +712,65 @@ public class SpecificationValidator extends BaseValidator
             useLocation = fClasspathRoot.getRelativeResource("/");
 
         return validateResource(useLocation, path, errorKey, source);
+    }
+
+    @Override
+    public void validateXMLInject(PluginComponentSpecification spec,
+            PluginInjectSpecification inject, ISourceLocationInfo sourceInfo)
+            throws ScannerException
+    {
+        String objectValue = inject.getObject();
+        if (objectValue == null)
+            return;
+
+        ISourceLocation objectLocation = sourceInfo.getAttributeSourceLocation("object");
+        if (objectLocation == null)
+            objectLocation = sourceInfo.getTagNameLocation();
+
+        InjectType type = InjectType.get(inject.getType());
+        switch (type)
+        {
+            case META:
+                if (spec.getProperty(objectValue) == null)
+                    addProblem(
+                            IProblem.WARNING,
+                            objectLocation,
+                            "TODO ADD MESSAGE - missing mets",
+                            true,
+                            IProblem.INJECT_MISSING_META);
+                break;
+            case PAGE:
+                ICoreNamespace ns = (ICoreNamespace) spec.getNamespace();
+                if (ns.getPageResolver().resolve(objectValue) == null)
+                    addProblem(
+                            IProblem.ERROR,
+                            objectLocation,
+                            "TODO ADD MESSAGE - missing page",
+                            true,
+                            IProblem.INJECT_MISSING_PAGE);
+
+            case SCRIPT:
+                validateResourceLocation(
+                        spec.getSpecificationLocation(),
+                        objectValue,
+                        "TODO CREATE MESSAGE",
+                        objectLocation,
+                        false);
+                PathUtils utils = new PathUtils(objectValue);
+                if (!"script".equals(utils.getFileExtension()))
+                    addProblem(
+                            IProblem.ERROR,
+                            objectLocation,
+                            "TODO ADD MESSAGE - .script",
+                            true,
+                            IProblem.INJECT_INCORRECT_SCRIPT_NAME);
+            case STATE:
+            case STATE_FLAG:
+            case SPRING:
+            case OBJECT:
+            case UNKNOWN:               
+            default:
+                break;
+        }
     }
 }

@@ -53,9 +53,9 @@ public class BuilderMessages
         return FORMATTER.getMessage("incremental-build-starting");
     }
 
-    public static String buildMissMessage(Resource resource)
+    public static String buildMissMessage(String name)
     {
-        return FORMATTER.format("missed-file-message", resource.getName());
+        return FORMATTER.format("missed-file-message", name);
     }
 
     public static String locatingNamespaces()
@@ -99,9 +99,9 @@ public class BuilderMessages
         return FORMATTER.getMessage("abort-too-many-valid-servlets-found");
     }
 
-    public static String missingContext(Resource resource)
+    public static String webXMLDoesNotExist(Resource resource)
     {
-        return FORMATTER.format("missing-context", resource.toString());
+        return FORMATTER.format("web-xml-does-not-exist", resource.toString());
     }
 
     public static String circularError(String extraMessage)

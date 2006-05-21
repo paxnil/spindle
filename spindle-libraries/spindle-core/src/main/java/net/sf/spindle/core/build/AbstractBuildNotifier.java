@@ -57,7 +57,7 @@ public abstract class AbstractBuildNotifier implements IBuildNotifier
 
     private void aboutToProcess(String message)
     {
-        subTask("processing " + message);
+        subTask("processing: " + message);
     }
 
     /*

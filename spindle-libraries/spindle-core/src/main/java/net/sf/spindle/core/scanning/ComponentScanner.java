@@ -1,25 +1,26 @@
 package net.sf.spindle.core.scanning;
+
 /*
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+ The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations
-under the License.
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
 
-The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
+ The Original Code is __Spindle, an Eclipse Plugin For Tapestry__.
 
-The Initial Developer of the Original Code is _____Geoffrey Longman__.
-Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
-__Geoffrey Longman____. All Rights Reserved.
+ The Initial Developer of the Original Code is _____Geoffrey Longman__.
+ Portions created by _____Initial Developer___ are Copyright (C) _2004, 2005, 2006__
+ __Geoffrey Longman____. All Rights Reserved.
 
-Contributor(s): __glongman@gmail.com___.
-*/
-import net.sf.spindle.core.PicassoMigration;
+ Contributor(s): __glongman@gmail.com___.
+ */
 import net.sf.spindle.core.TapestryCore;
+import net.sf.spindle.core.build.templates.TemplateFinder;
 import net.sf.spindle.core.messages.DefaultTapestryMessages;
 import net.sf.spindle.core.messages.PageloadMessages;
 import net.sf.spindle.core.messages.ParseMessages;
@@ -192,7 +193,7 @@ public class ComponentScanner extends SpecificationScanner
                     false,
                     IProblem.COMPONENT_SPEC_DUPLICATE_ASSET_ID);
 
-        if (name != null && !name.equals(PicassoMigration.TEMPLATE_ASSET_NAME))
+        if (name != null && !name.equals(TemplateFinder.TEMPLATE_ASSET_NAME))
             fValidator.validatePattern(
                     name,
                     SpecificationParser.ASSET_NAME_PATTERN,
@@ -491,14 +492,11 @@ public class ComponentScanner extends SpecificationScanner
 
         String name = getBindingName(component, node);
         String value = null;
-        boolean fromAttribute = true;
         // must be done here - never revalidatable
         try
         {
             ExtendedAttributeResult result = getExtendedAttribute(node, "value", true);
             value = result.value;
-            fromAttribute = result.fromAttribute;
-
         }
         catch (ScannerException e)
         {
@@ -590,16 +588,7 @@ public class ComponentScanner extends SpecificationScanner
 
         if (componentClassname == null)
         {
-            //check the "packages" thingy
-            if (fIsPageSpec)
-
-                specification.setComponentClassName(fPropertySource
-                        .getPropertyValue("org.apache.tapestry.default-page-class"));
-
-            else
-
-                // TODO it appears that the default for components is not configurable!
-                specification.setComponentClassName("org.apache.tapestry.BaseComponent");
+            componentClassCheck(specification);
 
         }
         else
@@ -634,30 +623,50 @@ public class ComponentScanner extends SpecificationScanner
         specification.validate(fValidator);
     }
 
+    private void componentClassCheck(PluginComponentSpecification specification)
+    {
+        // Here is a place where we diverge from the real T4 semantics.
+        // T4 has the wild and wolley meta tag:
+        //
+        // which Spindle can't support right now (or ever)
+        //
+        // Here's how we'll handle it.
+        // check the "packages" thingy
+        if (fIsPageSpec)
+
+            specification.setComponentClassName(fPropertySource
+                    .getPropertyValue("org.apache.tapestry.default-page-class"));
+
+        else
+
+            // TODO it appears that the default for components is not configurable!
+            specification.setComponentClassName("org.apache.tapestry.BaseComponent");
+    }
+
     protected boolean scanListenerBinding_3_0(PluginContainedComponent component, Node node)
             throws ScannerException
     {
         if (!isElement(node, "listener-binding"))
             return false;
 
-//  FIXME      String name = getBindingName(component, node);
-//
-//        String language = getAttribute(node, "language");
-//
-//        // The script itself is the character data wrapped by the element.
-//
-//        String script = getValue(node);
-//
-//        PluginListenerBindingSpecification binding = new PluginListenerBindingSpecification();
-//
-//        binding.setLanguage(language);
-//        binding.setValue(script);
-//
-//        ISourceLocationInfo location = getSourceLocationInfo(node);
-//        location.setResource(component.getLocation().getResource());
-//        binding.setLocation(location);
-//
-//        component.setBinding(name, binding);
+        // FIXME String name = getBindingName(component, node);
+        //
+        // String language = getAttribute(node, "language");
+        //
+        // // The script itself is the character data wrapped by the element.
+        //
+        // String script = getValue(node);
+        //
+        // PluginListenerBindingSpecification binding = new PluginListenerBindingSpecification();
+        //
+        // binding.setLanguage(language);
+        // binding.setValue(script);
+        //
+        // ISourceLocationInfo location = getSourceLocationInfo(node);
+        // location.setResource(component.getLocation().getResource());
+        // binding.setLocation(location);
+        //
+        // component.setBinding(name, binding);
 
         return true;
     }
@@ -691,6 +700,8 @@ public class ComponentScanner extends SpecificationScanner
         inject.setLocation(location);
 
         specification.addInjectSpecification(inject);
+
+        inject.validateSelf(fValidator);
 
         return true;
     }

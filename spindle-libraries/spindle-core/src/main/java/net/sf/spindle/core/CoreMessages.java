@@ -77,7 +77,7 @@ public class CoreMessages
 
     public static String missingWebXMLFile(ICoreResource webXML)
     {
-        return FORMATTER.format("missing_web_XML_file", webXML.toString()); 
+        return FORMATTER.format("missing_web_XML_file", webXML.toString());
     }
 
     public static String projectMetaDataMissingNatureId(String namespaceIdentifier, String name)
@@ -85,6 +85,23 @@ public class CoreMessages
         return FORMATTER.format("project-metadata-missing-natureId", namespaceIdentifier, name);
     }
 
-    
+    public static String componentClassMetaIncompatability()
+    {
+        return FORMATTER.getMessage("unsupported_namespace_meta_component_classes");
+    }
 
+    public static String pageClassMetaIncompatability()
+    {
+        return FORMATTER.getMessage("unsupported_namespace_meta_page_classes");
+    }
+
+    public static String unsupportedPageName(String name)
+    {
+        return FORMATTER.format("unsupported-page-name", name);
+    }
+    
+    public static String unsupportedComponentName(String name)
+    {
+        return FORMATTER.format("unsupported-component-name", name);
+    }
 }

@@ -22,7 +22,6 @@ package net.sf.spindle.core.build;
 import java.io.IOException;
 import java.util.List;
 
-import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.namespace.CoreNamespace;
 import net.sf.spindle.core.namespace.ICoreNamespace;
@@ -179,9 +178,13 @@ public class FullBuild extends AbstractBuild
 
         if (webXML.exists())
         {
+            aboutToProcess(webXML);
+
             IDOMModel model = null;
+            boolean ok = false;
             try
             {
+
                 notifier.subTask(BuilderMessages.scanning(webXML));
 
                 try
@@ -193,57 +196,62 @@ public class FullBuild extends AbstractBuild
                     TapestryCore.log(e);
                 }
 
-                if (model == null)
-                    throw new BrokenWebXMLException(BuilderMessages
-                            .fatalErrorCouldNotParseWebXML(webXML));
-
-                WebAppDescriptor descriptor = null;
-
-                WebXMLScanner wscanner = infrastructure.createWebXMLScanner();
-                try
+                if (model != null)
                 {
-                    descriptor = wscanner.scanWebAppDescriptor(model);
+
+                    WebAppDescriptor descriptor = null;
+
+                    WebXMLScanner wscanner = infrastructure.createWebXMLScanner(this);
+                    try
+                    {
+                        descriptor = wscanner.scanWebAppDescriptor(model);
+                    }
+                    catch (ScannerException e)
+                    {
+                        TapestryCore.log(e);
+                    }
+                    recordProblems(webXML, wscanner.getProblems());
+
+                    if (descriptor == null)
+                        throw new BrokenWebXMLException(BuilderMessages
+                                .fatalErrorNoValidTapestryServlets());
+
+                    ServletInfo[] applicationServlets = descriptor.getServletInfos();
+                    if (applicationServlets == null || applicationServlets.length == 0)
+
+                        throw new BrokenWebXMLException(BuilderMessages
+                                .fatalErrorNoValidTapestryServlets());
+
+                    if (applicationServlets.length > 1)
+                        throw new BrokenWebXMLException(BuilderMessages
+                                .fatalErrorTooManyValidTapestryServlets());
+
+                    applicationServlet = applicationServlets[0];
+
+                    projectPropertySource = infrastructure.installBasePropertySource(descriptor);
+                    webAppDescriptor = descriptor;
+                    
+                    ok = true;
                 }
-                catch (ScannerException e)
-                {
-                    TapestryCore.log(e);
-                }
-                problemPersister.recordProblems(webXML, wscanner.getProblems());
-
-                if (descriptor == null)
-                    throw new BrokenWebXMLException(BuilderMessages
-                            .fatalErrorNoValidTapestryServlets());
-
-                ServletInfo[] applicationServlets = descriptor.getServletInfos();
-                if (applicationServlets == null || applicationServlets.length == 0)
-
-                    throw new BrokenWebXMLException(BuilderMessages
-                            .fatalErrorNoValidTapestryServlets());
-
-                if (applicationServlets.length > 1)
-                    throw new BrokenWebXMLException(BuilderMessages
-                            .fatalErrorTooManyValidTapestryServlets());
-
-                applicationServlet = applicationServlets[0];
-
-                projectPropertySource = infrastructure.installBasePropertySource(descriptor);
-                webAppDescriptor = descriptor;
             }
             finally
             {
+                if (!ok && model == null)
+                    throw new BrokenWebXMLException(BuilderMessages
+                            .fatalErrorCouldNotParseWebXML(webXML));
+                
                 if (model != null)
                     model.release();
+
+                finished(webXML);
             }
         }
         else
         {
-            ICoreResource definedWebRoot = (ICoreResource) tapestryProject.getWebContextLocation();
-            if (definedWebRoot != null || !definedWebRoot.exists())
-            {
-                problemPersister.recordProblem(tapestryProject, new DefaultProblem(
-                        IProblem.WARNING, BuilderMessages.missingContext(definedWebRoot),
-                        SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-            }
+            problemPersister.recordProblem(tapestryProject, new DefaultProblem(IProblem.WARNING,
+                    BuilderMessages.webXMLDoesNotExist(webXML), SourceLocation.FOLDER_LOCATION,
+                    false, IProblem.NOT_QUICK_FIXABLE));
+
         }
     }
 

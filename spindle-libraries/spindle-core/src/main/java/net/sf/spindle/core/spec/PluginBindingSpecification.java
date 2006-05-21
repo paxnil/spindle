@@ -19,6 +19,8 @@ package net.sf.spindle.core.spec;
 
  Contributor(s): __glongman@gmail.com___.
  */
+import net.sf.spindle.core.scanning.IScannerValidator;
+
 import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IBindingSpecification;
 
@@ -34,6 +36,8 @@ public class PluginBindingSpecification extends DescribableSpecification impleme
     private BindingType fBindingType;
 
     private String fValue;
+
+    private String prefix;
 
     public PluginBindingSpecification()
     {
@@ -85,4 +89,21 @@ public class PluginBindingSpecification extends DescribableSpecification impleme
         fValue = value;
     }
 
+    public String getPrefix()
+    {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix)
+    {
+        this.prefix = prefix;
+    }
+
+    public String getUnprefixedValue()
+    {
+        String value = getValue();
+        if (fBindingType != BindingType.PREFIXED)
+            return value;
+        return value.substring(prefix.length() + 1);
+    }
 }

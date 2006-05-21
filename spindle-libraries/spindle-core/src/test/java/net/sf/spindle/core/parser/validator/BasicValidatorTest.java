@@ -119,24 +119,6 @@ public class BasicValidatorTest extends AbstractXMLTestCase
         });
     }
 
-    // protected Document getDocument(InputStream content)
-    // {
-    // try
-    // {
-    // parser.parse(content, null);
-    // printProblems(parser.getProblems());
-    // assertTrue("document is not well formed!", !parser.getHasFatalErrors());
-    // Document xmlDocument = parser.getParsedDocument();
-    // assertNotNull(xmlDocument);
-    // System.err.println();
-    // return xmlDocument;
-    // }
-    // catch (IOException e)
-    // {
-    // fail(e.getMessage());
-    // }
-    // return null;
-    // }
 
     private void printProblems(IProblem[] problems)
     {

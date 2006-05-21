@@ -111,4 +111,17 @@ public class TestLogger implements ILogger
             events.clear();
     }
 
+    public void dump()
+    {
+        int count = 1;
+        for (LoggingEvent event : events)
+        {
+            System.err.println("EVENT#"+(count++)+"\t\t"+event.message);
+            if (event.exception != null)
+                event.exception.printStackTrace(System.err);
+            System.err.println("-----------------------------------------------------");
+        }
+        
+    }
+
 }

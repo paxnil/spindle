@@ -32,7 +32,7 @@ import org.apache.hivemind.Resource;
  * @see org.apache.tapestry.IResourceLocation
  */
 
-public interface ICoreResource extends Resource, ResourceExtension
+public interface ICoreResource<E extends Object> extends Resource, ResourceExtension
 {
 
     /**

@@ -28,54 +28,59 @@ import org.apache.tapestry.spec.IComponentSpecification;
  * @author Howard Lewis Ship
  * @since 4.0
  */
-class ResolverMessages
+public class ResolverMessages
 {
     protected static MessageFormatter _formatter = new MessageFormatter("org.apache.tapestry.resolver.ResolverMessages",
             "ResolverStrings");
 
-    static String noSuchComponentType(String type, INamespace namespace)
+    public static String noSuchComponentType(String type, INamespace namespace)
     {
         return _formatter.format("no-such-component-type", type, namespace);
     }
+    
+    public static String noSuchComponentTypeUnknown(String type)
+    {
+        return _formatter.format("no-such-component-type", type, "unknown");
+    }
 
-    static String noSuchPage(String name, INamespace namespace)
+    public static String noSuchPage(String name, INamespace namespace)
     {
         return _formatter.format("no-such-page", name, namespace.getNamespaceId());
     }
 
-    static String resolvingComponent(String type, INamespace namespace)
+    public static String resolvingComponent(String type, INamespace namespace)
     {
         return _formatter.format("resolving-component", type, namespace);
     }
 
-    static String checkingResource(Resource resource)
+    public static String checkingResource(Resource resource)
     {
         return _formatter.format("checking-resource", resource);
     }
 
-    static String installingComponent(String type, INamespace namespace,
+    public static String installingComponent(String type, INamespace namespace,
             IComponentSpecification specification)
     {
         return _formatter.format("installing-component", type, namespace, specification);
     }
 
-    static String installingPage(String pageName, INamespace namespace,
+    public static String installingPage(String pageName, INamespace namespace,
             IComponentSpecification specification)
     {
         return _formatter.format("installing-page", pageName, namespace, specification);
     }
 
-    static String resolvingPage(String pageName, INamespace namespace)
+    public static String resolvingPage(String pageName, INamespace namespace)
     {
         return _formatter.format("resolving-page", pageName, namespace);
     }
 
-    static String foundFrameworkPage(String pageName)
+    public static String foundFrameworkPage(String pageName)
     {
         return _formatter.format("found-framework-page", pageName);
     }
 
-    static String foundHTMLTemplate(Resource resource)
+    public static String foundHTMLTemplate(Resource resource)
     {
         return _formatter.format("found-html-template", resource);
     }

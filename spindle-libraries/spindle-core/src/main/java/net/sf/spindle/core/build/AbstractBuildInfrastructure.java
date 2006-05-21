@@ -33,7 +33,6 @@ import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.parser.IDOMModelSource;
 import net.sf.spindle.core.properties.CorePropertySource;
-import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceRoot;
 import net.sf.spindle.core.source.DefaultProblem;
 import net.sf.spindle.core.source.IProblem;
@@ -380,7 +379,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     protected abstract void clearLastState();
 
-    public abstract WebXMLScanner createWebXMLScanner();
+    public abstract WebXMLScanner createWebXMLScanner(FullBuild build);
 
     public IPropertySource installBasePropertySource(WebAppDescriptor webAppDescriptor)
     {
@@ -405,6 +404,8 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
             return (IJavaType) cache.get(fullyQualifiedName);
 
         IJavaType result = tapestryProject.findType(fullyQualifiedName);
+        //force type resolution
+        result.exists();
 
         if (cache != null)
             cache.put(fullyQualifiedName, result);

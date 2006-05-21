@@ -85,8 +85,9 @@ public class PluginInjectSpecification extends BaseSpecification implements Inje
     {
         ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
         
+        PluginComponentSpecification spec = (PluginComponentSpecification)getParent();
         
-        
+        validator.validateXMLInject(spec, this, sourceInfo);       
     }
 
    

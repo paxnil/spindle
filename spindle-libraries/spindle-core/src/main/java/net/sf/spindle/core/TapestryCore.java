@@ -164,6 +164,10 @@ public class TapestryCore implements IPreferenceConstants
 
         return value.trim().length() == 0;
     }
+    
+    public CoreStatus getIncompatabilityPriority() {
+        return getStatus(INCOMPATABILITY_SERVERITY, CoreStatus.ERROR);
+    }
 
     /**
      * Retrieve the priority the core should lend to build 'misses'.
@@ -212,6 +216,9 @@ public class TapestryCore implements IPreferenceConstants
     {
         CoreStatus coreStatus = CoreStatus.getCoreStatus(preferenceSource.getString(preferenceKey));
 
+        if (coreStatus == null)
+            coreStatus = defaultStatus;
+        
         if (coreStatus == null)
             coreStatus = CoreStatus.ERROR;
 

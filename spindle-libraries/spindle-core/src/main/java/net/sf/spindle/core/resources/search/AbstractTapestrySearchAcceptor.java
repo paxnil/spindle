@@ -37,7 +37,7 @@ import java.util.Set;
  * 
  * @author glongman@gmail.com
  */
-public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
+public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor<Object>
 {
 
     public static final int ACCEPT_NONE = 0x0100000;

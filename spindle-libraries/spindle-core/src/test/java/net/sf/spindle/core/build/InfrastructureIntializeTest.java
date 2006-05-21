@@ -379,7 +379,7 @@ public class InfrastructureIntializeTest extends AbstractTestCase
         }
 
         @Override
-        public WebXMLScanner createWebXMLScanner()
+        public WebXMLScanner createWebXMLScanner(FullBuild build)
         {
             fail("never should be called!");
             return null;
