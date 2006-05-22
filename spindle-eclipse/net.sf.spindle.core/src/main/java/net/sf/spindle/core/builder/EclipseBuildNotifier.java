@@ -28,6 +28,7 @@ package net.sf.spindle.core.builder;
 
 import net.sf.spindle.core.build.AbstractBuildNotifier;
 import net.sf.spindle.core.build.IBuildNotifier;
+import net.sf.spindle.core.util.Assert;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -44,6 +45,7 @@ public class EclipseBuildNotifier extends AbstractBuildNotifier implements IBuil
     public EclipseBuildNotifier(IProgressMonitor monitor)
     {
         super();
+        Assert.isNotNull(monitor);
         this.monitor = monitor;
     }
 
@@ -54,8 +56,7 @@ public class EclipseBuildNotifier extends AbstractBuildNotifier implements IBuil
      */
     protected void internalBegin()
     {
-        if (monitor != null)
-            monitor.beginTask("", fTotalWork);
+        monitor.beginTask("", fTotalWork);
     }
 
     /*
@@ -65,33 +66,36 @@ public class EclipseBuildNotifier extends AbstractBuildNotifier implements IBuil
      */
     protected boolean internalCheckCancel()
     {
-        return monitor != null && monitor.isCanceled();
-    }    
+        return monitor.isCanceled();
+    }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see core.builder.AbstractBuildNotifier#internalDone()
      */
     protected void internalDone()
     {
-        if (monitor != null)
-            monitor.done();        
+        monitor.done();
     }
-        
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see core.builder.AbstractBuildNotifier#internalUpdateProgress(int)
      */
     protected void internalUpdateProgress(int work)
     {
-        if (monitor != null)
-            monitor.worked(work - this.fWorkDone);        
+        monitor.worked(work - this.fWorkDone);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see core.builder.AbstractBuildNotifier#internalSubtask(java.lang.String)
      */
     protected void internalSubtask(String message)
     {
-        if (monitor != null)
-            monitor.subTask(message);        
+        monitor.subTask(message);
     }
 }

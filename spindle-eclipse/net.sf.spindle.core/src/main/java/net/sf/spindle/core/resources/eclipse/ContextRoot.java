@@ -30,6 +30,7 @@ import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceAcceptor;
 import net.sf.spindle.core.resources.IResourceRoot;
+import net.sf.spindle.core.resources.LookupDepth;
 import net.sf.spindle.core.resources.search.ISearch;
 
 import org.apache.hivemind.Resource;
@@ -66,7 +67,7 @@ public class ContextRoot implements IResourceRoot
      * 
      * @see core.resources.IResourceRoot#lookup(core.resources.IResourceAcceptor)
      */
-    public void lookup(IResourceAcceptor requestor)
+    public void lookup(IResourceAcceptor requestor, LookupDepth depth)
     {
         performLookup(fRootContainer, requestor);
     }

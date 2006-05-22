@@ -48,7 +48,7 @@ public class ClasspathSearch implements ISearch
     
     protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
 
-    protected HashMap fPackageFragments;
+    protected HashMap<String, IPackageFragment[]> fPackageFragments;
 
     protected IJavaProject fJavaProject;
 
@@ -95,7 +95,7 @@ public class ClasspathSearch implements ISearch
     private void configureClasspath() throws CoreException
     {
         fPackageFragmentRoots = fJavaProject.getAllPackageFragmentRoots();
-        fPackageFragments = new HashMap();
+        fPackageFragments = new HashMap<String, IPackageFragment[]>();
         IPackageFragment[] frags = getPackageFragmentsInRoots(fPackageFragmentRoots, fJavaProject);
         for (int i = 0; i < frags.length; i++)
         {
@@ -129,7 +129,7 @@ public class ClasspathSearch implements ISearch
             IJavaProject project)
     {
 
-        ArrayList frags = new ArrayList();
+        ArrayList<IPackageFragment> frags = new ArrayList<IPackageFragment>();
         for (int i = 0; i < roots.length; i++)
         {
             IPackageFragmentRoot root = roots[i];
@@ -143,7 +143,7 @@ public class ClasspathSearch implements ISearch
                 if (children[0].getParent().getParent().equals(project))
                 {
                     for (int j = 0; j < length; j++)
-                        frags.add(children[j]);
+                        frags.add((IPackageFragment)children[j]);
                 }
                 else
                 {
@@ -156,9 +156,8 @@ public class ClasspathSearch implements ISearch
                 // do nothing
             }
         }
-        IPackageFragment[] fragments = new IPackageFragment[frags.size()];
-        frags.toArray(fragments);
-        return fragments;
+        
+        return frags.toArray(new IPackageFragment [] {});
     }
 
     public void search(ISearchAcceptor acceptor)
@@ -312,10 +311,10 @@ public class ClasspathSearch implements ISearch
         if (container != null && container.exists())
         {
             IResource[] members = container.members(false);
-            ArrayList resultList = new ArrayList();
+            ArrayList<IResource> resultList = new ArrayList<IResource>();
             for (int i = 0; i < members.length; i++)
             {
-                if (members[i] instanceof IFile)
+                if (members[i].getType() == IResource.FILE)
                     resultList.add(members[i]);
             }
             result = resultList.toArray();

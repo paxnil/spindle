@@ -63,12 +63,12 @@ public class ProjectExternalMetadataLocator implements IRegistryChangeListener
     /**
      * the cache of contributed IProjectMetadataLocator keyed on project natureId.
      */
-    protected HashMap fLocatorCache;
+    protected HashMap<String, ArrayList<IProjectMetadataLocator>> fLocatorCache;
 
     public ProjectExternalMetadataLocator()
     {
         super();
-        fLocatorCache = new HashMap();
+        fLocatorCache = new HashMap<String, ArrayList<IProjectMetadataLocator>>();
         registerLocatorProxies();
         Platform.getExtensionRegistry().addRegistryChangeListener(this);
     }
@@ -89,7 +89,7 @@ public class ProjectExternalMetadataLocator implements IRegistryChangeListener
      */
     public void registryChanged(IRegistryChangeEvent event)
     {
-        HashSet toRemove = null;
+        HashSet<IExtension> toRemove = null;
         String id = TapestryCorePlugin.NATURE_ID + ".projectMetaDataLocator";
         IExtensionDelta[] deltas = event.getExtensionDeltas();
 
@@ -105,7 +105,7 @@ public class ProjectExternalMetadataLocator implements IRegistryChangeListener
             else
             {
                 if (toRemove == null)
-                    toRemove = new HashSet();
+                    toRemove = new HashSet<IExtension>();
                 toRemove.add(deltas[i].getExtension());
             }
         }
@@ -198,10 +198,10 @@ public class ProjectExternalMetadataLocator implements IRegistryChangeListener
         if (natureId == null || natureId.equals(""))
             return;
 
-        List list = (List) fLocatorCache.get(natureId);
+        ArrayList<IProjectMetadataLocator> list = fLocatorCache.get(natureId);
         if (list == null)
         {
-            list = new ArrayList(5);
+            list = new ArrayList<IProjectMetadataLocator>(5);
             fLocatorCache.put(natureId, list);
         }
         list.add(locator);

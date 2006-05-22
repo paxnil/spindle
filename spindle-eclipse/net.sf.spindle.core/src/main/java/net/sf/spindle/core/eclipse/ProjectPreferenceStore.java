@@ -28,12 +28,12 @@ import net.sf.spindle.core.util.eclipse.EclipsePluginUtils;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 /**
@@ -462,13 +462,14 @@ public class ProjectPreferenceStore implements IPersistentPreferenceStore
    */
   public String[] preferenceNames()
   {
-    ArrayList list = new ArrayList();
+    ArrayList<String> list = new ArrayList<String>();
+    
     Enumeration enumeration = properties.propertyNames();
     while (enumeration.hasMoreElements())
     {
-      list.add(enumeration.nextElement());
+      list.add((String) enumeration.nextElement());
     }
-    return (String[]) list.toArray(new String[list.size()]);
+    return (String[]) list.toArray(new String[] {});
   }
   /*
    * (non-Javadoc) Method declared on IPreferenceStore.

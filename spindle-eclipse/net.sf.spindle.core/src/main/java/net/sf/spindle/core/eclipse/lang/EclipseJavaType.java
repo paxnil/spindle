@@ -1,7 +1,6 @@
 package net.sf.spindle.core.eclipse.lang;
 
 import net.sf.spindle.core.types.IJavaType;
-import net.sf.spindle.core.types.TypeModelException;
 import net.sf.spindle.core.util.Assert;
 import net.sf.spindle.core.util.eclipse.EclipseUtils;
 

@@ -29,20 +29,21 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 /**
- * TapestryException  extension to CoreException
+ * TapestryException extension to CoreException
  * 
  * @author glongman@gmail.com
- * 
  */
 public class TapestryPluginException extends CoreException
 {
 
-  /**
-   * @param status
-   */
-  public TapestryPluginException(IStatus status)
-  {
-    super(status);
-  }
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * @param status
+     */
+    public TapestryPluginException(IStatus status)
+    {
+        super(status);
+    }
 
 }

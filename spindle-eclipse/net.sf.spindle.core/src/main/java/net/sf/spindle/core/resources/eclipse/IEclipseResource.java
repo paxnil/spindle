@@ -8,7 +8,7 @@ import org.eclipse.core.resources.IStorage;
 /**
  * @author gwl
  */
-public interface IEclipseResource extends ICoreResource
+public interface IEclipseResource extends ICoreResource<IStorage>
 {
     IStorage getStorage();
     IProject getProject();

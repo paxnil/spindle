@@ -35,6 +35,7 @@ import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.builder.EclipseBuildInfrastructure;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceAcceptor;
+import net.sf.spindle.core.resources.LookupDepth;
 import net.sf.spindle.core.resources.PathUtils;
 import net.sf.spindle.core.resources.search.ISearch;
 
@@ -163,7 +164,7 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
      * 
      * @see core.resources.ICoreResource#lookup(core.resources.IResourceAcceptor)
      */
-    public void lookup(IResourceAcceptor requestor)
+    public void lookup(IResourceAcceptor requestor, LookupDepth depth)
     {
         IContainer container = getContainer();
         if (container != null && container.exists())
@@ -298,6 +299,11 @@ public class ContextResource extends AbstractResource implements IEclipseResourc
             path.append(new PathUtils(name));
         buffer.append("context:" + path.makeRelative().toString());
         return buffer.toString();
+    }
+
+    public IStorage getUnderlier()
+    {
+       return getStorage();
     }
 
 }

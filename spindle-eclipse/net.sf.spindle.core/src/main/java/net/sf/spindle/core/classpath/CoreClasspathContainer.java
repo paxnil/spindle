@@ -33,14 +33,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.eclipse.EclipseMessages;
 import net.sf.spindle.core.eclipse.TapestryCorePlugin;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
@@ -107,14 +106,14 @@ public class CoreClasspathContainer implements IClasspathContainer
     private IClasspathEntry[] computeClasspathEntries(Bundle bundle, final boolean includeContrib,
             final boolean includePortlet)
     {
-        List entries = new ArrayList();
+        List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 
         URL installUrl = bundle.getEntry("/");
 
         try
         {
             URL tapLibUrl = new URL(installUrl, "lib");
-            tapLibUrl = Platform.resolve(tapLibUrl);
+            tapLibUrl = FileLocator.resolve(tapLibUrl);
 
             File tapLibs = new File(new URI(tapLibUrl.toString()));
 
@@ -146,7 +145,7 @@ public class CoreClasspathContainer implements IClasspathContainer
             }
 
             URL externalLibsUrl = new URL(tapLibUrl, "ext-package/lib");
-            externalLibsUrl = Platform.resolve(externalLibsUrl);
+            externalLibsUrl = FileLocator.resolve(externalLibsUrl);
 
             File externalLibs = new File(new URI(externalLibsUrl.toString()));
 
@@ -175,10 +174,10 @@ public class CoreClasspathContainer implements IClasspathContainer
         {
             TapestryCore.log(e);
         }
-        return (IClasspathEntry[]) entries.toArray(new IClasspathEntry[entries.size()]);
+        return entries.toArray(new IClasspathEntry [] {});
     }
 
-    private static void collectCPEntries(List target, File directory, String[] fileNames)
+    private static void collectCPEntries(List<IClasspathEntry> target, File directory, String[] fileNames)
     {
         IPath srcAttachmentRootPath = new Path("/");
         for (int i = 0; i < fileNames.length; i++)

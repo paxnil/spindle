@@ -27,6 +27,8 @@
 package net.sf.spindle.core.resources.eclipse;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +37,7 @@ import net.sf.spindle.core.TapestryCoreException;
 import net.sf.spindle.core.builder.EclipseBuildInfrastructure;
 import net.sf.spindle.core.resources.IResourceAcceptor;
 import net.sf.spindle.core.resources.IResourceRoot;
+import net.sf.spindle.core.resources.LookupDepth;
 import net.sf.spindle.core.resources.PathUtils;
 import net.sf.spindle.core.resources.search.ISearch;
 import net.sf.spindle.core.resources.search.ISearchAcceptor;
@@ -75,7 +78,7 @@ public class ClasspathRoot implements IResourceRoot
      * 
      * @see core.resources.IResourceRoot#lookup(core.resources.IResourceAcceptor)
      */
-    public void lookup(IResourceAcceptor acceptor)
+    public void lookup(IResourceAcceptor acceptor, LookupDepth depth)
     {
         // TODO - never called but I guess this would be the same as a lookup on the default package.
         throw new Error("not implemented yet");
@@ -228,13 +231,15 @@ public class ClasspathRoot implements IResourceRoot
                         IContainer container = (IContainer) fragments[i].getUnderlyingResource();
                         if (container != null && container.exists())
                         {
-                            IResource[] members = container.members(false);
-                            ArrayList resultList = new ArrayList();
-                            for (int j = 0; j < members.length; j++)
+                            
+                            List<IResource> resultList = Arrays.asList(container.members(false));
+                            for (Iterator iter = resultList.iterator(); iter.hasNext();)
                             {
-                                if (members[j] instanceof IFile)
-                                    resultList.add(members[j]);
-                            }
+                                IResource element = (IResource) iter.next();                               
+                                if (element.getType() != IResource.FILE)
+                                    iter.remove();
+                                
+                            }                      
                             nonJavaResources = resultList.toArray();
                         }
                     }
@@ -289,6 +294,7 @@ public class ClasspathRoot implements IResourceRoot
         return acceptor.getResult();
     }
     
+    @SuppressWarnings("unchecked")
     public IPackageFragment[] getAllPackageFragments(String packageName)
     {
         Map cache = EclipseBuildInfrastructure.getPackageCache();
@@ -296,7 +302,7 @@ public class ClasspathRoot implements IResourceRoot
         if (cache != null && cache.containsKey(packageName))
             return (IPackageFragment[]) cache.get(packageName);
 
-        List fragments = new ArrayList();
+        List<IPackageFragment> fragments = new ArrayList<IPackageFragment>();
         try
         {
             IPackageFragmentRoot[] roots = fJavaProject.getAllPackageFragmentRoots();

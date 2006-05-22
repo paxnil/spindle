@@ -59,7 +59,7 @@ public class EclipsePluginUtils
             throws CoreException
     {
         IProjectDescription description = project.getDescription();
-        List natures = new ArrayList(Arrays.asList(description.getNatureIds()));
+        List<String> natures = new ArrayList<String>(Arrays.asList(description.getNatureIds()));
         if (!natures.contains(natureId))
         {
             if (forceOrder)
@@ -71,7 +71,7 @@ public class EclipsePluginUtils
             {
                 natures.add(natureId);
             }
-            description.setNatureIds((String[]) natures.toArray(new String[natures.size()]));
+            description.setNatureIds((String[]) natures.toArray());
             project.setDescription(description, null);
         }
     

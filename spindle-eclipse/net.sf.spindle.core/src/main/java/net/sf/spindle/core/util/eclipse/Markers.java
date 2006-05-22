@@ -42,7 +42,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
-
 /**
  * Marker utililties
  * 
@@ -50,13 +49,144 @@ import org.eclipse.core.runtime.CoreException;
  */
 public class Markers implements IProblemPeristManager
 {
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.IProblemPeristManager#recordProblem(net.sf.spindle.core.ITapestryProject,
+     *      net.sf.spindle.core.source.IProblem)
+     */
+    public void recordProblem(ITapestryProject project, IProblem problem)
+    {
+        recordProblems(project, new IProblem[]
+        { problem });
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.IProblemPeristManager#recordProblems(net.sf.spindle.core.ITapestryProject,
+     *      net.sf.spindle.core.source.IProblem[])
+     */
+    public void recordProblems(ITapestryProject project, IProblem[] problems)
+    {
+        addTapestryProblemMarkersToResource(((TapestryProject) project).getProject(), problems);
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.IProblemPeristManager#recordProblem(org.apache.hivemind.Resource,
+     *      net.sf.spindle.core.source.IProblem)
+     */
+    public void recordProblem(Resource resource, IProblem problem)
+    {
+        recordProblems(resource, new IProblem[]
+        { problem });
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.IProblemPeristManager#recordProblems(org.apache.hivemind.Resource,
+     *      net.sf.spindle.core.source.IProblem[])
+     */
+    public void recordProblems(Resource resource, IProblem[] problems)
+    {
+        IStorage storage = (IStorage) ((ICoreResource) resource).getUnderlier();
+        recordProblems(storage, problems);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.IProblemPeristManager#hasBrokenBuildProblems(net.sf.spindle.core.ITapestryProject)
+     */
+    public boolean hasBrokenBuildProblems(ITapestryProject project)
+    {
+        return getBrokenBuildProblemsFor(((TapestryProject) project).getProject()).length > 0;
+    }
+
+    /**
+     * @param project
+     */
+    public void removeProblems(ITapestryProject project)
+    {
+        removeProblemsForProject(((TapestryProject) project).getProject());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.IProblemPeristManager#removeAllProblems(net.sf.spindle.core.ITapestryProject)
+     */
+    public void removeAllProblems(ITapestryProject project)
+    {
+        removeAllProblems(((TapestryProject) project).getProject());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.IProblemPeristManager#removeTemporaryProblemsForResource(org.apache.hivemind.Resource)
+     */
+    public void removeTemporaryProblemsForResource(Resource resource)
+    {
+        removeTemporaryProblemsFor(((ICoreResource)resource).getUnderlier());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.IProblemPeristManager#removeAllProblemsFor(org.apache.hivemind.Resource)
+     */
+    public void removeAllProblemsFor(Resource resource)
+    {
+        removeProblemsFor(getResource(resource));
+
+    }
+    
+    public void recordProblem(Object underlier, IProblem problem)
+    {
+        recordProblems((IStorage) underlier, new IProblem [] {});
+        
+    }
+
+    public void removeAllProblemsFor(Object underlier)
+    {
+        removeProblemsFor(getResource((IStorage)underlier));
+        
+    }
+
+    public void removeTemporaryProblemsFor(Object underlier)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /**
+     * @param resource
+     * @return
+     */
+    private IResource getResource(Resource resource)
+    {
+        return getResource((IStorage) ((ICoreResource) resource).getUnderlier());
+    }
+
+    private IResource getResource(IStorage storage)
+    {
+        return (IResource) storage.getAdapter(IResource.class);
+    }
+
     /**
      * Method addBuildBrokenProblemMarkerToResource.
      * 
      * @param iProject
      * @param string
      */
-    public static void addBuildBrokenProblemMarkerToResource(IProject iProject, String message)
+    private static void addBuildBrokenProblemMarkerToResource(IProject iProject, String message)
     {
         addProblemMarkerToResource(
                 iProject,
@@ -68,7 +198,11 @@ public class Markers implements IProblemPeristManager
                 0);
     }
 
-    public static void recordProblems(IStorage storage, IProblem[] problems)
+    /**
+     * @param storage
+     * @param problems
+     */
+    private static void recordProblems(IStorage storage, IProblem[] problems)
     {
         IResource res = (IResource) storage.getAdapter(IResource.class);
         boolean workspace = res != null;
@@ -85,7 +219,11 @@ public class Markers implements IProblemPeristManager
         }
     }
 
-    public static void recordProblems(ICoreResource location, IProblem[] problems)
+    /**
+     * @param location
+     * @param problems
+     */
+    private static void recordProblems(ICoreResource location, IProblem[] problems)
     {
         IResource res = EclipseUtils.toResource(location);
         boolean workspace = res != null;
@@ -102,18 +240,20 @@ public class Markers implements IProblemPeristManager
         }
     }
 
-    static void logProblem(IStorage storage, IProblem problem)
+    /**
+     * @param storage
+     * @param problem
+     */
+    private static void logProblem(IStorage storage, IProblem problem)
     {
-        TapestryCore.log(EclipseMessages.logProblemMessage(
-                storage,
-                problem));
+        TapestryCore.log(EclipseMessages.logProblemMessage(storage, problem));
     }
 
     /**
-     * @param path
+     * @param storage
      * @param problems
      */
-    public static void logProblems(IStorage storage, IProblem[] problems)
+    private static void logProblems(IStorage storage, IProblem[] problems)
     {
         if (problems != null)
         {
@@ -124,7 +264,11 @@ public class Markers implements IProblemPeristManager
         }
     }
 
-    public static void addTapestryProblemMarkersToResource(IResource resource, IProblem[] problems)
+    /**
+     * @param resource
+     * @param problems
+     */
+    private static void addTapestryProblemMarkersToResource(IResource resource, IProblem[] problems)
     {
         if (problems.length > 0)
             for (int i = 0; i < problems.length; i++)
@@ -132,7 +276,11 @@ public class Markers implements IProblemPeristManager
 
     }
 
-    public static void addTapestryProblemMarkerToResource(IResource resource, IProblem problem)
+    /**
+     * @param resource
+     * @param problem
+     */
+    private static void addTapestryProblemMarkerToResource(IResource resource, IProblem problem)
     {
         try
         {
@@ -173,21 +321,38 @@ public class Markers implements IProblemPeristManager
     //
     // }
 
-    public static void addTapestryProblemMarkerToResource(IResource resource, String message,
-            int severity, int lineNumber, int charStart, int charEnd)
-    {
+//    /**
+//     * @param resource
+//     * @param message
+//     * @param severity
+//     * @param lineNumber
+//     * @param charStart
+//     * @param charEnd
+//     */
+//    private static void addTapestryProblemMarkerToResource(IResource resource, String message,
+//            int severity, int lineNumber, int charStart, int charEnd)
+//    {
+//
+//        addProblemMarkerToResource(
+//                resource,
+//                IProblem.TAPESTRY_PROBLEM_MARKER,
+//                message,
+//                new Integer(severity),
+//                new Integer(lineNumber),
+//                new Integer(charStart),
+//                new Integer(charEnd));
+//    }
 
-        addProblemMarkerToResource(
-                resource,
-                IProblem.TAPESTRY_PROBLEM_MARKER,
-                message,
-                new Integer(severity),
-                new Integer(lineNumber),
-                new Integer(charStart),
-                new Integer(charEnd));
-    }
-
-    public static void addProblemMarkerToResource(IResource resource, String markerTag,
+    /**
+     * @param resource
+     * @param markerTag
+     * @param message
+     * @param severity
+     * @param lineNumber
+     * @param charStart
+     * @param charEnd
+     */
+    private static void addProblemMarkerToResource(IResource resource, String markerTag,
             String message, int severity, int lineNumber, int charStart, int charEnd)
     {
 
@@ -201,6 +366,15 @@ public class Markers implements IProblemPeristManager
                 new Integer(charEnd));
     }
 
+    /**
+     * @param resource
+     * @param markerTag
+     * @param message
+     * @param severity
+     * @param lineNumber
+     * @param charStart
+     * @param charEnd
+     */
     private static void addProblemMarkerToResource(IResource resource, String markerTag,
             String message, Integer severity, Integer lineNumber, Integer charStart, Integer charEnd)
     {
@@ -220,6 +394,10 @@ public class Markers implements IProblemPeristManager
 
     }
 
+    /**
+     * @param project
+     * @return
+     */
     public static IMarker[] getBrokenBuildProblemsFor(IProject project)
     {
         try
@@ -239,7 +417,11 @@ public class Markers implements IProblemPeristManager
         return new IMarker[0];
     }
 
-    public static IMarker[] getProblemsFor(IResource resource)
+    /**
+     * @param resource
+     * @return
+     */
+    private static IMarker[] getProblemsFor(IResource resource)
     {
         try
         {
@@ -255,22 +437,29 @@ public class Markers implements IProblemPeristManager
         return new IMarker[0];
     }
 
-    public static IMarker[] getFatalProblemsFor(IResource resource)
-    {
-        try
-        {
-            if (resource != null && resource.exists())
-                return resource.findMarkers(
-                        IProblem.TAPESTRY_FATAL_PROBLEM_MARKER,
-                        false,
-                        IResource.DEPTH_INFINITE);
-        }
-        catch (CoreException e)
-        {
-        } // assume there are no problems
-        return new IMarker[0];
-    }
+    // /**
+    // * @param resource
+    // * @return
+    // */
+    // private static IMarker[] getFatalProblemsFor(IResource resource)
+    // {
+    // try
+    // {
+    // if (resource != null && resource.exists())
+    // return resource.findMarkers(
+    // IProblem.TAPESTRY_FATAL_PROBLEM_MARKER,
+    // false,
+    // IResource.DEPTH_INFINITE);
+    // }
+    // catch (CoreException e)
+    // {
+    // } // assume there are no problems
+    //        return new IMarker[0];
+    //    }
 
+    /**
+     * @param resource
+     */
     public static void removeProblemsFor(IResource resource)
     {
         try
@@ -301,7 +490,8 @@ public class Markers implements IProblemPeristManager
      * 
      * @param project
      */
-    public static void removeProblemsForProject(IProject project)
+
+    private static void removeProblemsForProject(IProject project)
     {
         try
         {
@@ -329,9 +519,6 @@ public class Markers implements IProblemPeristManager
         } // assume there were no problems
     }
 
-    /**
-     * @param project
-     */
     public static void removeAllProblems(IProject project)
     {
         if (project != null && project.isAccessible())
@@ -352,29 +539,29 @@ public class Markers implements IProblemPeristManager
 
     }
 
-    /**
-     * @param fCurrentProject
-     *            TODO remove?
-     */
-    public static void removeBuildProblemsForProject(IProject iProject)
-    {
-        try
-        {
-            if (iProject != null && iProject.exists())
-            {
-                iProject.deleteMarkers(
-                        IProblem.TAPESTRY_BUILDBROKEN_MARKER,
-                        false,
-                        IResource.DEPTH_ZERO);
-            }
-        }
-        catch (CoreException e)
-        {
-        } // assume there were no problems
+//    /**
+//     * @param fCurrentProject
+//     *            TODO remove?
+//     */
+//    private static void removeBuildProblemsForProject(IProject iProject)
+//    {
+//        try
+//        {
+//            if (iProject != null && iProject.exists())
+//            {
+//                iProject.deleteMarkers(
+//                        IProblem.TAPESTRY_BUILDBROKEN_MARKER,
+//                        false,
+//                        IResource.DEPTH_ZERO);
+//            }
+//        }
+//        catch (CoreException e)
+//        {
+//        } // assume there were no problems
+//
+//    }
 
-    }
-
-    public static void removeTemporaryProblemsForResource(IResource resource)
+    public static void removeTemporaryProblemsForEclipseResource(IResource resource)
     {
         IMarker[] markers = getProblemsFor(resource);
         for (int i = 0; i < markers.length; i++)
@@ -395,62 +582,6 @@ public class Markers implements IProblemPeristManager
 
     }
 
-    public void recordProblem(ITapestryProject project, IProblem problem)
-    {
-        recordProblems(project, new IProblem[]
-        { problem });
-    }
-
-    public void recordProblems(ITapestryProject project, IProblem[] problems)
-    {
-        addTapestryProblemMarkersToResource(((TapestryProject) project).getProject(), problems);
-
-    }
-
-    public void recordProblem(Resource resource, IProblem problem)
-    {
-        recordProblems(resource, new IProblem[]
-        { problem });
-
-    }
-
-    public void recordProblems(Resource resource, IProblem[] problems)
-    {
-        IStorage storage = ((IEclipseResource) resource).getStorage();
-        recordProblems(storage, problems);
-    }
-
-    public boolean hasBrokenBuildProblems(ITapestryProject project)
-    {
-        return getBrokenBuildProblemsFor(((TapestryProject) project).getProject()).length > 0;
-    }
-
-    public void removeProblems(ITapestryProject project)
-    {
-        removeProblemsForProject(((TapestryProject) project).getProject());
-    }
-
-    public void removeAllProblems(ITapestryProject project)
-    {
-        removeAllProblems(((TapestryProject) project).getProject());
-    }
-
-    public void removeTemporaryProblemsForResource(Resource resource)
-    {
-        removeTemporaryProblemsForResource(getResource(resource));
-    }
-
-    public void removeAllProblemsFor(Resource resource)
-    {
-        removeProblemsFor(getResource(resource));
-
-    }
-
-    private IResource getResource(Resource resource)
-    {
-        IEclipseResource res = (IEclipseResource) resource;
-        IStorage storage = res.getStorage();
-        return (IResource) storage.getAdapter(IResource.class);
-    }
+    
 
 }

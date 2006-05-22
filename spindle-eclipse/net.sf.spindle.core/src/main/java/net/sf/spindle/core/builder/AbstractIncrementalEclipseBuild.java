@@ -183,6 +183,8 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
      */
     private static class NeedToBuildException extends RuntimeException
     {
+        private static final long serialVersionUID = 1L;
+
         public NeedToBuildException()
         {
             super();
@@ -284,8 +286,8 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
         if (currentEntries.length != lastStateEntries.length)
             return true;
 
-        List old = Arrays.asList(lastStateEntries);
-        List current = Arrays.asList(currentEntries);
+        List<IClasspathEntry> old = Arrays.asList(lastStateEntries);
+        List<IClasspathEntry> current = Arrays.asList(currentEntries);
 
         return !current.containsAll(old);
     }

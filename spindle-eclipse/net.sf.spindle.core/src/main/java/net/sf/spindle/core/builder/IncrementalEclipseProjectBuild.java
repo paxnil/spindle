@@ -119,7 +119,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             fProblemCollector.beginCollecting();
             useValidator.setProblemCollector(fProblemCollector);
 
-            Markers.removeTemporaryProblemsForResource(file);
+            problemPersister.removeTemporaryProblemsFor(file);
             try
             {
                 result.validate(useValidator);
@@ -130,7 +130,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                 useValidator.removeListener(this);
             }
 
-            Markers.recordProblems(useLocation, fProblemCollector.getProblems());
+            problemPersister.recordProblems(useLocation, fProblemCollector.getProblems());
         }
         finally
         {
@@ -183,7 +183,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             file = (IFile) storage;
             if (result == null || result.isPlaceholder() || fileChanged(file))
             {
-                Markers.removeProblemsFor(file);
+                problemPersister.removeAllProblemsFor(file);
                 return super.parseLibrarySpecification(location, encoding);
             }
         }
@@ -204,7 +204,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             fProblemCollector.beginCollecting();
             useValidator.setProblemCollector(fProblemCollector);
 
-            Markers.removeTemporaryProblemsForResource(file);
+            problemPersister.removeTemporaryProblemsFor(file);
             try
             {
                 result.validate(useValidator);
@@ -215,7 +215,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                 useValidator.removeListener(this);
             }
 
-            Markers.recordProblems(useLocation, fProblemCollector.getProblems());
+            problemPersister.recordProblems(useLocation, fProblemCollector.getProblems());
         }
         finally
         {
@@ -285,11 +285,11 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             fProblemCollector.beginCollecting();
             useValidator.setProblemCollector(fProblemCollector);
 
-            Markers.removeTemporaryProblemsForResource(file);
+            problemPersister.removeTemporaryProblemsFor(file);
             try
             {
                 result.validate(useValidator);
-                List oldTemplates = new ArrayList(result.getTemplateLocations());
+                List<Resource> oldTemplates = new ArrayList<Resource>(result.getTemplateLocations());
                 IPropertySource source = infrastructure.createPropertySource(result);
 
                 String seek_extension = source
@@ -323,7 +323,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                 useValidator.removeListener(this);
             }
 
-            Markers.recordProblems(location, fProblemCollector.getProblems());
+            problemPersister.recordProblems(location, fProblemCollector.getProblems());
         }
         finally
         {
@@ -410,7 +410,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
     class ProblemCollector implements IProblemCollector
     {
 
-        private List fProblems = new ArrayList();
+        private List<IProblem> fProblems = new ArrayList<IProblem>();
 
         /*
          * (non-Javadoc)
@@ -463,7 +463,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
          */
         public IProblem[] getProblems()
         {
-            return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
+            return (IProblem[]) fProblems.toArray();
         }
 
     }

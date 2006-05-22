@@ -37,6 +37,7 @@ import net.sf.spindle.core.TapestryCoreException;
 import net.sf.spindle.core.builder.EclipseBuildInfrastructure;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceAcceptor;
+import net.sf.spindle.core.resources.LookupDepth;
 import net.sf.spindle.core.resources.PathUtils;
 import net.sf.spindle.core.resources.search.ISearch;
 import net.sf.spindle.core.util.eclipse.JarEntryFileUtil;
@@ -197,7 +198,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
      * 
      * @see core.resources.ICoreResource#seek(core.resources.IResourceLocationRequestor)
      */
-    public void lookup(IResourceAcceptor requestor)
+    public void lookup(IResourceAcceptor requestor, LookupDepth depth)
     {
         String packageName = fRoot.toPackageName(this);
         IPackageFragment[] fragments = fRoot.getAllPackageFragments(packageName);
@@ -217,7 +218,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
                     if (container != null && container.exists())
                     {
                         IResource[] members = container.members(false);
-                        ArrayList resultList = new ArrayList();
+                        ArrayList<IResource> resultList = new ArrayList<IResource>();
                         for (int j = 0; j < members.length; j++)
                         {
                             if (members[j] instanceof IFile)
@@ -282,6 +283,7 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
      * 
      * @see core.resources.eclipse.IEclipseResource#getStorage()
      */
+    @SuppressWarnings("unchecked")
     public IStorage getStorage()
     {
         // if we are in a build, the storages get cached for speed.
@@ -326,4 +328,8 @@ public class ClasspathResource extends AbstractResource implements IEclipseResou
         return buffer.toString();
     }
 
+    public IStorage getUnderlier()
+    {
+        return getStorage();
+    }
 }

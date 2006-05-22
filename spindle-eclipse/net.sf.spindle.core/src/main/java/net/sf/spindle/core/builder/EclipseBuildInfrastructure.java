@@ -157,7 +157,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
      * 
      * @see core.builder.AbstractBuildInfrastructure#createWebXMLScanner()
      */
-    public WebXMLScanner createWebXMLScanner()
+    public WebXMLScanner createWebXMLScanner(AbstractBuild build)
     {
         return new EclipseWebXMLScanner(build);
     }
