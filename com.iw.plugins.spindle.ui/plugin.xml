@@ -20,9 +20,32 @@
       </page>
    </extension> 
    
-   <!--    
+    <extension
+         point="org.eclipse.ui.ide.projectNatureImages">
+      <image
+            icon="icons/full/project_ovr.gif"
+            natureId="com.iw.plugins.spindle.core.tapestrynature"
+            id="com.iw.plugins.spindle.core.tapestryProjectNatureImage">
+      </image>
+   </extension>
+   
    <extension
-         point="org.eclipse.ui.decorators"> 
+         point="org.eclipse.ui.propertyPages">
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            name="Tapestry"
+            class="com.iw.plugins.spindle.ui.properties.ProjectPropertyPage"
+            id="com.iw.plugins.spindle.ui.contrib.properties.CorePropertyPage">         
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>      
+	</extension>
+	
+	<extension
+         point="org.eclipse.ui.decorators">
       <decorator
             lightweight="true"
             location="TOP_RIGHT"
@@ -40,9 +63,6 @@
             </objectClass>
          </enablement>
       </decorator>
-   </extension>
-   <extension
-         point="org.eclipse.ui.decorators">
       <decorator
             lightweight="true"
             adaptable="true"
@@ -60,15 +80,94 @@
          </enablement>
       </decorator>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="Spindle 3"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleGeneralPreferencePage"
+            id="com.iw.plugins.spindle.ui.SpindlePreferences">
+      </page>
+      <page
+            name="Editors"
+            category="com.iw.plugins.spindle.ui.SpindlePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleEditorPreferencePage"
+            id="com.iw.plugins.spindle.ui.SpindleEditorPreferences">
+      </page>
+      <page
+            name="Folding"
+            category="com.iw.plugins.spindle.ui.SpindleEditorPreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpecFoldingPreferencePage"
+            id="com.iw.plugins.spindle.ui.SpindleFoldingPreferences">
+      </page>
+      <page
+            name="Specification Formatter"
+            category="com.iw.plugins.spindle.ui.SpindleEditorPreferences" 
+            class="com.iw.plugins.spindle.ui.preferences.SpindleFormatterPreferencePage"
+            id="com.iw.plugins.spindle.ui.SpindleFormatterPreferences">
+      </page>
+      <page
+            name="Templates"
+            category="com.iw.plugins.spindle.ui.SpindlePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.TemplatesPreferencePage"
+            id="com.iw.plugins.spindle.ui.SpindleTemplatePreferences">
+      </page>
+       <page
+            name="Wizard Templates"
+            category="com.iw.plugins.spindle.ui.SpindleTemplatePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage"
+            id="com.iw.plugins.spindle.ui.SpindleWizardTemplatePreferences">
+      </page>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.quickFixProcessors">
+      <quickFixProcessor
+            name="AbstractMethodsQuickFixProcessor"
+            class="com.iw.plugins.spindle.correction.java.AbstractMethodsQuickFixProcessor"
+            id="com.iw.plugins.spindle.ui.correction.AbstractMethodsQuickFixProcessor">
+            <enablement>
+            <with variable="projectNatures">  
+            	<count value="+"/>  
+            	<iterate operator="and"> 
+            	    <equals value="'com.iw.plugins.spindle.core.tapestrynature'"/>
+            	    <equals value="'org.eclipse.jdt.javanature'"/>               		
+            	</iterate>
+            </with>
+         </enablement> 
+      </quickFixProcessor>      
+   </extension>
+   <!--
+   <extension
+         point="org.eclipse.jdt.ui.quickAssistProcessors">
+      <quickAssistProcessor
+            name="AbstractMethodQuickAssistProcessor"
+            class="com.iw.plugins.spindle.correction.java.AbstractMethodQuickAssistProcessor"
+            id="com.iw.plugins.spindle.ui.correction.AbstractMethodQuickAssistProcessor">
+         <enablement>
+            <with variable="projectNatures">  
+            	<count value="+"/>  
+            	<iterate operator="and"> 
+            	    <equals value="'com.iw.plugins.spindle.core.tapestrynature'"/>
+            	    <equals value="'org.eclipse.jdt.javanature'"/>               		
+            	</iterate>
+            </with>
+         </enablement>
+      </quickAssistProcessor>      
+   </extension>
    -->
+   <extension point="org.eclipse.ui.perspectiveExtensions"> 
+        <perspectiveExtension 
+            targetID="org.eclipse.jdt.ui.JavaPerspective">             
+            <newWizardShortcut id="com.iw.plugins.spindle.ui.new_jwc_wizard"/> 
+            <newWizardShortcut id="com.iw.plugins.spindle.ui.new_page_wizard"/> 
+            <newWizardShortcut id="com.iw.plugins.spindle.ui.new_project_wizard"/>     
+        </perspectiveExtension> 
+    </extension> 
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer class="com.iw.plugins.spindle.PreferenceInitializer"/>
    </extension>
-   <!-- 
-   	contributions to "org.eclipse.ui.preferencePages" have been moved
-   	to the ui.contrib fragment
-   -->	
+  
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
@@ -83,9 +182,17 @@
             name="Tapestry"
             id="com.iw.plugins.spindle.ui.new">
       </category>
-      <!--
-        The New Project Wizard has been moved into the contrib fragment      
-      -->
+      <wizard
+            name="Tapestry Web Project"
+            icon="./icons/full/application16.gif"
+            category="com.iw.plugins.spindle.ui.new"
+            class="com.iw.plugins.spindle.ui.wizards.project.NewTapestryProjectWizard"
+            project="true"
+            id="com.iw.plugins.spindle.ui.new_project_wizard">
+         <description>
+            Create a new Tapestry Web Project
+         </description>
+      </wizard>
       <wizard
             name="Tapestry Component"
             icon="./icons/full/component16.gif"

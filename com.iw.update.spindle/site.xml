@@ -6,10 +6,10 @@
    <feature url="features/com.iw.features.spindle_3.1.27.jar" id="com.iw.features.spindle" version="3.1.27">
       <category name="spindle_3_1"/>
    </feature>
-   <feature url="features/com.iw.features.spindle_3.2.13.jar" id="com.iw.features.spindle" version="3.2.13">
+   <feature url="features/com.iw.features.spindle_3.2.14.jar" id="com.iw.features.spindle" version="3.2.14">
       <category name="spindle_3_2"/>
    </feature>
-   <feature url="features/com.iw.features.spindle.groovy_3.2.13.jar" id="com.iw.features.spindle.groovy" version="3.2.13">
+   <feature url="features/com.iw.features.spindle.groovy_3.2.14.jar" id="com.iw.features.spindle.groovy" version="3.2.14">
       <category name="add ons"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.3.0.jar" id="com.iw.features.spindle" version="3.3.0">
@@ -22,14 +22,7 @@
    </category-def>
    <category-def name="add ons" label="Various add ons for Spindle">
       <description>
-         Here are features that one can install that augment Spindle with functionality ouside the realm of the core feature set.
-
-An example is the groovy feature that adds integration for the Goovestry libraries. 
-
-Groovestry support is limited to Spindle 3.2.X. If there is demand to see this feature ported to Eclipse 3.2 pls add a feature request.
-
-
-Add Ons are always located in the unstable update site.
+         Here are features that one can install that augment Spindle with functionality ouside the realm of the core feature set. Groovestry support is limited to Spindle 3.2.X. If there is demand to see this feature ported to Eclipse 3.2 pls add a feature request.
       </description>
    </category-def>
    <category-def name="spindle_3_2" label="Spindle 3.2  - for Eclipse 3.1.X">

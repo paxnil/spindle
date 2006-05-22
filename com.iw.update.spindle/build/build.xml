@@ -31,15 +31,17 @@
   <target name="check.version" unless="version">
     <fail> -Dversion=blah is required! </fail>
   </target>
-  <target name="check.version.groovy" unless="groovy.version">
-    <fail> -Dgroovy.version=blah is required! </fail>
+	<!--
+  <target name="check.version.groovy" if="groovy.version">
+    <fail> -Dgroovy.version=blah is no longer required! </fail>
   </target>
+  -->
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          all - note that this will not cleanup afterwards, or deploy
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    -->
-  <target name="all" depends="init, check.version, check.version.groovy">    
+  <target name="all" depends="init, check.version"><!--, check.version.groovy"-->    
     <antcall target="site" />
   </target>
   <!-- 
@@ -128,9 +130,9 @@
           tofile="${site.dir}/index.html" />
     <copy file="SpindleMasthead.jpg" tofile="${site.dir}/SpindleMasthead.jpg" />  	
     <replace file="${site.dir}/site.xml" token="@version@" value="${version}" />
-    <replace file="${site.dir}/site.xml"
+    <!--<replace file="${site.dir}/site.xml"
              token="@groovy.version@"
-             value="${groovy.version}" />
+             value="${groovy.version}" />-->
     <replace file="${site.dir}/index.html"
              token="@version@"
              value="${version}" />

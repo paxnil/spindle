@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <description>
-      Eclipse update site for Spindle 3.1 beta builds. 
+      Static update site for Spindle @version@
    </description>
    <feature url="features/com.iw.features.spindle_@version@.jar" id="com.iw.features.spindle" version="@version@">
       <category name="spindle_latest"/>
    </feature>
-   <feature url="features/com.iw.features.spindle.groovy_@groovy.version@.jar" id="com.iw.features.spindle.groovy" version="@groovy.version@">
-      <category name="add_ons"/>
-   </feature>
    <category-def name="spindle_latest" label="Spindle">
       <description>
           Spindle
-      </description>
-   </category-def>
-   <category-def name="add_ons" label="Add On features for Spindle">
-      <description>
-          Spindle Add Ons.
       </description>
    </category-def>
 </site>

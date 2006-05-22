@@ -65,5 +65,6 @@ Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.core.expressions,
  org.eclipse.help,
  net.sf.solareclipse.ui;bundle-version="0.4.0.spindle-dep-7",
- net.sf.solareclipse.xml.ui;bundle-version="0.4.0.spindle-dep-7"
-Eclipse-AutoStart: true
+ net.sf.solareclipse.xml.ui;bundle-version="0.4.0.spindle-dep-7",
+ org.eclipse.ltk.core.refactoring
+Eclipse-LazyStart: true

@@ -21,13 +21,13 @@
     <tr>
     <td>
 	 <br>
-	  <h1><font color="#c0c0c0">Spindle Filesystem Update Site - Spindle - build @version@ </font></h1>
+	  <h1>IF YOU ARE READING THIS - YOU HAVE EXTRACTED AN ARCHIVED UPDATE SITE - SOMETHING YOU <B>DO NOT NEED TO DO</B> TO INSTALL THIS SOFTWARE</h1>
+	  <h2><font color="#c0c0c0">Archived Update Site - Spindle - build @version@ </font></h2>
 	  
 	  <p>Welcome to the Spindle Update Site. This site contains the feature and plug-in versions for the Spindle project release you have downloaded and 
         extracted, published in the form expected by the Eclipse Update Manager. </p>
-      <p>Use the Update Manager's Feature Updates facility to open this site by navigating to directory containing this file. Online updates are always available 
-        by going to (<a href="http://spindle.sourceforge.net/updates">http://spindle.sourceforge.net/updates</a>). Spindle project downloads (including 
-        the archive containing this page) can also be obtained by pointing a web browser <a href="http://sourceforge.net/project/showfiles.php?group_id=50321">here</a></p>
+      <p>Online updates are always available by going to (<a href="http://spindle.sourceforge.net/updates">http://spindle.sourceforge.net/updates</a>). Spindle project downloads (including 
+        the zip file containing this page) can also be obtained by pointing a web browser <a href="http://sourceforge.net/project/showfiles.php?group_id=50321">here</a></p>
       
       <p> Spindle is an open source project, hosted on the <a href="http://sourceforge.net/projects/spindle">SourceForge</a> 
         and licensed under the <a href="http://www.mozilla.org/MPL/"> Mozilla 
