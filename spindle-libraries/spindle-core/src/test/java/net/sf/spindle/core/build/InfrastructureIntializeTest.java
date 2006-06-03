@@ -71,7 +71,7 @@ public class InfrastructureIntializeTest extends AbstractTestCase
     protected void setUp() throws Exception
     {
         super.setUp();
-        
+
         problemPersistManagerMock = mockContainer.newControl(IProblemPeristManager.class);
         problemPersistManager = (IProblemPeristManager) problemPersistManagerMock.getMock();
 
@@ -137,7 +137,9 @@ public class InfrastructureIntializeTest extends AbstractTestCase
         catch (NullPointerException e)
         {
             assertTrue(e.getMessage().indexOf("tapestry project must not be null") >= 0);
-        } finally {
+        }
+        finally
+        {
             mockContainer.verifyControls();
         }
 
@@ -218,7 +220,7 @@ public class InfrastructureIntializeTest extends AbstractTestCase
             {
                 throw new BuilderException("failed!");
 
-            }           
+            }
 
             @Override
             protected void clearLastState()
@@ -271,7 +273,7 @@ public class InfrastructureIntializeTest extends AbstractTestCase
             protected boolean isWorthBuilding() throws BuilderException
             {
                 throw new BuilderException("failed!");
-            }   
+            }
 
             @Override
             protected void clearLastState()
@@ -296,7 +298,7 @@ public class InfrastructureIntializeTest extends AbstractTestCase
     public void testIsWorthBuldingFailedBrokenWebXMLException()
     {
 
-        setUpTapestryCore(1);        
+        setUpTapestryCore(1);
 
         problemPersistManager.recordProblem(tapestryProject, new DefaultProblem(
                 IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, "failed!",
@@ -394,6 +396,13 @@ public class InfrastructureIntializeTest extends AbstractTestCase
 
         @Override
         public Object getClasspathMemento()
+        {
+            fail("never should be called!");
+            return null;
+        }
+
+        @Override
+        public State createEmptyState()
         {
             fail("never should be called!");
             return null;

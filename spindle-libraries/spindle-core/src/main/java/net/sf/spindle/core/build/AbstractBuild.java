@@ -180,7 +180,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         this.domModelSource = infrastructure.domModelSource;
         this.projectPropertySource = infrastructure.projectPropertySource;
         this.validateWebXML = infrastructure.validateWebXML;
-        this.newState = new State(infrastructure);
+        this.newState = infrastructure.createEmptyState();
         this.notifier = infrastructure.notifier;
         this.foundTypes = new ArrayList<IJavaType>();
         this.missingTypes = new ArrayList<String>();

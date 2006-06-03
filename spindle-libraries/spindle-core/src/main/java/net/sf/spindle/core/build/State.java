@@ -58,7 +58,7 @@ import net.sf.spindle.core.spec.PluginComponentSpecification;
  *            the type a platform implementor decides use when implementing {@link ICoreResource}
  * @author glongman@gmail.com
  */
-public class State<E>
+public abstract class State<E>
 {
 
     /**
@@ -216,7 +216,7 @@ public class State<E>
      * 
      * @param builder
      */
-    public State(AbstractBuildInfrastructure infrastructure)
+    protected State(AbstractBuildInfrastructure infrastructure)
     {
         fContextRoot = infrastructure.contextRoot;
         fBuildNumber = 0;

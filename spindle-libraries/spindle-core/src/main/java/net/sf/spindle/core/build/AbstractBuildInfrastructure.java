@@ -227,25 +227,26 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
         }
         catch (ClashException e)
         {
-            throw new BuilderException("Clash detection should not be occuring - give Geoff a punch in the back of the head!");
-//            problemPersister.removeAllProblems(tapestryProject);
-//            ICoreResource requestor = e.getRequestor();
-//            problemPersister.recordProblem(requestor, new DefaultProblem(
-//                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-REQUESTOR",
-//                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-//
-//            ICoreResource owner = e.getOwner();
-//            problemPersister.recordProblem(owner, new DefaultProblem(
-//                    IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-OWNER",
-//                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-//
-//            problemPersister.recordProblem(tapestryProject, new DefaultProblem(
-//                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR,
-//                    "Tapestry Build can't proceed due to namespace clashes",
-//                    SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
-//
-//            if (AbstractBuildInfrastructure.DEBUG)
-//                System.err.println("Tapestry build aborted: " + e.getMessage());
+            throw new BuilderException(
+                    "Clash detection should not be occuring - give Geoff a punch in the back of the head!");
+            // problemPersister.removeAllProblems(tapestryProject);
+            // ICoreResource requestor = e.getRequestor();
+            // problemPersister.recordProblem(requestor, new DefaultProblem(
+            // IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-REQUESTOR",
+            // SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+            //
+            // ICoreResource owner = e.getOwner();
+            // problemPersister.recordProblem(owner, new DefaultProblem(
+            // IProblem.TAPESTRY_CLASH_PROBLEM, IProblem.ERROR, "ACK-OWNER",
+            // SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+            //
+            // problemPersister.recordProblem(tapestryProject, new DefaultProblem(
+            // IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR,
+            // "Tapestry Build can't proceed due to namespace clashes",
+            // SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
+            //
+            // if (AbstractBuildInfrastructure.DEBUG)
+            // System.err.println("Tapestry build aborted: " + e.getMessage());
         }
         catch (BuilderException e)
         {
@@ -355,6 +356,11 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
             ArrayList<Resource> found);
 
     /**
+     * Platform implementor is responsible for creating new, empty state objects
+     */
+    public abstract State createEmptyState();
+
+    /**
      * @return the state saved from the last build, if any
      */
     public abstract State getLastState();
@@ -404,7 +410,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
             return (IJavaType) cache.get(fullyQualifiedName);
 
         IJavaType result = tapestryProject.findType(fullyQualifiedName);
-        //force type resolution
+        // force type resolution
         result.exists();
 
         if (cache != null)

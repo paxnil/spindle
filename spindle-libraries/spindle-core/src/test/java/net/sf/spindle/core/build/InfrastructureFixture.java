@@ -102,6 +102,12 @@ public class InfrastructureFixture extends AbstractBuildInfrastructure
     protected void clearLastState()
     {
         stateObject = null;
+    }    
+
+    @Override
+    public State createEmptyState()
+    {        
+        return new StateFixture(this);
     }
 
     @Override
@@ -131,6 +137,21 @@ public class InfrastructureFixture extends AbstractBuildInfrastructure
         // What I'm saying here is that for these tests I will not have access to
         // the annotation info needed until Mustang arrives.
         return false;
+    }
+    
+    public static class StateFixture extends State<Object> {
+
+        public StateFixture()
+        {
+            super();
+            // TODO Auto-generated constructor stub
+        }
+
+        public StateFixture(AbstractBuildInfrastructure infrastructure)
+        {
+            super(infrastructure);
+            // TODO Auto-generated constructor stub
+        }        
     }
 
 }
