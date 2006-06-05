@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sf.spindle.core.CoreMessages;
-import net.sf.spindle.core.messages.DefaultTapestryMessages;
 import net.sf.spindle.core.parser.IDOMModel;
 import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceRoot;

@@ -21,6 +21,7 @@ package net.sf.spindle.core.build;
  */
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -458,6 +459,7 @@ public class NamespaceResolver
      * 
      * @return a Map of Component Type name -> location
      */
+    @SuppressWarnings("unchecked")
     protected Map<String, Resource> getAllJWCFilesForNamespace()
     {
         ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
@@ -466,15 +468,15 @@ public class NamespaceResolver
         ILibrarySpecification spec = namespace.getSpecification();
 
         // pull the ones that are defined in the spec.
-        List cTypes = spec.getComponentTypes();
-        int count = cTypes.size();
-        for (int i = 0; i < count; i++)
+        List<String> cTypes = Collections.checkedList(spec.getComponentTypes(), String.class);
+        
+        for (String type : cTypes)
         {
-            String type = (String) cTypes.get(i);
             Resource specLoc = location.getRelativeResource(spec
                     .getComponentSpecificationPath(type));
             result.put(type, specLoc);
         }
+        
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_JWC);
@@ -577,6 +579,7 @@ public class NamespaceResolver
     /**
      * @return Map a map of the names and file locations of all the .page files for the Namespace
      */
+    @SuppressWarnings("unchecked")
     protected Map<String, ICoreResource> getAllPageFilesForNamespace()
     {
         ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();

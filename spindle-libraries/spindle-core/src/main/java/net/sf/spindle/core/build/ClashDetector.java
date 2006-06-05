@@ -34,7 +34,7 @@ import net.sf.spindle.core.source.SourceLocation;
 import net.sf.spindle.core.util.Assert;
 
 import org.apache.hivemind.Resource;
-
+@SuppressWarnings("deprecation")
 public class ClashDetector
 {
     

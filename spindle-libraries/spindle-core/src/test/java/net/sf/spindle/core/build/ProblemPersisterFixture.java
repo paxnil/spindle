@@ -1,10 +1,13 @@
 package net.sf.spindle.core.build;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.spindle.core.IProblemPeristManager;
 import net.sf.spindle.core.ITapestryProject;
@@ -232,21 +235,33 @@ public class ProblemPersisterFixture implements IProblemPeristManager<Object>
             builder.append(problem);
             builder.append("\n");
         }
-        
-        builder.append("\nResource Problems......"+(underlierProblems.isEmpty()? "none": underlierProblems.size())+"\n");
-        
-        for (Object underlier : underlierProblems.keySet())
+
+        builder.append("\nResource Problems......"
+                + (underlierProblems.isEmpty() ? "none" : underlierProblems.size()) + "\n");
+
+        ArrayList<Object> keys = new ArrayList<Object>(underlierProblems.keySet());
+        Collections.sort(keys, new Comparator<Object>()
+        {
+
+            public int compare(Object o1, Object o2)
+            {
+
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+
+        for (Object underlier : keys)
         {
             builder.append(underlier);
             builder.append("\n");
-            for (IProblem problem : underlierProblems.get(underlier))   
+            for (IProblem problem : underlierProblems.get(underlier))
             {
                 builder.append("\t");
                 builder.append(problem);
                 builder.append("\n");
             }
         }
-        
+
         System.err.println(builder.toString());
 
     }

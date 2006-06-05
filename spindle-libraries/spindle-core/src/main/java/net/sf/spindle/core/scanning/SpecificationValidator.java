@@ -55,7 +55,6 @@ import net.sf.spindle.core.util.Assert;
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IAssetSpecification;
-import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
@@ -309,15 +308,15 @@ public class SpecificationValidator extends BaseValidator
 
             if (name == null)
                 continue;
-
-            doValidateBinding(containedSpecification, bspec, location);
+            // this is for bindings found in XML only!
+            doValidateBinding(containerSpecification, containedSpecification, bspec, location, BuiltInBindingType.EXPRESSION);
 
         }
 
     }
 
-    public void doValidateBinding(IComponentSpecification containedSpecification,
-            PluginBindingSpecification bspec, ISourceLocation location) throws ScannerException
+    public void doValidateBinding(IComponentSpecification containerSpecification,
+            IComponentSpecification containedSpecification, PluginBindingSpecification bspec, ISourceLocation location, BuiltInBindingType defaultBindingType) throws ScannerException
     {
         String name = bspec.getIdentifier();
         String value = bspec.getUnprefixedValue();
@@ -327,7 +326,7 @@ public class SpecificationValidator extends BaseValidator
         if (type == BindingType.PREFIXED)
         {
 
-            BuiltInBindingType bindingType = BuiltInBindingType.get(bspec.getPrefix());
+            BuiltInBindingType bindingType = BuiltInBindingType.get(bspec.getPrefix(), defaultBindingType);
 
             switch (bindingType)
             {
@@ -340,19 +339,19 @@ public class SpecificationValidator extends BaseValidator
                 case VALIDATORS: // all the above have no true validator yet - use the
                     // static one
                 case LITERAL:
-                    validateStaticBinding(containedSpecification, name, value, location);
+                    validateStaticBinding(containerSpecification, name, value, location);
                     break;
                 case ASSET:
-                    validateAssetBinding(containedSpecification, name, value, location);
+                    validateAssetBinding(containerSpecification, name, value, location);
                     break;
                 case BEAN:
-                    validateBeanBinding(containedSpecification, name, value, location);
+                    validateBeanBinding(containerSpecification, name, value, location);
                     break;
                 case COMPONENT:
-                    validateComponentBinding(containedSpecification, name, value, location);
+                    validateComponentBinding(containerSpecification, name, value, location);
                     break;
                 case EXPRESSION:
-                    validateExpression(bspec.getValue(), IProblem.ERROR, location);
+                    validateExpression(value, IProblem.ERROR, location);
                     break;
                 case UNKNOWN:
                     // Most often this is a custom prefix a dev has
@@ -371,36 +370,36 @@ public class SpecificationValidator extends BaseValidator
             addProblem(
                     IProblem.ERROR,
                     location,
-                    "TODO FILL IN MESSAGE",
+                    "TODO I18N - implicit contained component" + value,
                     true,
                     IProblem.IMPLICIT_COMPONENT_BINDING_MISSING_COMPONENT);
         }
     }
 
-    public void validateBeanBinding(IComponentSpecification containedSpecification,
+    public void validateBeanBinding(IComponentSpecification beanSource,
             String bindingName, String value, ISourceLocation location) throws ScannerException
     {
-        if (containedSpecification.getBeanSpecification(value) == null)
+        if (beanSource.getBeanSpecification(value) == null)
         {
             addProblem(
                     IProblem.ERROR,
                     location,
-                    "TODO FILL IN MESSAGE",
+                    "I18N - implicit bean, missing bean" + value,
                     true,
                     IProblem.IMPLICIT_BEAN_BINDING_MISSING_BEAN);
         }
     }
 
-    public void validateAssetBinding(IComponentSpecification containedSpecification,
+    public void validateAssetBinding(IComponentSpecification assetSource,
             String bindingName, String value, ISourceLocation location) throws ScannerException
     {
 
-        if (containedSpecification.getAsset(value) == null)
+        if (assetSource.getAsset(value) == null)
         {
             addProblem(
                     IProblem.ERROR,
                     location,
-                    "TODO FILL IN MESSAGE",
+                    "TODO I18N - implicit asset, missing asset" + value,
                     true,
                     IProblem.IMPLICIT_ASSET_BINDING_MISSING_ASSET);
         }

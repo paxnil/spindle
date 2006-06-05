@@ -56,16 +56,6 @@ public class W3CAccess
     public static String getAttribute(Node node, String attributeName)
     {
         String result = null;
-        // if (node instanceof PullParserNode)
-        // {
-        // PullParserNode ppnode = (PullParserNode) node;
-        // Map attrs = ppnode.getKludgeAttributes();
-        // if (attrs != null)
-        // result = (String) attrs.get(attributeName);
-        //
-        // }
-        // else
-        // {
         NamedNodeMap map = node.getAttributes();
 
         if (map != null)
@@ -75,8 +65,20 @@ public class W3CAccess
             if (attributeNode != null)
                 result = attributeNode.getNodeValue();
         }
-        // }
         return result;
+    }
+
+    public static boolean doesAttributeExist(Node node, String attributeName)
+    {
+        NamedNodeMap map = node.getAttributes();
+
+        if (map != null)
+        {
+            Node attributeNode = map.getNamedItem(attributeName);
+
+            return attributeNode != null;
+        }
+        return false;
     }
 
     public static boolean getBooleanAttribute(Node node, String attributeName)

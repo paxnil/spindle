@@ -36,6 +36,7 @@ public class BuildFrameworkTest extends AbstractTestCase
 {
 
     private static String TAPESTRY_JAR_DIR = "jars/build-test-jars";
+
     private static String PROJECT_RESOURCES = "resources/";
 
     private static File[] EMPTY_FILE_LIST = new File[] {};
@@ -88,43 +89,44 @@ public class BuildFrameworkTest extends AbstractTestCase
             listeners.buildOccurred();
             control.setVoidCallable(buildNotifications);
         }
-        
-        //This will return defaults
-        IPreferenceSource preferenceSource =  new IPreferenceSource() {
+
+        // This will return defaults
+        IPreferenceSource preferenceSource = new IPreferenceSource()
+        {
 
             public double getDouble(String name)
-            {               
+            {
                 return 0;
             }
 
             public float getFloat(String name)
-            {                
+            {
                 return 0;
             }
 
             public int getInt(String name)
-            {               
+            {
                 return 0;
             }
 
             public long getLong(String name)
-            {                
+            {
                 return 0;
             }
 
             public String getString(String name)
-            {                
+            {
                 return null;
             }
-            
+
         };
 
         new TapestryCore(logger, listeners, preferenceSource);
     }
 
     private File getContextDirectory(String name)
-    {        
-        return getFile(PROJECT_RESOURCES+name);
+    {
+        return getFile(PROJECT_RESOURCES + name);
     }
 
     protected File getFile(String relativePath)
@@ -211,11 +213,14 @@ public class BuildFrameworkTest extends AbstractTestCase
 
     public void testBuildFramework()
     {
+        logger.setFailOnAnyEvent(true);
+
         setUpTapestryCore(1);
         File jars = getFile(TAPESTRY_JAR_DIR);
-        File[] context = new File [] {getContextDirectory("build-context1")};
-        ProjectFixture tproject = new ProjectFixture(jars, EMPTY_FILE_LIST,
-                context, new PermissiveTypeFinder());
+        File[] context = new File[]
+        { getContextDirectory("build-context1") };
+        ProjectFixture tproject = new ProjectFixture(jars, EMPTY_FILE_LIST, context,
+                new PermissiveTypeFinder());
         InfrastructureFixture inf = new InfrastructureFixture(tproject, problemPersistManager,
                 buildNotifier);
 
@@ -231,14 +236,17 @@ public class BuildFrameworkTest extends AbstractTestCase
 
         assertEquals(0, problemPersistManager.getAllProblemCount());
         assertFalse(problemPersistManager.hasBrokenBuildProblems(tproject));
-        if (!logger.isEmpty()) {
+        if (!logger.isEmpty())
+        {
             logger.dump();
             fail("expected no log entries");
         }
-        if (problemPersistManager.getAllProblemCount() > 0) {
+        if (problemPersistManager.getAllProblemCount() > 0)
+        {
             problemPersistManager.dump();
             fail("problems were encountered where none should have been encountered!");
         }
-        //assertNotNull(inf.getLastState()); TODO fix state management
+        assertNotNull(inf.getLastState());
+        problemPersistManager.dump();
     }
 }

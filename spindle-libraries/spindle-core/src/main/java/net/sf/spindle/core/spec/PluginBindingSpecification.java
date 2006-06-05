@@ -19,8 +19,6 @@ package net.sf.spindle.core.spec;
 
  Contributor(s): __glongman@gmail.com___.
  */
-import net.sf.spindle.core.scanning.IScannerValidator;
-
 import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IBindingSpecification;
 
@@ -104,6 +102,11 @@ public class PluginBindingSpecification extends DescribableSpecification impleme
         String value = getValue();
         if (fBindingType != BindingType.PREFIXED)
             return value;
-        return value.substring(prefix.length() + 1);
+        int colonx = value.indexOf(':');
+
+        if (colonx > 1)
+            return value.substring(colonx + 1);
+
+        return value;
     }
 }

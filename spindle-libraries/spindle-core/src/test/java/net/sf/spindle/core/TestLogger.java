@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import junit.framework.AssertionFailedError;
+
 public class TestLogger implements ILogger
 {
     // /CLOVER:OFF
@@ -51,6 +53,13 @@ public class TestLogger implements ILogger
     }
 
     private List<LoggingEvent> events;
+
+    private boolean failOnAnyEvent = false;
+
+    public void setFailOnAnyEvent(boolean fail)
+    {
+        failOnAnyEvent = fail;
+    }
 
     /*
      * (non-Javadoc)
@@ -82,6 +91,10 @@ public class TestLogger implements ILogger
         if (events == null)
             events = new ArrayList<LoggingEvent>();
         events.add(new LoggingEvent(message, ex));
+        if (failOnAnyEvent) {
+            dump();
+            throw new AssertionFailedError("TestLoggerFailOnAnyEvent");
+        }
     }
 
     public boolean isEmpty()
@@ -116,12 +129,12 @@ public class TestLogger implements ILogger
         int count = 1;
         for (LoggingEvent event : events)
         {
-            System.err.println("EVENT#"+(count++)+"\t\t"+event.message);
+            System.err.println("EVENT#" + (count++) + "\t\t" + event.message);
             if (event.exception != null)
                 event.exception.printStackTrace(System.err);
             System.err.println("-----------------------------------------------------");
         }
-        
+
     }
 
 }

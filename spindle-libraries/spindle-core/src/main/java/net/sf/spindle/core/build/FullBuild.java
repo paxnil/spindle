@@ -90,34 +90,33 @@ public class FullBuild extends AbstractBuild
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void saveState()
     {
-        // State newState = new State(fInfrastructure);
-        // // newState.fLibraryLocation =
-        // fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
-        // newState.fLastKnownClasspath = fInfrastructure.getClasspathMemento();
-        // newState.fJavaDependencies = fFoundTypes;
-        // newState.fMissingJavaTypes = fMissingTypes;
-        // newState.fTemplateMap = fTemplateMap;
-        // newState.fFileSpecificationMap = fFileSpecificationMap;
-        // newState.fBinarySpecificationMap = fBinarySpecificationMap;
-        // newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
-        //        
-        // newState.fDeclatedTemplateExtensions = fDeclaredTemplateExtensions;
-        // newState.fDeclaredTemplateExtensionsClasspath =
-        // fDeclaredTemplateExtensionsClasspath;
-        //        
-        // newState.fApplicationServlets = fApplicationServlets;
-        // newState.fWebAppDescriptor = fWebAppDescriptor;
-        // newState.fPrimaryNamespace = fApplicationNamespace;
-        // newState.fFrameworkNamespace = fFrameworkNamespace;
-        // newState.fCleanTemplates = fCleanTemplates;
-        //
-        // // save the processed binary libraries
-        // saveBinaryLibraries(fLibraryNamespaces, newState);
-        // fInfrastructure.persistState(newState);
+        State newState = infrastructure.createEmptyState();
+
+        newState.classpathMemento = infrastructure.getClasspathMemento();
+        newState.javaTypeDependencies = foundTypes;
+        newState.missingJavaTypes = missingTypes;
+        newState.templateMap = templateMap;
+        newState.fileSpecificationMap = fileSpecificationMap;
+        newState.binarySpecificationMap = binarySpecificationMap;
+        newState.seenTemplateExtensions = seenTemplateExtensions;
+
+        newState.declaredTemplateExtensions = declaredTemplateExtensions;
+        newState.declaredTemplateExtensionsClasspath = declaredTemplateExtensionsClasspath;
+        
+        newState.webAppDescriptor = webAppDescriptor;
+        newState.primaryNamespace = applicationNamespace;
+        newState.frameworkNamespace = frameworkNamespace;
+        newState.fCleanTemplates = cleanTemplates;
+
+        // save the processed binary libraries
+        saveBinaryLibraries(classpathNamespaces, newState);
+        infrastructure.persistState(newState);
     }
 
+    @SuppressWarnings("unchecked")
     private void saveBinaryLibraries(List<ICoreNamespace> libs, State state)
     {
         if (libs == null)
@@ -230,7 +229,7 @@ public class FullBuild extends AbstractBuild
 
                     projectPropertySource = infrastructure.installBasePropertySource(descriptor);
                     webAppDescriptor = descriptor;
-                    
+
                     ok = true;
                 }
             }
@@ -239,7 +238,7 @@ public class FullBuild extends AbstractBuild
                 if (!ok && model == null)
                     throw new BrokenWebXMLException(BuilderMessages
                             .fatalErrorCouldNotParseWebXML(webXML));
-                
+
                 if (model != null)
                     model.release();
 

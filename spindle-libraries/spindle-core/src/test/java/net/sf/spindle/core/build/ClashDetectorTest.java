@@ -55,6 +55,15 @@ public class ClashDetectorTest extends AbstractTestRoot
         super.setUpSuite();
         ClashDetector.SWITCHED_ON = true;
     }
+    
+    
+
+    @Override
+    public void tearDownSuite() throws Exception
+    {        
+        super.tearDownSuite();
+        ClashDetector.SWITCHED_ON = false;
+    }
 
     public void testClashesWithNot()
     {

@@ -19,8 +19,6 @@ package net.sf.spindle.core.parser;
 
  Contributor(s): __glongman@gmail.com___.
  */
-import java.io.InputStream;
-
 import net.sf.spindle.core.resources.ICoreResource;
 
 import org.apache.hivemind.Resource;

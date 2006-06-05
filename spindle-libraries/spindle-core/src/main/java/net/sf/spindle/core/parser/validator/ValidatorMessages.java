@@ -1,6 +1,5 @@
 package net.sf.spindle.core.parser.validator;
 
-import net.sf.spindle.core.build.BuilderMessages;
 import net.sf.spindle.core.messages.MessageFormatter;
 
 /*

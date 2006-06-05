@@ -32,8 +32,6 @@
 package com.sun.mirror.type;
 
 
-import java.lang.annotation.Annotation;
-
 import com.sun.mirror.declaration.Declaration;
 
 

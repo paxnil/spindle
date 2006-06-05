@@ -164,16 +164,16 @@ public class TapestryCore implements IPreferenceConstants
 
         return value.trim().length() == 0;
     }
-    
-    public CoreStatus getIncompatabilityPriority() {
+
+    public CoreStatus getIncompatabilityPriority()
+    {
         return getStatus(INCOMPATABILITY_SERVERITY, CoreStatus.ERROR);
     }
 
     /**
      * Retrieve the priority the core should lend to build 'misses'.
      * <p>
-     * If the preference store does not return a valid result, use
-     * {@link CoreStatus#IGNORE}
+     * If the preference store does not return a valid result, use {@link CoreStatus#IGNORE}
      * 
      * @see IPreferenceConstants
      * @return priority integer
@@ -187,8 +187,7 @@ public class TapestryCore implements IPreferenceConstants
      * Retrieve the priority the core should lend to clashing problems. TODO decide if clash
      * detection is in or out.
      * <p>
-     * If the preference store does not return a valid result, use
-     * {@link CoreStatus#ERROR}
+     * If the preference store does not return a valid result, use {@link CoreStatus#ERROR}
      * 
      * @see IPreferenceConstants
      * @return priority integer
@@ -201,8 +200,7 @@ public class TapestryCore implements IPreferenceConstants
     /**
      * Retrieve the priority the core should lend to asset problems.
      * <p>
-     * If the preference store does not return a valid result, use
-     * {@link CoreStatus#ERROR}
+     * If the preference store does not return a valid result, use {@link CoreStatus#ERROR}
      * 
      * @see IPreferenceConstants
      * @return priority integer
@@ -212,13 +210,18 @@ public class TapestryCore implements IPreferenceConstants
         return getStatus(BUILDER_HANDLE_ASSETS, CoreStatus.ERROR);
     }
 
+    public CoreStatus getHandleNonExplictClassDeclarationPriority()
+    {
+        return getStatus(BUILDER_HANDLE_NON_EXPLICIT_COMPONENT_CLASS_DECL, CoreStatus.WARN);
+    }
+
     private CoreStatus getStatus(String preferenceKey, CoreStatus defaultStatus)
     {
         CoreStatus coreStatus = CoreStatus.getCoreStatus(preferenceSource.getString(preferenceKey));
 
         if (coreStatus == null)
             coreStatus = defaultStatus;
-        
+
         if (coreStatus == null)
             coreStatus = CoreStatus.ERROR;
 

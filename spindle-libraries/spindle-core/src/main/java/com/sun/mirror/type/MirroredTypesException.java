@@ -32,7 +32,6 @@
 package com.sun.mirror.type;
 
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

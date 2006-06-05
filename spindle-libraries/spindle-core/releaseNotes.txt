@@ -1,0 +1,69 @@
+
+==============================================================================
+
+                            Spindle Core 1.0
+                             Release Notes
+                             
+==============================================================================
+
+Core Alpha 1, Release Date: 4-JUNE-2006
+------------------------------------------------------------------------------
+
+[Functionality]
+* The Core has been implemented as an IDE platform independant library
+* TapestryCore is a singleton instantiated by platform implementors who must supply:
+	-	an implementation of ILogger
+	-	an implementation of IPreferenceSource
+	-	an implementation of ICoreListeners
+* ITapestryProject is an interface for which platform implementors must supply an implementation.
+  Implementations provide:
+  	-	the projects' classpath root (IResourceRoot)
+  	-	the projects' context root (IResourceRoot)
+* ICoreResource which is an interface extending HiveMind's Resource interface. Platform implementors must supply an imlpementation appropropriate to thier IDE
+* IResourceRoot which is represents the Classpath or Context root of an ITapestryProject. Platform implementors supply Classpath and Context aware implementations suitable for thier IDE
+* AbstractBuildInfrastructure which is the abstract base class that is to be extended in order to perform a build
+  The build assumes, but does not require, that an instance of AbstractBuildInfrastructure is good for one build of one ITapestryProject and is not reused.
+  Plaform implementors must supply:
+  	- The ITapestryProject to be built
+  	- An implementation of IBuildNotfier to report build progress.
+  	- An implementation of IProblemPersister to record problems found during the build.
+  	- An implementation of IDOMModelSource which provides the builder with DOM trees of XML files.
+  	- The State of the last build, if any.
+* State - the State object has been made publicly visible and contains any build results. Platform implementors extend appropriately for thier IDE
+  Platform implementors are responsible for retaining an ITapestryProject's build state and supplying it to the build via the AbstractBuildInfrastructure
+* XML Inject tags are parsed and validated (see known issues)  
+
+[Known Issues]
+* The builder needs a modified version of the Tapestry Contrib library in order for it to be parsed correctly
+  A new release of Tapestry 4 (4.0.3) is in the works but is not available yet
+* The builder can be used with Tapestry 4.0.2 but the recorded state of the Contrib library may have minor inconsistencies
+* The builder, using T 4.0.2 may report spurious problems with Contrib. It is normally the case that problems for resources
+  found in jar files are not retained so this is not a showstopper.
+* Deprecated and aliased component parameters are not handled yet.
+* Tapestry annotations are not yet supported.
+* Incremental builds are not yet implemented and Full builds will always occur
+* Validations of aspects of a Tapestry application (like XML inject) that would require access to the Hivemind state of the project
+  are not complete as HiveMind is not modeled by the core. The default's provided by Tapestry, like inject asset are correctly validated.
+* Many error messages have not yet been internationalized and will appear as ugly keys like "!non-explicit-class-declaration!"
+  
+  
+[Inconsistencies between Spindle Core Alpha I implementation and the true implementation of Tapestry 4]
+* It is not expected that these inconsistencies will be removed in future release of the Core. 
+* the following meta tags are not used for class resolution:
+	- org.apache.tapestry.page-class-packages
+	- org.apache.tapestry.component-class-packages
+  Consequently, pages and components must explicitly declare thier class or the normal T4 default class mechanism will be used to assign the class.
+  Use of these metas are marked as problems although the severity of these problems is configurable
+* References to page or component names that are path like (myfolder/MyComponent) are validated for structure but are not used
+  in any other way by the builder. In other words, unlike the impl of T4, these names play no part in locating XML spec or classes.
+* Specless pages and components via Annotation will not supported.
+* Specless pages in the T3 sense are supported. 
+
+[Planned Functionality for Core Alpha II]
+* Annotation support will be implemented (less specless via annotation)
+* Bugs found in Core Alpha I will be fixed
+* Support for deprecated and aliased component parameters will be implemented.
+* Thinking about a StateAccessUtil for common queries that are made against a project's State (details to follow)
+* fix the internationalization problem in all error messages displaying this behaviour
+
+	

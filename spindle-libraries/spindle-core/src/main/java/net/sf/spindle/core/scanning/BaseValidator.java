@@ -509,7 +509,7 @@ public class BaseValidator implements IScannerValidator
 
         if (reference.startsWith(BindingConstants.OGNL_PREFIX))
             validateExpression(
-                    reference.substring(BindingConstants.OGNL_PREFIX.length()),
+                    reference.substring(BindingConstants.OGNL_PREFIX.length()+1),
                     severity,
                     sourceLocation);
 

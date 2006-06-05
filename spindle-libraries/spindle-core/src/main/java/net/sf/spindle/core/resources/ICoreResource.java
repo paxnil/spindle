@@ -65,6 +65,7 @@ public interface ICoreResource<E extends Object> extends Resource, ResourceExten
      *            ther resource to check
      * @return true if the path's clash
      */
+    @Deprecated
     public boolean clashesWith(ICoreResource resource);
 
     /**

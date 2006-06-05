@@ -36,8 +36,7 @@ package net.sf.spindle.core;
  * {@link org.apache.hivemind.ApplicationRuntimeException}.
  * </p>
  * <p>
- * for allowed values see {@link #ERROR}, {@link #WARN},
- * {@link #INFO}, {@link #IGNORE}
+ * for allowed values see {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #IGNORE}
  * <p>
  * </li>
  * <li>{@link #BUILDER_HANDLE_ASSETS}
@@ -54,16 +53,14 @@ package net.sf.spindle.core;
  * not exist.
  * </p>
  * <p>
- * for allowed values see {@link #ERROR}, {@link #WARN},
- * {@link #INFO}, {@link #IGNORE}
+ * for allowed values see {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #IGNORE}
  * <p>
  * </li>
  * <li>{@link #NAMESPACE_CLASH_SEVERITY}
  * <p>
  * TODO Decide once an for all if clash detection is in or out.
  * <p>
- * for allowed values see {@link #ERROR}, {@link #WARN},
- * {@link #INFO}, {@link #IGNORE}
+ * for allowed values see {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #IGNORE}
  * <p>
  * </li>
  * </ul>
@@ -82,7 +79,10 @@ public interface IPreferenceConstants
 
     String BUILDER_HANDLE_ASSETS = TapestryCore.IDENTIFIER + ".BUILDER_HANDLE_ASSETS";
 
+    String BUILDER_HANDLE_NON_EXPLICIT_COMPONENT_CLASS_DECL = TapestryCore.IDENTIFIER
+            + ".BUILDER_HANDLE_NON_EXPLICIT_COMPONENT_CLASS_DECL";
+
     String NAMESPACE_CLASH_SEVERITY = TapestryCore.IDENTIFIER + ".namespaceClashSeverity";
-    
+
     String INCOMPATABILITY_SERVERITY = TapestryCore.IDENTIFIER + ".incompatabilitySeverity";
 }

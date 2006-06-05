@@ -32,7 +32,7 @@ import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.w3c.dom.Document;
 
-// use JAXP DOM parser
+// uses JAXP DOM parser
 public class ApplicationScannerTest extends AbstractXMLTestCase
 {
 

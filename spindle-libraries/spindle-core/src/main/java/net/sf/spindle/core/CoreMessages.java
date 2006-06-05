@@ -104,4 +104,9 @@ public class CoreMessages
     {
         return FORMATTER.format("unsupported-component-name", name);
     }
+
+    public static String nonExplicitClassDeclaration()
+    {
+        return FORMATTER.getMessage("non-explicit-class-declaration");
+    }
 }

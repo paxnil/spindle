@@ -26,6 +26,7 @@ import net.sf.spindle.core.source.ISourceLocationInfo;
 import net.sf.spindle.core.util.Assert;
 import net.sf.spindle.core.util.W3CAccess;
 
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Node;
 
 /**
@@ -85,6 +86,13 @@ public abstract class AbstractDOMScanner extends AbstractScanner
             result = getNextDummyString();
 
         return result;
+    }
+    
+    protected boolean doesAttributeExist(Node node, String attributeName) {
+        
+        Assert.isLegal(!StringUtils.isBlank(attributeName));
+        
+        return W3CAccess.doesAttributeExist(node, attributeName);
     }
 
     protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull,

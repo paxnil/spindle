@@ -134,15 +134,10 @@ public class LibraryScanner extends SpecificationScanner
     protected boolean scanComponentType(ILibrarySpecification specification, Node node)
             throws ScannerException
     {
-        if (fIsTapestry_4_0)
-        {
-            if (!isElement(node, "component-type"))
-                return false;
-        }
-        else if (!isElement(node, "component-alias"))
-        {
+
+        if (!isElement(node, "component-type"))
             return false;
-        }
+
         return doScanComponentType40(specification, node);
     }
 

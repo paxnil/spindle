@@ -34,6 +34,7 @@ import net.sf.spindle.core.resources.ICoreResource;
 import net.sf.spindle.core.resources.IResourceRoot;
 import net.sf.spindle.core.spec.BaseSpecification;
 import net.sf.spindle.core.spec.PluginComponentSpecification;
+import net.sf.spindle.core.types.IJavaType;
 
 /**
  * An object intended to store the state of the build between builds. Normally, a builder's output
@@ -91,11 +92,11 @@ public abstract class State<E>
      * 
      * @see IIncrementalBuild#canIncrementalBuild()
      */
-    public Object fLastKnownClasspath;
+    public Object classpathMemento;
 
     /**
      * Since we do not have a true index of all the artifacts referenced in the project (Java or
-     * Tapestry), this list contains the FQN of every java type encountered during the last build
+     * Tapestry), this list contains the {@link IJavaType} of every type encountered during the last build
      * whether is was found to exist or not. Incrementals builders are plaform implementation
      * specific but usualy depend on a delta of changed files. Use this list to check your delta to
      * see if any java file changes affect the Tapestry state and thus would indicate an incremental
@@ -103,35 +104,35 @@ public abstract class State<E>
      * 
      * @see IIncrementalBuild#needsIncrementalBuild()
      */
-    public List fJavaDependencies;
+    public List<IJavaType> javaTypeDependencies;
 
     /**
-     * a subset of {@link #fJavaDependencies} containing only the FQN's of java types that were
+     * a subset of {@link #javaTypeDependencies} containing only the FQN's of java types that were
      * found not to exist during the last build. A shortcut device that can speed up incremental
      * build decision. ie. if your delta shows that only new Java types were added and no other
      * changed or removed then one can consult this, shorter, list.
      * 
      * @see IIncrementalBuild#needsIncrementalBuild()
      */
-    public List fMissingJavaTypes;
+    public List<String> missingJavaTypes;
 
     /**
      * Map of platform object representing template files (in jar or out) to a component
      * specification (page or component).
      */
-    public Map<E, PluginComponentSpecification> fTemplateMap;
+    public Map<E, PluginComponentSpecification> templateMap;
 
     /**
      * Map of platform object representing a physical 'file' (not in a jar) to any type of
      * specification object)
      */
-    public Map<E, ? extends BaseSpecification> fFileSpecificationMap;
+    public Map<E, ? extends BaseSpecification> fileSpecificationMap;
 
     /**
      * Map of platform object representing a binary 'file' (found in a jar) to any type of
      * specification object)
      */
-    public Map<E, ? extends BaseSpecification> fBinarySpecificationMap;
+    public Map<E, ? extends BaseSpecification> binarySpecificationMap;
 
     // map containing all of the above
     private CompositeMap fSpecificationMap = new CompositeMap();
@@ -145,10 +146,10 @@ public abstract class State<E>
      * 
      * @see IIncrementalBuild#needsIncrementalBuild()
      */
-    public Set<String> fSeenTemplateExtensions;
+    public Set<String> seenTemplateExtensions;
 
     /**
-     * Subset of {@link #fSeenTemplateExtensions}. contains only extensions used in binary
+     * Subset of {@link #seenTemplateExtensions}. contains only extensions used in binary
      * namespaces.
      * 
      * @see IIncrementalBuild#needsIncrementalBuild()
@@ -158,13 +159,13 @@ public abstract class State<E>
     /**
      * List of declared template extension seen during last build
      */
-    public Set<String> fDeclaredTemplateExtensions;
+    public Set<String> declaredTemplateExtensions;
 
     /**
      * List of declared template extensions seen in binary namespaces during the last build. A
-     * subset of {@link #fDeclaredTemplateExtensions}
+     * subset of {@link #declaredTemplateExtensions}
      */
-    public Set<String> fDeclaredTemplateExtensionsClasspath;
+    public Set<String> declaredTemplateExtensionsClasspath;
 
     /**
      * The result of parsing web.xml. Contains the location of the application spec. Used to check a
@@ -176,7 +177,7 @@ public abstract class State<E>
     public ServletInfo fApplicationServlet;
 
     // TODO why do we need this here?
-    public WebAppDescriptor fWebAppDescriptor;
+    public WebAppDescriptor webAppDescriptor;
 
     /**
      * Map of all binary (jar) namespaces (libraries) constructed during the last build
@@ -188,12 +189,12 @@ public abstract class State<E>
      * application namespace at this point. Named thus as it is planned someday to allow projects
      * that contain a library (or libraries) but no application.
      */
-    public ICoreNamespace fPrimaryNamespace;
+    public ICoreNamespace primaryNamespace;
 
     /**
      * The resolved Framework namespace for this project. (as of the last build)
      */
-    public ICoreNamespace fFrameworkNamespace;
+    public ICoreNamespace frameworkNamespace;
 
     /**
      * Contains a list of platform specific objects representing files (binary or physical) which
@@ -234,15 +235,15 @@ public abstract class State<E>
         fContextRoot = lastState.fContextRoot;
         fBuildNumber = lastState.fBuildNumber + 1;
         fBinaryNamespaces = new HashMap<ICoreResource, ICoreNamespace>(lastState.fBinaryNamespaces);
-        fBinarySpecificationMap = new HashMap<E, BaseSpecification>(
-                lastState.fBinarySpecificationMap);
-        fLastKnownClasspath = infrastructure.copyClasspathMemento(lastState.fLastKnownClasspath);
+        binarySpecificationMap = new HashMap<E, BaseSpecification>(
+                lastState.binarySpecificationMap);
+        classpathMemento = infrastructure.copyClasspathMemento(lastState.classpathMemento);
         fApplicationServlet = lastState.fApplicationServlet;
-        fWebAppDescriptor = lastState.fWebAppDescriptor;
-        fPrimaryNamespace = lastState.fPrimaryNamespace;
-        fFrameworkNamespace = lastState.fFrameworkNamespace;
-        fDeclaredTemplateExtensions = lastState.fDeclaredTemplateExtensions;
-        fDeclaredTemplateExtensionsClasspath = lastState.fDeclaredTemplateExtensionsClasspath;
+        webAppDescriptor = lastState.webAppDescriptor;
+        primaryNamespace = lastState.primaryNamespace;
+        frameworkNamespace = lastState.frameworkNamespace;
+        declaredTemplateExtensions = lastState.declaredTemplateExtensions;
+        declaredTemplateExtensionsClasspath = lastState.declaredTemplateExtensionsClasspath;
     }
 
     public void write(DataOutputStream out) throws IOException
@@ -256,7 +257,7 @@ public abstract class State<E>
 
     public Map<E, PluginComponentSpecification> getTemplateMap()
     {
-        return fTemplateMap;
+        return templateMap;
     }
 
     public Map<E, ? extends BaseSpecification> getSpecificationMap()
@@ -283,7 +284,7 @@ public abstract class State<E>
          */
         public boolean containsKey(Object key)
         {
-            return fBinaryNamespaces.containsKey(key) || fFileSpecificationMap.containsKey(key);
+            return fBinaryNamespaces.containsKey(key) || fileSpecificationMap.containsKey(key);
         }
 
         /*
@@ -313,10 +314,10 @@ public abstract class State<E>
          */
         public BaseSpecification get(Object key)
         {
-            BaseSpecification binary = fBinarySpecificationMap.get(key);
+            BaseSpecification binary = binarySpecificationMap.get(key);
             if (binary != null)
                 return binary;
-            return fFileSpecificationMap.get(key);
+            return fileSpecificationMap.get(key);
         }
 
         /*
@@ -326,7 +327,7 @@ public abstract class State<E>
          */
         public boolean isEmpty()
         {
-            return fBinaryNamespaces.isEmpty() && fFileSpecificationMap.isEmpty();
+            return fBinaryNamespaces.isEmpty() && fileSpecificationMap.isEmpty();
         }
 
         /*
@@ -336,8 +337,8 @@ public abstract class State<E>
          */
         public Set<E> keySet()
         {
-            HashSet<E> result = new HashSet<E>(fBinarySpecificationMap.keySet());
-            result.addAll(fFileSpecificationMap.keySet());
+            HashSet<E> result = new HashSet<E>(binarySpecificationMap.keySet());
+            result.addAll(fileSpecificationMap.keySet());
             return result;
         }
 
@@ -379,7 +380,7 @@ public abstract class State<E>
         public int size()
         {
 
-            return fBinaryNamespaces.size() + fFileSpecificationMap.size();
+            return fBinaryNamespaces.size() + fileSpecificationMap.size();
         }
 
         /*

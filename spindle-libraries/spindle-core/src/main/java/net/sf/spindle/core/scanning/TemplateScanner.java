@@ -280,6 +280,8 @@ public class TemplateScanner extends AbstractScanner
     {
         PluginBindingSpecification result = new PluginBindingSpecification();
 
+        result.setIdentifier(name);
+
         result.setType(BindingType.PREFIXED);
 
         String prefix = BindingConstants.LITERAL_PREFIX;
@@ -352,7 +354,11 @@ public class TemplateScanner extends AbstractScanner
                         IProblem.TEMPLATE_SCANNER_NO_INFORMALS_ALLOWED);
             }
 
-            ((SpecificationValidator) fValidator).doValidateBinding(containedSpecification, bspec, location);
+            ((SpecificationValidator) fValidator).doValidateBinding(
+                    fComponentSpec,
+                    containedSpecification,
+                    bspec,
+                    location, BuiltInBindingType.LITERAL);
         }
 
         // TODO deferred validations are to be revisited
@@ -369,8 +375,6 @@ public class TemplateScanner extends AbstractScanner
         // containedSpecification.getPublicId());
 
     }
-
-    
 
     private IComponentSpecification resolveComponentType(String type)
     {
@@ -395,8 +399,9 @@ public class TemplateScanner extends AbstractScanner
             throws ScannerException
     {
         IComponentSpecification spec = resolveComponentType(component.getType());
-
-        Map attributes = token.getAttributesMap();
+        Map attributes = null;
+        if (spec != null)
+            attributes = token.getAttributesMap();
 
         if (attributes == null)
             return;
@@ -461,7 +466,11 @@ public class TemplateScanner extends AbstractScanner
 
             }
 
-            ((SpecificationValidator) fValidator).doValidateBinding(spec, bspec, location);
+            ((SpecificationValidator) fValidator).doValidateBinding(
+                    fComponentSpec,
+                    spec,
+                    bspec,
+                    location, BuiltInBindingType.LITERAL);
         }
     }
 

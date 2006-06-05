@@ -98,7 +98,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     }
 
     // the sole app ns allowed in a Spindle project
-    protected ICoreNamespace appNamespace;
+    protected ICoreNamespace applicationNamespace;
 
     // all the namespaces rooted in the context.
     // will inclide appNamespace and any libraries in the context
@@ -216,7 +216,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             frameworkNamespace = getFrameworkNamespace();
 
-            appNamespace = getApplicationNamespace();
+            applicationNamespace = getApplicationNamespace();
 
             checkForNamspaceClashes();
 
@@ -250,7 +250,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
             notifier.checkCancel();
 
-            CoreNamespace application = (CoreNamespace) appNamespace;
+            CoreNamespace application = (CoreNamespace) applicationNamespace;
             resolveApplication(application.getAppNameFromWebXML(), application);
 
             notifier.checkCancel();
@@ -365,7 +365,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         missingTypes = null;
         processedLocations = null;
         seenTemplateExtensions = null;
-        appNamespace = null;
+        applicationNamespace = null;
         contextNamespaces = null;
         classpathNamespaces = null;
         frameworkNamespace = null;
@@ -798,7 +798,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                     ComponentScanner scanner = new ComponentScanner();
                     scanner.setResourceLocation(location);
                     scanner.setNamespace(namespace);
-                    scanner.setPropertySource((IPropertySource) namespace.getSpecification());
+                    scanner.setPropertySource((IPropertySource) namespace);
 
                     IScannerValidator scanValidator = new SpecificationValidator(this,
                             tapestryProject);

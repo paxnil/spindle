@@ -19,11 +19,14 @@ package net.sf.spindle.core.scanning;
 
  Contributor(s): __glongman@gmail.com___.
  */
+import net.sf.spindle.core.CoreMessages;
+import net.sf.spindle.core.CoreStatus;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.build.templates.TemplateFinder;
 import net.sf.spindle.core.messages.DefaultTapestryMessages;
 import net.sf.spindle.core.messages.PageloadMessages;
 import net.sf.spindle.core.messages.ParseMessages;
+import net.sf.spindle.core.source.DefaultProblem;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.source.ISourceLocation;
 import net.sf.spindle.core.source.ISourceLocationInfo;
@@ -39,6 +42,7 @@ import net.sf.spindle.core.spec.PluginReservedParameterDeclaration;
 import net.sf.spindle.core.spec.bean.PluginBindingBeanInitializer;
 import net.sf.spindle.core.util.Assert;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.binding.BindingConstants;
 import org.apache.tapestry.parse.SpecificationParser;
@@ -154,9 +158,8 @@ public class ComponentScanner extends SpecificationScanner
             return scanAsset_3_0(specification, node);
 
         if (!isElement(node, "asset"))
-            return scanAsset(specification, node, "path", null);
-
-        return true;
+            return false;
+        return scanAsset(specification, node, "path", null);
     }
 
     protected boolean scanAsset_3_0(PluginComponentSpecification specification, Node node)
@@ -452,7 +455,18 @@ public class ComponentScanner extends SpecificationScanner
         }
 
         PluginBindingSpecification bindingSpec = new PluginBindingSpecification();
+
         bindingSpec.setType(BindingType.PREFIXED);
+
+        BuiltInBindingType defaultPrefix = BuiltInBindingType.EXPRESSION;
+        String prefix = defaultPrefix.getIdentifier();
+
+        int colonx = value.indexOf(':');
+
+        if (colonx > 1)
+            prefix = value.substring(0, colonx);
+
+        bindingSpec.setPrefix(prefix);
         bindingSpec.setValue(value);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
@@ -503,7 +517,6 @@ public class ComponentScanner extends SpecificationScanner
             addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false, e.getCode());
             value = "";
         }
-
         PluginBindingSpecification spec = new PluginBindingSpecification();
         spec.setType(BindingType.PREFIXED);
         spec.setValue(BindingConstants.LITERAL_PREFIX + ":" + value);
@@ -562,7 +575,6 @@ public class ComponentScanner extends SpecificationScanner
             addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false, e.getCode());
             expression = "";
         }
-
         PluginBindingSpecification spec = new PluginBindingSpecification();
         spec.setType(BindingType.PREFIXED);
         spec.setValue(BindingConstants.OGNL_PREFIX + ":" + expression);
@@ -583,13 +595,23 @@ public class ComponentScanner extends SpecificationScanner
     protected void scanComponentSpecification(PluginComponentSpecification specification)
             throws ScannerException
     {
-
         String componentClassname = getAttribute(fRootNode, "class", false);
 
         if (componentClassname == null)
         {
-            componentClassCheck(specification);
+            // TODO this is a Spindle only behaviour for Tapestry 4
+            if (!doesAttributeExist(fRootNode, "class"))
+            {
+                CoreStatus pri = TapestryCore.getDefault()
+                        .getHandleNonExplictClassDeclarationPriority();
 
+                if (pri != CoreStatus.IGNORE)
+                    addProblem(new DefaultProblem(pri.getPriority(), CoreMessages
+                            .nonExplicitClassDeclaration(), getNodeStartSourceLocation(fRootNode),
+                            false, (fIsPageSpec ? IProblem.SPINDLE_NO_EXPLICIT_PAGE_CLASS
+                                    : IProblem.SPINDLE_NO_EXPLICIT_COMPONENT_CLASS)));
+            }
+            componentClassCheck(specification);
         }
         else
         {
@@ -617,6 +639,9 @@ public class ComponentScanner extends SpecificationScanner
                 continue;
 
             if (scanPropertySpecification(specification, node))
+                continue;
+
+            if (scanAsset(specification, node))
                 continue;
         }
 
@@ -742,7 +767,7 @@ public class ComponentScanner extends SpecificationScanner
                 IProblem.COMPONENT_INVALID_PARAMETER_NAME);
 
         String type = getAttribute(node, "type");
-        param.setType(type == null ? "java.lang.Object" : type);
+        param.setType(StringUtils.isEmpty(type) ? "java.lang.Object" : type);
 
         param.setRequired(getBooleanAttribute(node, "required"));
 
@@ -754,7 +779,7 @@ public class ComponentScanner extends SpecificationScanner
 
         String prefix = fIsTapestry_4_0 ? null : BindingConstants.OGNL_PREFIX + ":";
         if (prefix != null)
-            defaultValue = defaultValue == null ? prefix : prefix + defaultValue;
+            defaultValue = defaultValue == null ? null : prefix + defaultValue;
 
         fValidator.validateBindingReference(IProblem.ERROR, getAttributeSourceLocation(
                 node,

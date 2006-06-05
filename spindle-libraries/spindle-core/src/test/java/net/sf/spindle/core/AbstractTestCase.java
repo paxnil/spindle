@@ -373,6 +373,21 @@ public abstract class AbstractTestCase extends SuiteOfTestCases implements IProb
             throw new AssertionFailedError("expected problem code " + expected + "but got " + code
                     + " : " + problem.toString());
     }
+    
+    protected void assertNoProblemCode(IProblem problem, int notExpected)
+    {
+        int code = problem.getCode();
+        if (notExpected == code)
+            throw new AssertionFailedError("expected no such problem code " + notExpected + "but got it anyway : " + problem.toString());
+    }
+    
+    protected void assertNoSuchProblemCode(int problemCode) {
+        IProblem[] found = getProblems();
+        for (IProblem problem : found)
+        {
+            assertNoProblemCode(problem, problemCode);
+        }        
+    }
 
     /**
      * Checks that there is only one problem and the code matches
