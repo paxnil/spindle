@@ -31,7 +31,7 @@ import java.util.Set;
 
 import net.sf.spindle.core.CoreMessages;
 import net.sf.spindle.core.CoreStatus;
-import net.sf.spindle.core.IProblemPeristManager;
+import net.sf.spindle.core.IProblemPersistManager;
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.build.templates.ITemplateFinderListener;
@@ -150,7 +150,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     protected ClashDetector clashDetector;
 
-    protected IProblemPeristManager problemPersister;
+    protected IProblemPersistManager problemPersister;
 
     protected ITapestryProject tapestryProject;
 

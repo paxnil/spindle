@@ -3,7 +3,7 @@ package net.sf.spindle.core.build;
 import java.util.ArrayList;
 import java.util.Set;
 
-import net.sf.spindle.core.IProblemPeristManager;
+import net.sf.spindle.core.IProblemPersistManager;
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.scanning.ScannerException;
 import net.sf.spindle.core.types.IJavaType;
@@ -36,7 +36,7 @@ public class InfrastructureFixture extends AbstractBuildInfrastructure
     private State stateObject;
     
     public InfrastructureFixture(ITapestryProject project,
-            IProblemPeristManager<Object> problemPersistence, IBuildNotifier buildNotifier)
+            IProblemPersistManager<Object> problemPersistence, IBuildNotifier buildNotifier)
     {
         super();
         tapestryProject = project;      

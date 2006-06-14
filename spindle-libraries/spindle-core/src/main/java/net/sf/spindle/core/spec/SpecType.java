@@ -1,5 +1,7 @@
+/**
+ * 
+ */
 package net.sf.spindle.core.spec;
-
 /*
  The contents of this file are subject to the Mozilla Public License
  Version 1.1 (the "License"); you may not use this file except in
@@ -19,33 +21,36 @@ package net.sf.spindle.core.spec;
 
  Contributor(s): __glongman@gmail.com___.
  */
-import org.apache.hivemind.Location;
-
-/**
- * Record <reserved-parameter>tags in a document
- * 
- * @author glongman@gmail.com
- */
-public class PluginReservedParameterDeclaration extends BaseSpecification
-{
-
-    String fReservedName;
-
-    public PluginReservedParameterDeclaration(String reservedName, Location location)
-    {
-        super(SpecType.RESERVED_PARAMETER_DECLARATION);
-        fReservedName = reservedName;
-        setLocation(location);
-    }
-
-    public String getIdentfier()
-    {
-        return getReservedName();
-    }
-
-    public String getReservedName()
-    {
-        return fReservedName;
-    }
-
+public enum SpecType {
+    UNKNOWN,
+    APPLICATION_SPEC,
+    ASSET_SPEC,
+    BEAN_SPEC,
+    BINDING_SPEC,
+    COMPONENT_SPEC,
+    CONTAINED_COMPONENT_SPEC,
+    EXTENSION_CONFIGURATION,
+    EXTENSION_SPEC,
+    LIBRARY_SPEC,
+    LISTENER_BINDING_SPEC,
+    PARAMETER_SPEC,
+    PROPERTY_SPEC,
+    BINDING_BEAN_INIT,
+    PROPERTY_DECLARATION,
+    PAGE_DECLARATION,
+    COMPONENT_TYPE_DECLARATION,
+    DESCRIPTION_DECLARATION,
+    RESERVED_PARAMETER_DECLARATION,
+    ENGINE_SERVICE_DECLARATION,
+    LIBRARY_DECLARATION,
+    CONFIGURE_DECLARATION,
+    INJECT,
+    @Deprecated
+    EXPRESSION_BEAN_INIT,
+    @Deprecated
+    FIELD_BEAN_INIT,
+    @Deprecated
+    STATIC_BEAN_INIT,
+    @Deprecated
+    STRING_BEAN_INIT
 }

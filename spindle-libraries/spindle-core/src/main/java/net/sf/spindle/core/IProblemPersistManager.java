@@ -43,7 +43,7 @@ import org.apache.hivemind.Resource;
  * @see net.sf.spindle.core.ITapestryProject
  * @see org.apache.hivemind.Resource
  */
-public interface IProblemPeristManager<E extends Object>
+public interface IProblemPersistManager<E extends Object>
 {
     /**
      * Record a problem against the project.
@@ -131,5 +131,5 @@ public interface IProblemPeristManager<E extends Object>
      * @param resource
      *            the resource.
      */
-    void removeAllProblemsFor(E underlier);    
+    void removeAllProblemsFor(E underlier);
 }

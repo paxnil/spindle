@@ -27,7 +27,7 @@ import junit.framework.Test;
 import net.sf.spindle.core.AbstractTestCase;
 import net.sf.spindle.core.ICoreListeners;
 import net.sf.spindle.core.IPreferenceSource;
-import net.sf.spindle.core.IProblemPeristManager;
+import net.sf.spindle.core.IProblemPersistManager;
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.SuiteOfTestCases;
 import net.sf.spindle.core.TapestryCore;
@@ -43,7 +43,7 @@ public class InfrastructureIntializeTest extends AbstractTestCase
 
     private MockControl problemPersistManagerMock;
 
-    private IProblemPeristManager problemPersistManager;
+    private IProblemPersistManager problemPersistManager;
 
     private MockControl buildNotifierMock;
 
@@ -72,8 +72,8 @@ public class InfrastructureIntializeTest extends AbstractTestCase
     {
         super.setUp();
 
-        problemPersistManagerMock = mockContainer.newControl(IProblemPeristManager.class);
-        problemPersistManager = (IProblemPeristManager) problemPersistManagerMock.getMock();
+        problemPersistManagerMock = mockContainer.newControl(IProblemPersistManager.class);
+        problemPersistManager = (IProblemPersistManager) problemPersistManagerMock.getMock();
 
         tapestryProject = createBasicTapestryProject(mockContainer);
 
@@ -351,7 +351,7 @@ public class InfrastructureIntializeTest extends AbstractTestCase
         }
 
         public BaseTestInfrastructure(ITapestryProject tapestryProject,
-                IProblemPeristManager problemPersistManager, IBuildNotifier buildNotifier)
+                IProblemPersistManager problemPersistManager, IBuildNotifier buildNotifier)
         {
             super();
             this.tapestryProject = tapestryProject;

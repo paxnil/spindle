@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.spindle.core.IProblemPeristManager;
+import net.sf.spindle.core.IProblemPersistManager;
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.source.IProblem;
 import net.sf.spindle.core.util.Assert;
@@ -33,7 +33,7 @@ import net.sf.spindle.core.util.Assert;
 
  Contributor(s): __glongman@gmail.com___.
  */
-public class ProblemPersisterFixture implements IProblemPeristManager<Object>
+public class ProblemPersisterFixture implements IProblemPersistManager<Object>
 {
 
     ITapestryProject project;

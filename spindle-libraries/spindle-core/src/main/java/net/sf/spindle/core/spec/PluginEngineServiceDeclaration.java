@@ -44,7 +44,7 @@ public class PluginEngineServiceDeclaration extends DescribableSpecification
 
     public PluginEngineServiceDeclaration(String name, String serviceClass, Location location)
     {
-        super(BaseSpecification.ENGINE_SERVICE_DECLARATION);
+        super(SpecType.ENGINE_SERVICE_DECLARATION);
         fName = name;
         fServiceClass = serviceClass;
         setLocation(location);

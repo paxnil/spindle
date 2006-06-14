@@ -33,15 +33,6 @@ import net.sf.spindle.core.source.ISourceLocationInfo;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 
-// import core.TapestryCore;
-// import core.resources.ICoreResource;
-// import core.scanning.IScannerValidator;
-// import core.scanning.ScannerException;
-// import core.scanning.SpecificationScanner;
-// import core.source.IProblem;
-// import core.source.ISourceLocation;
-// import core.source.ISourceLocationInfo;
-
 /**
  * Spindle aware concrete implementation of ILibrarySpecification
  * 
@@ -67,7 +58,7 @@ public class PluginParameterSpecification extends DescribableSpecification imple
 
     public PluginParameterSpecification()
     {
-        super(BaseSpecification.PARAMETER_SPEC);
+        super(SpecType.PARAMETER_SPEC);
     }
 
     /*

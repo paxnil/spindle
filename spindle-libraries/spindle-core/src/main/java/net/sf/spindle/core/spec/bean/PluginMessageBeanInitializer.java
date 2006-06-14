@@ -19,7 +19,7 @@ package net.sf.spindle.core.spec.bean;
 
  Contributor(s): __glongman@gmail.com___.
  */
-import net.sf.spindle.core.spec.BaseSpecification;
+import net.sf.spindle.core.spec.SpecType;
 
 /**
  * Spindle implementation of a StringBeanInitializer
@@ -32,7 +32,7 @@ public class PluginMessageBeanInitializer extends AbstractPluginBeanInitializer
 
     public PluginMessageBeanInitializer()
     {
-        super(BaseSpecification.STRING_BEAN_INIT);
+        super(SpecType.STRING_BEAN_INIT);
     }
 
     public String getKey()

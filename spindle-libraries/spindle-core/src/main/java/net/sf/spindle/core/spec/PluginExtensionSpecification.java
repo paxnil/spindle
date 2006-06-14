@@ -47,9 +47,9 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements
 
     private String fClassName;
 
-    protected Map fConfiguration;
+    protected Map<String, Object> fConfiguration;
 
-    private List fRawConfigurations;
+    private List<PluginExtensionConfiguration> fRawConfigurations;
 
     private boolean fImmediate;
 
@@ -58,7 +58,7 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements
      */
     public PluginExtensionSpecification()
     {
-        super(BaseSpecification.EXTENSION_SPEC);
+        super(SpecType.EXTENSION_SPEC);
     }
 
     /*
@@ -89,9 +89,8 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements
      */
     public void addConfiguration(String propertyName, Object value)
     {
-        checkInternalCall("PluginExtensionSpecification.addConfiguration may not be called by external client code");
         if (fConfiguration == null)
-            fConfiguration = new HashMap();
+            fConfiguration = new HashMap<String, Object>();
 
         if (!fConfiguration.containsKey(propertyName))
             fConfiguration.put(propertyName, value);
@@ -100,21 +99,13 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements
     public void addConfiguration(PluginExtensionConfiguration configuration)
     {
         if (fRawConfigurations == null)
-            fRawConfigurations = new ArrayList();
+            fRawConfigurations = new ArrayList<PluginExtensionConfiguration>();
 
         fRawConfigurations.add(configuration);
         configuration.setParent(this);
 
-        beginInternalCall("calling Tapestry addConfiguration");
-        try
-        {
-            addConfiguration(configuration.getIdentifier(), configuration);
-        }
-        finally
-        {
+        addConfiguration(configuration.getIdentifier(), configuration);
 
-            endInternalCall();
-        }
     }
 
     /*
@@ -211,8 +202,6 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements
 
     public void validate(Object parent, IScannerValidator validator)
     {
-        ILibrarySpecification library = (ILibrarySpecification) parent;
-
         validateSelf(parent, validator);
 
         for (Iterator iter = getConfigurationObjects().iterator(); iter.hasNext();)

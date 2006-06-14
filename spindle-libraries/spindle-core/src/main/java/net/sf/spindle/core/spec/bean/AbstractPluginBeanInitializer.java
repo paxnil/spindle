@@ -19,6 +19,7 @@ __Geoffrey Longman____. All Rights Reserved.
 Contributor(s): __glongman@gmail.com___.
 */
 import net.sf.spindle.core.spec.BaseSpecification;
+import net.sf.spindle.core.spec.SpecType;
 
 import org.apache.tapestry.IBeanProvider;
 import org.apache.tapestry.bean.IBeanInitializer;
@@ -34,7 +35,7 @@ public class AbstractPluginBeanInitializer extends BaseSpecification
 {
 
   private String fValue;
-  protected AbstractPluginBeanInitializer(int type)
+  protected AbstractPluginBeanInitializer(SpecType type)
   {
     super(type);
   }

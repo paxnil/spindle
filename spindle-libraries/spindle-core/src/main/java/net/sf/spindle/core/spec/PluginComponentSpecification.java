@@ -168,7 +168,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
 
     public PluginComponentSpecification()
     {
-        super(BasePropertyHolder.COMPONENT_SPEC);
+        super(SpecType.COMPONENT_SPEC);
     }
 
     /**
@@ -179,7 +179,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
      */
     public PluginComponentSpecification(PluginComponentSpecification other)
     {
-        super(BasePropertyHolder.COMPONENT_SPEC);
+        super(SpecType.COMPONENT_SPEC);
         fComponentClassName = other.fComponentClassName;
         fPageSpecification = other.fPageSpecification;
         fPublicId = other.fPublicId;
@@ -296,7 +296,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
      */
     public IAssetSpecification getAsset(String name)
     {
-        return (IAssetSpecification) get(fAssets, name);
+        return get(fAssets, name);
     }
 
     /*

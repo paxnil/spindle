@@ -44,7 +44,7 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
      */
     public PluginAssetSpecification()
     {
-        super(BaseSpecification.ASSET_SPEC);
+        super(SpecType.ASSET_SPEC);
     }
 
     /*

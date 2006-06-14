@@ -42,57 +42,58 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     /**
      * Map of component alias to component specification path.
      */
-    private Map fComponents;
+    private Map<String, String> fComponents;
 
     /**
      * The locations and values of all component declarations in a document. Immutable after a
      * parse/scan episode.
      */
-    private List fComponentTypeDeclarations;
+    private List<PluginComponentTypeDeclaration> fComponentTypeDeclarations;
 
     /**
      * Map of extension name to {@link IExtensionSpecification}.
      */
 
-    private Map fExtensions;
+    private Map<String, IExtensionSpecification> fExtensions;
 
-    private List fExtensionDeclarations;
+    private List<PluginExtensionSpecification> fExtensionDeclarations;
 
     /**
      * Map of library id to library specification path.
      */
 
-    private Map fLibraries;
+    private Map<String, String> fLibraries;
 
     /**
      * The locations and values of all library declarations in a document. Immutable after a
      * parse/scan episode.
      */
-    private List fLibraryDeclarations;
+    private List<PluginLibraryDeclaration> fLibraryDeclarations;
 
     /**
      * Map of page name to page specification path.
      */
 
-    private Map fPages;
+    private Map<String, String> fPages;
 
     /**
      * The locations and values of all page declarations in a document. Immutable after a parse/scan
      * episode.
      */
-    private List fPageDeclarations;
+    private List<PluginPageDeclaration> fPageDeclarations;
 
     /**
      * Map of service name to service class name.
      */
 
-    private Map fServices;
+    private Map<String, String> fServices;
 
     /**
      * The locations and values of all service declarations in a document. Immutable after a
-     * parse/scan episode.
+     * parse/scan episode.<p>
+     * Deprecated as of Tapestry 4.0
      */
-    private List fEngineServiceDeclarations;
+    private List<PluginEngineServiceDeclaration> fEngineServiceDeclarations;
 
     private INamespace fNamespace;
 
@@ -104,10 +105,10 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
 
     public PluginLibrarySpecification()
     {
-        super(BaseSpecification.LIBRARY_SPEC);
+        this(SpecType.LIBRARY_SPEC); 
     }
 
-    protected PluginLibrarySpecification(int type)
+    protected PluginLibrarySpecification(SpecType type)
     {
         super(type);
     }
@@ -152,9 +153,8 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void addExtensionSpecification(String name, IExtensionSpecification extension)
     {
-        checkInternalCall("PluginLibrarySpecification.addExtensionSpecification may not be called by external client code");
         if (fExtensions == null)
-            fExtensions = new HashMap();
+            fExtensions = new HashMap<String, IExtensionSpecification>();
 
         fExtensions.put(name, extension);
     }
@@ -162,21 +162,12 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     public void addExtension(PluginExtensionSpecification extension)
     {
         if (fExtensionDeclarations == null)
-            fExtensionDeclarations = new ArrayList();
+            fExtensionDeclarations = new ArrayList<PluginExtensionSpecification>();
 
         fExtensionDeclarations.add(extension);
         extension.setParent(this);
 
-        beginInternalCall("calling Tapestry addExtensionSpecification");
-
-        try
-        {
-            addExtensionSpecification(extension.getIdentifier(), extension);
-        }
-        finally
-        {
-            endInternalCall();
-        }
+        addExtensionSpecification(extension.getIdentifier(), extension);
     }
 
     /*
@@ -400,9 +391,8 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setComponentSpecificationPath(String type, String path)
     {
-        checkInternalCall("not to be called by client code");
         if (fComponents == null)
-            fComponents = new HashMap();
+            fComponents = new HashMap<String, String>();
 
         fComponents.put(type, path);
 
@@ -411,22 +401,12 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     public void addComponentTypeDeclaration(PluginComponentTypeDeclaration declaration)
     {
         if (fComponentTypeDeclarations == null)
-            fComponentTypeDeclarations = new ArrayList();
+            fComponentTypeDeclarations = new ArrayList<PluginComponentTypeDeclaration>();
 
         fComponentTypeDeclarations.add(declaration);
 
         if (!getComponentTypes().contains(declaration.getId()))
-        {
-            beginInternalCall("calling setComponentSpecificationPath");
-            try
-            {
-                setComponentSpecificationPath(declaration.getId(), declaration.getResourcePath());
-            }
-            finally
-            {
-                endInternalCall();
-            }
-        }
+            setComponentSpecificationPath(declaration.getId(), declaration.getResourcePath());
     }
 
     /*
@@ -437,9 +417,8 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setLibrarySpecificationPath(String id, String path)
     {
-        checkInternalCall("not to be called by client code");
         if (fLibraries == null)
-            fLibraries = new HashMap();
+            fLibraries = new HashMap<String, String>();
 
         fLibraries.put(id, path);
 
@@ -448,24 +427,13 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     public void addLibraryDeclaration(PluginLibraryDeclaration declaration)
     {
         if (fLibraryDeclarations == null)
-            fLibraryDeclarations = new ArrayList();
+            fLibraryDeclarations = new ArrayList<PluginLibraryDeclaration>();
 
         fLibraryDeclarations.add(declaration);
         declaration.setParent(this);
 
         if (!getLibraryIds().contains(declaration.getName()))
-        {
-            beginInternalCall("calling setLibrarySpecificationPath");
-
-            try
-            {
-                setLibrarySpecificationPath(declaration.getName(), declaration.getResourcePath());
-            }
-            finally
-            {
-                endInternalCall();
-            }
-        }
+            setLibrarySpecificationPath(declaration.getName(), declaration.getResourcePath());
     }
 
     /*
@@ -476,9 +444,8 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setPageSpecificationPath(String name, String path)
     {
-        checkInternalCall("not to be called by client code");
         if (fPages == null)
-            fPages = new HashMap();
+            fPages = new HashMap<String, String>();
 
         fPages.put(name, path);
     }
@@ -486,24 +453,14 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     public void addPageDeclaration(PluginPageDeclaration declaration)
     {
         if (fPageDeclarations == null)
-            fPageDeclarations = new ArrayList();
+            fPageDeclarations = new ArrayList<PluginPageDeclaration>();
 
         fPageDeclarations.add(declaration);
 
         declaration.setParent(this);
 
         if (!getPageNames().contains(declaration.getName()))
-        {
-            beginInternalCall("calling setPageSpecificationPath");
-            try
-            {
-                setPageSpecificationPath(declaration.getName(), declaration.getResourcePath());
-            }
-            finally
-            {
-                endInternalCall();
-            }
-        }
+            setPageSpecificationPath(declaration.getName(), declaration.getResourcePath());
     }
 
     /*
@@ -514,9 +471,8 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setServiceClassName(String name, String className)
     {
-        checkInternalCall("not to be called by client code");
         if (fServices == null)
-            fServices = new HashMap();
+            fServices = new HashMap<String, String>();
 
         fServices.put(name, className);
     }
@@ -524,22 +480,12 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     public void addEngineServiceDeclaration(PluginEngineServiceDeclaration declaration)
     {
         if (fEngineServiceDeclarations == null)
-            fEngineServiceDeclarations = new ArrayList();
+            fEngineServiceDeclarations = new ArrayList<PluginEngineServiceDeclaration>();
 
         fEngineServiceDeclarations.add(declaration);
 
         if (!getServiceNames().contains(declaration.getName()))
-        {
-            beginInternalCall("calling setServiceClassName");
-            try
-            {
-                setServiceClassName(declaration.getName(), declaration.getServiceClass());
-            }
-            finally
-            {
-                endInternalCall();
-            }
-        }
+            setServiceClassName(declaration.getName(), declaration.getServiceClass());
     }
 
     /*

@@ -40,7 +40,7 @@ public class PluginLibraryDeclaration extends BaseSpecification
 
     public PluginLibraryDeclaration(String name, String resourcePath, Location location)
     {
-        super(BaseSpecification.LIBRARY_DECLARATION);
+        super(SpecType.LIBRARY_DECLARATION);
         setIdentifier(name);
         fResourcePath = resourcePath;
         setLocation(location);

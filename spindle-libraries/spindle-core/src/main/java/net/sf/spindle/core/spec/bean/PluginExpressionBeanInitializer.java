@@ -19,7 +19,7 @@ package net.sf.spindle.core.spec.bean;
 
  Contributor(s): __glongman@gmail.com___.
  */
-import net.sf.spindle.core.spec.BaseSpecification;
+import net.sf.spindle.core.spec.SpecType;
 
 /**
  * Spindle implementation Spindle implementation of an ExpressionBeanInitializer
@@ -32,7 +32,7 @@ public class PluginExpressionBeanInitializer extends AbstractPluginBeanInitializ
 
     public PluginExpressionBeanInitializer()
     {
-        super(BaseSpecification.EXPRESSION_BEAN_INIT);
+        super(SpecType.EXPRESSION_BEAN_INIT);
     }
 
     public String getExpression()

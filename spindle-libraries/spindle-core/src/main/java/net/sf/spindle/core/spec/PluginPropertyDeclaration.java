@@ -35,7 +35,7 @@ public class PluginPropertyDeclaration extends BaseSpecification
 
     public PluginPropertyDeclaration(String key, String value)
     {
-        super(BaseSpecification.PROPERTY_DECLARATION);
+        super(SpecType.PROPERTY_DECLARATION);
         setKey(key);
         fValue = value;
     }

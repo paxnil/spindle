@@ -35,7 +35,7 @@ public class PluginDescriptionDeclaration extends BaseSpecification
 
     public PluginDescriptionDeclaration(String lang, String value, Location location)
     {
-        super(BaseSpecification.DESCRIPTION_DECLARATION);
+        super(SpecType.DESCRIPTION_DECLARATION);
         fLang = lang;
         fValue = value;
         setLocation(location);

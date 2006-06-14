@@ -43,7 +43,7 @@ public class DescribableSpecification extends BaseSpecification
   /**
    * @param type
    */
-  public DescribableSpecification(int type)
+  public DescribableSpecification(SpecType type)
   {
     super(type);
   }

@@ -51,7 +51,7 @@ public class PluginPropertySpecification extends DescribableSpecification implem
 
     public PluginPropertySpecification()
     {
-        super(BaseSpecification.PROPERTY_SPEC);
+        super(SpecType.PROPERTY_SPEC);
     }
 
     /*

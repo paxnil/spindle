@@ -32,7 +32,6 @@ import net.sf.spindle.core.source.ISourceLocation;
 import net.sf.spindle.core.source.ISourceLocationInfo;
 
 import org.apache.hivemind.Location;
-import org.apache.tapestry.spec.IExtensionSpecification;
 
 /**
  * @author gwl Copyright 2002, Geoffrey Longman. All Rights Reserved.
@@ -55,21 +54,21 @@ public class PluginExtensionConfiguration extends DescribableSpecification
 
     static final Long falseL = new Long(0);
 
-    static final public Map classToString;
+    static final public Map<Class, String> classToString;
 
-    static final public Map stringToClass;
+    static final public Map<String, Class> stringToClass;
 
     static
     {
 
-        classToString = new HashMap();
+        classToString = new HashMap<Class, String>();
         classToString.put(String.class, "String");
         classToString.put(Boolean.class, "boolean");
         classToString.put(Integer.class, "int");
         classToString.put(Double.class, "double");
         classToString.put(Long.class, "long");
 
-        stringToClass = new HashMap();
+        stringToClass = new HashMap<String, Class>();
         stringToClass.put("String", String.class);
         stringToClass.put("boolean", Boolean.class);
         stringToClass.put("int", Integer.class);
@@ -93,7 +92,7 @@ public class PluginExtensionConfiguration extends DescribableSpecification
      */
     public PluginExtensionConfiguration(String propertyName, Object value)
     {
-        super(BaseSpecification.EXTENSION_CONFIGURATION);
+        super(SpecType.EXTENSION_CONFIGURATION);
         setIdentifier(propertyName);
         fValueObject = value;
         fType = value == null ? null : value.getClass();
@@ -108,11 +107,13 @@ public class PluginExtensionConfiguration extends DescribableSpecification
         setLocation(location);
     }
 
+    @Deprecated
     private Class checkType(String newType)
     {
         return (Class) stringToClass.get(newType);
     }
 
+    @Deprecated
     private Object convertValue(Class type, Object value)
     {
 
@@ -277,9 +278,6 @@ public class PluginExtensionConfiguration extends DescribableSpecification
 
     public void validate(Object parent, IScannerValidator validator)
     {
-
-        IExtensionSpecification extension = (IExtensionSpecification) parent;
-
         ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
 
         try
@@ -289,7 +287,6 @@ public class PluginExtensionConfiguration extends DescribableSpecification
             {
                 SpecificationScanner.IConverter converter = (SpecificationScanner.IConverter) SpecificationScanner.TYPE_CONVERSION_MAP
                         .get(fDeclaredType);
-                Object objectValue = null;
 
                 if (converter == null)
                 {
@@ -302,7 +299,7 @@ public class PluginExtensionConfiguration extends DescribableSpecification
                 {
                     try
                     {
-                        objectValue = converter.convert(fDeclaredValue);
+                        converter.convert(fDeclaredValue);
                     }
                     catch (ScannerException e2)
                     {

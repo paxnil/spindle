@@ -49,9 +49,9 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
 
     private boolean fInheritInformalParameters;
 
-    protected Map fBindings;
+    protected Map<String, IBindingSpecification> fBindings;
 
-    private List fDeclaredBindings;
+    private List<PluginBindingSpecification> fDeclaredBindings;
 
     private String fPropertyName;
 
@@ -60,7 +60,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public PluginContainedComponent()
     {
-        super(BaseSpecification.CONTAINED_COMPONENT_SPEC);
+        super(SpecType.CONTAINED_COMPONENT_SPEC);
     }
 
     /*
@@ -70,7 +70,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public IBindingSpecification getBinding(String name)
     {
-        return (IBindingSpecification) get(fBindings, name);
+        return get(fBindings, name);
     }
 
     /*
@@ -117,8 +117,8 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
     {
         if (fBindings == null)
         {
-            fBindings = new HashMap();
-            fDeclaredBindings = new ArrayList();
+            fBindings = new HashMap<String, IBindingSpecification>();
+            fDeclaredBindings = new ArrayList<PluginBindingSpecification>();
         }
 
         PluginBindingSpecification pluginSpec = (PluginBindingSpecification) spec;
@@ -126,7 +126,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
         pluginSpec.setIdentifier(name);
         pluginSpec.setParent(this);
 
-        fDeclaredBindings.add(spec);
+        fDeclaredBindings.add(pluginSpec);
 
         if (!fBindings.containsKey(name))
             fBindings.put(name, spec);
@@ -187,9 +187,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
 
         PluginComponentSpecification spec = (PluginComponentSpecification) parent;
 
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-        String id = getIdentifier();
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();        
 
         try
         {

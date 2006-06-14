@@ -38,7 +38,7 @@ public class PluginPageDeclaration extends BaseSpecification
 
     public PluginPageDeclaration(String name, String resourcePath, Location location)
     {
-        super(BaseSpecification.PAGE_DECLARATION);
+        super(SpecType.PAGE_DECLARATION);
         setIdentifier(name);
         fResourcePath = resourcePath;
         setLocation(location);

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.spindle.core.IProblemPeristManager;
+import net.sf.spindle.core.IProblemPersistManager;
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.TapestryCore;
 import net.sf.spindle.core.parser.IDOMModelSource;
@@ -121,7 +121,7 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     protected IResourceRoot classpathRoot;
 
-    protected IProblemPeristManager problemPersister;
+    protected IProblemPersistManager problemPersister;
 
     protected boolean validateWebXML;
 

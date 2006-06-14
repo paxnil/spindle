@@ -119,10 +119,10 @@ public class ImplMessages
                 .getExtendedId(), parameterName, component.getExtendedId());
     }
 
-    public static String missingComponentSpec(IComponent component, Collection ids)
+    public static String missingComponentSpec(IComponent component, Collection<String> ids)
     {
         StringBuffer buffer = new StringBuffer();
-        List idList = new ArrayList(ids);
+        List<String> idList = new ArrayList<String>(ids);
         int count = idList.size();
 
         for (int i = 0; i < count; i++)

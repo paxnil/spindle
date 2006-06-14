@@ -35,7 +35,7 @@ public class PluginInjectSpecification extends BaseSpecification implements Inje
     
     public PluginInjectSpecification()
     {
-        super(BaseSpecification.INJECT);       
+        super(SpecType.INJECT);       
     }
 
     /**

@@ -39,7 +39,7 @@ public class PluginComponentTypeDeclaration extends DescribableSpecification
 
     public PluginComponentTypeDeclaration(String id, String resourcePath, Location location)
     {
-        super(BaseSpecification.COMPONENT_TYPE_DECLARATION);
+        super(SpecType.COMPONENT_TYPE_DECLARATION);
         setIdentifier(id);
         fResourcePath = resourcePath;
         setLocation(location);

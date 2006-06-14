@@ -32,7 +32,7 @@ public abstract class BaseSpecLocatable extends BasePropertyHolder
 
     Resource fSpecificationLocation;
 
-  public BaseSpecLocatable(int type)
+  public BaseSpecLocatable(SpecType type)
   {
     super(type);
   }

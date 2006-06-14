@@ -56,11 +56,11 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      * A List of {@link IBeanInitializer}.
      */
 
-    protected List fInitializers;
+    protected List<IBeanInitializer> fInitializers;
 
     public PluginBeanSpecification()
     {
-        super(BaseSpecification.BEAN_SPEC);
+        super(SpecType.BEAN_SPEC);
     }
 
     public PluginBeanSpecification(String className, BeanLifecycle lifecycle)
@@ -98,7 +98,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
     public void addInitializer(IBeanInitializer initializer)
     {
         if (fInitializers == null)
-            fInitializers = new ArrayList();
+            fInitializers = new ArrayList<IBeanInitializer>();
 
         fInitializers.add(initializer);
     }

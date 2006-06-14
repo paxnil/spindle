@@ -42,7 +42,7 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
 
     public PluginApplicationSpecification()
     {
-        super(BaseSpecification.APPLICATION_SPEC);
+        super(SpecType.APPLICATION_SPEC); 
     }
 
     /*

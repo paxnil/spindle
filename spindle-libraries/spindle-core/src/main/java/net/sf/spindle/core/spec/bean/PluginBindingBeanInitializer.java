@@ -18,7 +18,7 @@ __Geoffrey Longman____. All Rights Reserved.
 
 Contributor(s): __glongman@gmail.com___.
 */
-import net.sf.spindle.core.spec.BaseSpecification;
+import net.sf.spindle.core.spec.SpecType;
 
 /**
  * @author Administrator TODO To change the template for this generated type comment go to Window -
@@ -29,7 +29,7 @@ public class PluginBindingBeanInitializer extends AbstractPluginBeanInitializer
 
     public PluginBindingBeanInitializer()
     {
-        super(BaseSpecification.BINDING_BEAN_INIT);
+        super(SpecType.BINDING_BEAN_INIT);
     }
 
     /**

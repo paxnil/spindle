@@ -39,10 +39,10 @@ public class PluginBindingSpecification extends DescribableSpecification impleme
 
     public PluginBindingSpecification()
     {
-        super(BaseSpecification.BINDING_SPEC);
+        super(SpecType.BINDING_SPEC);
     }
 
-    protected PluginBindingSpecification(int type)
+    protected PluginBindingSpecification(SpecType type)
     {
         super(type);
     }

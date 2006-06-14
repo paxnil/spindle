@@ -44,7 +44,7 @@ public abstract class BasePropertyHolder extends DescribableSpecification
 	/**
 	 * 
 	 */
-	public BasePropertyHolder(int type) {
+	public BasePropertyHolder(SpecType type) {
 		super(type);
 
 	}
