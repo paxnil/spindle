@@ -30,16 +30,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import net.sf.spindle.core.ITapestryProject;
 import net.sf.spindle.core.TapestryCore;
-import net.sf.spindle.core.build.State;
+import net.sf.spindle.core.builder.EclipseBuildInfrastructure.EclipseState;
 import net.sf.spindle.core.eclipse.TapestryCorePlugin;
 import net.sf.spindle.core.eclipse.TapestryProject;
 import net.sf.spindle.core.spec.BaseSpecification;
+import net.sf.spindle.core.spec.PluginComponentSpecification;
 import net.sf.spindle.core.util.Assert;
 import net.sf.spindle.core.util.eclipse.EclipsePluginUtils;
 import net.sf.spindle.core.util.eclipse.Markers;
@@ -49,6 +49,7 @@ import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -58,7 +59,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-
 /**
  * The <code>TapestryArtifactManager</code> manages all the Tapestry Artifacts in the workspace.
  * The single instance of <code>TapestryArtifactManager</code> is available from the static method
@@ -67,24 +67,21 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
  * 
  * @author glongman@gmail.com
  */
-public class TapestryArtifactManager 
+public class TapestryArtifactManager
 {
 
     static final Object MANAGER_JOB_FAMILY = new Object();
 
-    static private TapestryArtifactManager instance = new TapestryArtifactManager();
+    static private TapestryArtifactManager INSTANCE = new TapestryArtifactManager();
 
     static public final TapestryArtifactManager getTapestryArtifactManager()
     {
-
-        return instance;
+        return INSTANCE;
     }
 
     private final ILock fNonJobBuildLock = Platform.getJobManager().newLock();
 
-    Map fProjectBuildStates = new HashMap();
-
-    List fTemplateExtensionListeners;
+    private Map<IProject, EclipseState> fProjectBuildStates = new HashMap<IProject, EclipseState>();
 
     private TapestryArtifactManager()
     {
@@ -94,7 +91,7 @@ public class TapestryArtifactManager
     /**
      * Sets the last built state for the given project, or null to reset it.
      */
-    public void setLastBuildState(IProject project, Object state)
+    public void setLastBuildState(IProject project, EclipseState state)
     {
         if (!EclipsePluginUtils.hasTapestryNature(project))
             return;
@@ -171,8 +168,8 @@ public class TapestryArtifactManager
         getLastBuildState(project, true);
     }
 
-    //may block if a build is indicated
-    public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired)
+    // may block if a build is indicated
+    public synchronized EclipseState getLastBuildState(IProject project, boolean buildIfRequired)
     {
         if (project == null)
             return null;
@@ -180,7 +177,7 @@ public class TapestryArtifactManager
         if (!EclipsePluginUtils.hasTapestryNature(project))
             return null;
 
-        Object state = getProjectState(project);
+        EclipseState state = getProjectState(project);
         if (state == null && (buildIfRequired && canBuild(project)))
         {
             try
@@ -206,19 +203,14 @@ public class TapestryArtifactManager
 
     // the fsking hashcode on IProjects is never the same twice!
 
-    private Object getProjectState(IProject project)
+    private EclipseState getProjectState(IProject project)
     {
         return fProjectBuildStates.get(project.getFullPath());
     }
 
-    private void setProjectState(IProject project, Object state)
+    private void setProjectState(IProject project, EclipseState state)
     {
-        fProjectBuildStates.put(project.getFullPath(), state);
-    }
-
-    private void removeProjectState(IProject project)
-    {
-        fProjectBuildStates.remove(project.getFullPath());
+        fProjectBuildStates.put(project, state);
     }
 
     private void buildStateIfPossible(final IProject project) throws CoreException
@@ -233,12 +225,12 @@ public class TapestryArtifactManager
 
         Job buildJob = findBuildJob(project);
         try
-        {            
-                buildJob.join();
+        {
+            buildJob.join();
         }
         catch (InterruptedException e)
         {
-            //eat it
+            // eat it
         }
     }
 
@@ -270,11 +262,12 @@ public class TapestryArtifactManager
         return getTemplateMap(project, true);
     }
 
-    public Map getTemplateMap(IProject project, boolean buildIfRequired)
+    public Map<IStorage, PluginComponentSpecification> getTemplateMap(IProject project,
+            boolean buildIfRequired)
     {
-        State state = (State) getLastBuildState(project, buildIfRequired);
+        EclipseState state = (EclipseState) getLastBuildState(project, buildIfRequired);
         if (state != null)
-            return state.fTemplateMap;
+            return state.templateMap;
         return null;
     }
 
@@ -283,14 +276,15 @@ public class TapestryArtifactManager
         fProjectBuildStates.clear();
     }
 
-    public Map getSpecMap(IProject project)
+    public Map<IStorage, ? extends BaseSpecification> getSpecMap(IProject project)
     {
         return getSpecMap(project, true);
     }
 
-    public Map getSpecMap(IProject project, boolean buildIfRequired)
+    public Map<IStorage, ? extends BaseSpecification> getSpecMap(IProject project,
+            boolean buildIfRequired)
     {
-        State state = (State) getLastBuildState(project, buildIfRequired);
+        EclipseState state = getLastBuildState(project, buildIfRequired);
         if (state != null)
             return state.getSpecificationMap();
         return null;
@@ -303,18 +297,18 @@ public class TapestryArtifactManager
 
     public INamespace getProjectNamespace(IProject project, boolean buildIfRequired)
     {
-        State state = (State) getLastBuildState(project, buildIfRequired);
+        EclipseState state = getLastBuildState(project, buildIfRequired);
         if (state != null)
-            return state.fPrimaryNamespace;
+            return state.primaryNamespace;
         return null;
     }
 
     public IPropertySource getPropertySource(ITapestryProject tproject)
     {
         IProject project = ((TapestryProject) tproject).getProject();
-        State state = (State) getLastBuildState(project, false);
+        EclipseState state = getLastBuildState(project, false);
         if (state != null)
-            return state.fWebAppDescriptor;
+            return state.webAppDescriptor;
         return null;
     }
 
@@ -325,9 +319,9 @@ public class TapestryArtifactManager
 
     public INamespace getFrameworkNamespace(IProject project, boolean buildIfRequired)
     {
-        State state = (State) getLastBuildState(project, buildIfRequired);
+        EclipseState state = getLastBuildState(project, buildIfRequired);
         if (state != null)
-            return state.fFrameworkNamespace;
+            return state.frameworkNamespace;
         return null;
     }
 
@@ -338,43 +332,41 @@ public class TapestryArtifactManager
      * @param string
      * @return the Specification objects that refer to the type.
      */
-    public List findTypeRefences(IProject project, String fullyQualifiedTypeName)
+    public List<? extends BaseSpecification> findTypeRefences(IProject project,
+            String fullyQualifiedTypeName)
     {
         Assert.isNotNull(project);
         if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.trim().length() == 0)
-            return Collections.EMPTY_LIST;
-        State buildState = (State) getLastBuildState(project, false);
+            return Collections.emptyList();
+        EclipseState buildState = getLastBuildState(project, false);
         if (buildState == null)
-            return Collections.EMPTY_LIST;
-        List result = new ArrayList();
-        Map specMap = buildState.getSpecificationMap();
-        for (Iterator iter = specMap.keySet().iterator(); iter.hasNext();)
+            return Collections.emptyList();
+        List<BaseSpecification> result = new ArrayList<BaseSpecification>();
+        Map<IStorage, ? extends BaseSpecification> specMap = buildState.getSpecificationMap();
+        for (IStorage key : specMap.keySet())
         {
-            Object key = iter.next();
-            BaseSpecification spec = (BaseSpecification) specMap.get(key);
-            if (spec != null)
+            BaseSpecification spec = specMap.get(key);
+            if (spec == null)
+                continue;
+            switch (spec.getSpecificationType())
             {
-
-                switch (spec.getSpecificationType())
-                {
-                    case BaseSpecification.APPLICATION_SPEC:
-                        String engineSpec = ((IApplicationSpecification) spec).getEngineClassName();
-                        if (engineSpec != null && engineSpec.equals(fullyQualifiedTypeName))
-                            result.add(spec);
-                        break;
-                    case BaseSpecification.COMPONENT_SPEC:
-                        String componentSpec = ((IComponentSpecification) spec)
-                                .getComponentClassName();
-                        if (componentSpec != null && componentSpec.equals(fullyQualifiedTypeName))
-                            result.add(spec);
-                        break;
-
-                    default:
-                        break;
-                }
+                case APPLICATION_SPEC:
+                    String engineClassname = ((IApplicationSpecification) spec)
+                            .getEngineClassName();
+                    if (engineClassname != null && engineClassname.equals(fullyQualifiedTypeName))
+                        result.add(spec);
+                    break;
+                case COMPONENT_SPEC:
+                    String componentClassname = ((IComponentSpecification) spec)
+                            .getComponentClassName();
+                    if (componentClassname != null
+                            && componentClassname.equals(fullyQualifiedTypeName))
+                        result.add(spec);
+                    break;
+                default:
+                    break;
             }
         }
         return result;
     }
-
 }

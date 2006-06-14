@@ -106,7 +106,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
             return false;
         lastState = infrastructure.getLastState();
         projectPropertySource = infrastructure
-                .installBasePropertySource(lastState.fWebAppDescriptor);
+                .installBasePropertySource(lastState.webAppDescriptor);
 
         // TODO - this is not right - template extension is configurable
         final List knownTapestryExtensions = Arrays
@@ -127,10 +127,10 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
                     IPath path = resource.getFullPath();
                     String extension = path.getFileExtension();
 
-                    if (lastState.fSeenTemplateExtensions.contains(extension))
+                    if (lastState.seenTemplateExtensions.contains(extension))
                         throw new NeedToBuildException();
 
-                    if (lastState.fJavaDependencies.contains(resource)
+                    if (lastState.javaTypeDependencies.contains(resource)
                             || knownTapestryExtensions.contains(extension))
                     {
                         throw new NeedToBuildException();
@@ -147,12 +147,12 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
                         if (element == null)
                             return true;
                         if (element instanceof IPackageFragmentRoot
-                                && lastState.fMissingJavaTypes.contains(name))
+                                && lastState.missingJavaTypes.contains(name))
                         {
                             throw new NeedToBuildException();
                         }
                         else if (element instanceof IPackageFragment
-                                && lastState.fMissingJavaTypes
+                                && lastState.missingJavaTypes
                                         .contains(((IPackageFragment) element).getElementName()
                                                 + "." + name))
                         {
@@ -282,7 +282,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
     protected boolean hasClasspathChanged()
     {
         IClasspathEntry[] currentEntries = (IClasspathEntry[]) infrastructure.getClasspathMemento();
-        IClasspathEntry[] lastStateEntries = (IClasspathEntry[]) lastState.fLastKnownClasspath;
+        IClasspathEntry[] lastStateEntries = (IClasspathEntry[]) lastState.classpathMemento;
         if (currentEntries.length != lastStateEntries.length)
             return true;
 
@@ -321,7 +321,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
         else
         {
             // here we check to see if there is an automagic app spec.
-            ICoreNamespace last = lastState.fPrimaryNamespace;
+            ICoreNamespace last = lastState.primaryNamespace;
             if (last == null)
                 return true;
 
@@ -412,13 +412,13 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
     public void saveState()
     {
         State newState = new State();
-        newState.copyFrom(lastState, infrastructure);
-        newState.fJavaDependencies = foundTypes;
-        newState.fMissingJavaTypes = missingTypes;
-        newState.fTemplateMap = templateMap;
-        newState.fFileSpecificationMap = fileSpecificationMap;
+        newState.copyAndAdvanceBuildNumber(lastState, infrastructure);
+        newState.javaTypeDependencies = foundTypes;
+        newState.missingJavaTypes = missingTypes;
+        newState.templateMap = templateMap;
+        newState.fileSpecificationMap = fileSpecificationMap;
         //FIXME newState.fPrimaryNamespace = appNamespace;
-        newState.fSeenTemplateExtensions = seenTemplateExtensions;
+        newState.seenTemplateExtensions = seenTemplateExtensions;
         //FIXME newState.fCleanTemplates = cleanTemplates;
 
         infrastructure.persistState(newState);

@@ -40,6 +40,7 @@ import net.sf.spindle.core.TapestryCoreException;
 import net.sf.spindle.core.build.AbstractBuild;
 import net.sf.spindle.core.build.AbstractBuildInfrastructure;
 import net.sf.spindle.core.build.BuilderException;
+import net.sf.spindle.core.build.FullBuild;
 import net.sf.spindle.core.build.State;
 import net.sf.spindle.core.build.WebXMLScanner;
 import net.sf.spindle.core.eclipse.EclipseMessages;
@@ -58,6 +59,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -81,6 +83,21 @@ import org.eclipse.jdt.internal.core.JavaProject;
 public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 {
 
+    public static class EclipseState extends State<IStorage>
+    {
+
+        public EclipseState()
+        {
+            super();
+        }
+
+        public EclipseState(AbstractBuildInfrastructure infrastructure)
+        {
+            super(infrastructure);
+        }
+    }
+
+   
     private static String PACKAGE_CACHE = "PACKAGE_CACHE";
 
     private static String STORAGE_CACHE = "STORAGE_CACHE";
@@ -112,15 +129,15 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         ((State) state).write(out);
     }
 
-    IProject currentIProject;
+    private IProject currentIProject;
 
-    IJavaProject javaProject;
+    private IJavaProject javaProject;
 
-    IWorkspaceRoot workspaceRoot;
+    private IWorkspaceRoot workspaceRoot;
 
-    IClasspathEntry[] classpathEntries;
+    private IClasspathEntry[] classpathEntries;
 
-    IResourceDelta fDelta;
+    private IResourceDelta fDelta;
 
     private List<String> excludedFileNames;
 
@@ -150,16 +167,6 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         IClasspathEntry[] result = new IClasspathEntry[source.length];
         System.arraycopy(source, 0, result, 0, source.length);
         return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see core.builder.AbstractBuildInfrastructure#createWebXMLScanner()
-     */
-    public WebXMLScanner createWebXMLScanner(AbstractBuild build)
-    {
-        return new EclipseWebXMLScanner(build);
     }
 
     /*
@@ -282,7 +289,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     {
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
                 currentIProject,
-                state);
+                (EclipseState) state);
     }
 
     public boolean projectSupportsAnnotations()
@@ -324,6 +331,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     @Override
     protected AbstractBuild createIncrementalBuild()
     {
+        @SuppressWarnings("unused")
+        IResourceDelta delta = fDelta;
         return null; // FIXME when incremental is fixed.
     }
 
@@ -334,7 +343,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
      */
     protected void initialize()
     {
-        problemPersister = new Markers();
+        problemPersister = Markers.getInstance();
 
         // is it a java project at all?
         try
@@ -445,7 +454,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         }
 
         // tapestry must be on the classpath!
-        if (tapestryProject.findType(CoreMessages.getTapestryServletClassname())== null)
+        if (tapestryProject.findType(CoreMessages.getTapestryServletClassname()) == null)
             throw new BuilderException(CoreMessages.tapestryJarsMissing());
 
         // the context root must exist
@@ -456,8 +465,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
         // web.xml must exist in the context at the expected place.
         if (!webXML.exists())
-            throw new BuilderException(CoreMessages.missingWebXMLFile(
-                    webXML));
+            throw new BuilderException(CoreMessages.missingWebXMLFile(webXML));
 
         return true;
     }
@@ -524,6 +532,28 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             }
             return true;
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.build.AbstractBuildInfrastructure#createEmptyState()
+     */
+    @Override
+    public State createEmptyState()
+    {
+        return new EclipseState(this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.spindle.core.build.AbstractBuildInfrastructure#createWebXMLScanner(net.sf.spindle.core.build.FullBuild)
+     */
+    @Override
+    public WebXMLScanner createWebXMLScanner(FullBuild build)
+    {
+        return new EclipseWebXMLScanner(build);
     }
 
 }
