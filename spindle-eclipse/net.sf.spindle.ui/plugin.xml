@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+	<extension
+		point="org.eclipse.wst.common.project.facet.core.facets">
+
+		<category id="spindle.tapestry.category">
+			<label>Tapestry</label>
+			<description>Adds Tapestry capabilities.</description>
+		</category>
+		
+		<project-facet id="spindle.tapestry.core">
+			<label>Tapestry Core</label>
+			<description>
+				Adds core Tapestry capabilities, any VM 1.4+
+			</description>
+			<category>spindle.tapestry.category</category>
+		</project-facet>
+		
+		<project-facet id="spindle.tapestry.core.annotations">
+			<label>Tapestry Core - Annotation Extensions</label>
+			<description>
+				Add Tapestry Annotation capabilities. Requires VM 1.5+
+			</description>
+			<category>spindle.tapestry.category</category>
+		</project-facet>
+
+		<project-facet-version facet="spindle.tapestry.core"
+			version="4.0">
+			<constraint>
+				<requires facet="jst.web" version="2.2,2.3,2.4" />
+				<requires facet="jst.java" version="[1.4"/>
+			</constraint>
+			<action type="INSTALL" id="spindle.tapestry.core.install">
+				<config-factory
+					class="net.sf.spindle.ui.config.TapestryCoreFacetInstallConfig$Factory" />
+				<delegate
+					class="net.sf.spindle.ui.config.TapestryCoreFacetInstallDelegate" />
+			</action>
+		</project-facet-version>
+
+
+
+		<project-facet-version facet="spindle.tapestry.core.annotations"
+			version="4.0">
+			<constraint>
+				<requires facet="spindle.tapestry.core" version="4.0" />
+				<requires facet="jst.java" version="[5.0"/>
+			</constraint>
+			<action type="INSTALL">
+				<delegate
+					class="net.sf.spindle.ui.config.TapestryAnnotationsFacetInstallDelegate" />
+			</action>
+		</project-facet-version>
+
+		<preset id="spindle.tapestry.basic.preset">
+			<label>Basic Tapestry Project</label>
+			<description>
+				Creates a web project with basic Tapestry functionality
+				(no Annotations or Portlets).
+			</description>
+			<facet id="jst.java" version="5.0" />
+			<facet id="jst.web" version="2.4" />
+			<facet id="spindle.tapestry.core" version="4.0" />
+		</preset>
+
+		<preset id="spindle.tapestry.annotations.preset">
+			<label>Extended Tapestry Project</label>
+			<description>
+				Creates a web project with basic Tapestry functionality
+				and Annotations (no Portlets).
+			</description>
+			<facet id="jst.java" version="5.0" />
+			<facet id="jst.web" version="2.4" />
+			<facet id="spindle.tapestry.core" version="4.0" />
+			<facet id="spindle.tapestry.core.annotations" version="4.0" />
+		</preset>
+
+	</extension>
+
+	<extension
+		point="org.eclipse.wst.common.project.facet.core.runtimes">
+		<supported>
+			<runtime-component any="true" />
+			<facet id="spindle.tapestry.core" />
+			<facet id="spindle.tapestry.core.annotations" />
+		</supported>
+	</extension>
+
+	<extension point="org.eclipse.wst.common.project.facet.ui.images">
+		<image facet="spindle.tapestry.core"
+			path="icons/application16.gif" />
+		<image facet="spindle.tapestry.core.annotations"
+			path="icons/application16.gif" />
+		<image category="spindle.tapestry.category"
+			path="icons/application16.gif" />
+	</extension>
+	<!-- 
+		<extension point="org.eclipse.wst.common.project.facet.ui.wizardPages">
+		<wizard-pages action="formgen.core.install">
+		<page class="com.formgen.eclipse.FormGenCoreFacetInstallPage"/>
+		</wizard-pages>
+		</extension>  
+	-->
+
+</plugin>

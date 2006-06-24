@@ -1,25 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="spindle.core"
-   name="Spindle Core Plugin"
-   version="4.0.0"
-   provider-name="Geoffrey Longman"
-   class="com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin">
+<plugin>
 
-   <runtime>
-   </runtime>
-   <requires>
-      <import plugin="org.eclipse.core.resources" export="true"/>
-  
-      
-      <import plugin="org.eclipse.ui.ide" export="true"/>
-      <import plugin="org.eclipse.jdt.core" export="true"/>
-      
-      <import plugin="org.eclipse.core.runtime" export="true"/>
-       <import plugin="org.eclipse.ui" export="true"/>
-   </requires>
-   <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
+     <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
    <extension-point id="incrementalBuildVeto" name="Option to veto an incremental build" schema="schema/incrementalBuildVeto.exsd"/>
    <extension-point id="beanSpecificationValidators" name="Contributed Validators for Tapestry Bean Specs" schema="schema/beanSpecificationValidators.exsd"/>
    <extension-point id="projectMetaDataLocator" name="Web Project Metadata Locator" schema="schema/projectMetaDataLocator.exsd"/>
@@ -50,7 +33,7 @@
    
    <extension
          point="org.eclipse.core.runtime.preferences">
-      <initializer class="com.iw.plugins.spindle.core.eclipse.PreferenceInitializer"/>
+      <initializer class="net.sf.spindle.core.eclipse.PreferenceInitializer"/>
    </extension>
 
    <extension
@@ -59,7 +42,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="com.iw.plugins.spindle.core.eclipse.TapestryProject">
+               class="net.sf.spindle.core.eclipse.TapestryProject">
          </run>
       </runtime>
       <requires-nature
@@ -72,7 +55,7 @@
          point="org.eclipse.core.resources.builders">
       <builder>
          <run
-               class="com.iw.plugins.spindle.core.builder.TapestryBuilder">
+               class="net.sf.spindle.core.builder.TapestryBuilder">
          </run>
       </builder>
    </extension>
@@ -126,7 +109,7 @@
    <extension
          point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
-            class="com.iw.plugins.spindle.core.classpath.CoreClasspathContainerInitializer"
+            class="net.sf.spindle.core.classpath.CoreClasspathContainerInitializer"
             id="com.iw.plugins.spindle.core.TAPESTRY_FRAMEWORK">
       </classpathContainerInitializer>
    </extension>
@@ -136,21 +119,21 @@
       <factory
             adaptableType="org.eclipse.core.resources.IResource"
             class="net.sf.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
-         <adapter type="core.ITapestryProject"/>
+         <adapter type="net.sf.spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
       </factory>
       <factory
             adaptableType="org.eclipse.core.resources.IStorage"
             class="net.sf.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
-         <adapter type="core.ITapestryProject"/>
+         <adapter type="net.sf.spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
       </factory>      
        <factory
             adaptableType="org.eclipse.ui.IFileEditorInput"
             class="net.sf.spindle.core.eclipse.adapters.SpindleProjectAdapterFactory">
-         <adapter type="core.ITapestryProject"/>
+         <adapter type="net.sf.spindle.core.ITapestryProject"/>
          <adapter type="org.eclipse.core.resources.IProject"/>
          <adapter type="org.eclipse.jdt.core.IJavaProject"/>
       </factory>
