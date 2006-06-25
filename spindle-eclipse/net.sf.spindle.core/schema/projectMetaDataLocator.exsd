@@ -57,7 +57,7 @@
                   a class that implements &lt;code&gt;net.sf.spindle.core.IProjectMetadataLocator&lt;/code&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="net.sf.spindle.core.IProjectMetadataLocator"/>
+                  <meta.attribute kind="java" basedOn="net.sf.spindle.core.metadata.IProjectMetadataLocator"/>
                </appInfo>
             </annotation>
          </attribute>

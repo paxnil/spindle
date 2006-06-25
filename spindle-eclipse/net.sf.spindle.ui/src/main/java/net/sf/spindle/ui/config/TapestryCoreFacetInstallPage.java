@@ -8,12 +8,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.common.project.facet.ui.AbstractFacetWizardPage;
 
-public final class FormGenCoreFacetInstallPage extends AbstractFacetWizardPage
+public final class TapestryCoreFacetInstallPage extends AbstractFacetWizardPage
 {
     private TapestryCoreFacetInstallConfig config;
     private Text urlPatternTextField;
 
-    public FormGenCoreFacetInstallPage()
+    public TapestryCoreFacetInstallPage()
     {
         super( "formgen.core.facet.install.page" );
 
@@ -32,7 +32,7 @@ public final class FormGenCoreFacetInstallPage extends AbstractFacetWizardPage
 
         this.urlPatternTextField = new Text( composite, SWT.BORDER );
         this.urlPatternTextField.setLayoutData( gdhfill() );
-        this.urlPatternTextField.setText( this.config.getUrlPattern() );
+        this.urlPatternTextField.setText( this.config.getApplicationName() );
 
         setControl( composite );
     }
@@ -44,7 +44,7 @@ public final class FormGenCoreFacetInstallPage extends AbstractFacetWizardPage
 
     public void transferStateToConfig()
     {
-        this.config.setUrlPattern( this.urlPatternTextField.getText() );
+        this.config.setApplicationName( this.urlPatternTextField.getText() );
     }
 
     private static GridData gdhfill()

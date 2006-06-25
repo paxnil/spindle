@@ -9,7 +9,7 @@
 			<label>Tapestry</label>
 			<description>Adds Tapestry capabilities.</description>
 		</category>
-		
+
 		<project-facet id="spindle.tapestry.core">
 			<label>Tapestry Core</label>
 			<description>
@@ -17,7 +17,7 @@
 			</description>
 			<category>spindle.tapestry.category</category>
 		</project-facet>
-		
+
 		<project-facet id="spindle.tapestry.core.annotations">
 			<label>Tapestry Core - Annotation Extensions</label>
 			<description>
@@ -26,17 +26,32 @@
 			<category>spindle.tapestry.category</category>
 		</project-facet>
 
+		<project-facet id="spindle.tapestry.core.portlets">
+			<label>Tapestry Core - Portlet Extensions</label>
+			<description>
+				Add Tapestry Portlet capabilities.
+			</description>
+			<category>spindle.tapestry.category</category>
+		</project-facet>
+
 		<project-facet-version facet="spindle.tapestry.core"
 			version="4.0">
 			<constraint>
 				<requires facet="jst.web" version="2.2,2.3,2.4" />
-				<requires facet="jst.java" version="[1.4"/>
+				<requires facet="jst.java" version="[1.4" />
 			</constraint>
 			<action type="INSTALL" id="spindle.tapestry.core.install">
 				<config-factory
 					class="net.sf.spindle.ui.config.TapestryCoreFacetInstallConfig$Factory" />
 				<delegate
 					class="net.sf.spindle.ui.config.TapestryCoreFacetInstallDelegate" />
+			</action>
+			<action type="UNINSTALL"
+				id="spindle.tapestry.core.uninstall">
+				<!-- <config-factory
+					class="net.sf.spindle.ui.config.TapestryCoreFacetUninstallConfig$Factory" />-->
+				<delegate
+					class="net.sf.spindle.ui.config.TapestryCoreFacetUninstallDelegate" />
 			</action>
 		</project-facet-version>
 
@@ -46,16 +61,35 @@
 			version="4.0">
 			<constraint>
 				<requires facet="spindle.tapestry.core" version="4.0" />
-				<requires facet="jst.java" version="[5.0"/>
+				<requires facet="jst.java" version="[5.0" />
 			</constraint>
 			<action type="INSTALL">
 				<delegate
 					class="net.sf.spindle.ui.config.TapestryAnnotationsFacetInstallDelegate" />
 			</action>
+			<action type="UNINSTALL">
+				<delegate
+					class="net.sf.spindle.ui.config.TapestryAnnotationsFacetUninstallDelegate" />
+			</action>
+		</project-facet-version>
+
+		<project-facet-version facet="spindle.tapestry.core.portlets"
+			version="4.0">
+			<constraint>
+				<requires facet="spindle.tapestry.core" version="4.0" />
+			</constraint>
+			<action type="INSTALL">
+				<delegate
+					class="net.sf.spindle.ui.config.TapestryPortletFacetInstallDelegate" />
+			</action>
+			<action type="UNINSTALL">
+				<delegate
+					class="net.sf.spindle.ui.config.TapestryPortletFacetUninstallDelegate" />
+			</action>
 		</project-facet-version>
 
 		<preset id="spindle.tapestry.basic.preset">
-			<label>Basic Tapestry Project</label>
+			<label>Tapestry Project</label>
 			<description>
 				Creates a web project with basic Tapestry functionality
 				(no Annotations or Portlets).
@@ -66,7 +100,7 @@
 		</preset>
 
 		<preset id="spindle.tapestry.annotations.preset">
-			<label>Extended Tapestry Project</label>
+			<label>Tapestry Project (Annotations)</label>
 			<description>
 				Creates a web project with basic Tapestry functionality
 				and Annotations (no Portlets).
@@ -93,6 +127,8 @@
 			path="icons/application16.gif" />
 		<image facet="spindle.tapestry.core.annotations"
 			path="icons/application16.gif" />
+		<image facet="spindle.tapestry.core.portlets"
+			path="icons/application16.gif" />
 		<image category="spindle.tapestry.category"
 			path="icons/application16.gif" />
 	</extension>
@@ -103,5 +139,9 @@
 		</wizard-pages>
 		</extension>  
 	-->
-
+	<extension point="net.sf.spindle.core.projectMetaDataLocator">
+		<metadataLocator
+			locator="net.sf.spindle.ui.config.metadata.DynamicWebProjectProjectMetaDataLocator"
+			natureId="org.eclipse.wst.common.project.facet.core.nature" />
+	</extension>
 </plugin>

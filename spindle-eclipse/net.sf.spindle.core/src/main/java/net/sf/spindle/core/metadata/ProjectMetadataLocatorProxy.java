@@ -16,8 +16,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 
-
-
 /**
  * Instances of this class represent metadata locators found to be contributed via the locators
  * extension point. Currently, the concrete locator is loaded when the proxy is requested to do
@@ -36,8 +34,8 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
         result.fElement = element;
         if ("metadataLocator".equals(element.getName())) //$NON-NLS-1$
             return result;
-        TapestryCore.log(EclipseMessages.projectMetaDataUnexpectedElement( element
-                .getContributor().getName(), element.getName()));
+        TapestryCore.log(EclipseMessages.projectMetaDataUnexpectedElement(element.getContributor()
+                .getName(), element.getName()));
         return null;
     }
 
@@ -50,11 +48,9 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
      */
     private IProjectMetadataLocator fLocator;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see core.metadata.IProjectMetadataLocator#getWebContextRootFolder(org.eclipse.core.resources.IProject,
-     *      java.lang.String)
+   
+    /* (non-Javadoc)
+     * @see net.sf.spindle.core.metadata.IProjectMetadataLocator#getWebContextRootFolder(java.lang.String, org.eclipse.core.resources.IProject)
      */
     public IFolder getWebContextRootFolder(String natureId, IProject project) throws CoreException
     {
@@ -74,7 +70,7 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
             if (fLocator != null || fLoaded)
                 return fLocator;
             // String bundleId = fElement.getDeclaringExtension().getNamespaceIdentifier();
-            //set to true to prevent repeated attempts to load a broken locator
+            // set to true to prevent repeated attempts to load a broken locator
             fLoaded = true;
         }
         try
@@ -100,13 +96,12 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
 
     String getNatureId()
     {
-        //cannot return null because it can cause startup failure
+        // cannot return null because it can cause startup failure
         String result = fElement.getAttribute("natureId"); //$NON-NLS-1$
         if (result != null)
             return result;
-        TapestryCore.log(CoreMessages.projectMetaDataMissingNatureId(               
-                fElement.getDeclaringExtension().getNamespaceIdentifier(),
-                fElement.getName()));
+        TapestryCore.log(CoreMessages.projectMetaDataMissingNatureId(fElement
+                .getDeclaringExtension().getNamespaceIdentifier(), fElement.getName()));
         return ""; //$NON-NLS-1$
     }
 }

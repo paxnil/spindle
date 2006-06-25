@@ -25,22 +25,19 @@
  * ***** END LICENSE BLOCK ***** */
 package net.sf.spindle.ui.config;
 
-import net.sf.spindle.core.eclipse.TapestryCorePlugin;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-public class TapestryAnnotationsFacetInstallDelegate implements IDelegate
+public class TapestryPortletFacetUninstallDelegate implements IDelegate
 {
     public void execute(IProject project, IProjectFacetVersion version, Object config,
             IProgressMonitor monitor)
 
     throws CoreException
-
     {
-        ConfigFacetUtils.installJars(project, TapestryCorePlugin.getDefault().getBundle(), ConfigFacetUtils.ANNOTATION_FILES, monitor);
+        ConfigFacetUtils.uninstallJars(project, ConfigFacetUtils.PORTLET_FILES, monitor);
     }
 }

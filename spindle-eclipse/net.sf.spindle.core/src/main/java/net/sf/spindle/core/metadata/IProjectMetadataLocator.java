@@ -49,7 +49,5 @@ public interface IProjectMetadataLocator
      *         metadata can be found.
      * @throws CoreException
      */
-    public IFolder getWebContextRootFolder(String natureId, IProject project) throws CoreException;
-
-    
+    IFolder getWebContextRootFolder(String natureId, IProject project) throws CoreException;   
 }

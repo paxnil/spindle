@@ -2,9 +2,6 @@
 <?eclipse version="3.0"?>
 <plugin>
 
-     <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
-   <extension-point id="incrementalBuildVeto" name="Option to veto an incremental build" schema="schema/incrementalBuildVeto.exsd"/>
-   <extension-point id="beanSpecificationValidators" name="Contributed Validators for Tapestry Bean Specs" schema="schema/beanSpecificationValidators.exsd"/>
    <extension-point id="projectMetaDataLocator" name="Web Project Metadata Locator" schema="schema/projectMetaDataLocator.exsd"/>
 
    <extension
