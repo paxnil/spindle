@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.editors.actions;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -39,7 +38,6 @@ import org.eclipse.ui.IEditorPart;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.editors.actions.BaseAction.ChooseLocationPopup;
 import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
 
 /**

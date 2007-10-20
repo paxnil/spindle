@@ -201,7 +201,7 @@ public class AbstractMethodsQuickFixProcessor implements IQuickFixProcessor
                 ITypeBinding[] parameterTypes = getParameterTypes(arguments);
                 if (parameterTypes != null)
                 {
-                    String sig = ASTResolving.getMethodSignature(methodName, parameterTypes);
+                    String sig = ASTResolving.getMethodSignature(methodName, parameterTypes, false);
 
                     if (ASTResolving.isUseableTypeInContext(
                             parameterTypes,
@@ -314,11 +314,9 @@ public class AbstractMethodsQuickFixProcessor implements IQuickFixProcessor
             else
             {
                 isInDifferentCU = true;
-                ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-    			astParser.setSource(getCompilationUnit());
-    			astParser.setResolveBindings(true);
-    			astRoot= (CompilationUnit) astParser.createAST(null);
-    			newTypeDecl= astRoot.findDeclaringNode(senderBinding.getKey());
+    			isInDifferentCU= true;
+    			astRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
+    			newTypeDecl= astRoot.findDeclaringNode(senderBinding);
             }
             if (newTypeDecl != null)
             {
@@ -357,11 +355,7 @@ public class AbstractMethodsQuickFixProcessor implements IQuickFixProcessor
             SimpleName newNameNode = getNewName(rewrite);
 
             decl.setConstructor(false);
-            decl.modifiers().addAll(
-                    ASTNodeFactory.newModifiers(ast, evaluateModifiers(targetTypeDecl)));
-
-            ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, decl
-                    .modifiers());
+            addNewModifiers(rewrite, targetTypeDecl, decl.modifiers());
 
             if (returnType != null)
                 decl.setReturnType2(returnType);

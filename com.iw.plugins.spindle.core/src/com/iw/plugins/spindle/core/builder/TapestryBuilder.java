@@ -314,7 +314,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             System.out.println("elapsed (ms) = " + (stop - BUILD_START));
             fDeferredActions.clear();
             cleanup();
-            TapestryCore.getDefault().buildOccurred();
+            TapestryCore.buildOccurred();
         }
         
         
@@ -340,7 +340,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         ArrayList projects = new ArrayList();
         try
         {
-            IClasspathEntry[] entries = ((JavaProject) jproject).getExpandedClasspath(true);
+            IClasspathEntry[] entries = ((JavaProject) jproject).getExpandedClasspath();
             for (int i = 0, length = entries.length; i < length; i++)
             {
                 IClasspathEntry entry = JavaCore.getResolvedClasspathEntry(entries[i]);

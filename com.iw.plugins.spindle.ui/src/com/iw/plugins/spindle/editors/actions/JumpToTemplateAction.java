@@ -33,10 +33,8 @@ import java.util.List;
 
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.Images;
@@ -45,7 +43,6 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**

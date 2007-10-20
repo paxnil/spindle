@@ -2,11 +2,9 @@ package com.iw.plugins.spindle.editors.actions;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.tapestry.IResourceLocation;
-import org.apache.tapestry.Tapestry;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IClassFile;
@@ -172,15 +170,7 @@ public abstract class BaseAction extends Action implements IEditorActionDelegate
 
     protected IType resolveType(IClassFile file)
     {
-        try
-        {
-            return (IType) file.getType();
-        }
-        catch (JavaModelException e)
-        {
-            UIPlugin.log(e);
-        }
-        return null;
+       return (IType) file.getType();        
     }
 
     protected int getDocumentOffset()
@@ -451,10 +441,11 @@ public abstract class BaseAction extends Action implements IEditorActionDelegate
                 public void keyPressed(KeyEvent e)
                 {
                     int keyCode = e.keyCode;
-                    int stateMask = e.stateMask;
+					// int stateMask = e.stateMask;
                     char character = e.character;
-                    int accelerator = stateMask
-                            | (keyCode != 0 ? keyCode : convertCharacter(character));
+					// int accelerator = stateMask
+					// | (keyCode != 0 ? keyCode
+					// : convertCharacter(character));
 
                     // System.out.println("\nPRESSED");
                     // printKeyEvent(e);
@@ -556,9 +547,9 @@ public abstract class BaseAction extends Action implements IEditorActionDelegate
                 {
                     int keyCode = e.keyCode;
                     int stateMask = e.stateMask;
-                    char character = e.character;
-                    int accelerator = stateMask
-                            | (keyCode != 0 ? keyCode : convertCharacter(character));
+					// char character = e.character;
+					// int accelerator = stateMask
+					// | (keyCode != 0 ? keyCode : convertCharacter(character));
 
                     // System.out.println("\nRELEASED");
                     // printKeyEvent(e);
