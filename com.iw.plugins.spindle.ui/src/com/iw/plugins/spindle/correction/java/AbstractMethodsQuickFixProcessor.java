@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -46,9 +44,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.swt.graphics.Image;
-
-import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 
 public class AbstractMethodsQuickFixProcessor implements IQuickFixProcessor
 {
@@ -319,11 +314,11 @@ public class AbstractMethodsQuickFixProcessor implements IQuickFixProcessor
             else
             {
                 isInDifferentCU = true;
-                ASTParser astParser = ASTParser.newParser(ASTProvider.AST_LEVEL);
-                astParser.setSource(getCompilationUnit());
-                astParser.setResolveBindings(true);
-                astRoot = (CompilationUnit) astParser.createAST(null);
-                newTypeDecl = astRoot.findDeclaringNode(senderBinding.getKey());
+                ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
+    			astParser.setSource(getCompilationUnit());
+    			astParser.setResolveBindings(true);
+    			astRoot= (CompilationUnit) astParser.createAST(null);
+    			newTypeDecl= astRoot.findDeclaringNode(senderBinding.getKey());
             }
             if (newTypeDecl != null)
             {

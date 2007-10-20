@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -211,7 +212,7 @@ public class PackageDialogField extends StringButtonField
         {
           IContainer folder = (IContainer) getPackageFragment().getUnderlyingResource();
 
-          boolean isComponent = nameField.getKind() == nameField.COMPONENT_NAME;
+          boolean isComponent = nameField.getKind() == AbstractNameField.COMPONENT_NAME;
           IFile file = folder.getFile(new Path(nameField.getTextValue()
               + (isComponent ? ".jwc" : ".page")));
           if (file.exists())
@@ -268,7 +269,7 @@ public class PackageDialogField extends StringButtonField
       {
         dialog.setInitialSelections(new Object[]{currentPackage});
       }
-      if (dialog.open() == dialog.OK)
+      if (dialog.open() == Window.OK)
       {
         return (IPackageFragment) dialog.getResult()[0];
       }

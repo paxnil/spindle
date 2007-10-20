@@ -75,7 +75,7 @@ public class JumpToApplicationSpecAction extends AbstractTapestryProjectAction
       UIPlugin.getDefault().getActiveWorkbenchWindow().getActivePage().bringToTop(editor);
     } else
     {
-      UIPlugin.getDefault().openTapestryEditor(storage);
+      UIPlugin.openTapestryEditor(storage);
     }
   }
 

@@ -39,6 +39,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -252,7 +253,7 @@ public class ComponentLocationChooserField extends StringButtonField
         null);
     dialog.setInitialSelections(new Object[]{selection});
     dialog.setFilter(new OutputDirFilter());
-    if (dialog.open() == dialog.OK)
+    if (dialog.open() == Window.OK)
     {
       Object[] results = dialog.getResult();
       if (results != null && results.length > 0)
@@ -358,7 +359,7 @@ public class ComponentLocationChooserField extends StringButtonField
     if (fResultLocation != null && fNameField != null)
     {
 
-      boolean isComponent = fNameField.getKind() == fNameField.COMPONENT_NAME;
+      boolean isComponent = fNameField.getKind() == AbstractNameField.COMPONENT_NAME;
       IFile file = fResultLocation.getFile(new Path(fNameField.getTextValue()
           + (isComponent ? ".jwc" : ".page")));
       if (file.exists())

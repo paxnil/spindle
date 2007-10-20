@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -228,7 +229,7 @@ public class RawTypeDialogField extends StringButtonField
       dialog.setMessage(hierarchyRoot == null ? message : message
           + " (extends/implements " + hierarchyRoot + ")");
 
-      if (dialog.open() == dialog.OK)
+      if (dialog.open() == Window.OK)
       {
         return (IType) dialog.getResult()[0]; //FirstResult();
       }

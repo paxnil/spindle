@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 
@@ -78,9 +79,12 @@ public class BuildJob extends Job
    */
   protected IStatus run(IProgressMonitor monitor)
   {
-    if (systemBundle.getState() == Bundle.STOPPING || !canBuild(fProject))
-      throw new OperationCanceledException();
-
+    
+    
+    if (systemBundle.getState() == Bundle.STOPPING || !canBuild(fProject))      
+      return Status.CANCEL_STATUS;
+    
+    
     try
     {
       fProject.build(
@@ -91,10 +95,10 @@ public class BuildJob extends Job
     } catch (CoreException e)
     {
       TapestryCore.log(e);
-    }
-    if (systemBundle.getState() == Bundle.STOPPING)
-      throw new OperationCanceledException();
-    return new SpindleStatus();
+    } 
+   
+    
+    return Status.CANCEL_STATUS;
   }
 
   private boolean canBuild(IProject project)

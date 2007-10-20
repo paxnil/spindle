@@ -44,6 +44,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
@@ -256,7 +257,7 @@ public class ContainerDialogField extends StringButtonField
     dialog.setInput(JavaCore.create(fWorkspaceRoot));
     dialog.setInitialSelection(initElement);
 
-    if (dialog.open() == dialog.OK)
+    if (dialog.open() == Window.OK)
     {
       Object element = dialog.getFirstResult();
       if (element instanceof IJavaProject)

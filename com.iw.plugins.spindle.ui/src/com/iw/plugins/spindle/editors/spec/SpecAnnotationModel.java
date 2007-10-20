@@ -326,7 +326,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
     
     TapestryArtifactManager manager = TapestryArtifactManager
         .getTapestryArtifactManager();
-    Map specs = manager.getSpecMap(project);
+    Map specs = manager.getSpecMap(project, false);
     if (specs != null)
     {
       return specs.get(file);

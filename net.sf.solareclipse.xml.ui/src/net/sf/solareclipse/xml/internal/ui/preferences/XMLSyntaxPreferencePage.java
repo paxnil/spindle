@@ -32,7 +32,6 @@ import net.sf.solareclipse.xml.ui.text.IXMLSyntaxConstants;
 import net.sf.solareclipse.xml.ui.text.XMLTextTools;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Plugin;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
@@ -67,6 +66,7 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+import org.osgi.framework.Bundle;
 
 
 /**
@@ -607,7 +607,7 @@ public class XMLSyntaxPreferencePage
 			AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT,
 			true);
 
-		Plugin plugin = Platform.getPlugin("org.eclipse.ui.editors"); //$NON-NLS-1$
+		Bundle plugin = Platform.getBundle("org.eclipse.ui.editors"); //$NON-NLS-1$
 		if (plugin instanceof AbstractUIPlugin) {
 			AbstractUIPlugin uiPlugin = (AbstractUIPlugin) plugin;
 			IPreferenceStore uiStore = uiPlugin.getPreferenceStore();
@@ -645,7 +645,7 @@ public class XMLSyntaxPreferencePage
 //		WorkbenchChainedTextFontFieldEditor
 //			.startPropagate(store, JFaceResources.TEXT_FONT);
 
-		plugin = Platform.getPlugin("org.eclipse.ui.workbench"); //$NON-NLS-1$
+		plugin = Platform.getBundle("org.eclipse.ui.workbench"); //$NON-NLS-1$
 		if (plugin instanceof AbstractUIPlugin) {
 			AbstractUIPlugin uiPlugin = (AbstractUIPlugin) plugin;
 			IPreferenceStore uiStore = uiPlugin.getPreferenceStore();

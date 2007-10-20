@@ -188,7 +188,7 @@ public class ProjectTemplatesPropertyPage extends PropertyPage
     status.addStatus(fPageTemplateSelector.validate());
     status.addStatus(fTapestryTemplateSelector.validate());
 
-    IStatus mostSevere = status.getMostSevere(status.getChildren());
+    IStatus mostSevere = SpindleStatus.getMostSevere(status.getChildren());
     if (!mostSevere.isOK())
     {
       if (fImport != null)

@@ -416,7 +416,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         IStorage storage = getStorage(getEditorInput());
         IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        Map specs = manager.getSpecMap(project);
+        Map specs = manager.getSpecMap(project, false);
         try
         {
             if (specs != null)

@@ -247,6 +247,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
             if (isWorthBuilding())
             {
+                fNotifier.checkCancel();
                 if (kind == FULL_BUILD)
                 {
                     buildAll();
@@ -289,11 +290,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         {
             TapestryCore.log(e);
             throw e;
-        }
-        catch (OperationCanceledException e)
-        {
-            throw e;
-        }
+        }       
         catch (RuntimeException e)
         {
             TapestryCore.log(e);
