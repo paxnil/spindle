@@ -36,6 +36,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -57,137 +58,137 @@ public class JarEntryFileUtil
 {
     static private final int start = "JarEntryFile[".length();
 
-    public static IStorage wrap(JarEntryFile entry)
-    {
-        Assert.isNotNull(entry);
-        return new JarEntryFileWrapper(entry);
-    }
+//    public static IStorage wrap(JarEntryFile entry)
+//    {
+//        Assert.isNotNull(entry);
+//        return new JarEntryFileWrapper(entry);
+//    }
+//
+//    public static IStorage wrap(IStorage storage)
+//    {
+//        return wrap(storage, false);
+//    }
+//
+//    public static IStorage wrap(IStorage storage, boolean mustBeJarEntryFile)
+//    {
+//        if (storage instanceof JarEntryFileWrapper)
+//            return storage;
+//
+//        if (storage instanceof JarEntryFile)
+//            return wrap((JarEntryFile) storage);
+//        if (mustBeJarEntryFile)
+//            return null;
+//        return storage;
+//    }
 
-    public static IStorage wrap(IStorage storage)
-    {
-        return wrap(storage, false);
-    }
+//    public static Object[] getNonJavaResources(IPackageFragment fragment) throws JavaModelException
+//    {
+//        try
+//        {
+//            Assert.isTrue(fragment.getKind() == IPackageFragmentRoot.K_BINARY);
+//            Object[] resources = fragment.getNonJavaResources();
+//            ArrayList result = new ArrayList();
+//            for (int i = 0; i < resources.length; i++)
+//            {
+//                result.add(new JarEntryFileWrapper((JarEntryFile) resources[i]));
+//            }
+//            return result.toArray();
+//        }
+//        catch (ClassCastException e)
+//        {
+//            StringBuffer buffer = new StringBuffer();
+//            buffer
+//                    .append("Class cast occured trying to cast to JarEntryFile. Exception message was: "
+//                            + e.getMessage());
+//            buffer.append("/n");
+//            buffer.append("The IPackageFragment was:\n" + fragment.getElementName());
+//            buffer.append("/n");
+//            buffer.append("The IPackageFragment toString():\n" + fragment.toString());
+//            buffer.append("/n");
+//            buffer.append("The non java resources of the frgament were:\n");
+//            Object[] resources = fragment.getNonJavaResources();
+//            for (int i = 0; i < resources.length; i++)
+//            {
+//                buffer.append("\t");
+//                buffer.append(resources[i].toString());
+//                buffer.append(", ");
+//                buffer.append(resources[i].getClass().getSimpleName());
+//                buffer.append("\n");
+//            }
+//            TapestryCore.log(buffer.toString(), e);
+//            throw e;
+//        }
+//    }
 
-    public static IStorage wrap(IStorage storage, boolean mustBeJarEntryFile)
-    {
-        if (storage instanceof JarEntryFileWrapper)
-            return storage;
+//    public static class JarEntryFileWrapper implements IStorage
+//    {
+//        JarEntryFile entry;
+//
+//        public JarEntryFileWrapper(JarEntryFile entry)
+//        {
+//            this.entry = entry;
+//        }
+//
+//        public InputStream getContents() throws CoreException
+//        {
+//            return entry.getContents();
+//        }
+//
+//        public IPath getFullPath()
+//        {
+//            return entry.getFullPath();
+//        }
+//
+//        public String getName()
+//        {
+//            return entry.getName();
+//        }
+//
+//        public boolean isReadOnly()
+//        {
+//            return entry.isReadOnly();
+//        }
+//
+//        public Object getAdapter(Class adapter)
+//        {
+//            return entry.getAdapter(adapter);
+//        }
+//
+//        public JarEntryFile getEntry()
+//        {
+//            return entry;
+//        }
+//
+//        public boolean equals(Object obj)
+//        {
+//            if (obj == null)
+//                return false;
+//
+//            if (!(obj instanceof JarEntryFileWrapper))
+//                return false;
+//
+//            return this.toString().equals(((JarEntryFileWrapper) obj).toString());
+//        }
+//
+//        public int hashCode()
+//        {
+//            return toString().hashCode();
+//        }
+//
+//        public String toString()
+//        {
+//            return entry.toString();
+//        }
+//    }
 
-        if (storage instanceof JarEntryFile)
-            return wrap((JarEntryFile) storage);
-        if (mustBeJarEntryFile)
-            return null;
-        return storage;
-    }
-
-    public static Object[] getNonJavaResources(IPackageFragment fragment) throws JavaModelException
-    {
-        try
-        {
-            Assert.isTrue(fragment.getKind() == IPackageFragmentRoot.K_BINARY);
-            Object[] resources = fragment.getNonJavaResources();
-            ArrayList result = new ArrayList();
-            for (int i = 0; i < resources.length; i++)
-            {
-                result.add(new JarEntryFileWrapper((JarEntryFile) resources[i]));
-            }
-            return result.toArray();
-        }
-        catch (ClassCastException e)
-        {
-            StringBuffer buffer = new StringBuffer();
-            buffer
-                    .append("Class cast occured trying to cast to JarEntryFile. Exception message was: "
-                            + e.getMessage());
-            buffer.append("/n");
-            buffer.append("The IPackageFragment was:\n" + fragment.getElementName());
-            buffer.append("/n");
-            buffer.append("The IPackageFragment toString():\n" + fragment.toString());
-            buffer.append("/n");
-            buffer.append("The non java resources of the frgament were:\n");
-            Object[] resources = fragment.getNonJavaResources();
-            for (int i = 0; i < resources.length; i++)
-            {
-                buffer.append("\t");
-                buffer.append(resources[i].toString());
-                buffer.append(", ");
-                buffer.append(resources[i].getClass().getSimpleName());
-                buffer.append("\n");
-            }
-            TapestryCore.log(buffer.toString(), e);
-            throw e;
-        }
-    }
-
-    public static class JarEntryFileWrapper implements IStorage
-    {
-        JarEntryFile entry;
-
-        public JarEntryFileWrapper(JarEntryFile entry)
-        {
-            this.entry = entry;
-        }
-
-        public InputStream getContents() throws CoreException
-        {
-            return entry.getContents();
-        }
-
-        public IPath getFullPath()
-        {
-            return entry.getFullPath();
-        }
-
-        public String getName()
-        {
-            return entry.getName();
-        }
-
-        public boolean isReadOnly()
-        {
-            return entry.isReadOnly();
-        }
-
-        public Object getAdapter(Class adapter)
-        {
-            return entry.getAdapter(adapter);
-        }
-
-        public JarEntryFile getEntry()
-        {
-            return entry;
-        }
-
-        public boolean equals(Object obj)
-        {
-            if (obj == null)
-                return false;
-
-            if (!(obj instanceof JarEntryFileWrapper))
-                return false;
-
-            return this.toString().equals(((JarEntryFileWrapper) obj).toString());
-        }
-
-        public int hashCode()
-        {
-            return toString().hashCode();
-        }
-
-        public String toString()
-        {
-            return entry.toString();
-        }
-    }
-
-    public static String getJarPath(JarEntryFileWrapper entry)
+    public static String getJarPath(IJarEntryResource entry)
     {
         String content = entry.toString();
         int stop = content.indexOf("::");
         return content.substring(start, stop);
     }
 
-    public static String getPackageName(JarEntryFileWrapper entry)
+    public static String getPackageName(IJarEntryResource entry)
     {
         String content = entry.toString();
         int start = content.indexOf("::");
@@ -200,13 +201,13 @@ public class JarEntryFileUtil
     }
 
     public static IPackageFragmentRoot getPackageFragmentRoot(IJavaProject project,
-            JarEntryFileWrapper entry) throws CoreException
+            IJarEntryResource entry) throws CoreException
     {
         return getPackageFragmentRoot(project, entry, true);
     }
 
     private static IPackageFragmentRoot getPackageFragmentRoot(IJavaProject project,
-            JarEntryFileWrapper entry, boolean includeOtherProjects) throws CoreException
+    		IJarEntryResource entry, boolean includeOtherProjects) throws CoreException
     {
         String path = getJarPath(entry);
         IPackageFragmentRoot[] roots = includeOtherProjects ? project.getAllPackageFragmentRoots()
@@ -223,13 +224,13 @@ public class JarEntryFileUtil
     }
 
     public static IPackageFragment getPackageFragment(IJavaProject project,
-            JarEntryFileWrapper entry) throws CoreException
+            IJarEntryResource entry) throws CoreException
     {
         return getPackageFragment(project, entry, true);
     }
 
     private static IPackageFragment getPackageFragment(IJavaProject project,
-            JarEntryFileWrapper entry, boolean includeOtherProjects) throws CoreException
+    		IJarEntryResource entry, boolean includeOtherProjects) throws CoreException
     {
         IPackageFragmentRoot root = getPackageFragmentRoot(project, entry, includeOtherProjects);
         if (root == null)
@@ -249,7 +250,7 @@ public class JarEntryFileUtil
     }
 
     public static IPackageFragment[] getPackageFragments(IWorkspaceRoot root,
-            JarEntryFileWrapper entry) throws CoreException
+    		IJarEntryResource entry) throws CoreException
     {
         ArrayList result = new ArrayList();
         IProject[] projects = root.getProjects();
@@ -273,22 +274,23 @@ public class JarEntryFileUtil
         // return true;
         IStorage left = lhs.getStorage();
         IStorage right = rhs.getStorage();
-
-        boolean leftIsResource = left instanceof IResource;
-        boolean rightIsResource = right instanceof IResource;
-
-        if (leftIsResource && rightIsResource)
-            return left.equals(right);
-
-        if ((!leftIsResource && rightIsResource) || (leftIsResource && !rightIsResource))
-            return false;
-
-        left = wrap(left, true);
-        right = wrap(right, true);
-
-        if (left != null && right != null)
-            return left.equals(right);
-
-        return false;
+//
+//        boolean leftIsResource = left instanceof IResource;
+//        boolean rightIsResource = right instanceof IResource;
+//
+//        if (leftIsResource && rightIsResource)
+//            return left.equals(right);
+//
+//        if ((!leftIsResource && rightIsResource) || (leftIsResource && !rightIsResource))
+//            return false;
+//
+//        left = wrap(left, true);
+//        right = wrap(right, true);
+//
+//        if (left != null && right != null)
+//            return left.equals(right);
+//
+//        return false;
+    	return left.equals(right);
     }
 }

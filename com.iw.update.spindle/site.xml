@@ -3,36 +3,8 @@
    <description url="http://spindle.sourceforge.net/updates ">
       Eclipse update site for Spindle builds.
    </description>
-   <feature url="features/com.iw.features.spindle_3.1.27.jar" id="com.iw.features.spindle" version="3.1.27">
-      <category name="spindle_3_1"/>
+   <feature url="features/com.iw.features.spindle_3.4.0.jar" id="com.iw.features.spindle" version="3.4.0">
+      <category name="Eclipse 3.3"/>
    </feature>
-   <feature url="features/com.iw.features.spindle_3.2.14.jar" id="com.iw.features.spindle" version="3.2.14">
-      <category name="spindle_3_2"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle.groovy_3.2.14.jar" id="com.iw.features.spindle.groovy" version="3.2.14">
-      <category name="add ons"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.3.0.jar" id="com.iw.features.spindle" version="3.3.0">
-      <category name="spindle_3_3"/>
-   </feature>
-   <category-def name="spindle_3_1" label="Spindle 3.1 - Eclipse 3.0">
-      <description>
-         Tapestry 3 supported
-      </description>
-   </category-def>
-   <category-def name="add ons" label="Various add ons for Spindle">
-      <description>
-         Here are features that one can install that augment Spindle with functionality ouside the realm of the core feature set. Groovestry support is limited to Spindle 3.2.X. If there is demand to see this feature ported to Eclipse 3.2 pls add a feature request.
-      </description>
-   </category-def>
-   <category-def name="spindle_3_2" label="Spindle 3.2  - for Eclipse 3.1.X">
-      <description>
-         Tapestry 3 supported
-      </description>
-   </category-def>
-   <category-def name="spindle_3_3" label="Spindle 3.3 for Eclipse 3.2">
-      <description>
-         Tapestry 3 supported
-      </description>
-   </category-def>
+   <category-def name="Eclipse 3.3" label="Eclipse 3.3"/>
 </site>

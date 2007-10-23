@@ -334,6 +334,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
         catch (IllegalArgumentException e1)
         {
+        	TapestryCore.log(e1);
             return Collections.EMPTY_LIST;
         }
         if ("component".equals(fTagName) && "type".equals(fAttributeName))

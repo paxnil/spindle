@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -43,7 +44,6 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryModelException;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
-import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 
 // does not stay up to date as time goes on!
 
@@ -224,10 +224,10 @@ public class ClasspathSearch implements ISearch
         int length = jarFiles.length;
         for (int i = 0; i < length; i++)
         {
-            JarEntryFileWrapper jarFile = null;
+            IJarEntryResource jarFile = null;
             try
             {
-                jarFile = (JarEntryFileWrapper) jarFiles[i];
+                jarFile = (IJarEntryResource) jarFiles[i];
             }
             catch (ClassCastException ccex)
             {
@@ -314,11 +314,11 @@ public class ClasspathSearch implements ISearch
 
     class JarEntryAcceptor implements ISearchAcceptor
     {
-        private JarEntryFileWrapper fToBeFound;
+        private IJarEntryResource fToBeFound;
 
         public boolean success = false;
 
-        public JarEntryAcceptor(JarEntryFileWrapper toBeFound)
+        public JarEntryAcceptor(IJarEntryResource toBeFound)
         {
             fToBeFound = toBeFound;
         }
@@ -330,7 +330,7 @@ public class ClasspathSearch implements ISearch
         }
     }
 
-    public boolean projectContainsJarEntry(final JarEntryFileWrapper entry)
+    public boolean projectContainsJarEntry(final IJarEntryResource entry)
     {
         JarEntryAcceptor acceptor = new JarEntryAcceptor(entry);
         search(acceptor);

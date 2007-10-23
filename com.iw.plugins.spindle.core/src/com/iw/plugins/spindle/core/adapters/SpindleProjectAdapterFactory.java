@@ -14,18 +14,16 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterFactory;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.ui.IFileEditorInput;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.ClasspathSearch;
-import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
 import com.iw.plugins.spindle.core.util.Markers;
-import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 
 /**
  * @author Administrator TODO To change the template for this generated type comment go to Window -
@@ -96,16 +94,10 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
 
             return ((IResource) obj).getProject();
 
-        }
-        else if (obj instanceof JarEntryFile)
+        }       
+        else if (obj instanceof IJarEntryResource)
         {
-
-            return getProjectFor((JarEntryFile) obj);
-
-        }
-        else if (obj instanceof JarEntryFileWrapper)
-        {
-            return getProjectFor((JarEntryFileWrapper) obj);
+            return getProjectFor((IJarEntryResource) obj);
         }
         else if (obj instanceof IFileEditorInput)
         {
@@ -135,14 +127,9 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
 
         return jproject;
 
-    }
+    }    
 
-    private IProject getProjectFor(JarEntryFile jarFile)
-    {
-        return getProjectFor((JarEntryFileWrapper) JarEntryFileUtil.wrap(jarFile));
-    }
-
-    private IProject getProjectFor(JarEntryFileWrapper jarFile)
+    private IProject getProjectFor(IJarEntryResource jarFile)
     {
         ClasspathSearch lookup = null;
 

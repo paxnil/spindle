@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -46,8 +45,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.ElementCache;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -64,7 +61,6 @@ import com.iw.plugins.spindle.core.resources.AbstractRootLocation;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
-import com.iw.plugins.spindle.core.util.JarEntryFileUtil.JarEntryFileWrapper;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
 import com.iw.plugins.spindle.editors.util.BusyIndicatorSpindle;
 
@@ -545,7 +541,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
         {
             if (element instanceof IJavaElement)
                 return javaVerboseLabels.getImage(element);
-            if (element instanceof JarEntryFileWrapper)
+            if (element instanceof IStorage)
                 return Images.getSharedImage("file_obj.gif");
             return workbenchLabels.getImage(element);
         }
@@ -556,8 +552,8 @@ public class ResourceChooserInformationControl extends TreeInformationControl
                 return getPackageLabel((IPackageFragment) element);
             if (element instanceof IContainer)
                 return getContainerLabel((IContainer) element);
-            if (element instanceof JarEntryFileWrapper)
-                return ((JarEntryFileWrapper) element).getName();
+            if (element instanceof IStorage)
+                return ((IStorage) element).getName();
             return workbenchLabels.getText(element);
         }
 

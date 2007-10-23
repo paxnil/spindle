@@ -37,6 +37,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -77,6 +78,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
@@ -400,10 +402,14 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     }
 
     public static IStorage getStorage(IEditorInput input)
-    {
-        if (input instanceof JarEntryEditorInput)
-            return JarEntryFileUtil.wrap(((JarEntryEditorInput) input).getStorage());
-
+    {    
+    	if (input instanceof IStorageEditorInput) {
+    		try {
+				return ((IStorageEditorInput) input).getStorage();
+			} catch (CoreException e) {
+				TapestryCore.log(e);
+			}
+    	}
         return (IStorage) input.getAdapter(IStorage.class);
     }
 
