@@ -118,7 +118,7 @@
             id="com.iw.plugins.spindle.ui.SpindleWizardTemplatePreferences">
       </page>
    </extension>
-   
+   <!--
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
       <quickFixProcessor
@@ -136,6 +136,7 @@
          </enablement> 
       </quickFixProcessor>      
    </extension>
+   -->
    <!--
    <extension
          point="org.eclipse.jdt.ui.quickAssistProcessors">

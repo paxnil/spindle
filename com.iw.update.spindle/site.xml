@@ -3,8 +3,8 @@
    <description url="http://spindle.sourceforge.net/updates ">
       Eclipse update site for Spindle builds.
    </description>
-   <feature url="features/com.iw.features.spindle_3.4.0.jar" id="com.iw.features.spindle" version="3.4.0">
-      <category name="Eclipse 3.3"/>
+   <feature url="features/com.iw.features.spindle_3.4.1.jar" id="com.iw.features.spindle" version="3.4.1">
+      <category name="Eclipse 3.4"/>
    </feature>
-   <category-def name="Eclipse 3.3" label="Eclipse 3.3"/>
+   <category-def name="Eclipse 3.4" label="Eclipse 3.4"/>
 </site>

@@ -2,7 +2,7 @@
 <feature
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.4.0"
+      version="3.4.1"
       provider-name="Geoffrey Longman"
       image="spindle.gif">
 
@@ -87,18 +87,18 @@ All Rights Reserved
          id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
-         version="3.4.0"/>
+         version="3.4.1"/>
 
    <plugin
          id="com.iw.plugins.spindle.docs"
          download-size="0"
          install-size="0"
-         version="3.4.0"/>
+         version="3.4.1"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
-         version="3.4.0"/>
+         version="3.4.1"/>
 
 </feature>
