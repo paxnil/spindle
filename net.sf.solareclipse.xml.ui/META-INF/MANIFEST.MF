@@ -1,0 +1,16 @@
+Bundle-SymbolicName: net.sf.solareclipse.xml.ui;singleton:=true
+Bundle-Name: SolarEclipse UI
+Bundle-Version: 0.4.0.spindle-dep-7
+Bundle-Vendor: SolarEclipse Project
+Bundle-ManifestVersion: 2
+Export-Package: net.sf.solareclipse.xml.internal.ui.preferences,
+ net.sf.solareclipse.xml.internal.ui.text,
+ net.sf.solareclipse.xml.ui,
+ net.sf.solareclipse.xml.ui.text
+Require-Bundle: net.sf.solareclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.views,
+ org.eclipse.ui.workbench

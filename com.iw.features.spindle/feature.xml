@@ -46,23 +46,25 @@ All Rights Reserved
    </url>
 
    <requires>
-      <import plugin="org.eclipse.core.runtime.compatibility"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.help"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.compare"/>
       <import plugin="org.eclipse.core.expressions"/>
-      <import feature="org.eclipse.platform" version="3.2.0" match="compatible"/>
-      <import feature="org.eclipse.jdt" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.help"/>
+      <import plugin="org.eclipse.ltk.core.refactoring"/>
+      <import feature="org.eclipse.platform"/>
+      <import feature="org.eclipse.jdt"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.ui.workbench"/>
    </requires>
 
    <plugin
@@ -85,12 +87,6 @@ All Rights Reserved
 
    <plugin
          id="com.iw.plugins.spindle.core"
-         download-size="0"
-         install-size="0"
-         version="3.4.1"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.docs"
          download-size="0"
          install-size="0"
          version="3.4.1"/>

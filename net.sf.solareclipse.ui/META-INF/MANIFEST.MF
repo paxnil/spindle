@@ -1,0 +1,11 @@
+Bundle-SymbolicName: net.sf.solareclipse.ui;singleton:=true
+Bundle-Name: SolarEclipse UI
+Bundle-Version: 0.4.0.spindle-dep-7
+Bundle-Vendor: SolarEclipse Project
+Bundle-ManifestVersion: 2
+Export-Package: net.sf.solareclipse.editor,
+ net.sf.solareclipse.text,
+ net.sf.solareclipse.text.rules,
+ net.sf.solareclipse.text.source,
+ net.sf.solareclipse.ui,
+ net.sf.solareclipse.ui.preferences

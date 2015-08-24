@@ -178,6 +178,6 @@ Require-Bundle: org.eclipse.ui.ide;visibility:=reexport,
  org.eclipse.jdt.core;visibility:=reexport,
  org.eclipse.ui;visibility:=reexport,
  org.eclipse.jface.text,
- org.eclipse.core.runtime;visibility:=reexport,
- org.apache.xerces.spindle;visibility:=reexport
+ org.eclipse.core.runtime,
+ org.apache.xerces.spindle;bundle-version="4.0.13"
 Eclipse-LazyStart: true
